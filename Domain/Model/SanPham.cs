@@ -16,10 +16,10 @@ namespace AppData.Model
 		public string NguoiTao { get; set; }
 		public int KichHoat { get; set; }
 		public string MoTa { get; set; }
-		public Guid IdChatLieu { get; set; }
-		public Guid IdKieuDang { get; set; }
-		public Guid IdThuongHieu { get; set; }
-		public Guid IdDanhMuc { get; set; }
+		public virtual ChatLieu ChatLieu { get; set; }
+		public virtual KieuDang KieuDang { get; set; }
+		public virtual ThuongHieu ThuongHieu { get; set; }
+		public virtual DanhMuc DanhMuc { get; set; }
 		public int Sale { get; set; }
 	}
 }

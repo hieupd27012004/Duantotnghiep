@@ -19,5 +19,10 @@ namespace AppData.Model
 		public string NguoiTao { get; set; }
 		public string NguoiCapNhat { get; set; }
 		public int KichHoat { get; set; }
+
+		public virtual ICollection<DiaChi> DiaChis { get; set; }
+
+		public virtual ICollection<HoaDon> HoaDons { get; set; }
+
 	}
 }

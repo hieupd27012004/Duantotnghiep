@@ -13,7 +13,7 @@ namespace AppData.Model
 		public int SoLuong { get; set; }
 		public int TongTien { get; set; }
 		public int KichHoat { get; set; }
-		public Guid IdHoaDon { get; set; }
-		public Guid IdSanPhamChiTiet { get; set; }
+		public virtual HoaDon HoaDon { get; set; }
+		public virtual SanPhamChiTiet SanPhamChiTiet { get; set; }
 	}
 }

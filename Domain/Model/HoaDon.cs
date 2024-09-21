@@ -22,9 +22,9 @@ namespace AppData.Model
 		public DateTime NgayTao { get; set; }
 		public string NguoiTao { get; set; }
 		public int KichHoat { get; set; }
-		public Guid IdKhachHang { get; set; }
-		public Guid IdKhuyenMai { get; set; }
-		public Guid IdNhanVien { get; set; }
-		public Guid IdTrangThai { get; set; }
+		public virtual KhachHang KhachHang { get; set; }
+		public virtual KhuyenMai KhuyenMai { get; set; }
+		public virtual NhanVien NhanVien { get; set; }
+		public virtual TrangThai TrangThai { get; set; }
 	}
 }

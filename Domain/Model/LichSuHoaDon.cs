@@ -13,6 +13,6 @@ namespace AppData.Model
 		public DateTime NgayTao { get; set; }
 		public string NguoiThaoTac { get; set; }
 		public string TrangThai { get; set; }
-		public Guid IdHoaDon { get; set; }
+		public virtual HoaDon HoaDon { get; set; }
 	}
 }

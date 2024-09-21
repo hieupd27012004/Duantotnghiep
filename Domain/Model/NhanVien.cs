@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ namespace AppData.Model
 {
 	public class NhanVien
 	{
+		[Key]
 		public Guid IdNhanVien { get; set; }
 		public string TenNhanVien { get; set; }
 		public string SoDienThoai { get; set; }
@@ -22,6 +24,6 @@ namespace AppData.Model
 		public string NguoiCapNhat { get; set; }
 		public int KichHoat { get; set; }
 		public int TrangThai { get; set; }
-		public int IdChucVu { get; set; }
+		public virtual ChucVu chucVu { get; set; }
 	}
 }

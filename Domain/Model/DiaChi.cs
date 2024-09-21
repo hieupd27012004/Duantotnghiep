@@ -11,10 +11,12 @@ namespace AppData.Model
 		public Guid IdDiaChi { get; set; }
 		public string HoTen { get; set; }
 		public string SoDienThoai { get; set; }
-		public string DiaChi1 { get; set; }
+		public string Diachi { get; set; }
 		public string DiaChiMacDinh { get; set; }
 		public DateTime NgayTao { get; set; }
 		public DateTime NgayCapNhat { get; set; }
+
 		public Guid IdKhachHang { get; set; }
+		public virtual KhachHang khachHang { get; set; }
 	}
 }
