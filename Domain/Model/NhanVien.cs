@@ -24,6 +24,6 @@ namespace AppData.Model
 		public string NguoiCapNhat { get; set; }
 		public int KichHoat { get; set; }
 		public int TrangThai { get; set; }
-		public ChucVu chucVu { get; set; }
+		public virtual ChucVu chucVu { get; set; }
 	}
 }
