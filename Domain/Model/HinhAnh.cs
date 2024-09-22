@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,11 +9,15 @@ namespace AppData.Model
 {
 	public class HinhAnh
 	{
+		[Required(ErrorMessage = "Không Được Để Trống")]
 		public Guid IdHinhAnh { get; set; }
 
-		public string TenAnh { get; set; }
+		[Required(ErrorMessage = "Không Được Để Trống")]
 
+		public string TenAnh { get; set; }
+		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string HienThi { get; set; }
+		[Required(ErrorMessage = "Không Được Để Trống")]
 
 		public string LaAnhChinh { get; set; }
 
