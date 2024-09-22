@@ -11,6 +11,9 @@ namespace AppData.Model
 		public Guid IdGiaoDich { get; set; }
 		public string NguoiTao { get; set; }
 		public DateTime NgayTao { get; set; }
+		public Guid IdHoaDon { get; set; }
+
+		public Guid IdTrangThai { get; set; }
 		public virtual HoaDon HoaDon { get; set; }
 		public virtual TrangThai TrangThai { get; set; }
 	}

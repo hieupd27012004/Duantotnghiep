@@ -16,8 +16,14 @@ namespace AppData.Model
 
 		public string LaAnhChinh { get; set; }
 
+		public Guid IdSanPham { get; set; }
+
+		public Guid IdMauSac { get; set; }
+
 		public virtual SanPham SanPham { get; set; }
 
 		public virtual MauSac MauSac { get; set; }
+
+
 	}
 }

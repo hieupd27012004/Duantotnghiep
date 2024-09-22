@@ -20,5 +20,7 @@ namespace AppData.Model
 		public DateTime NgayKetThuc { get; set; }
 		public string TrangThai { get; set; }
 		public int KichHoat { get; set; }
+
+		public ICollection<HoaDon> HoaDons { get; set; }
 	}
 }

@@ -15,5 +15,7 @@ namespace AppData.Model
 		public string NguoiCapNhat { get; set; }
 		public string NguoiTao { get; set; }
 		public int KichHoat { get; set; }
+
+		public virtual ICollection<SanPhamChiTiet> SanPhamChiTiets { get; set; }
 	}
 }
