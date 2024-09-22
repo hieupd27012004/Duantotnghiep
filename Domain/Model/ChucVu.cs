@@ -9,10 +9,11 @@ namespace AppData.Model
 {
 	public class ChucVu
 	{
-		[Key]
 		public Guid IdChucVu { get; set; }
 
 		public string Code { get; set; }
 		public string TenChucVu { get; set; }
+
+	    public ICollection<NhanVien> nhanViens { get; set; }
 	}
 }

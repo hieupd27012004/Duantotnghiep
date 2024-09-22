@@ -10,5 +10,8 @@ namespace AppData.Model
 	{
 		public Guid IdTrangThai { get; set; }
 		public string TenTrangThai { get; set; }
+
+		public virtual ICollection<GiaoDich> GiaoDich { get; set; }
+		public virtual ICollection<HoaDon> HoaDons { get; set; }
 	}
 }

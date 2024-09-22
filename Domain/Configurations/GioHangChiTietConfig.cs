@@ -14,6 +14,14 @@ namespace AppData.Configurations
 		public void Configure(EntityTypeBuilder<GioHangChiTiet> builder)
 		{
 			builder.HasKey(p => p.IdGioHangChiTiet);
+
+			builder.HasOne(p => p.SanPhamChiTiet)
+				   .WithMany(p => p.GioHangChiTiets)
+				   .HasForeignKey(p => p.IdSanPhamChiTiet);
+
+			builder.HasOne(p => p.GioHang)
+				   .WithMany(p => p.GioHangChiTiets)
+				   .HasForeignKey(p => p.IdGioHang);
 		}
 	}
 }

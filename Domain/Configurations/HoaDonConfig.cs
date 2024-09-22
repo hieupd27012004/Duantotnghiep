@@ -14,6 +14,22 @@ namespace AppData.Configurations
 		public void Configure(EntityTypeBuilder<HoaDon> builder)
 		{
 			builder.HasKey(p => p.IdHoaDon);
+
+			builder.HasOne(p => p.KhachHang)
+				  .WithMany(p => p.HoaDons)
+				  .HasForeignKey(p => p.IdKhachHang);
+
+			builder.HasOne(p => p.KhuyenMai)
+			   	  .WithMany(p => p.HoaDons)
+				  .HasForeignKey(p => p.IdKhuyenMai);
+
+			builder.HasOne(p => p.NhanVien)
+				  .WithMany(p => p.HoaDons)
+				  .HasForeignKey(p => p.IdNhanVien);
+
+			builder.HasOne(p => p.TrangThai)
+				  .WithMany(p => p.HoaDons)
+				  .HasForeignKey(p => p.IdTrangThai);
 		}
 	}
 }
