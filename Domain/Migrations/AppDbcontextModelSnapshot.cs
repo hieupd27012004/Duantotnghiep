@@ -817,6 +817,10 @@ namespace AppData.Migrations
                     b.Property<double>("SoLuong")
                         .HasColumnType("float");
 
+                    b.Property<string>("XuatXu")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("IdSanPhamChiTiet");
 
                     b.HasIndex("IdDayGiay");

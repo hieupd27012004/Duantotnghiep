@@ -31,7 +31,10 @@ namespace AppData.Model
 
         [Required(ErrorMessage = "Không Được Để Trống")]
         public string GioiTinh { get; set; }
-		public DateTime NgayTao { get; set; }
+
+        [Required(ErrorMessage = "Không Được Để Trống")]
+        public string XuatXu { get; set; }
+        public DateTime NgayTao { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string NguoiCapNhat { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]

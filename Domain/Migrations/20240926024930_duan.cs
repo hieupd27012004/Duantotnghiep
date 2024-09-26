@@ -422,6 +422,7 @@ namespace AppData.Migrations
                     CoHienThi = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NgayCapNhat = table.Column<DateTime>(type: "datetime2", nullable: false),
                     GioiTinh = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    XuatXu = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NguoiCapNhat = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: false),
