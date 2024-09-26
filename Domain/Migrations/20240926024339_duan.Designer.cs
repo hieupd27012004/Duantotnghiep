@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
-    [Migration("20240922022148_da")]
-    partial class da
+    [Migration("20240926024339_duan")]
+    partial class duan
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -200,7 +200,8 @@ namespace AppData.Migrations
 
                     b.Property<string>("SoDienThoai")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("IdDiaChi");
 
@@ -257,8 +258,8 @@ namespace AppData.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("DonGia")
-                        .HasColumnType("int");
+                    b.Property<double>("DonGia")
+                        .HasColumnType("float");
 
                     b.Property<Guid>("IdGioHang")
                         .HasColumnType("uniqueidentifier");
@@ -269,11 +270,11 @@ namespace AppData.Migrations
                     b.Property<int>("KichHoat")
                         .HasColumnType("int");
 
-                    b.Property<int>("SoLuong")
-                        .HasColumnType("int");
+                    b.Property<double>("SoLuong")
+                        .HasColumnType("float");
 
-                    b.Property<int>("TongTien")
-                        .HasColumnType("int");
+                    b.Property<double>("TongTien")
+                        .HasColumnType("float");
 
                     b.HasKey("IdGioHangChiTiet");
 
@@ -328,7 +329,6 @@ namespace AppData.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GhiChu")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("IdKhachHang")
@@ -369,17 +369,17 @@ namespace AppData.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TienGiam")
-                        .HasColumnType("int");
+                    b.Property<double?>("TienGiam")
+                        .HasColumnType("float");
 
-                    b.Property<int>("TienShip")
-                        .HasColumnType("int");
+                    b.Property<double>("TienShip")
+                        .HasColumnType("float");
 
-                    b.Property<int>("TongTienDonHang")
-                        .HasColumnType("int");
+                    b.Property<double>("TongTienDonHang")
+                        .HasColumnType("float");
 
-                    b.Property<int>("TongTienHoaDon")
-                        .HasColumnType("int");
+                    b.Property<double>("TongTienHoaDon")
+                        .HasColumnType("float");
 
                     b.HasKey("IdHoaDon");
 
@@ -400,8 +400,8 @@ namespace AppData.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("DonGia")
-                        .HasColumnType("int");
+                    b.Property<double>("DonGia")
+                        .HasColumnType("float");
 
                     b.Property<Guid>("IdHoaDon")
                         .HasColumnType("uniqueidentifier");
@@ -409,14 +409,14 @@ namespace AppData.Migrations
                     b.Property<Guid>("IdSanPhamChiTiet")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("KichHoat")
-                        .HasColumnType("int");
+                    b.Property<double>("KichHoat")
+                        .HasColumnType("float");
 
-                    b.Property<int>("SoLuong")
-                        .HasColumnType("int");
+                    b.Property<double>("SoLuong")
+                        .HasColumnType("float");
 
-                    b.Property<int>("TongTien")
-                        .HasColumnType("int");
+                    b.Property<double>("TongTien")
+                        .HasColumnType("float");
 
                     b.HasKey("IdHoaDonChiTiet");
 
@@ -449,7 +449,8 @@ namespace AppData.Migrations
 
                     b.Property<string>("MatKhau")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("NgayCapNhat")
                         .HasColumnType("datetime2");
@@ -467,7 +468,8 @@ namespace AppData.Migrations
 
                     b.Property<string>("SoDienThoai")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("IdKhachHang");
 
@@ -480,8 +482,8 @@ namespace AppData.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("GiaTriToiDa")
-                        .HasColumnType("int");
+                    b.Property<double>("GiaTriToiDa")
+                        .HasColumnType("float");
 
                     b.Property<int>("KichHoat")
                         .HasColumnType("int");
@@ -506,8 +508,8 @@ namespace AppData.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PhanTramGiam")
-                        .HasColumnType("int");
+                    b.Property<double>("PhanTramGiam")
+                        .HasColumnType("float");
 
                     b.Property<string>("TenKhuyenMai")
                         .IsRequired()
@@ -650,7 +652,7 @@ namespace AppData.Migrations
                     b.Property<Guid>("IdNhanVien")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte>("AnhNhanVien")
+                    b.Property<byte?>("AnhNhanVien")
                         .HasColumnType("tinyint");
 
                     b.Property<string>("AuthProvider")
@@ -673,7 +675,8 @@ namespace AppData.Migrations
 
                     b.Property<string>("MatKhau")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("NgayCapNhat")
                         .HasColumnType("datetime2");
@@ -744,8 +747,8 @@ namespace AppData.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Sale")
-                        .HasColumnType("int");
+                    b.Property<double>("Sale")
+                        .HasColumnType("float");
 
                     b.Property<string>("TenSanPham")
                         .IsRequired()
@@ -774,8 +777,12 @@ namespace AppData.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Gia")
-                        .HasColumnType("int");
+                    b.Property<double>("Gia")
+                        .HasColumnType("float");
+
+                    b.Property<string>("GioiTinh")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("IdDayGiay")
                         .HasColumnType("uniqueidentifier");
@@ -809,8 +816,8 @@ namespace AppData.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SoLuong")
-                        .HasColumnType("int");
+                    b.Property<double>("SoLuong")
+                        .HasColumnType("float");
 
                     b.HasKey("IdSanPhamChiTiet");
 
@@ -837,9 +844,11 @@ namespace AppData.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("NgayCapNhat")
+                        .HasMaxLength(10)
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("NgayTao")
+                        .HasMaxLength(10)
                         .HasColumnType("datetime2");
 
                     b.Property<string>("NguoiCapNhat")

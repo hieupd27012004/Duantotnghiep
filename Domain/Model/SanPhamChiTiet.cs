@@ -27,7 +27,10 @@ namespace AppData.Model
 		public DateTime NgayCapNhat { get; set; }
 		[DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
 		[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-		//[Range(typeof(DateTime), "1/1/2020", "12/31/2025", ErrorMessage = "Không Trong Thời Gian Cho Phép")]
+        //[Range(typeof(DateTime), "1/1/2020", "12/31/2025", ErrorMessage = "Không Trong Thời Gian Cho Phép")]
+
+        [Required(ErrorMessage = "Không Được Để Trống")]
+        public string GioiTinh { get; set; }
 		public DateTime NgayTao { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string NguoiCapNhat { get; set; }

@@ -24,4 +24,9 @@
     <ProjectReference Include="..\Domain\AppData.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Service\" />
+    <Folder Include="Repository\" />
+  </ItemGroup>
+
 </Project>

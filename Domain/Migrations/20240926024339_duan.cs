@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AppData.Migrations
 {
-    public partial class da : Migration
+    public partial class duan : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -108,8 +108,8 @@ namespace AppData.Migrations
                 {
                     IdKhuyenMai = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TenKhuyenMai = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhanTramGiam = table.Column<int>(type: "int", nullable: false),
-                    GiaTriToiDa = table.Column<int>(type: "int", nullable: false),
+                    PhanTramGiam = table.Column<double>(type: "float", nullable: false),
+                    GiaTriToiDa = table.Column<double>(type: "float", nullable: false),
                     NgayCapNhat = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -180,8 +180,8 @@ namespace AppData.Migrations
                 {
                     IdThuongHieu = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TenThuongHieu = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NgayCapNhat = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    NgayCapNhat = table.Column<DateTime>(type: "datetime2", maxLength: 10, nullable: false),
+                    NgayTao = table.Column<DateTime>(type: "datetime2", maxLength: 10, nullable: false),
                     NguoiCapNhat = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     KichHoat = table.Column<int>(type: "int", nullable: false)
@@ -211,8 +211,8 @@ namespace AppData.Migrations
                     TenNhanVien = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SoDienThoai = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AnhNhanVien = table.Column<byte>(type: "tinyint", nullable: false),
-                    MatKhau = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AnhNhanVien = table.Column<byte>(type: "tinyint", nullable: true),
+                    MatKhau = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     AuthProvider = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DiaChi = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NgayCapNhat = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -240,10 +240,10 @@ namespace AppData.Migrations
                 {
                     IdKhachHang = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     HoTen = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SoDienThoai = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SoDienThoai = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AuthProvider = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MatKhau = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MatKhau = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NgayCapNhat = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -273,7 +273,7 @@ namespace AppData.Migrations
                     NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     KichHoat = table.Column<int>(type: "int", nullable: false),
                     MoTa = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Sale = table.Column<int>(type: "int", nullable: false),
+                    Sale = table.Column<double>(type: "float", nullable: false),
                     IdChatLieu = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdKieuDang = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdThuongHieu = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -314,7 +314,7 @@ namespace AppData.Migrations
                 {
                     IdDiaChi = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     HoTen = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SoDienThoai = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SoDienThoai = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     Diachi = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DiaChiMacDinh = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -342,11 +342,11 @@ namespace AppData.Migrations
                     SoDienThoaiNguoiNhan = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DiaChiGiaoHang = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LoaiHoaDon = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    GhiChu = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TienShip = table.Column<int>(type: "int", nullable: false),
-                    TienGiam = table.Column<int>(type: "int", nullable: false),
-                    TongTienDonHang = table.Column<int>(type: "int", nullable: false),
-                    TongTienHoaDon = table.Column<int>(type: "int", nullable: false),
+                    GhiChu = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TienShip = table.Column<double>(type: "float", nullable: false),
+                    TienGiam = table.Column<double>(type: "float", nullable: true),
+                    TongTienDonHang = table.Column<double>(type: "float", nullable: false),
+                    TongTienHoaDon = table.Column<double>(type: "float", nullable: false),
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     KichHoat = table.Column<int>(type: "int", nullable: false),
@@ -417,10 +417,11 @@ namespace AppData.Migrations
                 columns: table => new
                 {
                     IdSanPhamChiTiet = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Gia = table.Column<int>(type: "int", nullable: false),
-                    SoLuong = table.Column<int>(type: "int", nullable: false),
+                    Gia = table.Column<double>(type: "float", nullable: false),
+                    SoLuong = table.Column<double>(type: "float", nullable: false),
                     CoHienThi = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NgayCapNhat = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    GioiTinh = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NguoiCapNhat = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -518,9 +519,9 @@ namespace AppData.Migrations
                 columns: table => new
                 {
                     IdGioHangChiTiet = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DonGia = table.Column<int>(type: "int", nullable: false),
-                    SoLuong = table.Column<int>(type: "int", nullable: false),
-                    TongTien = table.Column<int>(type: "int", nullable: false),
+                    DonGia = table.Column<double>(type: "float", nullable: false),
+                    SoLuong = table.Column<double>(type: "float", nullable: false),
+                    TongTien = table.Column<double>(type: "float", nullable: false),
                     KichHoat = table.Column<int>(type: "int", nullable: false),
                     IdGioHang = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdSanPhamChiTiet = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
@@ -547,10 +548,10 @@ namespace AppData.Migrations
                 columns: table => new
                 {
                     IdHoaDonChiTiet = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DonGia = table.Column<int>(type: "int", nullable: false),
-                    SoLuong = table.Column<int>(type: "int", nullable: false),
-                    TongTien = table.Column<int>(type: "int", nullable: false),
-                    KichHoat = table.Column<int>(type: "int", nullable: false),
+                    DonGia = table.Column<double>(type: "float", nullable: false),
+                    SoLuong = table.Column<double>(type: "float", nullable: false),
+                    TongTien = table.Column<double>(type: "float", nullable: false),
+                    KichHoat = table.Column<double>(type: "float", nullable: false),
                     IdHoaDon = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdSanPhamChiTiet = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
