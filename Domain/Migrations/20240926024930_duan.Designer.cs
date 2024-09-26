@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
-    [Migration("20240926024339_duan")]
+    [Migration("20240926024930_duan")]
     partial class duan
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -818,6 +818,10 @@ namespace AppData.Migrations
 
                     b.Property<double>("SoLuong")
                         .HasColumnType("float");
+
+                    b.Property<string>("XuatXu")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdSanPhamChiTiet");
 
