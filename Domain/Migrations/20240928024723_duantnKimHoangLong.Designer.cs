@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
-    [Migration("20240926024930_duan")]
-    partial class duan
+    [Migration("20240928024723_duantnKimHoangLong")]
+    partial class duantnKimHoangLong
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
