@@ -1,0 +1,43 @@
+﻿@model IEnumerable<AppData.Model.KieuDang>
+@{
+    ViewData["Title"] = "GetAllKieuDang";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+<h1>Getall</h1>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.TenKieuDang)</th>
+            <th>@Html.DisplayNameFor(model => model.NgayCapNhat)</th>
+            <th>@Html.DisplayNameFor(model => model.NgayTao)</th>
+            <th>@Html.DisplayNameFor(model => model.NguoiTao)</th>
+            <th>@Html.DisplayNameFor(model => model.KichHoat)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.TenKieuDang)</td>
+                <td>@Html.DisplayFor(modelItem => item.NgayCapNhat)</td>
+                <td>@Html.DisplayFor(modelItem => item.NgayTao)</td>
+                <td>@Html.DisplayFor(modelItem => item.NguoiTao)</td>
+                <td>@Html.DisplayFor(modelItem => item.KichHoat)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.IdKieuDang">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.IdKieuDang">Details</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

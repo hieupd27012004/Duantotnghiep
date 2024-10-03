@@ -1,8 +1,11 @@
+using APPMVC.Service;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddHttpClient();
+builder.Services.AddTransient<IServiceKieuDang, ServiceKieuDang>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -20,8 +23,18 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllerRoute(
-	name: "default",
-	pattern: "{controller=Home}/{action=Index}/{id?}");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{area=Admin}/{controller=KieuDang}/{action=Getall}/{id?}");
 
+    endpoints.MapControllerRoute(
+        name: "areas",
+        pattern: "{area:exists}/{controller=KieuDang}/{action=Getall}/{id?}");
+    endpoints.MapControllerRoute(
+        name: "Client",
+        pattern: "{area:exists}/{controller=HomeClient}/{action=Index}/{id?}",
+        defaults: new { area = "Client", controller = "HomeClient", action = "Index" });
+});
 app.Run();
