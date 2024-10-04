@@ -28,6 +28,6 @@ namespace AppData.Model
 		public string NguoiTao { get; set; }
 		public int KichHoat { get; set; }
 
-		public virtual ICollection<SanPham> SanPhams { get; set; }
+		public virtual ICollection<SanPham>? SanPhams { get; set; }
 	}
 }

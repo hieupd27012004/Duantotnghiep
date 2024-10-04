@@ -46,6 +46,6 @@ namespace AppData.Model
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public int KichHoat { get; set; }
 
-		public ICollection<HoaDon> HoaDons { get; set; }
+		public ICollection<HoaDon>? HoaDons { get; set; }
 	}
 }
