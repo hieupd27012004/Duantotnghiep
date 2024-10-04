@@ -28,6 +28,6 @@ namespace AppData.Model
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public int KichHoat { get; set; }
 
-		public virtual ICollection<SanPham> SanPhams { get; set; }
+		public virtual ICollection<SanPham>? SanPhams { get; set; }
 	}
 }

@@ -1,4 +1,4 @@
-var builder = WebApplication.CreateBuilder(args);
+﻿var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -20,8 +20,22 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllerRoute(
-	name: "default",
-	pattern: "{controller=Home}/{action=Index}/{id?}");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+    name: "default",
+    pattern: "{area=Admin}/{controller=HomeAdmin}/{action=Index}/{id?}");
+
+    endpoints.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}");
+
+    // Cấu hình route cho area Customer
+    endpoints.MapControllerRoute(
+        name: "Client",
+        pattern: "{area:exists}/{controller=HomeClient}/{action=Index}/{id?}",
+        defaults: new { area = "Client", controller = "HomeClient", action = "Index" });
+
+});
 
 app.Run();

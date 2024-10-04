@@ -14,7 +14,7 @@ namespace AppData.Model
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string TenTrangThai { get; set; }
 
-		public virtual ICollection<GiaoDich> GiaoDich { get; set; }
-		public virtual ICollection<HoaDon> HoaDons { get; set; }
+		public virtual ICollection<GiaoDich>? GiaoDich { get; set; }
+		public virtual ICollection<HoaDon>? HoaDons { get; set; }
 	}
 }
