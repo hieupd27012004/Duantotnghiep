@@ -1,9 +1,12 @@
-using APPMVC.Service;
+﻿using APPMVC.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient();
+builder.Services.AddTransient<IServicegiaygiay, Servicegiaygiay>();
+
 builder.Services.AddHttpClient();
 builder.Services.AddTransient<IServiceKieuDang, ServiceKieuDang>();
 var app = builder.Build();
@@ -23,6 +26,23 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+    name: "default",
+    pattern: "{area=Admin}/{controller=HomeAdmin}/{action=Index}/{id?}");
+
+    endpoints.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}");
+
+    // Cấu hình route cho area Customer
+    endpoints.MapControllerRoute(
+        name: "Client",
+        pattern: "{area:exists}/{controller=HomeClient}/{action=Index}/{id?}",
+        defaults: new { area = "Client", controller = "HomeClient", action = "Index" });
+
+});
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(

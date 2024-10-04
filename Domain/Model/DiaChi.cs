@@ -31,6 +31,6 @@ namespace AppData.Model
 		public DateTime NgayCapNhat { get; set; }
 
 		public Guid IdKhachHang { get; set; }
-		public virtual KhachHang khachHang { get; set; }
+		public virtual KhachHang? khachHang { get; set; }
 	}
 }

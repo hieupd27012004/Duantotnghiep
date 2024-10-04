@@ -18,6 +18,6 @@ namespace AppData.Model
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string TenChucVu { get; set; }
 
-	    public ICollection<NhanVien> nhanViens { get; set; }
+	    public ICollection<NhanVien>? nhanViens { get; set; }
 	}
 }

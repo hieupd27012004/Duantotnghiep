@@ -25,9 +25,9 @@ namespace AppData.Model
 
 		public Guid IdMauSac { get; set; }
 
-		public virtual SanPham SanPham { get; set; }
+		public virtual SanPham? SanPham { get; set; }
 
-		public virtual MauSac MauSac { get; set; }
+		public virtual MauSac? MauSac { get; set; }
 
 
 	}

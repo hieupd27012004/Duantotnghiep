@@ -27,6 +27,6 @@ namespace AppData.Model
 		public string NguoiTao { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public int KichHoat { get; set; }
-		public ICollection<SanPhamChiTiet> SanPhamChiTiets { get; set; }
+		public ICollection<SanPhamChiTiet>? SanPhamChiTiets { get; set; }
 	}
 }

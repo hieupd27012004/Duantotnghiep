@@ -40,10 +40,10 @@ namespace AppData.Model
 		public string NguoiCapNhat { get; set; }
 		public int KichHoat { get; set; }
 
-		public virtual GioHang GioHang { get; set; }
-		public virtual ICollection<DiaChi> DiaChis { get; set; }
+		public virtual GioHang? GioHang { get; set; }
+		public virtual ICollection<DiaChi>? DiaChis { get; set; }
 
-		public virtual ICollection<HoaDon> HoaDons { get; set; }
+		public virtual ICollection<HoaDon>? HoaDons { get; set; }
 
 	}
 }
