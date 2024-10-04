@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
-    [Migration("20241002030055_UpdateKieuDang")]
-    partial class UpdateKieuDang
+    [Migration("20241004074213_InitDb")]
+    partial class InitDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -1149,8 +1149,7 @@ namespace AppData.Migrations
                 {
                     b.Navigation("GioHangChiTiets");
 
-                    b.Navigation("KhachHang")
-                        .IsRequired();
+                    b.Navigation("KhachHang");
                 });
 
             modelBuilder.Entity("AppData.Model.HoaDon", b =>

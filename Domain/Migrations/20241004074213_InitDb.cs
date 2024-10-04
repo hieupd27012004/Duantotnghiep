@@ -5,11 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AppData.Migrations
 {
-<<<<<<<< HEAD:Domain/Migrations/20240930050210_InitDB.cs
-    public partial class InitDB : Migration
-========
-    public partial class duan : Migration
->>>>>>>> fb5147a6d1ccd6f82479593e0fc0a3bf636a7cc9:Domain/Migrations/20241004022036_duan.cs
+    public partial class InitDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
