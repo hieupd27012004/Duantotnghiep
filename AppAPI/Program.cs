@@ -28,6 +28,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddTransient<IServicegiaygiay, Servicegiaygiay>();
 builder.Services.AddTransient<IRepogiaygiay, Repogiaygiay>();
 
+builder.Services.AddTransient<IServiceKieuDang, ServiceKieuDang>();
+builder.Services.AddTransient<IRepoKieuDang, RepoKieuDang>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
