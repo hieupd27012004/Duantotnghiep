@@ -14,20 +14,18 @@ namespace AppData.Model
 		public Guid IdThuongHieu { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string TenThuongHieu { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
-		[RegularExpression(@"^(\+84|0)[3|5|7|8|9][0-9]{8}$", ErrorMessage = "Không Đúng Định Dạng")]
-		[StringLength(10, MinimumLength = 10, ErrorMessage = "Phải Đủ 10 Số")]
-		public DateTime NgayCapNhat { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
-		[RegularExpression(@"^(\+84|0)[3|5|7|8|9][0-9]{8}$", ErrorMessage = "Không Đúng Định Dạng")]
-		[StringLength(10, MinimumLength = 10, ErrorMessage = "Phải Đủ 10 Số")]
-		public DateTime NgayTao { get; set; }
+        [DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        public DateTime NgayCapNhat { get; set; }
+        [DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        public DateTime NgayTao { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string NguoiCapNhat { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string NguoiTao { get; set; }
 		public int KichHoat { get; set; }
 
-		public virtual ICollection<SanPham> SanPhams { get; set; }
+		public virtual ICollection<SanPham>? SanPhams { get; set; }
 	}
 }
