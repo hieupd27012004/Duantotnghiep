@@ -1145,8 +1145,7 @@ namespace AppData.Migrations
                 {
                     b.Navigation("GioHangChiTiets");
 
-                    b.Navigation("KhachHang")
-                        .IsRequired();
+                    b.Navigation("KhachHang");
                 });
 
             modelBuilder.Entity("AppData.Model.HoaDon", b =>

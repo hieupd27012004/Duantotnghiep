@@ -1,5 +1,7 @@
 using AppAPI.Repository;
 using AppAPI.Service;
+using AppData;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,15 +24,24 @@ builder.Services.AddSwaggerGen();
 //});
 
 
-//DanhMuc
-builder.Services.AddTransient<IDanhMucService, DanhMucService>();
-builder.Services.AddTransient<IRepoDanhMuc, RepoDanhMuc>();
-//Thuong Hieu
-builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
-builder.Services.AddTransient<IThuongHiepRepo, ThuongHieuRepo>();
-//Chat Li?u
-builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
-builder.Services.AddTransient<IChatLieuRepo, ChatLieuRepo>();
+builder.Services.AddDbContext<AppDbcontext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+builder.Services.AddTransient<IServicegiaygiay, Servicegiaygiay>();
+builder.Services.AddTransient<IRepogiaygiay, Repogiaygiay>();
+
+builder.Services.AddTransient<IServiceKieuDang, ServiceKieuDang>();
+builder.Services.AddTransient<IRepoKieuDang, RepoKieuDang>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -41,7 +52,8 @@ if (app.Environment.IsDevelopment())
 }
 
 
-//app.UseCors("AllowAll");
+app.UseCors("AllowAll");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

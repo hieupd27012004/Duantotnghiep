@@ -21,7 +21,7 @@ namespace AppData.Model
 		public Guid IdHoaDon { get; set; }
 
 		public Guid IdTrangThai { get; set; }
-		public virtual HoaDon HoaDon { get; set; }
-		public virtual TrangThai TrangThai { get; set; }
+		public virtual HoaDon? HoaDon { get; set; }
+		public virtual TrangThai? TrangThai { get; set; }
 	}
 }

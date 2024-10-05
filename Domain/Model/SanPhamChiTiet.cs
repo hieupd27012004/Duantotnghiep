@@ -45,14 +45,14 @@ namespace AppData.Model
 		public Guid IdSanPham { get; set; }
 		public Guid IdDayGiay { get; set; }
 		public Guid IdDeGiay { get; set; }
-		public virtual KichCo KichCo { get; set; }
-		public virtual MauSac MauSac { get; set; }
-		public virtual SanPham  SanPham { get; set; }
-		public virtual DayGiay DayGiay { get; set; }
-		public virtual DeGiay DeGiay { get; set; }
+		public virtual KichCo? KichCo { get; set; }
+		public virtual MauSac? MauSac { get; set; }
+		public virtual SanPham?  SanPham { get; set; }
+		public virtual DayGiay? DayGiay { get; set; }
+		public virtual DeGiay? DeGiay { get; set; }
 
-		public virtual ICollection<HoaDonChiTiet> HoaDonChiTiets { get; set; }
+		public virtual ICollection<HoaDonChiTiet>? HoaDonChiTiets { get; set; }
 
-		public virtual ICollection<GioHangChiTiet> GioHangChiTiets { get; set; }
+		public virtual ICollection<GioHangChiTiet>? GioHangChiTiets { get; set; }
 	}
 }

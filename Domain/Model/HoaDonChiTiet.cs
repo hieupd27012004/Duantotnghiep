@@ -27,7 +27,7 @@ namespace AppData.Model
 		public double KichHoat { get; set; }
 		public Guid IdHoaDon { get; set; }
 		public Guid IdSanPhamChiTiet { get; set; }
-		public virtual HoaDon HoaDon { get; set; }
-		public virtual SanPhamChiTiet SanPhamChiTiet { get; set; }
+		public virtual HoaDon? HoaDon { get; set; }
+		public virtual SanPhamChiTiet? SanPhamChiTiet { get; set; }
 	}
 }

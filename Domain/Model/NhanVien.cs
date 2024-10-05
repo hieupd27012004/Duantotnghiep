@@ -45,8 +45,8 @@ namespace AppData.Model
 		public int TrangThai { get; set; }
 
 		public Guid IdchucVu { get; set; }
-		public virtual ChucVu chucVu { get; set; }
+		public virtual ChucVu? chucVu { get; set; }
 
-		public ICollection<HoaDon> HoaDons { get; set; }
+		public ICollection<HoaDon>? HoaDons { get; set; }
 	}
 }
