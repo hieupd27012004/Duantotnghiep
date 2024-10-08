@@ -1,7 +1,18 @@
-/*
+﻿/*
 * demo.css
 * File include item demo only specific css only
 ******************************************************************************/
+
+body {
+    background-color: #ffffff;
+
+}
+.container-fluid {
+    background-color: white;
+    margin: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
 
 .menu .app-brand.demo {
   height: 64px;

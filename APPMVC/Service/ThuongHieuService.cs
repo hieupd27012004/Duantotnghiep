@@ -1,9 +1,10 @@
 ﻿using AppData.Model;
+using APPMVC.IService;
 using System.Net.Http;
 
 namespace APPMVC.Service
 {
-	public class ThuongHieuService : IThuongHieuService
+    public class ThuongHieuService : IThuongHieuService
 	{
 		HttpClient _client;
         public ThuongHieuService()

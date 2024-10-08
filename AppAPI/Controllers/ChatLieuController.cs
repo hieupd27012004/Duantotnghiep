@@ -1,4 +1,4 @@
-﻿using AppAPI.Service;
+﻿using AppAPI.IService;
 using AppData.Model;
 using Microsoft.AspNetCore.Mvc;
 

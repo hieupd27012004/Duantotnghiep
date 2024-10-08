@@ -1,10 +1,10 @@
 ﻿using AppData.Model;
-using APPMVC.Service;
+using APPMVC.IService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APPMVC.Areas.Admin.Controllers
 {
-	[Area("Admin")]
+    [Area("Admin")]
 	public class ThuongHieuController : Controller
 	{
 		public IThuongHieuService _service;

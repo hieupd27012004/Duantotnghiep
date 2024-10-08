@@ -1,11 +1,11 @@
-﻿using AppAPI.Service;
+﻿using AppAPI.IService;
 using AppData.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppAPI.Controllers
 {
-	[Route("api/[controller]")]
+    [Route("api/[controller]")]
 	[ApiController]
 	public class ThuongHieuController : ControllerBase
 	{
