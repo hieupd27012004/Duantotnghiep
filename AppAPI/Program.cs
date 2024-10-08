@@ -1,6 +1,7 @@
 using AppAPI.Repository;
 using AppAPI.Service;
 using AppData;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,7 +31,13 @@ builder.Services.AddTransient<IRepogiaygiay, Repogiaygiay>();
 
 builder.Services.AddTransient<IServiceKieuDang, ServiceKieuDang>();
 builder.Services.AddTransient<IRepoKieuDang, RepoKieuDang>();
+
+builder.Services.AddTransient<IRepoHinhAnh, RepoHinhAnh>();
+builder.Services.AddTransient<IServiceHinhAnh, ServiceHinhAnh>();
+
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

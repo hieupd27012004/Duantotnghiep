@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,23 +14,21 @@ namespace AppData.Model
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public Guid IdHinhAnh { get; set; }
 
+		[Required(ErrorMessage = "Không được để trống")]
+		public byte[] DataHinhAnh { get; set; }
+		[Required(ErrorMessage = "Không được để trống")]
+		public string LoaiFileHinhAnh { get; set; }
+
 		[Required(ErrorMessage = "Không Được Để Trống")]
+		public int TrangThai { get; set; }
 
-		public string TenAnh { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
-		public string HienThi { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
+		[Display(Name = "Upload File")]
 
-		public string LaAnhChinh { get; set; }
+		public Guid? IdSanPhamChiTiet { get; set; }
+		[NotMapped]
+        public IFormFile File { get; set; }
 
-		public Guid IdSanPham { get; set; }
-
-		public Guid IdMauSac { get; set; }
-
-		public virtual SanPham? SanPham { get; set; }
-
-		public virtual MauSac? MauSac { get; set; }
-
+        public virtual SanPhamChiTiet? SanPhamChiTiet { get; set; }
 
 	}
 }

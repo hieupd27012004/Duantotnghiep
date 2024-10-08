@@ -6,9 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 builder.Services.AddTransient<IServicegiaygiay, Servicegiaygiay>();
-
-builder.Services.AddHttpClient();
 builder.Services.AddTransient<IServiceKieuDang, ServiceKieuDang>();
+builder.Services.AddTransient<IServiceHinhAnh,  ServiceHinhAnh>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
