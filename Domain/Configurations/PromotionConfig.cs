@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace AppData.Configurations
 {
-	public class KhuyenMaiConfig : IEntityTypeConfiguration<KhuyenMai>
+	public class PromotionConfig : IEntityTypeConfiguration<Promotion>
 	{
-		public void Configure(EntityTypeBuilder<KhuyenMai> builder)
+		public void Configure(EntityTypeBuilder<Promotion> builder)
 		{
-			builder.HasKey(p => p.IdKhuyenMai);
+			builder.HasKey(p => p.IdPromotion);
 		}
 	}
 }

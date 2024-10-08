@@ -4,6 +4,7 @@ using AppData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
-    partial class AppDbcontextModelSnapshot : ModelSnapshot
+    [Migration("20241005023817_UpdateHinhAnhTable")]
+    partial class UpdateHinhAnhTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -845,9 +847,11 @@ namespace AppData.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("NgayCapNhat")
+                        .HasMaxLength(10)
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("NgayTao")
+                        .HasMaxLength(10)
                         .HasColumnType("datetime2");
 
                     b.Property<string>("NguoiCapNhat")
