@@ -1,4 +1,5 @@
-﻿using AppData;
+﻿using AppAPI.IRepository;
+using AppData;
 using AppData.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace AppAPI.Repository
 {
-    public class RepoHinhAnh : IRepoHinhAnh
+    public class HinhAnhRepo : IHinhAnhRepo
     {
         private readonly AppDbcontext _context;
 
-        public RepoHinhAnh(AppDbcontext context)
+        public HinhAnhRepo(AppDbcontext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }

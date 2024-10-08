@@ -1,71 +1,61 @@
-﻿using AppData.Model;
-using APPMVC.Service;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using APPMVC.IService;
+using AppData.Model;
+using System;
+using System.Threading.Tasks;
 
-namespace APPMVC.Areas.Admin.Controllers
+namespace APPMVC.Controllers
 {
-    [Area("Admin")]
     public class HinhAnhController : Controller
     {
-        private readonly IServiceHinhAnh _services;
+        private readonly IHinhAnhService _hinhAnhService;
 
-        public HinhAnhController(IServiceHinhAnh services)
+        public HinhAnhController(IHinhAnhService hinhAnhService)
         {
-            _services = services;
+            _hinhAnhService = hinhAnhService;
         }
 
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> Index()
         {
-            List<HinhAnh> hinhAnhs = await _services.GetHinhAnhs();
+            var hinhAnhs = await _hinhAnhService.GetHinhAnhsAsync();
             return View(hinhAnhs);
         }
 
-        public IActionResult Create()
+        public IActionResult Upload()
         {
-            var hinhAnh = new HinhAnh()
-            {
-                IdHinhAnh = Guid.NewGuid(),
-                LoaiFileHinhAnh = "image/jpeg",
-                DataHinhAnh = new byte[0],
-                IdSanPhamChiTiet = Guid.NewGuid(),
-                TrangThai = 1
-            };
-            return View(hinhAnh);
+            return View();
         }
 
         [HttpPost]
-        public IActionResult Create(HinhAnh hinhAnh, IFormFile file)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Upload(IFormFile file, Guid idSanPhamChiTiet)
         {
-            if (file != null)
+            if (file != null && file.Length > 0)
             {
-                using (var ms = new MemoryStream())
+                using (var memoryStream = new MemoryStream())
                 {
-                    file.CopyTo(ms);
-                    hinhAnh.DataHinhAnh = ms.ToArray();
-                    hinhAnh.LoaiFileHinhAnh = file.ContentType;
+                    await file.CopyToAsync(memoryStream);
+
+                    var hinhAnh = new HinhAnh
+                    {
+                        IdSanPhamChiTiet = idSanPhamChiTiet,
+                        LoaiFileHinhAnh = file.ContentType,
+                        DataHinhAnh = memoryStream.ToArray()
+                    };
+
+                    var result = await _hinhAnhService.UploadAsync(hinhAnh);
+                    if (result)
+                    {
+                        return RedirectToAction(nameof(Index));
+                    }
                 }
             }
-
-            if (!ModelState.IsValid)
-            {
-                return View(hinhAnh);
-            }
-
-            _services.Create(hinhAnh);
-            return RedirectToAction("Index");
+            return View();
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Details(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var hinhAnh = await _services.GetHinhAnhById(id);
-            return View(hinhAnh);
-        }
-
-        public async Task<IActionResult> Edit(Guid id)
-        {
-            var hinhAnh = await _services.GetHinhAnhById(id);
+            var hinhAnh = await _hinhAnhService.GetHinhAnhByIdAsync(id);
             if (hinhAnh == null)
             {
                 return NotFound();
@@ -73,21 +63,16 @@ namespace APPMVC.Areas.Admin.Controllers
             return View(hinhAnh);
         }
 
-        [HttpPost]
-        public IActionResult Edit(HinhAnh hinhAnh)
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            if (!ModelState.IsValid)
+            var result = await _hinhAnhService.DeleteAsync(id);
+            if (result)
             {
-                return View(hinhAnh);
+                return RedirectToAction(nameof(Index));
             }
-            _services.Update(hinhAnh);
-            return RedirectToAction("GetAll");
-        }
-
-        public ActionResult Delete(Guid id)
-        {
-            _services.Delete(id);
-            return RedirectToAction("GetAll");
+            return NotFound();
         }
     }
 }

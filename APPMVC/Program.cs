@@ -9,13 +9,11 @@ builder.Services.AddHttpClient();
 
 
 builder.Services.AddTransient<IDayGiayService, DayGiayService>();
-
 builder.Services.AddTransient<IDanhMucService, DanhMucService>();
-
 builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
-
 builder.Services.AddTransient<IKieuDangService, KieuDangService>();
+builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
 
 
 builder.Services.AddCors(options =>
@@ -28,9 +26,7 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
-builder.Services.AddTransient<IServicegiaygiay, Servicegiaygiay>();
-builder.Services.AddTransient<IServiceKieuDang, ServiceKieuDang>();
-builder.Services.AddTransient<IServiceHinhAnh,  ServiceHinhAnh>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -473,54 +473,6 @@ namespace AppData.Migrations
                     b.ToTable("khachHangs");
                 });
 
-            modelBuilder.Entity("AppData.Model.KhuyenMai", b =>
-                {
-                    b.Property<Guid>("IdKhuyenMai")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("GiaTriToiDa")
-                        .HasColumnType("float");
-
-                    b.Property<int>("KichHoat")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("NgayBatDau")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("NgayCapNhat")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("NgayKetThuc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("NgayTao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("NguoiCapNhat")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NguoiTao")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("PhanTramGiam")
-                        .HasColumnType("float");
-
-                    b.Property<string>("TenKhuyenMai")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TrangThai")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("IdKhuyenMai");
-
-                    b.ToTable("khuyenMais");
-                });
-
             modelBuilder.Entity("AppData.Model.KichCo", b =>
                 {
                     b.Property<Guid>("IdKichCo")
@@ -703,6 +655,37 @@ namespace AppData.Migrations
                     b.HasKey("IdNhanVien");
 
                     b.ToTable("nhanViens");
+                });
+
+            modelBuilder.Entity("AppData.Model.Promotion", b =>
+                {
+                    b.Property<Guid>("IdPromotion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("NgayBatDau")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NgayKetThuc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("PhanTramGiam")
+                        .HasColumnType("float");
+
+                    b.Property<string>("TenPromotion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdPromotion");
+
+                    b.ToTable("khuyenMais");
                 });
 
             modelBuilder.Entity("AppData.Model.SanPham", b =>
@@ -952,7 +935,7 @@ namespace AppData.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppData.Model.KhuyenMai", "KhuyenMai")
+                    b.HasOne("AppData.Model.Promotion", "KhuyenMai")
                         .WithMany("HoaDons")
                         .HasForeignKey("IdKhuyenMai")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1157,11 +1140,6 @@ namespace AppData.Migrations
                     b.Navigation("HoaDons");
                 });
 
-            modelBuilder.Entity("AppData.Model.KhuyenMai", b =>
-                {
-                    b.Navigation("HoaDons");
-                });
-
             modelBuilder.Entity("AppData.Model.KichCo", b =>
                 {
                     b.Navigation("SanPhamChiTiets");
@@ -1178,6 +1156,11 @@ namespace AppData.Migrations
                 });
 
             modelBuilder.Entity("AppData.Model.NhanVien", b =>
+                {
+                    b.Navigation("HoaDons");
+                });
+
+            modelBuilder.Entity("AppData.Model.Promotion", b =>
                 {
                     b.Navigation("HoaDons");
                 });
