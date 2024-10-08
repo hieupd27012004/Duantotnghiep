@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AppAPI.Repository
 {
-    public class RepoDanhMuc : IDanhMucRepo
+    public class DanhMucRepo : IDanhMucRepo
     {
         AppDbcontext _context;
-        public RepoDanhMuc()
+        public DanhMucRepo()
         {
             _context = new AppDbcontext();
         }

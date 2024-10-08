@@ -30,17 +30,17 @@ builder.Services.AddCors(options =>
 });
 // Dây giày
 builder.Services.AddTransient<IDayGiayService, DayGiayService>();
-builder.Services.AddTransient<IDayGiayRepo, RepodayGiay>();
+builder.Services.AddTransient<IDayGiayRepo, DayGiayRepo>();
 //Chất liêu
 builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
 builder.Services.AddTransient<IChatLieuRepo, ChatLieuRepo>();
 // Kiểu dáng
 builder.Services.AddTransient<IKieuDangService, KieuDangService>();
-builder.Services.AddTransient<IKieuDangRepo, RepoKieuDang>();
+builder.Services.AddTransient<IKieuDangRepo, KieuDangRepo>();
 
 //Danh mục
 builder.Services.AddTransient<IDanhMucService, DanhMucService>();
-builder.Services.AddTransient<IDanhMucRepo, RepoDanhMuc>();
+builder.Services.AddTransient<IDanhMucRepo, DanhMucRepo>();
 
 // THương Hiệu
 builder.Services.AddTransient<IThuongHiepRepo, ThuongHieuRepo>();

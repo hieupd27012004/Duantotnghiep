@@ -4,10 +4,10 @@ using AppData.Model;
 
 namespace AppAPI.Repository
 {
-    public class RepoKieuDang : IKieuDangRepo
+    public class KieuDangRepo : IKieuDangRepo
     {
         AppDbcontext _context;
-        public RepoKieuDang()
+        public KieuDangRepo()
         {
             _context = new AppDbcontext();
         }

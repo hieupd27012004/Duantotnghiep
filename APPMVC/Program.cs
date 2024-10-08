@@ -9,9 +9,12 @@ builder.Services.AddHttpClient();
 
 
 builder.Services.AddTransient<IDayGiayService, DayGiayService>();
+
 builder.Services.AddTransient<IDanhMucService, DanhMucService>();
+
 builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
+
 builder.Services.AddTransient<IKieuDangService, KieuDangService>();
 
 

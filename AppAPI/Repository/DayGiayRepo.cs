@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace AppAPI.Repository
 {
-    public class RepodayGiay : IDayGiayRepo
+    public class DayGiayRepo : IDayGiayRepo
     {
         private readonly AppDbcontext _context;
 
-        public RepodayGiay(AppDbcontext context)
+        public DayGiayRepo(AppDbcontext context)
         {
             _context = context;
         }
