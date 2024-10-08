@@ -54,5 +54,6 @@ namespace AppData.Model
 		public virtual ICollection<HoaDonChiTiet>? HoaDonChiTiets { get; set; }
 
 		public virtual ICollection<GioHangChiTiet>? GioHangChiTiets { get; set; }
+		public virtual ICollection<HinhAnh>? HinhAnhs {  get; set; }
 	}
 }

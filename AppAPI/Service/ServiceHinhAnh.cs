@@ -1,4 +1,5 @@
-﻿using AppAPI.Repository;
+﻿using AppAPI.IRepository;
+using AppAPI.IService;
 using AppData.Model;
 using System;
 using System.Collections.Generic;
@@ -8,9 +9,9 @@ namespace AppAPI.Service
 {
     public class ServiceHinhAnh : IServiceHinhAnh
     {
-        private readonly IRepoHinhAnh _repository;
+        private readonly IHinhAnhRepo _repository;
 
-        public ServiceHinhAnh(IRepoHinhAnh repository)
+        public ServiceHinhAnh(IHinhAnhRepo repository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }

@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AppAPI.Service
+namespace AppAPI.IRepository
 {
-    public interface IServiceHinhAnh
+    public interface IHinhAnhRepo
     {
         Task<List<HinhAnh>> GetHinhAnhsAsync();
         Task<HinhAnh> GetHinhAnhByIdAsync(Guid id);

@@ -28,8 +28,6 @@ namespace AppData.Model
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public int KichHoat { get; set; }
 
-		public virtual ICollection<HinhAnh>? HinhAnhs { get; set; }
-
 		public virtual ICollection<SanPhamChiTiet>? SanPhamChiTiets { get; set; }
 	}
 }

@@ -1,11 +1,8 @@
 ﻿using AppData.Model;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace AppAPI.Repository
+namespace APPMVC.IService
 {
-    public interface IRepoHinhAnh
+    public interface IHinhAnhService
     {
         Task<List<HinhAnh>> GetHinhAnhsAsync();
         Task<HinhAnh> GetHinhAnhByIdAsync(Guid id);

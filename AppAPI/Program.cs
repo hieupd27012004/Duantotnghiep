@@ -47,11 +47,7 @@ builder.Services.AddTransient<IDanhMucRepo, DanhMucRepo>();
 builder.Services.AddTransient<IThuongHiepRepo, ThuongHieuRepo>();
 builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 
-
-builder.Services.AddTransient<IServiceKieuDang, ServiceKieuDang>();
-builder.Services.AddTransient<IRepoKieuDang, RepoKieuDang>();
-
-builder.Services.AddTransient<IRepoHinhAnh, RepoHinhAnh>();
+builder.Services.AddTransient<IHinhAnhRepo, HinhAnhRepo>();
 builder.Services.AddTransient<IServiceHinhAnh, ServiceHinhAnh>();
 
 var app = builder.Build();

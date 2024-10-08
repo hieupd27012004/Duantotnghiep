@@ -1,10 +1,10 @@
-﻿using AppAPI.Service;
-using AppData.Model;
+﻿using AppData.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using AppAPI.IService;
 
 namespace AppAPI.Controllers
 {
