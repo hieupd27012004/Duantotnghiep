@@ -42,6 +42,7 @@ namespace AppData.Model
 		public virtual KieuDang? KieuDang { get; set; }
 		public virtual ThuongHieu? ThuongHieu { get; set; }
 		public virtual DanhMuc? DanhMuc { get; set; }
+		
 
 		public virtual ICollection<HinhAnh>? HinhAnhs { get; set; }
 		public virtual ICollection<SanPhamChiTiet>? SanPhamChiTiets { get; set; }

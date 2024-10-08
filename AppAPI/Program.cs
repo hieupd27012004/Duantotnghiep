@@ -1,3 +1,5 @@
+﻿using AppAPI.IRepository;
+using AppAPI.IService;
 using AppAPI.Repository;
 using AppAPI.Service;
 using AppData;
@@ -13,6 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 builder.Services.AddDbContext<AppDbcontext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -26,8 +29,24 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
-builder.Services.AddTransient<IServicegiaygiay, Servicegiaygiay>();
-builder.Services.AddTransient<IRepogiaygiay, Repogiaygiay>();
+// Dây giày
+builder.Services.AddTransient<IDayGiayService, DayGiayService>();
+builder.Services.AddTransient<IDayGiayRepo, DayGiayRepo>();
+//Chất liêu
+builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
+builder.Services.AddTransient<IChatLieuRepo, ChatLieuRepo>();
+// Kiểu dáng
+builder.Services.AddTransient<IKieuDangService, KieuDangService>();
+builder.Services.AddTransient<IKieuDangRepo, KieuDangRepo>();
+
+//Danh mục
+builder.Services.AddTransient<IDanhMucService, DanhMucService>();
+builder.Services.AddTransient<IDanhMucRepo, DanhMucRepo>();
+
+// THương Hiệu
+builder.Services.AddTransient<IThuongHiepRepo, ThuongHieuRepo>();
+builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
+
 
 builder.Services.AddTransient<IServiceKieuDang, ServiceKieuDang>();
 builder.Services.AddTransient<IRepoKieuDang, RepoKieuDang>();

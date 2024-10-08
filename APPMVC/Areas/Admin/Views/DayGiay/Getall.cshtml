@@ -1,63 +1,76 @@
 ﻿@model IEnumerable<AppData.Model.DayGiay>
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
 
 @{
-    ViewData["Title"] = "Getall";
+    ViewData["Title"] = "Get all";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.TenDayGiay)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NgayCapNhat)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NgayTao)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NguoiCapNhat)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NguoiTao)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.KichHoat)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.TenDayGiay)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NgayCapNhat)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NgayTao)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NguoiCapNhat)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NguoiTao)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.KichHoat)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.IdDayGiay">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.IdDayGiay">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.IdDayGiay">Delete</a>
-            </td>
-        </tr>
+
+<div class="content-wrapper">
+    <!-- Content -->
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Quản lý sản phẩm /</span> Dây Giày</h4>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4" style=" padding:20px">
+                    <div class="nav-item d-flex align-items-center" style="display: flex; justify-content: space-between;">
+                        <form action="Getall" method="get" style="display: flex; align-items: center;">
+                            <i class="bx bx-search fs-4 lh-0"></i>
+                            <input type="text" name="name" class="form-control border-1 shadow-none" placeholder="Search by name..." aria-label="Search..." />
+                            <button type="submit" title="Search" style="margin-left: 10px; padding: 5px 10px; border: none; border-radius: 5px; background-color: #4CAF50; color: #fff; cursor: pointer;">Tìm</button>
+                        </form>
+                        <a asp-action="Create" class="btn btn-primary" style="margin-left: 10px;">Create New</a>
+                    </div>
+                    <br>
+                    <div class="panel-body" >
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Tên dây giày</th>
+                                    <th>Ngày cập nhật</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Người cập nhật</th>
+                                    <th>Người tạo</th>
+                                    <th>Kích hoạt</th>
+                                    <th>Chức năng</th>
+                                </tr>
+                            </thead>
+                      <tbody >
+                            @foreach (var item in Model)
+                            {
+                               <tr style="border-bottom: 1px solid #dee2e6;">
+                                    <td>@Html.DisplayFor(modelItem => item.TenDayGiay)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.NgayCapNhat)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.NgayTao)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.NguoiCapNhat)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.NguoiTao)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.KichHoat)</td>
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@item.IdDayGiay" class="btn btn-sm btn-primary">Edit</a>
+                                        <a asp-action="Details" asp-route-id="@item.IdDayGiay" class="btn btn-sm btn-info">Details</a>
+                                        <a asp-action="Delete" asp-route-id="@item.IdDayGiay" class="btn btn-sm btn-danger">Delete</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+</div>
+</div>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
 }
-    </tbody>
-</table>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+

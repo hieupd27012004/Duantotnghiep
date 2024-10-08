@@ -1,10 +1,33 @@
-﻿using APPMVC.Service;
+﻿using APPMVC.IService;
+using APPMVC.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
+
+
+builder.Services.AddTransient<IDayGiayService, DayGiayService>();
+
+builder.Services.AddTransient<IDanhMucService, DanhMucService>();
+
+builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
+builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
+
+builder.Services.AddTransient<IKieuDangService, KieuDangService>();
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 builder.Services.AddTransient<IServicegiaygiay, Servicegiaygiay>();
 builder.Services.AddTransient<IServiceKieuDang, ServiceKieuDang>();
 builder.Services.AddTransient<IServiceHinhAnh,  ServiceHinhAnh>();
@@ -21,6 +44,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseCors("AllowAll");
 app.UseRouting();
 
 app.UseAuthorization();
@@ -41,19 +65,5 @@ app.UseEndpoints(endpoints =>
         pattern: "{area:exists}/{controller=HomeClient}/{action=Index}/{id?}",
         defaults: new { area = "Client", controller = "HomeClient", action = "Index" });
 
-});
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{area=Admin}/{controller=KieuDang}/{action=Getall}/{id?}");
-
-    endpoints.MapControllerRoute(
-        name: "areas",
-        pattern: "{area:exists}/{controller=KieuDang}/{action=Getall}/{id?}");
-    endpoints.MapControllerRoute(
-        name: "Client",
-        pattern: "{area:exists}/{controller=HomeClient}/{action=Index}/{id?}",
-        defaults: new { area = "Client", controller = "HomeClient", action = "Index" });
 });
 app.Run();

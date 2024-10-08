@@ -9,23 +9,21 @@ namespace AppData.Model
 {
 	public class DanhMuc
 	{
-		[Required(ErrorMessage = "Không Được Để Trống")]
 		public Guid IdDanhMuc { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string TenDanhMuc { get; set; }
+
 		[DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
 		[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-		//[Range(typeof(DateTime), "1/1/2020", "12/31/2025", ErrorMessage = "Không Trong Thời Gian Cho Phép")]
 		public DateTime NgayCapNhat { get; set; }
+
 		[DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
 		[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-		//[Range(typeof(DateTime), "1/1/2020", "12/31/2025", ErrorMessage = "Không Trong Thời Gian Cho Phép")]
 		public DateTime NgayTao { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string NguoiCapNhat { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string NguoiTao { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
+        //[Required(ErrorMessage = "Trạng thái kích hoạt không được để trống")] 
 		public int KichHoat { get; set; }
 
 		public virtual ICollection<SanPham>? SanPhams { get; set; }

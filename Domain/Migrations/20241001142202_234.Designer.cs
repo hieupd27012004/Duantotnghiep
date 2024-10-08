@@ -4,6 +4,7 @@ using AppData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
-    partial class AppDbcontextModelSnapshot : ModelSnapshot
+    [Migration("20241001142202_234")]
+    partial class _234
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -289,28 +291,29 @@ namespace AppData.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte[]>("DataHinhAnh")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<Guid?>("IdSanPhamChiTiet")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("LoaiFileHinhAnh")
+                    b.Property<string>("HienThi")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("SanPhamIdSanPham")
+                    b.Property<Guid>("IdMauSac")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("TrangThai")
-                        .HasColumnType("int");
+                    b.Property<Guid>("IdSanPham")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LaAnhChinh")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TenAnh")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdHinhAnh");
 
-                    b.HasIndex("IdSanPhamChiTiet");
+                    b.HasIndex("IdMauSac");
 
-                    b.HasIndex("SanPhamIdSanPham");
+                    b.HasIndex("IdSanPham");
 
                     b.ToTable("hinhAnh");
                 });
@@ -933,15 +936,21 @@ namespace AppData.Migrations
 
             modelBuilder.Entity("AppData.Model.HinhAnh", b =>
                 {
-                    b.HasOne("AppData.Model.SanPhamChiTiet", "SanPhamChiTiet")
+                    b.HasOne("AppData.Model.MauSac", "MauSac")
                         .WithMany("HinhAnhs")
-                        .HasForeignKey("IdSanPhamChiTiet");
+                        .HasForeignKey("IdMauSac")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("AppData.Model.SanPham", null)
+                    b.HasOne("AppData.Model.SanPham", "SanPham")
                         .WithMany("HinhAnhs")
-                        .HasForeignKey("SanPhamIdSanPham");
+                        .HasForeignKey("IdSanPham")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("SanPhamChiTiet");
+                    b.Navigation("MauSac");
+
+                    b.Navigation("SanPham");
                 });
 
             modelBuilder.Entity("AppData.Model.HoaDon", b =>
@@ -1138,7 +1147,8 @@ namespace AppData.Migrations
                 {
                     b.Navigation("GioHangChiTiets");
 
-                    b.Navigation("KhachHang");
+                    b.Navigation("KhachHang")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AppData.Model.HoaDon", b =>
@@ -1174,6 +1184,8 @@ namespace AppData.Migrations
 
             modelBuilder.Entity("AppData.Model.MauSac", b =>
                 {
+                    b.Navigation("HinhAnhs");
+
                     b.Navigation("SanPhamChiTiets");
                 });
 
@@ -1192,8 +1204,6 @@ namespace AppData.Migrations
             modelBuilder.Entity("AppData.Model.SanPhamChiTiet", b =>
                 {
                     b.Navigation("GioHangChiTiets");
-
-                    b.Navigation("HinhAnhs");
 
                     b.Navigation("HoaDonChiTiets");
                 });
