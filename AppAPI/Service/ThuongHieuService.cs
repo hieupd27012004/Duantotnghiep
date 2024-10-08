@@ -1,9 +1,10 @@
-﻿using AppAPI.Repository;
+﻿using AppAPI.IRepository;
+using AppAPI.IService;
 using AppData.Model;
 
 namespace AppAPI.Service
 {
-	public class ThuongHieuService : IThuongHieuService
+    public class ThuongHieuService : IThuongHieuService
 	{
 		public IThuongHiepRepo _repo;
         public ThuongHieuService(IThuongHiepRepo repo)

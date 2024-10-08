@@ -1,10 +1,11 @@
-﻿using AppData;
+﻿using AppAPI.IRepository;
+using AppData;
 using AppData.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppAPI.Repository
 {
-	public class ThuongHieuRepo : IThuongHiepRepo
+    public class ThuongHieuRepo : IThuongHiepRepo
 	{
 		AppDbcontext _context;
         public ThuongHieuRepo()

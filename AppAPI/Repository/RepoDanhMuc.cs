@@ -1,10 +1,11 @@
-﻿using AppData;
+﻿using AppAPI.IRepository;
+using AppData;
 using AppData.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppAPI.Repository
 {
-    public class RepoDanhMuc : IRepoDanhMuc
+    public class RepoDanhMuc : IDanhMucRepo
     {
         AppDbcontext _context;
         public RepoDanhMuc()

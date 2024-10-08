@@ -1,4 +1,5 @@
-﻿using APPMVC.Service;
+﻿using APPMVC.IService;
+using APPMVC.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,11 +8,23 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 
 
-builder.Services.AddTransient<IServicegiaygiay, Servicegiaygiay>();
+builder.Services.AddTransient<IDayGiayService, DayGiayService>();
 builder.Services.AddTransient<IDanhMucService, DanhMucService>();
 builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
-builder.Services.AddTransient<IServiceKieuDang, ServiceKieuDang>();
+builder.Services.AddTransient<IKieuDangService, KieuDangService>();
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -25,6 +38,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseCors("AllowAll");
 app.UseRouting();
 
 app.UseAuthorization();

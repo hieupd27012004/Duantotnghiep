@@ -1,7 +1,8 @@
-﻿using AppAPI.Repository;
+﻿using AppAPI.IRepository;
+using AppAPI.IService;
+using AppAPI.Repository;
 using AppAPI.Service;
 using AppData;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,18 +29,18 @@ builder.Services.AddCors(options =>
     });
 });
 // Dây giày
-builder.Services.AddTransient<IServicegiaygiay, Servicegiaygiay>();
-builder.Services.AddTransient<IRepogiaygiay, Repogiaygiay>();
+builder.Services.AddTransient<IDayGiayService, DayGiayService>();
+builder.Services.AddTransient<IDayGiayRepo, RepodayGiay>();
 //Chất liêu
 builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
 builder.Services.AddTransient<IChatLieuRepo, ChatLieuRepo>();
 // Kiểu dáng
-builder.Services.AddTransient<IServiceKieuDang, ServiceKieuDang>();
-builder.Services.AddTransient<IRepoKieuDang, RepoKieuDang>();
+builder.Services.AddTransient<IKieuDangService, KieuDangService>();
+builder.Services.AddTransient<IKieuDangRepo, RepoKieuDang>();
 
 //Danh mục
 builder.Services.AddTransient<IDanhMucService, DanhMucService>();
-builder.Services.AddTransient<IRepoDanhMuc, RepoDanhMuc>();
+builder.Services.AddTransient<IDanhMucRepo, RepoDanhMuc>();
 
 // THương Hiệu
 builder.Services.AddTransient<IThuongHiepRepo, ThuongHieuRepo>();

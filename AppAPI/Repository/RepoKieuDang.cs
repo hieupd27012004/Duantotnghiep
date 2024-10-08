@@ -1,9 +1,10 @@
-﻿using AppData;
+﻿using AppAPI.IRepository;
+using AppData;
 using AppData.Model;
 
 namespace AppAPI.Repository
 {
-    public class RepoKieuDang : IRepoKieuDang
+    public class RepoKieuDang : IKieuDangRepo
     {
         AppDbcontext _context;
         public RepoKieuDang()

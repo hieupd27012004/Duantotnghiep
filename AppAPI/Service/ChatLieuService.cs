@@ -1,4 +1,5 @@
-﻿using AppAPI.Repository;
+﻿using AppAPI.IRepository;
+using AppAPI.IService;
 using AppData.Model;
 
 namespace AppAPI.Service

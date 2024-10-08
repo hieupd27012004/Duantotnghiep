@@ -1,12 +1,13 @@
-﻿using AppAPI.Repository;
+﻿using AppAPI.IRepository;
+using AppAPI.IService;
 using AppData.Model;
 
 namespace AppAPI.Service
 {
     public class DanhMucService : IDanhMucService
     {
-        public IRepoDanhMuc _repo;
-        public DanhMucService(IRepoDanhMuc repo)
+        public IDanhMucRepo _repo;
+        public DanhMucService(IDanhMucRepo repo)
         {
             _repo = repo;
         }

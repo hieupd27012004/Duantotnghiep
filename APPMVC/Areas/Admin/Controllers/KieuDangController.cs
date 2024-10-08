@@ -1,5 +1,5 @@
 ﻿using AppData.Model;
-using APPMVC.Service;
+using APPMVC.IService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APPMVC.Areas.Admin.Controllers
@@ -7,9 +7,9 @@ namespace APPMVC.Areas.Admin.Controllers
     [Area("Admin")]
     public class KieuDangController : Controller
     {
-        private readonly IServiceKieuDang _services;
+        private readonly IKieuDangService _services;
 
-        public KieuDangController(IServiceKieuDang services)
+        public KieuDangController(IKieuDangService services)
         {
             _services = services;
         }

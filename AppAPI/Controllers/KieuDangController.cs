@@ -1,4 +1,4 @@
-﻿using AppAPI.Service;
+﻿using AppAPI.IService;
 using AppData.Model;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,8 +8,8 @@ namespace AppAPI.Controllers
     [ApiController]
     public class KieuDangController : ControllerBase
     {
-        private readonly IServiceKieuDang _service;
-        public KieuDangController(IServiceKieuDang service)
+        private readonly IKieuDangService _service;
+        public KieuDangController(IKieuDangService service)
         {
             _service = service;
         }
