@@ -9,10 +9,12 @@
 <div class="content-wrapper">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Quản lý sản phẩm /</span> Dây Giày</h4>
+        <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">Quản lý sản phẩm /</span> Dây Giày
+        </h4>
         <div class="row">
             <div class="col-md-12">
-                <div class="card mb-4" style=" padding:20px">
+                <div class="card mb-4" style="padding: 20px">
                     <div class="nav-item d-flex align-items-center" style="display: flex; justify-content: space-between;">
                         <form action="Getall" method="get" style="display: flex; align-items: center;">
                             <i class="bx bx-search fs-4 lh-0"></i>
@@ -22,7 +24,7 @@
                         <a asp-action="Create" class="btn btn-primary" style="margin-left: 10px;">Create New</a>
                     </div>
                     <br>
-                    <div class="panel-body" >
+                    <div class="panel-body">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -35,31 +37,32 @@
                                     <th>Chức năng</th>
                                 </tr>
                             </thead>
-                      <tbody >
-                            @foreach (var item in Model)
-                            {
-                               <tr style="border-bottom: 1px solid #dee2e6;">
-                                    <td>@Html.DisplayFor(modelItem => item.TenDayGiay)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.NgayCapNhat)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.NgayTao)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.NguoiCapNhat)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.NguoiTao)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.KichHoat)</td>
-                                    <td>
-                                        <a asp-action="Edit" asp-route-id="@item.IdDayGiay" class="btn btn-sm btn-primary">Edit</a>
-                                        <a asp-action="Details" asp-route-id="@item.IdDayGiay" class="btn btn-sm btn-info">Details</a>
-                                        <a asp-action="Delete" asp-route-id="@item.IdDayGiay" class="btn btn-sm btn-danger">Delete</a>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr style="border-bottom: 1px solid #dee2e6;">
+                                        <td>@Html.DisplayFor(modelItem => item.TenDayGiay)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.NgayCapNhat)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.NgayTao)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.NguoiCapNhat)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.NguoiTao)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.KichHoat)</td>
+                                        <td>
+                                            <a asp-action="Edit" asp-route-id="@item.IdDayGiay" title="Edit">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 </div>
-</div>
+
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success">
@@ -73,4 +76,3 @@
         @TempData["Error"]
     </div>
 }
-
