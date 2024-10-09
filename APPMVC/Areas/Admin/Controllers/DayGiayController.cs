@@ -17,7 +17,7 @@ namespace APPMVC.Areas.Admin.Controllers
 		}
         [HttpGet]
 
-        public async Task<IActionResult> Getall(string? name)
+        public async Task<IActionResult> Getall(string? name )
         {
             List<DayGiay> timten = await _services.GetDayGiay(name);
             List<DayGiay> dayGiays = await _services.GetDayGiay(name);
@@ -31,24 +31,19 @@ namespace APPMVC.Areas.Admin.Controllers
             }
         }
         public IActionResult Create()
-		{
-			var daygiay = new DayGiay()
-			{
-				IdDayGiay = Guid.NewGuid(),
-				TenDayGiay = "hieudz",
-				NgayCapNhat = DateTime.Now,
-				NgayTao = DateTime.Now,
-				
-
-			};
-			return View(daygiay);
-		}
+        {
+            return PartialView("Create");   
+        }
         [HttpPost]
         public async Task<IActionResult> Create(DayGiay dayGiay)
         {
             if (!ModelState.IsValid)
             {
-                return View(dayGiay);
+                if (!ModelState.IsValid)
+                {
+                    TempData["Error"] = "Thêm mới thất bại";
+                    return RedirectToAction("Getall");
+                }
             }
             try
             {

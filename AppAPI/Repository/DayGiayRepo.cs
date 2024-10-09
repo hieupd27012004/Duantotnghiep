@@ -82,6 +82,7 @@ namespace AppAPI.Repository
                 dayGiayUpdate.NgayTao = dayGiay.NgayTao;
                 dayGiayUpdate.NguoiCapNhat = dayGiay.NguoiCapNhat;
                 dayGiayUpdate.NguoiTao = dayGiay.NguoiTao;
+                dayGiayUpdate.KichHoat = dayGiay.KichHoat == 1 ? 1 : 0;
                 _context.dayGiay.Update(dayGiayUpdate);
                 _context.SaveChanges();
                 return true;
