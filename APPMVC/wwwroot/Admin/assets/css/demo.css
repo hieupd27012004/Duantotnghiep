@@ -2,7 +2,13 @@
 * demo.css
 * File include item demo only specific css only
 ******************************************************************************/
+/* Thêm thuộc tính !important để override các thuộc tính CSS đang đè lên nó */
+/* Thêm lớp CSS mới để target vào icon edit */
 
+table td, table th {
+    text-align: center;
+    vertical-align: middle;
+}
 body {
     background-color: #ffffff;
 

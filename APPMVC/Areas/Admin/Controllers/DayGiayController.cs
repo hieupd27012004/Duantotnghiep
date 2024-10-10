@@ -3,6 +3,7 @@ using APPMVC.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using X.PagedList;
 
 namespace APPMVC.Areas.Admin.Controllers
 {
@@ -17,7 +18,7 @@ namespace APPMVC.Areas.Admin.Controllers
 		}
         [HttpGet]
 
-        public async Task<IActionResult> Getall(string? name)
+        public async Task<IActionResult> Getall(string? name )
         {
             List<DayGiay> timten = await _services.GetDayGiay(name);
             List<DayGiay> dayGiays = await _services.GetDayGiay(name);
@@ -31,24 +32,24 @@ namespace APPMVC.Areas.Admin.Controllers
             }
         }
         public IActionResult Create()
-		{
-			var daygiay = new DayGiay()
-			{
-				IdDayGiay = Guid.NewGuid(),
-				TenDayGiay = "hieudz",
-				NgayCapNhat = DateTime.Now,
-				NgayTao = DateTime.Now,
-				
-
-			};
-			return View(daygiay);
-		}
+        {
+            return PartialView("Create");   
+        }
         [HttpPost]
         public async Task<IActionResult> Create(DayGiay dayGiay)
         {
             if (!ModelState.IsValid)
             {
-                return View(dayGiay);
+                // Kiểm tra tính hợp lệ của dữ liệu
+                if (ModelState.ContainsKey("TenDayGiay"))
+                {
+                    var error = ModelState["TenDayGiay"].Errors.FirstOrDefault();
+                    if (error != null)
+                    {
+                        TempData["Error"] = error.ErrorMessage;
+                    }
+                }
+                return RedirectToAction("Getall");
             }
             try
             {
@@ -71,10 +72,19 @@ namespace APPMVC.Areas.Admin.Controllers
             return View(dayGiay);
         }
         [HttpPost]
-        public  async Task<ActionResult> Edit(DayGiay dayGiay)
+        public async Task<ActionResult> Edit(DayGiay dayGiay)
         {
             if (!ModelState.IsValid)
             {
+                // Kiểm tra tính hợp lệ của dữ liệu
+                if (ModelState.ContainsKey("TenDayGiay"))
+                {
+                    var error = ModelState["TenDayGiay"].Errors.FirstOrDefault();
+                    if (error != null)
+                    {
+                        TempData["Error"] = error.ErrorMessage;
+                    }
+                }
                 return View(dayGiay);
             }
             try
@@ -110,6 +120,14 @@ namespace APPMVC.Areas.Admin.Controllers
                 return NotFound();
             }
             return View(dayGiay);
+        }
+
+        public async Task<IActionResult> ShowPaging(int page = 1)
+        {
+            int pageSize = 5;
+            var dayGiays = await _services.GetDayGiay(null); // Pass null as the name parameter
+            var pagedDayGiays = dayGiays.ToPagedList(page, pageSize);
+            return View(pagedDayGiays);
         }
     }
 
