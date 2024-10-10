@@ -7,7 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 
-
 builder.Services.AddTransient<IDayGiayService, DayGiayService>();
 builder.Services.AddTransient<IDanhMucService, DanhMucService>();
 builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
