@@ -12,9 +12,9 @@ namespace AppAPI.Controllers
     [ApiController]
     public class HinhAnhController : ControllerBase
     {
-        private readonly IServiceHinhAnh _service;
+        private readonly IHinhAnhService _service;
 
-        public HinhAnhController(IServiceHinhAnh service)
+        public HinhAnhController(IHinhAnhService service)
         {
             _service = service;
         }

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AppAPI.IService
 {
-    public interface IServiceHinhAnh
+    public interface IHinhAnhService
     {
         Task<List<HinhAnh>> GetHinhAnhsAsync();
         Task<HinhAnh> GetHinhAnhByIdAsync(Guid id);
