@@ -124,6 +124,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
         public async Task<IActionResult> ShowPaging(int page = 1)
         {
+            page = page <1 ? 1 : page;
             int pageSize = 5;
             var dayGiays = await _services.GetDayGiay(null); // Pass null as the name parameter
             var pagedDayGiays = dayGiays.ToPagedList(page, pageSize);
