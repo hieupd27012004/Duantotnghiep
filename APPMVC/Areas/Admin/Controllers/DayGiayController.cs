@@ -18,17 +18,22 @@ namespace APPMVC.Areas.Admin.Controllers
 		}
         [HttpGet]
 
-        public async Task<IActionResult> Getall(string? name )
+        [HttpGet]
+        public async Task<IActionResult> Getall(string? name, int page = 1)
         {
+            page = page < 1 ? 1 : page;
+            int pageSize = 5;
             List<DayGiay> timten = await _services.GetDayGiay(name);
-            List<DayGiay> dayGiays = await _services.GetDayGiay(name);
             if (timten != null)
             {
-                return View(timten);
+                var pagedDayGiays = timten.ToPagedList(page, pageSize);
+                return View(pagedDayGiays);
             }
             else
             {
-                return View(dayGiays); 
+                List<DayGiay> dayGiays = await _services.GetDayGiay(name);
+                var pagedDayGiays = dayGiays.ToPagedList(page, pageSize);
+                return View(pagedDayGiays);
             }
         }
         public IActionResult Create()
@@ -122,14 +127,7 @@ namespace APPMVC.Areas.Admin.Controllers
             return View(dayGiay);
         }
 
-        public async Task<IActionResult> ShowPaging(int page = 1)
-        {
-            page = page <1 ? 1 : page;
-            int pageSize = 5;
-            var dayGiays = await _services.GetDayGiay(null); // Pass null as the name parameter
-            var pagedDayGiays = dayGiays.ToPagedList(page, pageSize);
-            return View(pagedDayGiays);
-        }
+    
     }
 
 }

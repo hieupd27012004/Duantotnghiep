@@ -1,4 +1,5 @@
-﻿@model IEnumerable<AppData.Model.DayGiay>
+﻿@model X.PagedList.IPagedList<AppData.Model.DayGiay>
+@using X.PagedList.Mvc.Core;
 @using Microsoft.AspNetCore.Mvc.ViewFeatures
 
 @{
@@ -83,6 +84,19 @@
                                 }
                             </tbody>
                         </table>
+                    </div>
+                    <div class="pagination">
+                        @Html.PagedListPager(Model, Page => Url.Action("Getall", "DayGiay", new { Page = Page }),
+                                 new PagedListRenderOptions
+                        {
+                            DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                            DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                            DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                            DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                            MaximumPageNumbersToDisplay = 5,
+                            LiElementClasses = new string[] { "page-item" },
+                            PageClasses = new string[] { "page-link" }
+                        })
                     </div>
                 </div>
             </div>
