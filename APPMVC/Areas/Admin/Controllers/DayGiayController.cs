@@ -3,6 +3,7 @@ using APPMVC.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using X.PagedList;
 
 namespace APPMVC.Areas.Admin.Controllers
 {
@@ -119,6 +120,14 @@ namespace APPMVC.Areas.Admin.Controllers
                 return NotFound();
             }
             return View(dayGiay);
+        }
+
+        public async Task<IActionResult> ShowPaging(int page = 1)
+        {
+            int pageSize = 5;
+            var dayGiays = await _services.GetDayGiay(null); // Pass null as the name parameter
+            var pagedDayGiays = dayGiays.ToPagedList(page, pageSize);
+            return View(pagedDayGiays);
         }
     }
 
