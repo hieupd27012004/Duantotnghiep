@@ -1,39 +1,63 @@
 ﻿@model AppData.Model.HinhAnh
-
 @{
-    ViewData["Title"] = "Upload Image";
+    ViewData["Title"] = "Upload Hình Ảnh";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Upload Image</h1>
+<h1>@ViewData["Title"]</h1>
 
-<hr />
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var modelState in ViewData.ModelState.Values)
+            {
+                foreach (var error in modelState.Errors)
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            }
+        </ul>
+    </div>
+}
+
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Upload" enctype="multipart/form-data">
+    <div class="col-md-6">
+        <form asp-action="Upload" enctype="multipart/form-data" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="IdSanPhamChiTiet" class="control-label"></label>
-                <input asp-for="IdSanPhamChiTiet" class="form-control" />
-                <span asp-validation-for="IdSanPhamChiTiet" class="text-danger"></span>
+           
+            <div class="form-group mb-3">
+                <label for="file" class="control-label">Chọn Hình Ảnh</label>
+                <input type="file" id="file" name="file" class="form-control" accept="image/*" required />
             </div>
-            <div class="form-group">
-                <label for="imageFile" class="control-label">Image File</label>
-                <input type="file" id="imageFile" name="file" class="form-control" required />
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Upload" class="btn btn-primary" />
+
+            <div class="form-group mb-3">
+                <input type="submit" value="Tải Lên" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Quay Lại Danh Sách</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div id="imagePreview" style="display: none;">
+            <h4>Xem Trước Hình Ảnh</h4>
+            <img id="preview" src="#" alt="Preview" style="max-width: 100%; max-height: 300px;" />
+        </div>
+    </div>
 </div>
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+<script>
+    document.getElementById('file').onchange = function (evt) {
+        var tgt = evt.target || window.event.srcElement,
+            files = tgt.files;
+
+        if (files && files.length) {
+            var file = files[0];
+            var url = URL.createObjectURL(file);
+            document.getElementById('preview').src = url;
+            document.getElementById('imagePreview').style.display = 'block';
+        }
     }
-}
+</script>
