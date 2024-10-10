@@ -39,11 +39,16 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
+                // Kiểm tra tính hợp lệ của dữ liệu
+                if (ModelState.ContainsKey("TenDayGiay"))
                 {
-                    TempData["Error"] = "Thêm mới thất bại";
-                    return RedirectToAction("Getall");
+                    var error = ModelState["TenDayGiay"].Errors.FirstOrDefault();
+                    if (error != null)
+                    {
+                        TempData["Error"] = error.ErrorMessage;
+                    }
                 }
+                return RedirectToAction("Getall");
             }
             try
             {
@@ -66,10 +71,19 @@ namespace APPMVC.Areas.Admin.Controllers
             return View(dayGiay);
         }
         [HttpPost]
-        public  async Task<ActionResult> Edit(DayGiay dayGiay)
+        public async Task<ActionResult> Edit(DayGiay dayGiay)
         {
             if (!ModelState.IsValid)
             {
+                // Kiểm tra tính hợp lệ của dữ liệu
+                if (ModelState.ContainsKey("TenDayGiay"))
+                {
+                    var error = ModelState["TenDayGiay"].Errors.FirstOrDefault();
+                    if (error != null)
+                    {
+                        TempData["Error"] = error.ErrorMessage;
+                    }
+                }
                 return View(dayGiay);
             }
             try

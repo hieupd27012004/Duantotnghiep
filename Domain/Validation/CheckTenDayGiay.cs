@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace AppData.Validation
     public class CheckTenDayGiay : ValidationAttribute
     {
         private readonly AppDbcontext _context;
+
         public CheckTenDayGiay()
         {
             _context = new AppDbcontext();
@@ -22,7 +24,7 @@ namespace AppData.Validation
                 return ValidationResult.Success;
 
             var objectType = validationContext.ObjectType;
-            var idProperty = objectType.GetProperty("Id");
+            var idProperty = objectType.GetProperty("IdDayGiay");
             if (idProperty == null)
             {
                 // Handle the case where Id property is not found
@@ -30,12 +32,16 @@ namespace AppData.Validation
             }
 
             var dayGiayId = (Guid)idProperty.GetValue(validationContext.ObjectInstance);
-            var existing = _context.dayGiay.Any(dg => dg.TenDayGiay == name && dg.IdDayGiay != dayGiayId);
+            var existing = _context.dayGiay
+                .AsNoTracking() // Add this to avoid tracking issues
+                .Any(dg => dg.TenDayGiay == name && dg.IdDayGiay != dayGiayId);
+
             if (existing)
             {
-                return new ValidationResult(ErrorMessage);
+                return new ValidationResult("Tên giày đã tồn tại", new[] { "TenDayGiay" });
             }
             return ValidationResult.Success;
         }
     }
 }
+
