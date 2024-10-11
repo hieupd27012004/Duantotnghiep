@@ -4,10 +4,10 @@ namespace APPMVC.IService
 {
     public interface IChatLieuService
     {
-        Task<List<ChatLieu>> GetAllChatLieu();
-        Task<ChatLieu> GetIdChatLieu(Guid id);
-        Task CreateChatLieu(ChatLieu chatLieu);
-        Task UpdateChatLieu(ChatLieu chatLieu);
-        Task DeleteChatLieu(Guid id);
+        Task<List<ChatLieu>> GetChatLieu(string? name);
+        Task<ChatLieu> GetChatLieuById(Guid id);
+        Task Create(ChatLieu chatLieu);
+        Task Update(ChatLieu chatLieu);
+        Task Delete(Guid id);
     }
 }

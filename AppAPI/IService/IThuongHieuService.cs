@@ -4,10 +4,10 @@ namespace AppAPI.IService
 {
     public interface IThuongHieuService
     {
-        Task<List<ThuongHieu>> GetAllThuongHieu();
-        Task<ThuongHieu> GetIdThuongHieu(Guid id);
-        Task<ThuongHieu> CreateTH(ThuongHieu th);
-        Task<ThuongHieu> UpdateTH(ThuongHieu th);
-        Task DeleteTH(Guid id);
+        List<ThuongHieu> GetThuongHieu(string? name);
+        ThuongHieu GetThuongHieuById(Guid id);
+        bool Create(ThuongHieu thuongHieu);
+        bool Update(ThuongHieu thuongHieu);
+        bool Delete(Guid id);
     }
 }

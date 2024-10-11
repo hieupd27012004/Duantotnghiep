@@ -1,13 +1,16 @@
 ﻿using AppData.Model;
 using APPMVC.IService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using X.PagedList;
 
 namespace APPMVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class KieuDangController : Controller
     {
-        private readonly IKieuDangService _services;
+        public IKieuDangService _services;
 
         public KieuDangController(IKieuDangService services)
         {
@@ -15,46 +18,57 @@ namespace APPMVC.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Getall()
+        public async Task<IActionResult> Getall(string? name, int page = 1)
         {
-            List<KieuDang> kieuDangs = await _services.GetKieuDang();
-            return View(kieuDangs);
+            page = page < 1 ? 1 : page;
+            int pageSize = 5;
+            List<KieuDang> timten = await _services.GetKieuDang(name);
+            if (timten != null)
+            {
+                var pagedKieuDangs = timten.ToPagedList(page, pageSize);
+                return View(pagedKieuDangs);
+            }
+            else
+            {
+                List<KieuDang> kieuDangs = await _services.GetKieuDang(name);
+                var pagedKieuDangs = kieuDangs.ToPagedList(page, pageSize);
+                return View(pagedKieuDangs);
+            }
         }
 
         public IActionResult Create()
         {
-            return View();
+            return PartialView("Create");
         }
 
-        // POST: Admin/KieuDang/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(KieuDang kieuDang)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                kieuDang.IdKieuDang = Guid.NewGuid();
-                kieuDang.NgayTao = DateTime.Now;
-                kieuDang.NgayCapNhat = DateTime.Now;
+                // Kiểm tra tính hợp lệ của dữ liệu
+                if (ModelState.ContainsKey("TenKieuDang"))
+                {
+                    var error = ModelState["TenKieuDang"].Errors.FirstOrDefault();
+                    if (error != null)
+                    {
+                        TempData["Error"] = error.ErrorMessage;
+                    }
+                }
+                return RedirectToAction("Getall");
+            }
+            try
+            {
                 await _services.Create(kieuDang);
-                TempData["Success"] = "KieuDang created successfully.";
-                return RedirectToAction(nameof(Getall));
+                TempData["Success"] = "Thêm mới thành công";
             }
-            return View(kieuDang);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Details(Guid id)
-        {
-            var kieuDang = await _services.GetKieuDangById(id);
-            if (kieuDang == null)
+            catch (Exception)
             {
-                return NotFound();
+                TempData["Error"] = "Thêm mới thất bại";
             }
-            return View(kieuDang);
+            return RedirectToAction("Getall");
         }
 
-        [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
             var kieuDang = await _services.GetKieuDangById(id);
@@ -66,52 +80,55 @@ namespace APPMVC.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(KieuDang kieuDang)
+        public async Task<ActionResult> Edit(KieuDang kieuDang)
         {
             if (!ModelState.IsValid)
             {
+                // Kiểm tra tính hợp lệ của dữ liệu
+                if (ModelState.ContainsKey("TenKieuDang"))
+                {
+                    var error = ModelState["TenKieuDang"].Errors.FirstOrDefault();
+                    if (error != null)
+                    {
+                        TempData["Error"] = error.ErrorMessage;
+                    }
+                }
                 return View(kieuDang);
             }
             try
             {
-                var existingKieuDang = await _services.GetKieuDangById(kieuDang.IdKieuDang);
-                if (existingKieuDang != null)
-                {
-                    kieuDang.NgayTao = existingKieuDang.NgayTao;
-                    kieuDang.NgayCapNhat = DateTime.Now;
-                    await _services.Update(kieuDang);
-                    TempData["Success"] = "KieuDang updated successfully.";
-                }
-                else
-                {
-                    TempData["Error"] = "KieuDang not found.";
-                }
-                return RedirectToAction(nameof(Getall));
+                await _services.Update(kieuDang);
+                TempData["Success"] = "Cập nhật thành công";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // Log the exception
-                ModelState.AddModelError("", "An error occurred while updating the KieuDang.");
-                return View(kieuDang);
+                TempData["Error"] = "Cập nhật thất bại";
             }
+            return RedirectToAction("Getall");
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            var kieuDang = await _services.GetKieuDangById(id);
-            if (kieuDang != null)
+            try
             {
                 await _services.Delete(id);
-                TempData["Success"] = "KieuDang deleted successfully.";
+                TempData["Success"] = "Xóa thành công";
             }
-            else
+            catch (Exception)
             {
-                TempData["Error"] = "KieuDang not found.";
+                TempData["Error"] = "Xóa thất bại";
             }
-            return RedirectToAction(nameof(Getall));
+            return RedirectToAction("Getall");
+        }
+
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var kieuDang = await _services.GetKieuDangById(id);
+            if (kieuDang == null)
+            {
+                return NotFound();
+            }
+            return View(kieuDang);
         }
     }
 }

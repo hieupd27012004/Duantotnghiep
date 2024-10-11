@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AppData.Migrations
 {
-    public partial class InitDB : Migration
+    public partial class duan : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -145,6 +145,7 @@ namespace AppData.Migrations
                     NgayCapNhat = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NguoiCapNhat = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     KichHoat = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -272,7 +273,8 @@ namespace AppData.Migrations
                     IdChatLieu = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdKieuDang = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdThuongHieu = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdDanhMuc = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    IdDanhMuc = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IdDeGiay = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -288,6 +290,12 @@ namespace AppData.Migrations
                         column: x => x.IdDanhMuc,
                         principalTable: "danhMuc",
                         principalColumn: "IdDanhMuc",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_sanPhams_deGiay_IdDeGiay",
+                        column: x => x.IdDeGiay,
+                        principalTable: "deGiay",
+                        principalColumn: "IdDeGiay",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_sanPhams_kieuDangs_IdKieuDang",
@@ -397,8 +405,7 @@ namespace AppData.Migrations
                     IdKichCo = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdMauSac = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdSanPham = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdDayGiay = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdDeGiay = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    IdDayGiay = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -408,12 +415,6 @@ namespace AppData.Migrations
                         column: x => x.IdDayGiay,
                         principalTable: "dayGiay",
                         principalColumn: "IdDayGiay",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_sanPhamChiTiets_deGiay_IdDeGiay",
-                        column: x => x.IdDeGiay,
-                        principalTable: "deGiay",
-                        principalColumn: "IdDeGiay",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_sanPhamChiTiets_kichCos_IdKichCo",
@@ -642,11 +643,6 @@ namespace AppData.Migrations
                 column: "IdDayGiay");
 
             migrationBuilder.CreateIndex(
-                name: "IX_sanPhamChiTiets_IdDeGiay",
-                table: "sanPhamChiTiets",
-                column: "IdDeGiay");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_sanPhamChiTiets_IdKichCo",
                 table: "sanPhamChiTiets",
                 column: "IdKichCo");
@@ -670,6 +666,11 @@ namespace AppData.Migrations
                 name: "IX_sanPhams_IdDanhMuc",
                 table: "sanPhams",
                 column: "IdDanhMuc");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_sanPhams_IdDeGiay",
+                table: "sanPhams",
+                column: "IdDeGiay");
 
             migrationBuilder.CreateIndex(
                 name: "IX_sanPhams_IdKieuDang",
@@ -712,9 +713,6 @@ namespace AppData.Migrations
                 name: "dayGiay");
 
             migrationBuilder.DropTable(
-                name: "deGiay");
-
-            migrationBuilder.DropTable(
                 name: "kichCos");
 
             migrationBuilder.DropTable(
@@ -740,6 +738,9 @@ namespace AppData.Migrations
 
             migrationBuilder.DropTable(
                 name: "danhMuc");
+
+            migrationBuilder.DropTable(
+                name: "deGiay");
 
             migrationBuilder.DropTable(
                 name: "kieuDangs");

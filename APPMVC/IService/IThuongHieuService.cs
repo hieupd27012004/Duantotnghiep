@@ -4,10 +4,10 @@ namespace APPMVC.IService
 {
     public interface IThuongHieuService
     {
-        Task<List<ThuongHieu>> GetAllThuongHieu();
-        Task<ThuongHieu> GetIdThuongHieu(Guid id);
-        Task CreateThuongHieu(ThuongHieu th);
-        Task UpdateThuongHieu(ThuongHieu th);
-        Task DeleteThuongHieu(Guid id);
+        Task<List<ThuongHieu>> GetThuongHieu(string? name);
+        Task<ThuongHieu> GetThuongHieuById(Guid id);
+        Task Create(ThuongHieu thuongHieu);
+        Task Update(ThuongHieu thuongHieu);
+        Task Delete(Guid id);
     }
 }

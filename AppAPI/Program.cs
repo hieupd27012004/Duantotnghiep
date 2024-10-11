@@ -32,9 +32,11 @@ builder.Services.AddCors(options =>
 // Dây giày
 builder.Services.AddTransient<IDayGiayService, DayGiayService>();
 builder.Services.AddTransient<IDayGiayRepo, DayGiayRepo>();
+
 //Chất liêu
 builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
 builder.Services.AddTransient<IChatLieuRepo, ChatLieuRepo>();
+
 // Kiểu dáng
 builder.Services.AddTransient<IKieuDangService, KieuDangService>();
 builder.Services.AddTransient<IKieuDangRepo, KieuDangRepo>();
@@ -44,11 +46,24 @@ builder.Services.AddTransient<IDanhMucService, DanhMucService>();
 builder.Services.AddTransient<IDanhMucRepo, DanhMucRepo>();
 
 // THương Hiệu
-builder.Services.AddTransient<IThuongHiepRepo, ThuongHieuRepo>();
+builder.Services.AddTransient<IThuongHieuRepo, ThuongHieuRepo>();
 builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 
+//Hình Ảnh
 builder.Services.AddTransient<IHinhAnhRepo, HinhAnhRepo>();
 builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
+
+//Đế Giày
+builder.Services.AddTransient<IDeGiayService, DeGiayService>();
+builder.Services.AddTransient<IDeGiayRepo, DeGiayRepo>();
+
+//Kich Cỡ
+builder.Services.AddTransient<IKichCoService, KichCoService>();
+builder.Services.AddTransient<IKichCoRepo, KichCoRepo>();
+
+//Màu Sắc
+builder.Services.AddTransient<IMauSacService, MauSacService>();
+builder.Services.AddTransient<IMauSacRepo, MauSacRepo>();
 
 var app = builder.Build();
 

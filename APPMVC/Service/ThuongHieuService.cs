@@ -1,46 +1,43 @@
 ﻿using AppData.Model;
 using APPMVC.IService;
 
-
 namespace APPMVC.Service
 {
     public class ThuongHieuService : IThuongHieuService
-	{
-		HttpClient _client;
+    {
+        HttpClient _httpClient;
+
         public ThuongHieuService()
         {
-            _client = new HttpClient();
-			_client.BaseAddress = new Uri("https://localhost:7198");
+            _httpClient = new HttpClient();
+            _httpClient.BaseAddress = new Uri("https://localhost:7198");
         }
 
-        public async Task CreateThuongHieu(ThuongHieu th)
+        public async Task Create(ThuongHieu thuongHieu)
         {
-            await _client.PostAsJsonAsync("api/ThuongHieu/CreateTH", th);
+            await _httpClient.PostAsJsonAsync("api/ThuongHieu/them", thuongHieu);
         }
 
-        public async Task DeleteThuongHieu(Guid id)
+        public async Task Delete(Guid id)
         {
-            var delete = await _client.DeleteAsync($"/api/ThuongHieu/DeleteTH?id={id}");
-            delete.EnsureSuccessStatusCode();
+            await _httpClient.DeleteAsync($"api/ThuongHieu/Xoa?id={id}");
         }
 
-        public async Task<List<ThuongHieu>> GetAllThuongHieu()
+        public Task<List<ThuongHieu>> GetThuongHieu(string? name)
         {
-            var getall = await _client.GetFromJsonAsync<List<ThuongHieu>>("/api/ThuongHieu/GetAllTH");
-            return getall;
+            var repo = _httpClient.GetFromJsonAsync<List<ThuongHieu>>($"api/ThuongHieu/getall?name={name}");
+            return repo;
         }
 
-        public async Task<ThuongHieu> GetIdThuongHieu(Guid id)
+        public Task<ThuongHieu> GetThuongHieuById(Guid id)
         {
-            var getId = await _client.GetFromJsonAsync<ThuongHieu>($"/api/ThuongHieu/GetIdTH?id={id}");
-            return getId;
+            var thuongHieu = _httpClient.GetFromJsonAsync<ThuongHieu>($"api/ThuongHieu/getbyid?id={id}");
+            return thuongHieu;
         }
 
-        public async Task UpdateThuongHieu(ThuongHieu th)
+        public async Task Update(ThuongHieu thuongHieu)
         {
-            var update = await _client.PutAsJsonAsync($"/api/ThuongHieu/UpdateTH", th);
-            update.EnsureSuccessStatusCode();
+            await _httpClient.PutAsJsonAsync("api/ThuongHieu/Sua", thuongHieu);
         }
-
     }
 }

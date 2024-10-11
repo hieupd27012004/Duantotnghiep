@@ -5,39 +5,39 @@ namespace APPMVC.Service
 {
     public class ChatLieuService : IChatLieuService
     {
-        private readonly HttpClient _httpClient;
+        HttpClient _httpClient;
+
         public ChatLieuService()
         {
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri("https://localhost:7198");
         }
 
-        public async Task CreateChatLieu(ChatLieu chatLieu)
+        public async Task Create(ChatLieu chatLieu)
         {
-            await _httpClient.PostAsJsonAsync("api/ChatLieu/CreateCL", chatLieu);
+            await _httpClient.PostAsJsonAsync("api/ChatLieu/them", chatLieu);
         }
 
-        public async Task DeleteChatLieu(Guid id)
+        public async Task Delete(Guid id)
         {
-            var delete = await _httpClient.DeleteAsync($"/api/ChatLieu/DeleteCL?id={id}");
-            delete.EnsureSuccessStatusCode();
+            await _httpClient.DeleteAsync($"api/ChatLieu/Xoa?id={id}");
         }
 
-        public async Task<List<ChatLieu>> GetAllChatLieu()
+        public Task<List<ChatLieu>> GetChatLieu(string? name)
         {
-            var getall = await _httpClient.GetFromJsonAsync<List<ChatLieu>>("/api/ChatLieu/GetAllCL");
-            return getall;
+            var repo = _httpClient.GetFromJsonAsync<List<ChatLieu>>($"api/ChatLieu/getall?name={name}");
+            return repo;
         }
 
-        public async Task<ChatLieu> GetIdChatLieu(Guid id)
+        public Task<ChatLieu> GetChatLieuById(Guid id)
         {
-            var getId = await _httpClient.GetFromJsonAsync<ChatLieu>($"/api/ChatLieu/GetIdCL?id={id}");
-            return getId;
+            var chatLieu = _httpClient.GetFromJsonAsync<ChatLieu>($"api/ChatLieu/getbyid?id={id}");
+            return chatLieu;
         }
 
-        public async Task UpdateChatLieu(ChatLieu chatLieu)
+        public async Task Update(ChatLieu chatLieu)
         {
-            await _httpClient.PutAsJsonAsync("api/ChatLieu/UpdateCL", chatLieu);
+            await _httpClient.PutAsJsonAsync("api/ChatLieu/Sua", chatLieu);
         }
     }
 }

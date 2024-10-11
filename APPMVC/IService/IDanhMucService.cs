@@ -4,10 +4,10 @@ namespace APPMVC.IService
 {
     public interface IDanhMucService
     {
-        Task<List<DanhMuc>> GetAllDanhMuc();
-        Task<DanhMuc> GetIdDanhMuc(Guid id);
+        Task<List<DanhMuc>> GetDanhMuc(string? name);
+        Task<DanhMuc> GetDanhMucById(Guid id);
         Task Create(DanhMuc danhMuc);
+        Task Update(DanhMuc danhMuc);
         Task Delete(Guid id);
-        Task UpDate(DanhMuc danhMuc);
     }
 }

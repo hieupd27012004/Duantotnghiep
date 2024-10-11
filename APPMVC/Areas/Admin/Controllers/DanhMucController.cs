@@ -1,108 +1,134 @@
 ﻿using AppData.Model;
 using APPMVC.IService;
-using APPMVC.Service;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using X.PagedList;
 
 namespace APPMVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class DanhMucController : Controller
     {
+        public IDanhMucService _services;
 
-        public IDanhMucService _service;
-        public DanhMucController()
+        public DanhMucController(IDanhMucService services)
         {
-            _service = new DanhMucService();
-        }
-        // GET: DanhMucController
-        public async Task<IActionResult> GetAll()
-        {
-            List<DanhMuc> danhMuc = await _service.GetAllDanhMuc();
-            return View(danhMuc);
+            _services = services;
         }
 
-        // GET: DanhMucController/Details/5
-        public async Task<ActionResult> Details(Guid id)
+        [HttpGet]
+        public async Task<IActionResult> Getall(string? name, int page = 1)
         {
-            var danhMuc = await _service.GetIdDanhMuc(id);
-            if(danhMuc == null)
+            page = page < 1 ? 1 : page;
+            int pageSize = 5;
+            List<DanhMuc> timten = await _services.GetDanhMuc(name);
+            if (timten != null)
             {
-               return NotFound();
+                var pagedDanhMucs = timten.ToPagedList(page, pageSize);
+                return View(pagedDanhMucs);
             }
-            return View(danhMuc);
+            else
+            {
+                List<DanhMuc> danhMucs = await _services.GetDanhMuc(name);
+                var pagedDanhMucs = danhMucs.ToPagedList(page, pageSize);
+                return View(pagedDanhMucs);
+            }
         }
 
-        // GET: DanhMucController/Create
         public IActionResult Create()
         {
-            DanhMuc dm = new DanhMuc() {
-                IdDanhMuc = Guid.NewGuid(),
-                TenDanhMuc = "HoangLong01",
-                NgayCapNhat = DateTime.Now,
-                NgayTao = DateTime.Now,              
-            };
-            return View(dm);
+            return PartialView("Create");
         }
 
-        // POST: DanhMucController/Create
         [HttpPost]
-        public async Task<IActionResult> Create(DanhMuc dm)
+        public async Task<IActionResult> Create(DanhMuc danhMuc)
         {
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors);
-                foreach (var error in errors)
+                // Kiểm tra tính hợp lệ của dữ liệu
+                if (ModelState.ContainsKey("TenDanhMuc"))
                 {
-                    Console.WriteLine(error.ErrorMessage); // Hoặc bạn có thể log lỗi để kiểm tra
+                    var error = ModelState["TenDanhMuc"].Errors.FirstOrDefault();
+                    if (error != null)
+                    {
+                        TempData["Error"] = error.ErrorMessage;
+                    }
                 }
+                return RedirectToAction("Getall");
             }
-            await _service.Create(dm);
-            return RedirectToAction("GetAll");
-            
-            
+            try
+            {
+                await _services.Create(danhMuc);
+                TempData["Success"] = "Thêm mới thành công";
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Thêm mới thất bại";
+            }
+            return RedirectToAction("Getall");
         }
 
-        // GET: DanhMucController/Edit/5
         public async Task<IActionResult> Edit(Guid id)
         {
-            var danhMuc = await _service.GetIdDanhMuc(id);
-            if(danhMuc == null)
+            var danhMuc = await _services.GetDanhMucById(id);
+            if (danhMuc == null)
             {
                 return NotFound();
             }
             return View(danhMuc);
         }
 
-        // POST: DanhMucController/Edit/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, DanhMuc dm)
+        public async Task<ActionResult> Edit(DanhMuc danhMuc)
         {
-           if(id != dm.IdDanhMuc)
+            if (!ModelState.IsValid)
             {
-                return BadRequest();
+                // Kiểm tra tính hợp lệ của dữ liệu
+                if (ModelState.ContainsKey("TenDanhMuc"))
+                {
+                    var error = ModelState["TenDanhMuc"].Errors.FirstOrDefault();
+                    if (error != null)
+                    {
+                        TempData["Error"] = error.ErrorMessage;
+                    }
+                }
+                return View(danhMuc);
             }
-            if (ModelState.IsValid)
+            try
             {
-                await _service.UpDate(dm);
-                return RedirectToAction("GetAll");
+                await _services.Update(danhMuc);
+                TempData["Success"] = "Cập nhật thành công";
             }
-            return View(dm);
+            catch (Exception)
+            {
+                TempData["Error"] = "Cập nhật thất bại";
+            }
+            return RedirectToAction("Getall");
         }
 
-        // GET: DanhMucController/Delete/5
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            var danhmuc = await _service.GetIdDanhMuc(id);
-            if(danhmuc == null)
+            try
+            {
+                await _services.Delete(id);
+                TempData["Success"] = "Xóa thành công";
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Xóa thất bại";
+            }
+            return RedirectToAction("Getall");
+        }
+
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var danhMuc = await _services.GetDanhMucById(id);
+            if (danhMuc == null)
             {
                 return NotFound();
-            }    
-            await _service.Delete(id);
-            return RedirectToAction("GetAll");
-            
-
+            }
+            return View(danhMuc);
         }
     }
 }
