@@ -1,6 +1,5 @@
 ﻿using AppData.Model;
 
-
 namespace AppAPI.IRepository
 {
     public interface IDayGiayRepo

@@ -13,7 +13,9 @@ builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
 builder.Services.AddTransient<IKieuDangService, KieuDangService>();
 builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
-
+builder.Services.AddTransient<IDeGiayService, DeGiayService>();
+builder.Services.AddTransient<IKichCoService, KichCoService>();
+builder.Services.AddTransient<IMauSacService, MauSacService>();
 
 
 builder.Services.AddCors(options =>

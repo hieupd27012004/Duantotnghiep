@@ -1,39 +1,46 @@
 ﻿using AppAPI.IRepository;
 using AppAPI.IService;
 using AppData.Model;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AppAPI.Service
 {
     public class ChatLieuService : IChatLieuService
     {
-        public IChatLieuRepo _repo;
-        public ChatLieuService(IChatLieuRepo repo)
+        private readonly IChatLieuRepo _repository;
+
+        public ChatLieuService(IChatLieuRepo repository)
         {
-            _repo = repo;
-        }
-        public async Task<ChatLieu> CreateChatLieu(ChatLieu chatLieu)
-        {
-            return await _repo.CreateChatLieu(chatLieu);
+            _repository = repository;
         }
 
-        public async Task DeleteChatLieu(Guid id)
+        public bool Create(ChatLieu chatLieu)
         {
-            await _repo.DeleteChatLieu(id);
+            return _repository.Create(chatLieu);
         }
 
-        public async Task<List<ChatLieu>> GetAllChatLieu()
+        public bool Delete(Guid id)
         {
-            return await _repo.GetAllChatLieu();
+            return _repository.Delete(id);
         }
 
-        public async Task<ChatLieu> GetIdChatLieu(Guid id)
+        public ChatLieu GetChatLieuById(Guid id)
         {
-            return await _repo.GetIdChatLieu(id);
+            return _repository.GetChatLieuById(id);
         }
 
-        public async Task<ChatLieu> UpdateChatLieu(ChatLieu chatLieu)
+        // Phương thức GetChatLieu (Bất đồng bộ)
+        public List<ChatLieu> GetChatLieu(string? name)
         {
-            return await _repo.UpdateChatLieu(chatLieu);
+            return _repository.GetChatLieu(name);
+        }
+
+        // Phương thức Update (Bất đồng bộ)
+        public bool Update(ChatLieu chatLieu)
+        {
+            return _repository.Update(chatLieu);
         }
     }
 }

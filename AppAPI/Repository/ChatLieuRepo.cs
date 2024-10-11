@@ -7,43 +7,81 @@ namespace AppAPI.Repository
 {
     public class ChatLieuRepo : IChatLieuRepo
     {
-        AppDbcontext _context;
-        public ChatLieuRepo()
+        private readonly AppDbcontext _context;
+
+        public ChatLieuRepo(AppDbcontext context)
         {
-            _context = new AppDbcontext();
-        }
-        public async Task<ChatLieu> CreateChatLieu(ChatLieu chatLieu)
-        {
-            _context.chatLieus.Add(chatLieu);
-            await _context.SaveChangesAsync();
-            return chatLieu;
+            _context = context;
         }
 
-        public async Task DeleteChatLieu(Guid id)
+        public bool Create(ChatLieu chatLieu)
         {
-            var chatLieu = await _context.chatLieus.FindAsync(id);
-            if(chatLieu != null)
+            try
             {
-                _context.chatLieus.Remove(chatLieu);
-                await _context.SaveChangesAsync();
+                _context.chatLieus.Add(chatLieu);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
         }
 
-        public async Task<List<ChatLieu>> GetAllChatLieu()
+        public bool Delete(Guid id)
         {
-            return await _context.chatLieus.ToListAsync();
+            try
+            {
+                var chatLieu = _context.chatLieus.Find(id);
+                if (chatLieu != null)
+                {
+                    _context.chatLieus.Remove(chatLieu);
+                    _context.SaveChanges();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
-        public async Task<ChatLieu> GetIdChatLieu(Guid id)
+        public ChatLieu GetChatLieuById(Guid id)
         {
-            return await _context.chatLieus.FindAsync(id);
-        }
-
-        public async Task<ChatLieu> UpdateChatLieu(ChatLieu chatLieu)
-        {
-            _context.Entry(chatLieu).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            var chatLieu = _context.chatLieus.Find(id);
             return chatLieu;
+        }
+
+        public List<ChatLieu> GetChatLieu(string? name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return _context.chatLieus.ToList();
+            }
+            else
+            {
+                return _context.chatLieus
+                    .Where(c => c.TenChatLieu.Contains(name)).ToList();
+            }
+        }
+
+        public bool Update(ChatLieu chatLieu)
+        {
+            var chatLieuUpdate = _context.chatLieus.Find(chatLieu.IdChatLieu);
+            if (chatLieuUpdate != null)
+            {
+                chatLieuUpdate.TenChatLieu = chatLieu.TenChatLieu;
+                chatLieuUpdate.NgayCapNhat = chatLieu.NgayCapNhat;
+                chatLieuUpdate.NgayTao = chatLieu.NgayTao;
+                chatLieuUpdate.NguoiCapNhat = chatLieu.NguoiCapNhat;
+                chatLieuUpdate.NguoiTao = chatLieu.NguoiTao;
+                chatLieuUpdate.KichHoat = chatLieu.KichHoat == 1 ? 1 : 0;
+                _context.chatLieus.Update(chatLieuUpdate);
+                _context.SaveChanges();
+                return true;
+            }
+            return false;
         }
     }
 }

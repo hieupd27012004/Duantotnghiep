@@ -1,40 +1,46 @@
 ﻿using AppAPI.IRepository;
 using AppAPI.IService;
 using AppData.Model;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AppAPI.Service
 {
     public class DanhMucService : IDanhMucService
     {
-        public IDanhMucRepo _repo;
-        public DanhMucService(IDanhMucRepo repo)
+        private readonly IDanhMucRepo _repository;
+
+        public DanhMucService(IDanhMucRepo repository)
         {
-            _repo = repo;
+            _repository = repository;
         }
 
-        public async Task<DanhMuc> CreateDM(DanhMuc dm)
+        public bool Create(DanhMuc danhMuc)
         {
-            return await _repo.CreateDM(dm);
+            return _repository.Create(danhMuc);
         }
 
-        public async Task DeleteDM(Guid id)
+        public bool Delete(Guid id)
         {
-            await _repo.DeleteDM(id);
+            return _repository.Delete(id);
         }
 
-        public async Task<List<DanhMuc>> GetAllDanhMuc()
+        public DanhMuc GetDanhMucById(Guid id)
         {
-            return await _repo.GetAllDanhMuc();
+            return _repository.GetDanhMucById(id);
         }
 
-        public async Task<DanhMuc> GetIdDanhMuc(Guid id)
+        // Phương thức GetDanhMuc (Bất đồng bộ)
+        public List<DanhMuc> GetDanhMuc(string? name)
         {
-            return await _repo.GetIdDanhMuc(id);
+            return _repository.GetDanhMuc(name);
         }
 
-        public async Task<DanhMuc> UpdateDM(DanhMuc dm)
+        // Phương thức Update (Bất đồng bộ)
+        public bool Update(DanhMuc danhMuc)
         {
-            return await _repo.UpdateDM(dm);
+            return _repository.Update(danhMuc);
         }
     }
 }

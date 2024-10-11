@@ -4,11 +4,11 @@ namespace AppAPI.IRepository
 {
     public interface IChatLieuRepo
     {
-        Task<List<ChatLieu>> GetAllChatLieu();
-        Task<ChatLieu> GetIdChatLieu(Guid id);
-        Task<ChatLieu> CreateChatLieu(ChatLieu chatLieu);
-        Task<ChatLieu> UpdateChatLieu(ChatLieu chatLieu);
-        Task DeleteChatLieu(Guid id);
+        List<ChatLieu> GetChatLieu(string? name);
+        ChatLieu GetChatLieuById(Guid id);
+        bool Create(ChatLieu chatLieu);
+        bool Update(ChatLieu chatLieu);
+        bool Delete(Guid id);
 
     }
 }
