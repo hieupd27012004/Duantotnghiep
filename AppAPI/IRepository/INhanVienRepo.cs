@@ -1,0 +1,16 @@
+﻿using AppData.Model;
+
+namespace AppAPI.IRepository
+{
+    public interface INhanVienRepo
+    {
+        Task<List<NhanVien>> GetAllNhaVien();
+        Task<NhanVien> GetIdNhanVien(Guid id);
+        Task<NhanVien?> Login(string email, string password);
+        Task<NhanVien> CreateNV(NhanVien nv);
+        Task<NhanVien> UpdateNV(NhanVien nv);
+        Task<NhanVien> GetByEmail(string email);
+        Task<NhanVien> GetBySDT(string sdT);
+        Task DeleteDM(Guid id);
+    }
+}

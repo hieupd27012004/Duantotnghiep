@@ -1,4 +1,4 @@
-﻿using AppAPI.IRepository;
+
 using AppAPI.IService;
 using AppAPI.Repository;
 using AppAPI.Service;
@@ -29,6 +29,12 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
+//Khach Hang
+builder.Services.AddTransient<IKhachHangService, KhachHangService>();
+builder.Services.AddTransient<IKhachHangRepo, KhachHangRepo>();
+//Chức Vụ
+builder.Services.AddTransient<IChucVuService, ChucVuService>();
+builder.Services.AddTransient<IChucVuRepo, ChucVuRepo>();
 // Dây giày
 builder.Services.AddTransient<IDayGiayService, DayGiayService>();
 builder.Services.AddTransient<IDayGiayRepo, DayGiayRepo>();
@@ -51,19 +57,7 @@ builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 
 //Hình Ảnh
 builder.Services.AddTransient<IHinhAnhRepo, HinhAnhRepo>();
-builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
 
-//Đế Giày
-builder.Services.AddTransient<IDeGiayService, DeGiayService>();
-builder.Services.AddTransient<IDeGiayRepo, DeGiayRepo>();
-
-//Kich Cỡ
-builder.Services.AddTransient<IKichCoService, KichCoService>();
-builder.Services.AddTransient<IKichCoRepo, KichCoRepo>();
-
-//Màu Sắc
-builder.Services.AddTransient<IMauSacService, MauSacService>();
-builder.Services.AddTransient<IMauSacRepo, MauSacRepo>();
 
 var app = builder.Build();
 

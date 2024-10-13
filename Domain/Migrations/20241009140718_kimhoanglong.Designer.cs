@@ -4,6 +4,7 @@ using AppData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
-    partial class AppDbcontextModelSnapshot : ModelSnapshot
+    [Migration("20241009140718_kimhoanglong")]
+    partial class kimhoanglong
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -430,33 +432,41 @@ namespace AppData.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AuthProvider")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("HoTen")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("KichHoat")
+                    b.Property<int>("KichHoat")
                         .HasColumnType("int");
 
                     b.Property<string>("MatKhau")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
-                    b.Property<DateTime?>("NgayCapNhat")
+                    b.Property<DateTime>("NgayCapNhat")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("NgayTao")
+                    b.Property<DateTime>("NgayTao")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("NguoiCapNhat")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NguoiTao")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SoDienThoai")
+                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
@@ -511,10 +521,6 @@ namespace AppData.Migrations
 
                     b.Property<DateTime>("NgayTao")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("NguoiCapNhat")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NguoiTao")
                         .IsRequired()
@@ -595,13 +601,13 @@ namespace AppData.Migrations
             modelBuilder.Entity("AppData.Model.NhanVien", b =>
                 {
                     b.Property<Guid>("IdNhanVien")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AnhNhanVien")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte?>("AnhNhanVien")
+                        .HasColumnType("tinyint");
 
                     b.Property<string>("AuthProvider")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DiaChi")
@@ -612,10 +618,10 @@ namespace AppData.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("IdchucVu")
+                    b.Property<Guid>("IdchucVu")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("KichHoat")
+                    b.Property<int>("KichHoat")
                         .HasColumnType("int");
 
                     b.Property<string>("MatKhau")
@@ -630,24 +636,25 @@ namespace AppData.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("NguoiCapNhat")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NguoiTao")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SoDienThoai")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("TenNhanVien")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TrangThai")
+                    b.Property<string>("TenNhanVien")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TrangThai")
                         .HasColumnType("int");
 
                     b.HasKey("IdNhanVien");
-
-                    b.HasIndex("IdchucVu");
 
                     b.ToTable("nhanViens");
                 });
@@ -695,9 +702,6 @@ namespace AppData.Migrations
                     b.Property<Guid>("IdDanhMuc")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdDeGiay")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("IdKieuDang")
                         .HasColumnType("uniqueidentifier");
 
@@ -738,8 +742,6 @@ namespace AppData.Migrations
 
                     b.HasIndex("IdDanhMuc");
 
-                    b.HasIndex("IdDeGiay");
-
                     b.HasIndex("IdKieuDang");
 
                     b.HasIndex("IdThuongHieu");
@@ -765,6 +767,9 @@ namespace AppData.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("IdDayGiay")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IdDeGiay")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("IdKichCo")
@@ -803,6 +808,8 @@ namespace AppData.Migrations
                     b.HasKey("IdSanPhamChiTiet");
 
                     b.HasIndex("IdDayGiay");
+
+                    b.HasIndex("IdDeGiay");
 
                     b.HasIndex("IdKichCo");
 
@@ -1002,7 +1009,9 @@ namespace AppData.Migrations
                 {
                     b.HasOne("AppData.Model.ChucVu", "chucVu")
                         .WithMany("nhanViens")
-                        .HasForeignKey("IdchucVu");
+                        .HasForeignKey("IdNhanVien")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("chucVu");
                 });
@@ -1018,12 +1027,6 @@ namespace AppData.Migrations
                     b.HasOne("AppData.Model.DanhMuc", "DanhMuc")
                         .WithMany("SanPhams")
                         .HasForeignKey("IdDanhMuc")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AppData.Model.DeGiay", "DeGiay")
-                        .WithMany("SanPhams")
-                        .HasForeignKey("IdDeGiay")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1043,8 +1046,6 @@ namespace AppData.Migrations
 
                     b.Navigation("DanhMuc");
 
-                    b.Navigation("DeGiay");
-
                     b.Navigation("KieuDang");
 
                     b.Navigation("ThuongHieu");
@@ -1055,6 +1056,12 @@ namespace AppData.Migrations
                     b.HasOne("AppData.Model.DayGiay", "DayGiay")
                         .WithMany("SanPhamChiTiets")
                         .HasForeignKey("IdDayGiay")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppData.Model.DeGiay", "DeGiay")
+                        .WithMany("SanPhamChiTiets")
+                        .HasForeignKey("IdDeGiay")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1077,6 +1084,8 @@ namespace AppData.Migrations
                         .IsRequired();
 
                     b.Navigation("DayGiay");
+
+                    b.Navigation("DeGiay");
 
                     b.Navigation("KichCo");
 
@@ -1107,7 +1116,7 @@ namespace AppData.Migrations
 
             modelBuilder.Entity("AppData.Model.DeGiay", b =>
                 {
-                    b.Navigation("SanPhams");
+                    b.Navigation("SanPhamChiTiets");
                 });
 
             modelBuilder.Entity("AppData.Model.GioHang", b =>
