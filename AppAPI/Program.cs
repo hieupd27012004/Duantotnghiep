@@ -65,6 +65,14 @@ builder.Services.AddTransient<IKichCoRepo, KichCoRepo>();
 builder.Services.AddTransient<IMauSacService, MauSacService>();
 builder.Services.AddTransient<IMauSacRepo, MauSacRepo>();
 
+// Sản Phẩm Chi Tiết
+builder.Services.AddTransient<ISanPhamChiTietService, SanPhamChiTietService>();
+builder.Services.AddTransient<ISanPhamChiTietRepo, SanPhamChiTietRepo>();
+
+// Sản Phẩm
+builder.Services.AddTransient<ISanPhamService, SanPhamService>();
+builder.Services.AddTransient<ISanPhamRepo, SanPhamRepo>();
+
 var app = builder.Build();
 
 

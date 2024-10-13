@@ -16,6 +16,8 @@ builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
 builder.Services.AddTransient<IDeGiayService, DeGiayService>();
 builder.Services.AddTransient<IKichCoService, KichCoService>();
 builder.Services.AddTransient<IMauSacService, MauSacService>();
+builder.Services.AddTransient<ISanPhamService, SanPhamService>();
+builder.Services.AddTransient<ISanPhamChiTietService, SanPhamChiTietService>();
 
 
 builder.Services.AddCors(options =>

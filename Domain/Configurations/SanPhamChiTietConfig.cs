@@ -31,6 +31,6 @@ namespace AppData.Configurations
 			builder.HasOne(p => p.DayGiay)
 				   .WithMany(p => p.SanPhamChiTiets)
 				   .HasForeignKey(p => p.IdDayGiay);
-		}
+        }
 	}
 }
