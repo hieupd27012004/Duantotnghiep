@@ -1,4 +1,5 @@
 
+using AppAPI.IRepository;
 using AppAPI.IService;
 using AppAPI.Repository;
 using AppAPI.Service;
@@ -66,6 +67,10 @@ builder.Services.AddTransient<ISanPhamChiTietRepo, SanPhamChiTietRepo>();
 // Sản Phẩm
 builder.Services.AddTransient<ISanPhamService, SanPhamService>();
 builder.Services.AddTransient<ISanPhamRepo, SanPhamRepo>();
+
+// Nhân Viên
+builder.Services.AddTransient<INhanVienService, NhanVienService>();
+builder.Services.AddTransient<INhanVienRepo, NhanVienRepo>();
 
 var app = builder.Build();
 

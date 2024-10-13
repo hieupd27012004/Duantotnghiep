@@ -1,3 +1,4 @@
+using APPMVC.IService;
 using APPMVC.Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,9 @@ builder.Services.AddTransient<IKichCoService, KichCoService>();
 builder.Services.AddTransient<IMauSacService, MauSacService>();
 builder.Services.AddTransient<ISanPhamService, SanPhamService>();
 builder.Services.AddTransient<ISanPhamChiTietService, SanPhamChiTietService>();
+builder.Services.AddTransient<INhanVienService, NhanVienService>();
+builder.Services.AddTransient<IKhachHangService, KhachHangService>();
+builder.Services.AddTransient<IChucVuService, ChucVuService>();
 
 
 builder.Services.AddCors(options =>
