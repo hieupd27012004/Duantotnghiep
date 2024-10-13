@@ -9,5 +9,10 @@ namespace APPMVC.Areas.Client.Controllers
 		{
 			return View();
 		}
-	}
+		public IActionResult LoginRegister()
+		{
+			return View();
+		}
+
+    }
 }

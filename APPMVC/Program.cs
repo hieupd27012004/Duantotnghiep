@@ -1,7 +1,10 @@
-﻿using APPMVC.IService;
 using APPMVC.Service;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian tồn tại của session
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -32,7 +35,7 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
+app.UseSession();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
