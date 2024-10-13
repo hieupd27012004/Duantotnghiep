@@ -1,105 +1,134 @@
 ﻿using AppData.Model;
 using APPMVC.IService;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using X.PagedList;
 
 namespace APPMVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class ChatLieuController : Controller
     {
-        
-        private readonly IChatLieuService _service;
-        public ChatLieuController(IChatLieuService service)
+        public IChatLieuService _services;
+
+        public ChatLieuController(IChatLieuService services)
         {
-            _service = service;
-        }
-        // GET: ChatLieuContronller
-        public async Task<IActionResult> Index()
-        {
-            var chatLieu = await _service.GetAllChatLieu();
-            return View(chatLieu);
+            _services = services;
         }
 
-        // GET: ChatLieuContronller/Details/5
-        public async Task<IActionResult> Details(Guid id)
+        [HttpGet]
+        public async Task<IActionResult> Getall(string? name, int page = 1)
         {
-            var chatLieu = await _service.GetIdChatLieu(id);
-            if(chatLieu == null)
+            page = page < 1 ? 1 : page;
+            int pageSize = 5;
+            List<ChatLieu> timten = await _services.GetChatLieu(name);
+            if (timten != null)
             {
-                return NotFound();
+                var pagedChatLieux = timten.ToPagedList(page, pageSize);
+                return View(pagedChatLieux);
             }
-            return View(chatLieu);
+            else
+            {
+                List<ChatLieu> chatLieux = await _services.GetChatLieu(name);
+                var pagedChatLieux = chatLieux.ToPagedList(page, pageSize);
+                return View(pagedChatLieux);
+            }
         }
 
-        // GET: ChatLieuContronller/Create
-        public ActionResult Create()
+        public IActionResult Create()
         {
-            var chatLieu = new ChatLieu() 
-            { 
-                IdChatLieu = Guid.NewGuid(),
-                TenChatLieu = "Da",
-                NgayCapNhat = DateTime.Now,
-                NguoiTao = "Kim Hoàng Long",
-                KichHoat = 1
-            };
-            return View(chatLieu);
+            return PartialView("Create");
         }
 
-        // POST: ChatLieuContronller/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ChatLieu chatLieu)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                await _service.CreateChatLieu(chatLieu);
-                return RedirectToAction("Index");
+                // Kiểm tra tính hợp lệ của dữ liệu
+                if (ModelState.ContainsKey("TenChatLieu"))
+                {
+                    var error = ModelState["TenChatLieu"].Errors.FirstOrDefault();
+                    if (error != null)
+                    {
+                        TempData["Error"] = error.ErrorMessage;
+                    }
+                }
+                return RedirectToAction("Getall");
             }
-            return View(chatLieu);
+            try
+            {
+                await _services.Create(chatLieu);
+                TempData["Success"] = "Thêm mới thành công";
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Thêm mới thất bại";
+            }
+            return RedirectToAction("Getall");
         }
 
-        // GET: ChatLieuContronller/Edit/5
         public async Task<IActionResult> Edit(Guid id)
         {
-            var chatlieu = await _service.GetIdChatLieu(id);
-            if(chatlieu == null)
-            {
-                return NotFound();
-            }
-            return View(chatlieu);
-        }
-
-        // POST: ChatLieuContronller/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id,ChatLieu chatLieu)
-        {
-            if(id != chatLieu.IdChatLieu)
-            {
-                return NotFound();
-            }
-            if (ModelState.IsValid)
-            {
-                await _service.UpdateChatLieu(chatLieu);
-                return RedirectToAction("Index");
-            }
-            return View(chatLieu);
-        }
-
-        // GET: ChatLieuContronller/Delete/5
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var chatLieu = await _service.GetIdChatLieu(id);
+            var chatLieu = await _services.GetChatLieuById(id);
             if (chatLieu == null)
             {
                 return NotFound();
             }
-            await _service.DeleteChatLieu(id);
-            return RedirectToAction("Index");
+            return View(chatLieu);
         }
 
-        
-   
+        [HttpPost]
+        public async Task<ActionResult> Edit(ChatLieu chatLieu)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Kiểm tra tính hợp lệ của dữ liệu
+                if (ModelState.ContainsKey("TenChatLieu"))
+                {
+                    var error = ModelState["TenChatLieu"].Errors.FirstOrDefault();
+                    if (error != null)
+                    {
+                        TempData["Error"] = error.ErrorMessage;
+                    }
+                }
+                return View(chatLieu);
+            }
+            try
+            {
+                await _services.Update(chatLieu);
+                TempData["Success"] = "Cập nhật thành công";
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Cập nhật thất bại";
+            }
+            return RedirectToAction("Getall");
+        }
+
+        public async Task<ActionResult> Delete(Guid id)
+        {
+            try
+            {
+                await _services.Delete(id);
+                TempData["Success"] = "Xóa thành công";
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Xóa thất bại";
+            }
+            return RedirectToAction("Getall");
+        }
+
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var chatLieu = await _services.GetChatLieuById(id);
+            if (chatLieu == null)
+            {
+                return NotFound();
+            }
+            return View(chatLieu);
+        }
     }
 }

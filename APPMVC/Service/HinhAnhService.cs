@@ -25,23 +25,33 @@ namespace APPMVC.Service
                 if (hinhAnh == null)
                     throw new ArgumentNullException(nameof(hinhAnh));
 
-                if (hinhAnh.IdHinhAnh == Guid.Empty)
-                {
-                    hinhAnh.IdHinhAnh = Guid.NewGuid();
-                }
+                Console.WriteLine($"Preparing to upload HinhAnh: Id={hinhAnh.IdHinhAnh}, Type={hinhAnh.LoaiFileHinhAnh}, Size={hinhAnh.DataHinhAnh?.Length ?? 0} bytes");
 
                 var response = await _httpClient.PostAsJsonAsync("api/HinhAnh/UploadHinhAnh", hinhAnh);
-                response.EnsureSuccessStatusCode();
+
+                Console.WriteLine($"Upload response status: {response.StatusCode}");
+
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Response content: {content}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Upload failed. Status: {response.StatusCode}, Content: {content}");
+                    return false;
+                }
+
                 return true;
             }
             catch (HttpRequestException ex)
             {
                 Console.WriteLine($"HTTP request error when uploading HinhAnh: {ex.Message}");
+                Console.WriteLine($"Error details: {ex.InnerException?.Message}");
                 return false;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error when uploading HinhAnh: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return false;
             }
         }
@@ -88,7 +98,15 @@ namespace APPMVC.Service
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<HinhAnh>($"api/HinhAnh/GetHinhAnhById?id={id}");
+                var response = await _httpClient.GetAsync($"api/HinhAnh/GetHinhAnhById?id={id}");
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsByteArrayAsync();
+                return new HinhAnh
+                {
+                    IdHinhAnh = id,
+                    DataHinhAnh = content,
+                    LoaiFileHinhAnh = response.Content.Headers.ContentType?.ToString()
+                };
             }
             catch (HttpRequestException ex)
             {

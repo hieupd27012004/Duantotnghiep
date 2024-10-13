@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace AppAPI.Service
 {
-    public class ServiceHinhAnh : IServiceHinhAnh
+    public class HinhAnhService : IHinhAnhService
     {
         private readonly IHinhAnhRepo _repository;
 
-        public ServiceHinhAnh(IHinhAnhRepo repository)
+        public HinhAnhService(IHinhAnhRepo repository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }

@@ -6,38 +6,38 @@ namespace APPMVC.Service
     public class DanhMucService : IDanhMucService
     {
         HttpClient _httpClient;
+
         public DanhMucService()
         {
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri("https://localhost:7198");
         }
+
         public async Task Create(DanhMuc danhMuc)
         {
-            await _httpClient.PostAsJsonAsync("/api/DanhMuc/ThemDanhMuc", danhMuc);
+            await _httpClient.PostAsJsonAsync("api/DanhMuc/them", danhMuc);
         }
 
         public async Task Delete(Guid id)
         {
-            var delete = await _httpClient.DeleteAsync($"/api/DanhMuc/xoa?id={id}");
-            delete.EnsureSuccessStatusCode();
+            await _httpClient.DeleteAsync($"api/DanhMuc/Xoa?id={id}");
         }
 
-        public async Task<List<DanhMuc>> GetAllDanhMuc()
+        public Task<List<DanhMuc>> GetDanhMuc(string? name)
         {
-            var repo = await _httpClient.GetFromJsonAsync<List<DanhMuc>>("/api/DanhMuc/GetAllDanhMuc");
+            var repo = _httpClient.GetFromJsonAsync<List<DanhMuc>>($"api/DanhMuc/getall?name={name}");
             return repo;
         }
 
-        public async Task<DanhMuc> GetIdDanhMuc(Guid id)
+        public Task<DanhMuc> GetDanhMucById(Guid id)
         {
-            var getId = await _httpClient.GetFromJsonAsync<DanhMuc>($"/api/DanhMuc/GetIdDanhMuc?id={id}");
-            return getId;
+            var danhMuc = _httpClient.GetFromJsonAsync<DanhMuc>($"api/DanhMuc/getbyid?id={id}");
+            return danhMuc;
         }
 
-        public async Task UpDate(DanhMuc danhMuc)
+        public async Task Update(DanhMuc danhMuc)
         {
-            var update = await _httpClient.PutAsJsonAsync($"/api/DanhMuc/SuaDanhMuc", danhMuc);
-            update.EnsureSuccessStatusCode();
+            await _httpClient.PutAsJsonAsync("api/DanhMuc/Sua", danhMuc);
         }
     }
 }

@@ -1,40 +1,46 @@
 ﻿using AppAPI.IRepository;
 using AppAPI.IService;
 using AppData.Model;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AppAPI.Service
 {
     public class ThuongHieuService : IThuongHieuService
-	{
-		public IThuongHiepRepo _repo;
-        public ThuongHieuService(IThuongHiepRepo repo)
+    {
+        private readonly IThuongHieuRepo _repository;
+
+        public ThuongHieuService(IThuongHieuRepo repository)
         {
-            _repo = repo;
+            _repository = repository;
         }
 
-        public async Task<ThuongHieu> CreateTH(ThuongHieu th)
+        public bool Create(ThuongHieu thuongHieu)
         {
-            return await _repo.CreateTH(th);
+            return _repository.Create(thuongHieu);
         }
 
-        public async Task DeleteTH(Guid id)
+        public bool Delete(Guid id)
         {
-             await _repo.DeleteTH(id);
+            return _repository.Delete(id);
         }
 
-        public async Task<List<ThuongHieu>> GetAllThuongHieu()
+        public ThuongHieu GetThuongHieuById(Guid id)
         {
-            return await _repo.GetAllThuongHieu();
+            return _repository.GetThuongHieuById(id);
         }
 
-        public async Task<ThuongHieu> GetIdThuongHieu(Guid id)
+        // Phương thức GetThuongHieu (Bất đồng bộ)
+        public List<ThuongHieu> GetThuongHieu(string? name)
         {
-            return await _repo.GetIdThuongHieu(id);
+            return _repository.GetThuongHieu(name);
         }
 
-        public async Task<ThuongHieu> UpdateTH(ThuongHieu th)
+        // Phương thức Update (Bất đồng bộ)
+        public bool Update(ThuongHieu thuongHieu)
         {
-           return await _repo.UpdateTH(th); 
+            return _repository.Update(thuongHieu);
         }
     }
 }

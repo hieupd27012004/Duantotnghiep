@@ -2,50 +2,91 @@
 using AppData;
 using AppData.Model;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AppAPI.Repository
 {
-    public class ThuongHieuRepo : IThuongHiepRepo
-	{
-		AppDbcontext _context;
-        public ThuongHieuRepo()
+    public class ThuongHieuRepo : IThuongHieuRepo
+    {
+        private readonly AppDbcontext _context;
+
+        public ThuongHieuRepo(AppDbcontext context)
         {
-            _context = new AppDbcontext();
+            _context = context;
         }
 
-        public async Task<ThuongHieu> CreateTH(ThuongHieu th)
+        public bool Create(ThuongHieu thuongHieu)
         {
-            _context.thuongHieus.Add(th);
-            await _context.SaveChangesAsync();
-            return th;
-        }
-
-        public async Task DeleteTH(Guid id)
-        {
-            var delete = await _context.thuongHieus.FindAsync(id);
-            if(delete != null)
+            try
             {
-                _context.thuongHieus.Remove(delete);
-                await _context.SaveChangesAsync();
+                _context.thuongHieus.Add(thuongHieu);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
         }
 
-        public async Task<List<ThuongHieu>> GetAllThuongHieu()
+        public bool Delete(Guid id)
         {
-            return await _context.thuongHieus.ToListAsync();
-
+            try
+            {
+                var thuongHieu = _context.thuongHieus.Find(id);
+                if (thuongHieu != null)
+                {
+                    _context.thuongHieus.Remove(thuongHieu);
+                    _context.SaveChanges();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
-        public async Task<ThuongHieu> GetIdThuongHieu(Guid id)
+        public ThuongHieu GetThuongHieuById(Guid id)
         {
-            return await _context.thuongHieus.FindAsync(id);
+            var thuongHieu = _context.thuongHieus.Find(id);
+            return thuongHieu;
         }
 
-        public async Task<ThuongHieu> UpdateTH(ThuongHieu th)
+        // Phương thức GetThuongHieu (Bất đồng bộ)
+        public List<ThuongHieu> GetThuongHieu(string? name)
         {
-            _context.Entry(th).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return th;
+            if (string.IsNullOrEmpty(name))
+            {
+                return _context.thuongHieus.ToList();
+            }
+            else
+            {
+                return _context.thuongHieus
+                    .Where(t => t.TenThuongHieu.Contains(name)).ToList();
+            }
+        }
+
+        public bool Update(ThuongHieu thuongHieu)
+        {
+            var thuongHieuUpdate = _context.thuongHieus.Find(thuongHieu.IdThuongHieu);
+            if (thuongHieuUpdate != null)
+            {
+                thuongHieuUpdate.TenThuongHieu = thuongHieu.TenThuongHieu;
+                thuongHieuUpdate.NgayCapNhat = thuongHieu.NgayCapNhat;
+                thuongHieuUpdate.NgayTao = thuongHieu.NgayTao;
+                thuongHieuUpdate.NguoiCapNhat = thuongHieu.NguoiCapNhat;
+                thuongHieuUpdate.NguoiTao = thuongHieu.NguoiTao;
+                thuongHieuUpdate.KichHoat = thuongHieu.KichHoat == 1 ? 1 : 0;
+                _context.thuongHieus.Update(thuongHieuUpdate);
+                _context.SaveChanges();
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -4,10 +4,10 @@ namespace AppAPI.IService
 {
     public interface IDanhMucService
     {
-        Task<List<DanhMuc>> GetAllDanhMuc();
-        Task<DanhMuc> GetIdDanhMuc(Guid id);
-        Task<DanhMuc> CreateDM(DanhMuc dm);
-        Task<DanhMuc> UpdateDM(DanhMuc dm);
-        Task DeleteDM(Guid id);
+        List<DanhMuc> GetDanhMuc(string? name);
+        DanhMuc GetDanhMucById(Guid id);
+        bool Create(DanhMuc danhMuc);
+        bool Update(DanhMuc danhMuc);
+        bool Delete(Guid id);
     }
 }

@@ -37,8 +37,10 @@ namespace AppData.Model
 		public Guid IdKieuDang { get; set; }
 		public Guid IdThuongHieu { get; set; }
 		public Guid IdDanhMuc { get; set; }
+        public Guid IdDeGiay { get; set; }
 
-		public virtual ChatLieu? ChatLieu { get; set; }
+        public virtual DeGiay? DeGiay { get; set; }
+        public virtual ChatLieu? ChatLieu { get; set; }
 		public virtual KieuDang? KieuDang { get; set; }
 		public virtual ThuongHieu? ThuongHieu { get; set; }
 		public virtual DanhMuc? DanhMuc { get; set; }

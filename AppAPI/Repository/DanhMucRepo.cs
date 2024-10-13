@@ -7,44 +7,81 @@ namespace AppAPI.Repository
 {
     public class DanhMucRepo : IDanhMucRepo
     {
-        AppDbcontext _context;
-        public DanhMucRepo()
+        private readonly AppDbcontext _context;
+
+        public DanhMucRepo(AppDbcontext context)
         {
-            _context = new AppDbcontext();
+            _context = context;
         }
 
-        public async Task<DanhMuc> CreateDM(DanhMuc dm)
+        public bool Create(DanhMuc danhMuc)
         {
-            _context.danhMuc.Add(dm);
-            await _context.SaveChangesAsync();
-            return dm;
-        }
-
-        public async Task DeleteDM(Guid id)
-        {
-            var danhMuc = await _context.danhMuc.FindAsync(id);
-            if(danhMuc != null)
+            try
             {
-                _context.danhMuc.Remove(danhMuc);
-                await _context.SaveChangesAsync();
+                _context.danhMuc.Add(danhMuc);
+                _context.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
         }
 
-        public async Task<List<DanhMuc>> GetAllDanhMuc()
+        public bool Delete(Guid id)
         {
-            return await _context.danhMuc.ToListAsync();
+            try
+            {
+                var danhMuc = _context.danhMuc.Find(id);
+                if (danhMuc != null)
+                {
+                    _context.danhMuc.Remove(danhMuc);
+                    _context.SaveChanges();
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
-        public async Task<DanhMuc> GetIdDanhMuc(Guid id)
+        public DanhMuc GetDanhMucById(Guid id)
         {
-            return await _context.danhMuc.FindAsync(id);
+            var danhMuc = _context.danhMuc.Find(id);
+            return danhMuc;
         }
 
-        public async Task<DanhMuc> UpdateDM(DanhMuc dm)
+        public List<DanhMuc> GetDanhMuc(string? name)
         {
-           _context.Entry(dm).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return dm;
+            if (string.IsNullOrEmpty(name))
+            {
+                return _context.danhMuc.ToList();
+            }
+            else
+            {
+                return _context.danhMuc
+                    .Where(d => d.TenDanhMuc.Contains(name)).ToList();
+            }
+        }
+
+        public bool Update(DanhMuc danhMuc)
+        {
+            var danhMucUpdate = _context.danhMuc.Find(danhMuc.IdDanhMuc);
+            if (danhMucUpdate != null)
+            {
+                danhMucUpdate.TenDanhMuc = danhMuc.TenDanhMuc;
+                danhMucUpdate.NgayCapNhat = danhMuc.NgayCapNhat;
+                danhMucUpdate.NgayTao = danhMuc.NgayTao;
+                danhMucUpdate.NguoiCapNhat = danhMuc.NguoiCapNhat;
+                danhMucUpdate.NguoiTao = danhMuc.NguoiTao;
+                danhMucUpdate.KichHoat = danhMuc.KichHoat == 1 ? 1 : 0;
+                _context.danhMuc.Update(danhMucUpdate);
+                _context.SaveChanges();
+                return true;
+            }
+            return false;
         }
     }
 }

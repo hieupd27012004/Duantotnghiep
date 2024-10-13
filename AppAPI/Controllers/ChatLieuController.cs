@@ -1,8 +1,8 @@
 ﻿using AppAPI.IService;
 using AppData.Model;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using System;
+using System.Threading.Tasks;
 
 namespace AppAPI.Controllers
 {
@@ -10,61 +10,100 @@ namespace AppAPI.Controllers
     [ApiController]
     public class ChatLieuController : ControllerBase
     {
-        private readonly IChatLieuService _serivce;
+        private readonly IChatLieuService _service;
+
         public ChatLieuController(IChatLieuService service)
         {
-            _serivce = service;
-        }
-        // GET: api/<ChatLieuController>
-        [HttpGet("GetAllCL")]
-        public async Task<ActionResult<List<ChatLieu>>> GetAllChatLieu() 
-        { 
-            return Ok(await _serivce.GetAllChatLieu());
+            _service = service;
         }
 
-        // GET api/<ChatLieuController>/5
-        [HttpGet("GetIdCL")]
-        public async Task<ActionResult<DanhMuc>> GetIdChatLieu(Guid id) 
-        {
-            var chatLieu = await _serivce.GetIdChatLieu(id);
-            if(chatLieu == null)
-            {
-                return NotFound();
-            }
-            return Ok(chatLieu);
-        }
-
-        // POST api/<ChatLieuController>
-        [HttpPost("CreateCL")]
-        public async Task<ActionResult<ChatLieu>> CreateChatLieu(ChatLieu chatLieu)
+        // GET: api/ChatLieu/getall
+        [HttpGet("getall")]
+        public IActionResult GetAll(string? name)
         {
             try
             {
-                var createCL = await _serivce.CreateChatLieu(chatLieu);
-                return Ok(createCL);
+                var chatLieu = _service.GetChatLieu(name);
+                return Ok(chatLieu);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-            
         }
 
-        // PUT api/<ChatLieuController>/5
-        [HttpPut("UpdateCL")]
-        public async Task<IActionResult> UpdateChatLieu(ChatLieu chatLieu)
+        // GET: api/ChatLieu/getbyid?id=<guid>
+        [HttpGet("getbyid")]
+        public IActionResult Get(Guid id)
         {
-            await _serivce.UpdateChatLieu(chatLieu);
-            return Ok(chatLieu);
-            
+            try
+            {
+                var chatLieu = _service.GetChatLieuById(id);
+                if (chatLieu == null)
+                {
+                    return NotFound($"ChatLieu with ID {id} not found.");
+                }
+                return Ok(chatLieu);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
-        // DELETE api/<ChatLieuController>/5
-        [HttpDelete("DeleteCL")]
-        public async Task<IActionResult> DeleteChatLieu(Guid idChatLieu)
+        // POST: api/ChatLieu/them
+        [HttpPost("them")]
+        public IActionResult Post(ChatLieu chatLieu)
         {
-            await _serivce.DeleteChatLieu(idChatLieu);
-            return NoContent();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _service.Create(chatLieu);
+                return Ok(chatLieu);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
-    } 
+
+        // PUT: api/ChatLieu/Sua
+        [HttpPut("Sua")]
+        public IActionResult Put(ChatLieu chatLieu)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _service.Update(chatLieu);
+                return Ok(chatLieu);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // DELETE: api/ChatLieu/Xoa?id=<guid>
+        [HttpDelete("Xoa")]
+        public IActionResult Delete(Guid id)
+        {
+            try
+            {
+                _service.Delete(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+    }
 }

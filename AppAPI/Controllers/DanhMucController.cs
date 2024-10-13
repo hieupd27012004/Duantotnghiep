@@ -1,7 +1,8 @@
 ﻿using AppAPI.IService;
 using AppData.Model;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace AppAPI.Controllers
 {
@@ -9,51 +10,100 @@ namespace AppAPI.Controllers
     [ApiController]
     public class DanhMucController : ControllerBase
     {
-        public IDanhMucService _service;
+        private readonly IDanhMucService _service;
+
         public DanhMucController(IDanhMucService service)
         {
             _service = service;
         }
-        [HttpGet("GetAllDanhMuc")]
-        public async Task<ActionResult<List<DanhMuc>>> GetAllDanhMuc()
-        {
-            return Ok(await  _service.GetAllDanhMuc());
-        }
-        [HttpGet("GetIdDanhMuc")]
-        public async Task<ActionResult<DanhMuc>> GetID(Guid id)
-        {
-            var getId = await _service.GetIdDanhMuc(id);
-            if(getId == null) 
-            { 
-                return NotFound();
-            }
-            return Ok(getId);
-        }
-        [HttpPost("ThemDanhMuc")]
-        public async Task<ActionResult<DanhMuc>> CreateDanhMuc(DanhMuc danhMuc)
+
+        // GET: api/DanhMuc/getall
+        [HttpGet("getall")]
+        public IActionResult GetAll(string? name)
         {
             try
             {
-                _service.CreateDM(danhMuc);
+                var danhMuc = _service.GetDanhMuc(name);
+                return Ok(danhMuc);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/DanhMuc/getbyid?id=<guid>
+        [HttpGet("getbyid")]
+        public IActionResult Get(Guid id)
+        {
+            try
+            {
+                var danhMuc = _service.GetDanhMucById(id);
+                if (danhMuc == null)
+                {
+                    return NotFound($"DanhMuc with ID {id} not found.");
+                }
+                return Ok(danhMuc);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/DanhMuc/them
+        [HttpPost("them")]
+        public IActionResult Post(DanhMuc danhMuc)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _service.Create(danhMuc);
+                return Ok(danhMuc);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // PUT: api/DanhMuc/Sua
+        [HttpPut("Sua")]
+        public IActionResult Put(DanhMuc danhMuc)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _service.Update(danhMuc);
+                return Ok(danhMuc);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // DELETE: api/DanhMuc/Xoa?id=<guid>
+        [HttpDelete("Xoa")]
+        public IActionResult Delete(Guid id)
+        {
+            try
+            {
+                _service.Delete(id);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-            
-        }
-        [HttpPut("SuaDanhMuc")]
-        public async Task<IActionResult> UpDateDanhMuc(DanhMuc danhMuc)
-        {
-            await _service.UpdateDM(danhMuc);
-            return  Ok(danhMuc);
-        }
-        [HttpDelete("Xoa")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            await _service.DeleteDM(id);
-            return Ok();
         }
     }
 }

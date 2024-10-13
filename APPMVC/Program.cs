@@ -1,4 +1,3 @@
-﻿using APPMVC.IService;
 using APPMVC.Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,18 +10,12 @@ builder.Services.AddSession(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 
-builder.Services.AddTransient<IKhachHangService, KhachHangService>();
 builder.Services.AddTransient<IDayGiayService, DayGiayService>();
 builder.Services.AddTransient<IDanhMucService, DanhMucService>();
 builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
 builder.Services.AddTransient<IKieuDangService, KieuDangService>();
 builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
-//Nhân Viên
-builder.Services.AddTransient<INhanVienService, NhanVienService>();
-//Chức vụ
-builder.Services.AddTransient<IChucVuService, ChucVuService>();
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -43,6 +36,7 @@ if (!app.Environment.IsDevelopment())
 	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 	app.UseHsts();
 }
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppData.Validation;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.Contracts;
@@ -13,6 +14,7 @@ namespace AppData.Model
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public Guid IdThuongHieu { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
+		[CheckTenThuongHieu]
 		public string TenThuongHieu { get; set; }
         [DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]

@@ -1,6 +1,8 @@
 ﻿using AppAPI.IService;
 using AppData.Model;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace AppAPI.Controllers
 {
@@ -9,46 +11,99 @@ namespace AppAPI.Controllers
     public class KieuDangController : ControllerBase
     {
         private readonly IKieuDangService _service;
+
         public KieuDangController(IKieuDangService service)
         {
             _service = service;
         }
-        [HttpGet("GetAllKieuDang")]
-        public IActionResult GetAll()
+
+        // GET: api/KieuDang/getall
+        [HttpGet("getall")]
+        public IActionResult GetAll(string? name)
         {
-            var kieuDang = _service.GetKieuDang();
-            return Ok(kieuDang);
+            try
+            {
+                var kieuDang = _service.GetKieuDang(name);
+                return Ok(kieuDang);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
-        // GET api/<ValuesController>/5
-        [HttpGet("GetKieuDangById")]
+
+        // GET: api/KieuDang/getbyid?id=<guid>
+        [HttpGet("getbyid")]
         public IActionResult Get(Guid id)
         {
-            var kieuDang = _service.GetKieuDangById(id);
-            return Ok(kieuDang);
+            try
+            {
+                var kieuDang = _service.GetKieuDangById(id);
+                if (kieuDang == null)
+                {
+                    return NotFound($"KieuDang with ID {id} not found.");
+                }
+                return Ok(kieuDang);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
-        // POST api/<ValuesController>
-        [HttpPost("CreateKieuDang")]
+        // POST: api/KieuDang/them
+        [HttpPost("them")]
         public IActionResult Post(KieuDang kieuDang)
         {
-            _service.Create(kieuDang);
-            return Ok(kieuDang);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _service.Create(kieuDang);
+                return Ok(kieuDang);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
-        // PUT api/<ValuesController>/5
-        [HttpPut("EditKieuDang")]
+        // PUT: api/KieuDang/Sua
+        [HttpPut("Sua")]
         public IActionResult Put(KieuDang kieuDang)
         {
-            _service.Update(kieuDang);
-            return Ok(kieuDang);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _service.Update(kieuDang);
+                return Ok(kieuDang);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
-        // DELETE api/<ValuesController>/5
-        [HttpDelete("DeleteKieuDang")]
+        // DELETE: api/KieuDang/Xoa?id=<guid>
+        [HttpDelete("Xoa")]
         public IActionResult Delete(Guid id)
         {
-            _service.Delete(id);
-            return Ok();
+            try
+            {
+                _service.Delete(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
 }

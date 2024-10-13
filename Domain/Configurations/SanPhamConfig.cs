@@ -33,6 +33,10 @@ namespace AppData.Configurations
 			builder.HasOne(p => p.ChatLieu)
 				   .WithMany(p => p.SanPhams)
 				   .HasForeignKey(p => p.IdChatLieu);
-		}
+
+            builder.HasOne(p => p.DeGiay)
+				   .WithMany(p => p.SanPhams)
+				   .HasForeignKey(p => p.IdDeGiay);
+        }
 	}
 }

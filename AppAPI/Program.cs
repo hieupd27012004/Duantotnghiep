@@ -1,4 +1,4 @@
-﻿using AppAPI.IRepository;
+
 using AppAPI.IService;
 using AppAPI.Repository;
 using AppAPI.Service;
@@ -38,9 +38,11 @@ builder.Services.AddTransient<IChucVuRepo, ChucVuRepo>();
 // Dây giày
 builder.Services.AddTransient<IDayGiayService, DayGiayService>();
 builder.Services.AddTransient<IDayGiayRepo, DayGiayRepo>();
+
 //Chất liêu
 builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
 builder.Services.AddTransient<IChatLieuRepo, ChatLieuRepo>();
+
 // Kiểu dáng
 builder.Services.AddTransient<IKieuDangService, KieuDangService>();
 builder.Services.AddTransient<IKieuDangRepo, KieuDangRepo>();
@@ -50,14 +52,11 @@ builder.Services.AddTransient<IDanhMucService, DanhMucService>();
 builder.Services.AddTransient<IDanhMucRepo, DanhMucRepo>();
 
 // THương Hiệu
-builder.Services.AddTransient<IThuongHiepRepo, ThuongHieuRepo>();
+builder.Services.AddTransient<IThuongHieuRepo, ThuongHieuRepo>();
 builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 
+//Hình Ảnh
 builder.Services.AddTransient<IHinhAnhRepo, HinhAnhRepo>();
-builder.Services.AddTransient<IServiceHinhAnh, ServiceHinhAnh>();
-//Nhân Viên
-builder.Services.AddTransient<INhanVienRepo, NhanVienRepo>();
-builder.Services.AddTransient<INhanVienService, NhanVienService>();
 
 
 var app = builder.Build();
