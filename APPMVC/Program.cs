@@ -2,19 +2,26 @@
 using APPMVC.Service;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian tồn tại của session
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 
-
+builder.Services.AddTransient<IKhachHangService, KhachHangService>();
 builder.Services.AddTransient<IDayGiayService, DayGiayService>();
 builder.Services.AddTransient<IDanhMucService, DanhMucService>();
 builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
 builder.Services.AddTransient<IKieuDangService, KieuDangService>();
 builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
-
+//Nhân Viên
+builder.Services.AddTransient<INhanVienService, NhanVienService>();
+//Chức vụ
+builder.Services.AddTransient<IChucVuService, ChucVuService>();
 
 builder.Services.AddCors(options =>
 {
@@ -28,7 +35,7 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
+app.UseSession();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AppData.Migrations
 {
-    public partial class InitDB : Migration
+    public partial class kimhoanglong : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

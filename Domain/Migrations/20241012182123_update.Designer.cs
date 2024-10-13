@@ -4,6 +4,7 @@ using AppData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
-    partial class AppDbcontextModelSnapshot : ModelSnapshot
+    [Migration("20241012182123_update")]
+    partial class update
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -591,7 +593,6 @@ namespace AppData.Migrations
             modelBuilder.Entity("AppData.Model.NhanVien", b =>
                 {
                     b.Property<Guid>("IdNhanVien")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AnhNhanVien")
@@ -605,7 +606,6 @@ namespace AppData.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("IdchucVu")
@@ -615,7 +615,6 @@ namespace AppData.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("MatKhau")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -642,8 +641,6 @@ namespace AppData.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("IdNhanVien");
-
-                    b.HasIndex("IdchucVu");
 
                     b.ToTable("nhanViens");
                 });
@@ -998,7 +995,9 @@ namespace AppData.Migrations
                 {
                     b.HasOne("AppData.Model.ChucVu", "chucVu")
                         .WithMany("nhanViens")
-                        .HasForeignKey("IdchucVu");
+                        .HasForeignKey("IdNhanVien")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("chucVu");
                 });

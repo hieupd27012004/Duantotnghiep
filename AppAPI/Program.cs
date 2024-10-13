@@ -29,6 +29,12 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
+//Khach Hang
+builder.Services.AddTransient<IKhachHangService, KhachHangService>();
+builder.Services.AddTransient<IKhachHangRepo, KhachHangRepo>();
+//Chức Vụ
+builder.Services.AddTransient<IChucVuService, ChucVuService>();
+builder.Services.AddTransient<IChucVuRepo, ChucVuRepo>();
 // Dây giày
 builder.Services.AddTransient<IDayGiayService, DayGiayService>();
 builder.Services.AddTransient<IDayGiayRepo, DayGiayRepo>();
@@ -49,6 +55,10 @@ builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 
 builder.Services.AddTransient<IHinhAnhRepo, HinhAnhRepo>();
 builder.Services.AddTransient<IServiceHinhAnh, ServiceHinhAnh>();
+//Nhân Viên
+builder.Services.AddTransient<INhanVienRepo, NhanVienRepo>();
+builder.Services.AddTransient<INhanVienService, NhanVienService>();
+
 
 var app = builder.Build();
 

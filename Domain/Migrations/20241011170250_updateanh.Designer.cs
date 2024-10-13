@@ -4,6 +4,7 @@ using AppData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
-    partial class AppDbcontextModelSnapshot : ModelSnapshot
+    [Migration("20241011170250_updateanh")]
+    partial class updateanh
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -591,7 +593,6 @@ namespace AppData.Migrations
             modelBuilder.Entity("AppData.Model.NhanVien", b =>
                 {
                     b.Property<Guid>("IdNhanVien")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AnhNhanVien")
@@ -608,7 +609,7 @@ namespace AppData.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("IdchucVu")
+                    b.Property<Guid>("IdchucVu")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("KichHoat")
@@ -632,8 +633,7 @@ namespace AppData.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SoDienThoai")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TenNhanVien")
                         .HasColumnType("nvarchar(max)");
@@ -642,8 +642,6 @@ namespace AppData.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("IdNhanVien");
-
-                    b.HasIndex("IdchucVu");
 
                     b.ToTable("nhanViens");
                 });
@@ -998,7 +996,9 @@ namespace AppData.Migrations
                 {
                     b.HasOne("AppData.Model.ChucVu", "chucVu")
                         .WithMany("nhanViens")
-                        .HasForeignKey("IdchucVu");
+                        .HasForeignKey("IdNhanVien")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("chucVu");
                 });
