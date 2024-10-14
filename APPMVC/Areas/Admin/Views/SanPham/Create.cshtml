@@ -1,0 +1,123 @@
+﻿@model Tuple<AppData.Model.SanPham, AppData.Model.SanPhamChiTiet>
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+
+}
+
+<div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">Quản lý sản phẩm /</span> Thêm Sản Phẩm
+        </h4>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4" style="padding: 20px">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="Item1.TenSanPham" class="control-label">Tên Sản Phẩm</label>
+                            <input asp-for="Item1.TenSanPham" class="form-control" />
+                            <span asp-validation-for="Item1.TenSanPham" class="text-danger"></span>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label asp-for="Item1.IdChatLieu" class="control-label">Chất liệu</label>
+                                <select asp-for="Item1.IdChatLieu" class="form-control" asp-items="@(ViewBag.IdChatLieu)"></select>
+                            </div>
+                            <div class="col">
+                                <label asp-for="Item1.IdDeGiay" class="control-label">Đế giày</label>
+                                <select asp-for="Item1.IdDeGiay" class="form-control" asp-items="@(ViewBag.IdDeGiay)"></select>
+                            </div>
+                            <div class="col">
+                                <label asp-for="Item1.IdDanhMuc" class="control-label">Danh mục</label>
+                                <select asp-for="Item1.IdDanhMuc" class="form-control" asp-items="@(ViewBag.IdDanhMuc)"></select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label asp-for="Item1.IdThuongHieu" class="control-label">Thương hiệu</label>
+                                <select asp-for="Item1.IdThuongHieu" class="form-control" asp-items="@(ViewBag.IdThuongHieu)"></select>
+                            </div>
+                            <div class="col">
+                                <label asp-for="Item1.IdKieuDang" class="control-label">Kiểu dáng</label>
+                                <select asp-for="Item1.IdKieuDang" class="form-control" asp-items="@(ViewBag.IdKieuDang)"></select>
+                            </div>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="Item1.NgayCapNhat" class="control-label"></label>
+                            <input asp-for="Item1.NgayCapNhat" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
+                            <span asp-validation-for="Item1.NgayCapNhat" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="Item1.NgayTao" class="control-label"></label>
+                            <input asp-for="Item1.NgayTao" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
+                            <span asp-validation-for="Item1.NgayTao" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="Item1.NguoiCapNhat" class="control-label"></label>
+                            <input asp-for="Item1.NguoiCapNhat" class="form-control" />
+                            <span asp-validation-for="Item1.NguoiCapNhat" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="Item1.NguoiTao" class="control-label"></label>
+                            <input asp-for="Item1.NguoiTao" class="form-control" />
+                            <span asp-validation-for="Item1.NguoiTao" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="Item1.KichHoat" class="control-label"></label>
+                            <input asp-for="Item1.KichHoat" class="form-control" />
+                            <span asp-validation-for="Item1.KichHoat" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Item1.MoTa" class="control-label">Mô Tả</label>
+                            <input asp-for="Item1.MoTa" class="form-control" />
+                            <span asp-validation-for="Item1.MoTa" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="Item1.Sale" class="control-label"></label>
+                            <input asp-for="Item1.Sale" class="form-control" />
+                            <span asp-validation-for="Item1.Sale" class="text-danger"></span>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label asp-for="Item2.IdKichCo" class="control-label">Kích cỡ</label>
+                                <select asp-for="Item2.IdKichCo" class="form-control" asp-items="@(ViewBag.IdKichCo)"></select>
+                            </div>
+                            <div class="col">
+                                <label asp-for="Item2.IdMauSac" class="control-label">Màu sắc</label>
+                                <select asp-for="Item2.IdMauSac" class="form-control" asp-items="@(ViewBag.IdMauSac)"></select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label asp-for="Item2.Gia" class="control-label">Giá</label>
+                                <input asp-for="Item2.Gia" class="form-control" />
+                                <span asp-validation-for="Item2.Gia" class="text-danger"></span>
+                            </div>
+                            <div class="col">
+                                <label asp-for="Item2.SoLuong" class="control-label">Số lượng</label>
+                                <input asp-for="Item2.SoLuong" class="form-control" />
+                                <span asp-validation-for="Item2.SoLuong" class="text-danger"></span>
+                            </div>
+                            <div class="col">
+                                <label asp-for="Item2.XuatXu" class="control-label">Xuất xứ</label>
+                                <input asp-for="Item2.XuatXu" class="form-control" />
+                                <span asp-validation-for="Item2.XuatXu" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="form-group mb-3 d-flex justify-content-center">
+                            <div class="mx-auto">
+                                <input type="submit" value="Create" class="btn btn-primary" />
+                                <a asp-area="Admin" asp-action="Getall" class="btn btn-secondary">Back to List</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+     </div>
+</div>
+

@@ -57,41 +57,12 @@ namespace AppAPI.Repository
         {
             if (string.IsNullOrEmpty(name))
             {
-                return _context.sanPhams
-                    .AsNoTracking()
-                    .Include(sp => sp.SanPhamChiTiets)
-                        .ThenInclude(spc => spc.KichCo) // Include KichCo
-                    .Include(sp => sp.SanPhamChiTiets)
-                        .ThenInclude(spc => spc.MauSac) // Include MauSac
-                    .Include(sp => sp.SanPhamChiTiets)
-                        .ThenInclude(spc => spc.DayGiay) // Include DayGiay
-                                            .Include(sp => sp.SanPhamChiTiets)
-                        .ThenInclude(spc => spc.SoLuong)
-                    .Include(sp => sp.ChatLieu)
-                    .Include(sp => sp.KieuDang)
-                    .Include(sp => sp.ThuongHieu)
-                    .Include(sp => sp.DanhMuc)
-                    .Include(sp => sp.DeGiay)
-                    .Where(sp => sp.KichHoat == 1) // Lọc sản phẩm đã kích hoạt
-                    .ToList();
+                return _context.sanPhams.ToList();
             }
             else
             {
                 return _context.sanPhams
-                    .AsNoTracking()
-                    .Include(sp => sp.SanPhamChiTiets)
-                        .ThenInclude(spc => spc.KichCo) // Include KichCo
-                    .Include(sp => sp.SanPhamChiTiets)
-                        .ThenInclude(spc => spc.MauSac) // Include MauSac
-                    .Include(sp => sp.SanPhamChiTiets)
-                        .ThenInclude(spc => spc.DayGiay) // Include DayGiay
-                    .Include(sp => sp.ChatLieu)
-                    .Include(sp => sp.KieuDang)
-                    .Include(sp => sp.ThuongHieu)
-                    .Include(sp => sp.DanhMuc)
-                    .Include(sp => sp.DeGiay)
-                    .Where(s => s.TenSanPham.Contains(name) && s.KichHoat == 1) // Lọc sản phẩm đã kích hoạt và tên sản phẩm chứa từ khóa
-                    .ToList();
+                    .Where(m => m.TenSanPham.Contains(name)).ToList();
             }
         }
 

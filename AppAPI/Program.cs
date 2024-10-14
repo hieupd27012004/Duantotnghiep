@@ -40,6 +40,10 @@ builder.Services.AddTransient<IChucVuRepo, ChucVuRepo>();
 builder.Services.AddTransient<IDayGiayService, DayGiayService>();
 builder.Services.AddTransient<IDayGiayRepo, DayGiayRepo>();
 
+//Đế Giày
+builder.Services.AddTransient<IDeGiayService, DeGiayService>();
+builder.Services.AddTransient<IDeGiayRepo, DeGiayRepo>();
+
 //Chất liêu
 builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
 builder.Services.AddTransient<IChatLieuRepo, ChatLieuRepo>();
@@ -71,6 +75,14 @@ builder.Services.AddTransient<ISanPhamRepo, SanPhamRepo>();
 // Nhân Viên
 builder.Services.AddTransient<INhanVienService, NhanVienService>();
 builder.Services.AddTransient<INhanVienRepo, NhanVienRepo>();
+
+// Kích Cỡ
+builder.Services.AddTransient<IKichCoService, KichCoService>();
+builder.Services.AddTransient<IKichCoRepo, KichCoRepo > ();
+
+// Màu Sắc
+builder.Services.AddTransient<IMauSacService, MauSacService>();
+builder.Services.AddTransient<IMauSacRepo, MauSacRepo>();
 
 var app = builder.Build();
 

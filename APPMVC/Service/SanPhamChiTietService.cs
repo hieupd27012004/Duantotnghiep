@@ -39,5 +39,6 @@ namespace APPMVC.Service
         {
             await _httpClient.PutAsJsonAsync("api/SanPhamChiTiet/Sua", sanPhamChiTiet);
         }
+
     }
 }

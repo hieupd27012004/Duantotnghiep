@@ -1,6 +1,7 @@
 ﻿using AppAPI.IRepository;
 using AppAPI.IService;
 using AppData.Model;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -42,5 +43,6 @@ namespace AppAPI.Service
         {
             return _repository.Update(sanPhamChiTiet);
         }
+
     }
 }

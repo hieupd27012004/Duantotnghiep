@@ -1,6 +1,7 @@
 ﻿using AppData.Model;
 using AppData;
 using AppAPI.IRepository;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppAPI.Repository
 {
@@ -21,7 +22,7 @@ namespace AppAPI.Repository
                 _context.SaveChanges();
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -75,5 +76,6 @@ namespace AppAPI.Repository
             }
             return false;
         }
+
     }
 }

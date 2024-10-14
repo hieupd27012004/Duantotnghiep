@@ -85,7 +85,7 @@
                         </table>
                     </div>
                     <div class="pagination">
-                        @Html.PagedListPager(Model, Page => Url.Action("Getall", "DanhMuc", new { Page = Page }),
+                        @Html.PagedListPager(Model, Page => Url.Action("Getall", "ChatLieu", new { Page = Page }),
                                  new PagedListRenderOptions
                         {
                             DisplayLinkToFirstPage = PagedListDisplayMode.Always,
@@ -93,7 +93,8 @@
                             DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
                             DisplayLinkToNextPage = PagedListDisplayMode.Always,
                             MaximumPageNumbersToDisplay = 5,
-                            LiElementClasses = new string[] { "page-item" }
+                            LiElementClasses = new string[] { "page-item" },
+                            PageClasses = new string[] { "page-link" }
                         })
                     </div>
                 </div>

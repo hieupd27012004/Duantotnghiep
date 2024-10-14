@@ -31,9 +31,9 @@ namespace AppData.Model
 		public int KichHoat { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string MoTa { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
-		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
-		[Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
+		//[Required(ErrorMessage = "Không Được Để Trống")]
+		//[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
+		//[Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
 		public double Sale { get; set; }
 		public Guid IdChatLieu { get; set; }
 		public Guid IdKieuDang { get; set; }
