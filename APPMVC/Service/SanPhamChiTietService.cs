@@ -40,5 +40,16 @@ namespace APPMVC.Service
             await _httpClient.PutAsJsonAsync("api/SanPhamChiTiet/Sua", sanPhamChiTiet);
         }
 
+        public async Task<List<SanPhamChiTiet>> GetSanPhamChiTietsBySanPhamId(Guid sanPhamId)
+        {
+            var response = await _httpClient.GetFromJsonAsync<List<SanPhamChiTiet>>($"api/SanPhamChiTiet/getbysanphamid?sanPhamId={sanPhamId}");
+            return response;
+        }
+
+        public async Task<SanPhamChiTiet> GetSanPhamChiTietBySanPhamId(Guid sanPhamId)
+        {
+            var response = await _httpClient.GetFromJsonAsync<SanPhamChiTiet>($"api/SanPhamChiTiet/getbysanphamid?sanPhamId={sanPhamId}");
+            return response;
+        }
     }
 }

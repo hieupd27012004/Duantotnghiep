@@ -77,5 +77,9 @@ namespace AppAPI.Repository
             return false;
         }
 
+        public async Task<SanPhamChiTiet> GetSanPhamChiTietBySanPhamId(Guid sanPhamId)
+        {
+            return await _context.sanPhamChiTiets.FirstOrDefaultAsync(s => s.IdSanPham == sanPhamId);
+        }
     }
 }

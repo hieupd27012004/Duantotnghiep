@@ -1,4 +1,4 @@
-﻿@model Tuple<AppData.Model.SanPham, AppData.Model.SanPhamChiTiet>
+﻿@model AppData.ViewModel.SanPhamViewModel
 
 @{
     ViewData["Title"] = "Create";
@@ -16,96 +16,123 @@
                 <div class="card mb-4" style="padding: 20px">
                     <form asp-action="Create">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input asp-for="SanPham.IdSanPham" class="form-control"  hidden>
                         <div class="form-group">
-                            <label asp-for="Item1.TenSanPham" class="control-label">Tên Sản Phẩm</label>
-                            <input asp-for="Item1.TenSanPham" class="form-control" />
-                            <span asp-validation-for="Item1.TenSanPham" class="text-danger"></span>
+                            <label asp-for="SanPham.TenSanPham" class="control-label">Tên Sản Phẩm</label>
+                            <input asp-for="SanPham.TenSanPham" class="form-control" />
+                            <span asp-validation-for="SanPham.TenSanPham" class="text-danger"></span>
                         </div>
                         <div class="row mb-3">
                             <div class="col">
-                                <label asp-for="Item1.IdChatLieu" class="control-label">Chất liệu</label>
-                                <select asp-for="Item1.IdChatLieu" class="form-control" asp-items="@(ViewBag.IdChatLieu)"></select>
+                                <label asp-for="SanPham.IdChatLieu" class="control-label">Chất liệu</label>
+                                <select asp-for="SanPham.IdChatLieu" class="form-control" asp-items="@(ViewBag.IdChatLieu)"></select>
                             </div>
                             <div class="col">
-                                <label asp-for="Item1.IdDeGiay" class="control-label">Đế giày</label>
-                                <select asp-for="Item1.IdDeGiay" class="form-control" asp-items="@(ViewBag.IdDeGiay)"></select>
+                                <label asp-for="SanPham.IdDeGiay" class="control-label">Đế giày</label>
+                                <select asp-for="SanPham.IdDeGiay" class="form-control" asp-items="@(ViewBag.IdDeGiay)"></select>
                             </div>
                             <div class="col">
-                                <label asp-for="Item1.IdDanhMuc" class="control-label">Danh mục</label>
-                                <select asp-for="Item1.IdDanhMuc" class="form-control" asp-items="@(ViewBag.IdDanhMuc)"></select>
+                                <label asp-for="SanPham.IdDanhMuc" class="control-label">Danh mục</label>
+                                <select asp-for="SanPham.IdDanhMuc" class="form-control" asp-items="@(ViewBag.IdDanhMuc)"></select>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col">
-                                <label asp-for="Item1.IdThuongHieu" class="control-label">Thương hiệu</label>
-                                <select asp-for="Item1.IdThuongHieu" class="form-control" asp-items="@(ViewBag.IdThuongHieu)"></select>
+                                <label asp-for="SanPham.IdThuongHieu" class="control-label">Thương hiệu</label>
+                                <select asp-for="SanPham.IdThuongHieu" class="form-control" asp-items="@(ViewBag.IdThuongHieu)"></select>
                             </div>
                             <div class="col">
-                                <label asp-for="Item1.IdKieuDang" class="control-label">Kiểu dáng</label>
-                                <select asp-for="Item1.IdKieuDang" class="form-control" asp-items="@(ViewBag.IdKieuDang)"></select>
+                                <label asp-for="SanPham.IdKieuDang" class="control-label">Kiểu dáng</label>
+                                <select asp-for="SanPham.IdKieuDang" class="form-control" asp-items="@(ViewBag.IdKieuDang)"></select>
                             </div>
                         </div>
                         <div class="form-group" hidden>
-                            <label asp-for="Item1.NgayCapNhat" class="control-label"></label>
-                            <input asp-for="Item1.NgayCapNhat" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
-                            <span asp-validation-for="Item1.NgayCapNhat" class="text-danger"></span>
+                            <label asp-for="SanPham.NgayCapNhat" class="control-label"></label>
+                            <input asp-for="SanPham.NgayCapNhat" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
+                            <span asp-validation-for="SanPham.NgayCapNhat" class="text-danger"></span>
                         </div>
                         <div class="form-group" hidden>
-                            <label asp-for="Item1.NgayTao" class="control-label"></label>
-                            <input asp-for="Item1.NgayTao" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
-                            <span asp-validation-for="Item1.NgayTao" class="text-danger"></span>
+                            <label asp-for="SanPham.NgayTao" class="control-label"></label>
+                            <input asp-for="SanPham.NgayTao" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
+                            <span asp-validation-for="SanPham.NgayTao" class="text-danger"></span>
                         </div>
                         <div class="form-group" hidden>
-                            <label asp-for="Item1.NguoiCapNhat" class="control-label"></label>
-                            <input asp-for="Item1.NguoiCapNhat" class="form-control" />
-                            <span asp-validation-for="Item1.NguoiCapNhat" class="text-danger"></span>
+                            <label asp-for="SanPham.NguoiCapNhat" class="control-label"></label>
+                            <input asp-for="SanPham.NguoiCapNhat" class="form-control" />
+                            <span asp-validation-for="SanPham.NguoiCapNhat" class="text-danger"></span>
                         </div>
                         <div class="form-group" hidden>
-                            <label asp-for="Item1.NguoiTao" class="control-label"></label>
-                            <input asp-for="Item1.NguoiTao" class="form-control" />
-                            <span asp-validation-for="Item1.NguoiTao" class="text-danger"></span>
+                            <label asp-for="SanPham.NguoiTao" class="control-label"></label>
+                            <input asp-for="SanPham.NguoiTao" class="form-control" />
+                            <span asp-validation-for="SanPham.NguoiTao" class="text-danger"></span>
                         </div>
                         <div class="form-group" hidden>
-                            <label asp-for="Item1.KichHoat" class="control-label"></label>
-                            <input asp-for="Item1.KichHoat" class="form-control" />
-                            <span asp-validation-for="Item1.KichHoat" class="text-danger"></span>
+                            <label asp-for="SanPham.KichHoat" class="control-label"></label>
+                            <input asp-for="SanPham.KichHoat" class="form-control" />
+                            <span asp-validation-for="SanPham.KichHoat" class="text-danger"></span>
                         </div>
                         <div class="form-group">
-                            <label asp-for="Item1.MoTa" class="control-label">Mô Tả</label>
-                            <input asp-for="Item1.MoTa" class="form-control" />
-                            <span asp-validation-for="Item1.MoTa" class="text-danger"></span>
+                            <label asp-for="SanPham.MoTa" class="control-label">Mô Tả</label>
+                            <input asp-for="SanPham.MoTa" class="form-control" />
+                            <span asp-validation-for="SanPham.MoTa" class="text-danger"></span>
                         </div>
                         <div class="form-group" hidden>
-                            <label asp-for="Item1.Sale" class="control-label"></label>
-                            <input asp-for="Item1.Sale" class="form-control" />
-                            <span asp-validation-for="Item1.Sale" class="text-danger"></span>
+                            <label asp-for="SanPham.Sale" class="control-label"></label>
+                            <input asp-for="SanPham.Sale" class="form-control" />
+                            <span asp-validation-for="SanPham.Sale" class="text-danger"></span>
+                        </div>
+                        <input asp-for="SanPhamChiTiet.IdSanPhamChiTiet" class="form-control"  hidden>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label asp-for="SanPhamChiTiet.IdKichCo" class="control-label">Kích cỡ</label>
+                                <select asp-for="SanPhamChiTiet.IdKichCo" class="form-control" asp-items="@(ViewBag.IdKichCo)"></select>
+                            </div>
+                            <div class="col">
+                                <label asp-for="SanPhamChiTiet.IdMauSac" class="control-label">Màu sắc</label>
+                                <select asp-for="SanPhamChiTiet.IdMauSac" class="form-control" asp-items="@(ViewBag.IdMauSac)"></select>
+                            </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col">
-                                <label asp-for="Item2.IdKichCo" class="control-label">Kích cỡ</label>
-                                <select asp-for="Item2.IdKichCo" class="form-control" asp-items="@(ViewBag.IdKichCo)"></select>
+                                <label asp-for="SanPhamChiTiet.Gia" class="control-label">Giá</label>
+                                <input asp-for="SanPhamChiTiet.Gia" class="form-control" />
+                                <span asp-validation-for="SanPhamChiTiet.Gia" class="text-danger"></span>
                             </div>
                             <div class="col">
-                                <label asp-for="Item2.IdMauSac" class="control-label">Màu sắc</label>
-                                <select asp-for="Item2.IdMauSac" class="form-control" asp-items="@(ViewBag.IdMauSac)"></select>
+                                <label asp-for="SanPhamChiTiet.SoLuong" class="control-label">Số lượng</label>
+                                <input asp-for="SanPhamChiTiet.SoLuong" class="form-control" />
+                                <span asp-validation-for="SanPhamChiTiet.SoLuong" class="text-danger"></span>
+                            </div>
+                            <div class="col">
+                                <label asp-for="SanPhamChiTiet.XuatXu" class="control-label">Xuất xứ</label>
+                                <input asp-for="SanPhamChiTiet.XuatXu" class="form-control" />
+                                <span asp-validation-for="SanPhamChiTiet.XuatXu" class="text-danger"></span>
                             </div>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label asp-for="Item2.Gia" class="control-label">Giá</label>
-                                <input asp-for="Item2.Gia" class="form-control" />
-                                <span asp-validation-for="Item2.Gia" class="text-danger"></span>
-                            </div>
-                            <div class="col">
-                                <label asp-for="Item2.SoLuong" class="control-label">Số lượng</label>
-                                <input asp-for="Item2.SoLuong" class="form-control" />
-                                <span asp-validation-for="Item2.SoLuong" class="text-danger"></span>
-                            </div>
-                            <div class="col">
-                                <label asp-for="Item2.XuatXu" class="control-label">Xuất xứ</label>
-                                <input asp-for="Item2.XuatXu" class="form-control" />
-                                <span asp-validation-for="Item2.XuatXu" class="text-danger"></span>
-                            </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="SanPhamChiTiet.NgayCapNhat" class="control-label"></label>
+                            <input asp-for="SanPhamChiTiet.NgayCapNhat" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
+                            <span asp-validation-for="SanPhamChiTiet.NgayCapNhat" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="SanPhamChiTiet.NgayTao" class="control-label"></label>
+                            <input asp-for="SanPhamChiTiet.NgayTao" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
+                            <span asp-validation-for="SanPhamChiTiet.NgayTao" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="SanPhamChiTiet.NguoiCapNhat" class="control-label"></label>
+                            <input asp-for="SanPhamChiTiet.NguoiCapNhat" class="form-control" />
+                            <span asp-validation-for="SanPhamChiTiet.NguoiCapNhat" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="SanPhamChiTiet.NguoiTao" class="control-label"></label>
+                            <input asp-for="SanPhamChiTiet.NguoiTao" class="form-control" />
+                            <span asp-validation-for="SanPhamChiTiet.NguoiTao" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" hidden>
+                            <label asp-for="SanPhamChiTiet.KichHoat" class="control-label"></label>
+                            <input asp-for="SanPhamChiTiet.KichHoat" class="form-control" />
+                            <span asp-validation-for="SanPhamChiTiet.KichHoat" class="text-danger"></span>
                         </div>
                         <br />
                         <div class="form-group mb-3 d-flex justify-content-center">

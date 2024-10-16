@@ -28,9 +28,9 @@ namespace AppData.Configurations
 				   .WithMany(p => p.SanPhamChiTiets)
 				   .HasForeignKey(p => p.IdSanPham);
 
-			builder.HasOne(p => p.DayGiay)
-				   .WithMany(p => p.SanPhamChiTiets)
-				   .HasForeignKey(p => p.IdDayGiay);
+			//builder.HasOne(p => p.DayGiay)
+			//	   .WithMany(p => p.SanPhamChiTiets)
+			//	   .HasForeignKey(p => p.IdDayGiay);
         }
 	}
 }

@@ -10,8 +10,7 @@ namespace AppData.Model
 {
 	public class MauSac
 	{
-		[Required(ErrorMessage = "Không Được Để Trống")]
-		public Guid IdMauSac { get; set; }
+		public Guid? IdMauSac { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
         [CheckTenMauSac]
         public string TenMauSac { get; set; }

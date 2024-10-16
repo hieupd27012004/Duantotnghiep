@@ -9,7 +9,9 @@ namespace APPMVC.IService
         Task Create(SanPhamChiTiet sanPhamChiTiet);
         Task Update(SanPhamChiTiet sanPhamChiTiet);
         Task Delete(Guid id);
-    
+
+        Task<SanPhamChiTiet> GetSanPhamChiTietBySanPhamId(Guid sanPhamId);
+
     }
 }
 
