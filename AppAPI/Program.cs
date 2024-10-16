@@ -37,8 +37,8 @@ builder.Services.AddTransient<IKhachHangRepo, KhachHangRepo>();
 builder.Services.AddTransient<IChucVuService, ChucVuService>();
 builder.Services.AddTransient<IChucVuRepo, ChucVuRepo>();
 // Dây giày
-builder.Services.AddTransient<IDayGiayService, DayGiayService>();
-builder.Services.AddTransient<IDayGiayRepo, DayGiayRepo>();
+//builder.Services.AddTransient<IDayGiayService, DayGiayService>();
+//builder.Services.AddTransient<IDayGiayRepo, DayGiayRepo>();
 
 //Đế Giày
 builder.Services.AddTransient<IDeGiayService, DeGiayService>();

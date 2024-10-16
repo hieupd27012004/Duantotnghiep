@@ -105,5 +105,24 @@ namespace AppAPI.Controllers
             }
         }
 
+        // GET: api/SanPhamChiTiet/getbysanphamid?sanPhamId=<guid>
+        [HttpGet("getbysanphamid")]
+        public async Task<IActionResult> GetSanPhamChiTietBySanPhamId(Guid sanPhamId)
+        {
+            try
+            {
+                var sanPhamChiTiet = await _service.GetSanPhamChiTietBySanPhamId(sanPhamId);
+                if (sanPhamChiTiet == null)
+                {
+                    return NotFound($"SanPhamChiTiet with SanPhamId {sanPhamId} not found.");
+                }
+                return Ok(sanPhamChiTiet);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
     }
 }

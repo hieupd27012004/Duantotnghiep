@@ -1,5 +1,5 @@
 ﻿@using X.PagedList.Mvc.Core
-@model X.PagedList.IPagedList<AppData.Model.SanPham>
+@model X.PagedList.IPagedList<AppData.ViewModel.SanPhamViewModel>
 
 @{
     ViewData["Title"] = "Get all";
@@ -72,17 +72,17 @@
                                 {
                                     <tr style="border-bottom: 1px solid #dee2e6;">
                                         <td>@stt</td>
-                                        <td>@Html.DisplayFor(modelItem => item.TenSanPham)</td>
-                                        <td hidden>@Html.DisplayFor(modelItem => item.NgayCapNhat)</td>
-                                        <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
-                                        <td hidden>@Html.DisplayFor(modelItem => item.NguoiCapNhat)</td>
-                                        <td hidden>@Html.DisplayFor(modelItem => item.NguoiTao)</td>
-                                        <td>@item.SanPhamChiTiets.FirstOrDefault()?.SoLuong</td>
+                                        <td>@Html.DisplayFor(modelItem => item.SanPham.TenSanPham)</td>
+                                        <td hidden>@Html.DisplayFor(modelItem => item.SanPham.NgayCapNhat)</td>
+                                        <td>@item.SanPham.NgayTao.ToString("dd/MM/yyyy")</td>
+                                        <td hidden>@Html.DisplayFor(modelItem => item.SanPham.NguoiCapNhat)</td>
+                                        <td hidden>@Html.DisplayFor(modelItem => item.SanPham.NguoiTao)</td>
+                                        <td>@item.SanPhamChiTiet.SoLuong</td>
                                         <td>
-                                            @(item.KichHoat == 1 ? "Hoạt động" : "Không hoạt động")
+                                            @(item.SanPham.KichHoat == 1 ? "Hoạt động" : "Không hoạt động")
                                         </td>
                                         <td>
-                                            <a asp-action="Edit" asp-route-id="@item.IdSanPham" title="Edit">
+                                            <a asp-action="Edit" asp-route-id="@item.SanPham.IdSanPham" title="Edit">
                                                 <i class="fa-solid fa-pen"></i>
                                             </a>
                                         </td>
@@ -101,7 +101,8 @@
                             DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
                             DisplayLinkToNextPage = PagedListDisplayMode.Always,
                             MaximumPageNumbersToDisplay = 5,
-                            LiElementClasses = new string[] { "page-item" }
+                            LiElementClasses = new string[] { "page-item" },
+                            PageClasses = new string[] { "page-link" }
                         })
                     </div>
                 </div>

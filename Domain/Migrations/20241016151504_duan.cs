@@ -57,23 +57,6 @@ namespace AppData.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "dayGiay",
-                columns: table => new
-                {
-                    IdDayGiay = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenDayGiay = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NgayCapNhat = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    NguoiCapNhat = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    KichHoat = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_dayGiay", x => x.IdDayGiay);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "deGiay",
                 columns: table => new
                 {
@@ -261,19 +244,19 @@ namespace AppData.Migrations
                 columns: table => new
                 {
                     IdSanPham = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenSanPham = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenSanPham = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NgayCapNhat = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    NguoiCapNhat = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NguoiCapNhat = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     KichHoat = table.Column<int>(type: "int", nullable: false),
-                    MoTa = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MoTa = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Sale = table.Column<double>(type: "float", nullable: false),
-                    IdChatLieu = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdKieuDang = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdThuongHieu = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdDanhMuc = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdDeGiay = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    IdChatLieu = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IdKieuDang = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IdThuongHieu = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IdDanhMuc = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IdDeGiay = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -282,32 +265,27 @@ namespace AppData.Migrations
                         name: "FK_sanPhams_chatLieus_IdChatLieu",
                         column: x => x.IdChatLieu,
                         principalTable: "chatLieus",
-                        principalColumn: "IdChatLieu",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "IdChatLieu");
                     table.ForeignKey(
                         name: "FK_sanPhams_danhMuc_IdDanhMuc",
                         column: x => x.IdDanhMuc,
                         principalTable: "danhMuc",
-                        principalColumn: "IdDanhMuc",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "IdDanhMuc");
                     table.ForeignKey(
                         name: "FK_sanPhams_deGiay_IdDeGiay",
                         column: x => x.IdDeGiay,
                         principalTable: "deGiay",
-                        principalColumn: "IdDeGiay",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "IdDeGiay");
                     table.ForeignKey(
                         name: "FK_sanPhams_kieuDangs_IdKieuDang",
                         column: x => x.IdKieuDang,
                         principalTable: "kieuDangs",
-                        principalColumn: "IdKieuDang",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "IdKieuDang");
                     table.ForeignKey(
                         name: "FK_sanPhams_thuongHieus_IdThuongHieu",
                         column: x => x.IdThuongHieu,
                         principalTable: "thuongHieus",
-                        principalColumn: "IdThuongHieu",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "IdThuongHieu");
                 });
 
             migrationBuilder.CreateTable(
@@ -393,46 +371,37 @@ namespace AppData.Migrations
                     IdSanPhamChiTiet = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Gia = table.Column<double>(type: "float", nullable: false),
                     SoLuong = table.Column<double>(type: "float", nullable: false),
-                    CoHienThi = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CoHienThi = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NgayCapNhat = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    GioiTinh = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    XuatXu = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GioiTinh = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    XuatXu = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    NguoiCapNhat = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NguoiCapNhat = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     KichHoat = table.Column<int>(type: "int", nullable: false),
-                    IdKichCo = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdMauSac = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdSanPham = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdDayGiay = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    IdKichCo = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IdMauSac = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IdSanPham = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IdDayGiay = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_sanPhamChiTiets", x => x.IdSanPhamChiTiet);
                     table.ForeignKey(
-                        name: "FK_sanPhamChiTiets_dayGiay_IdDayGiay",
-                        column: x => x.IdDayGiay,
-                        principalTable: "dayGiay",
-                        principalColumn: "IdDayGiay",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_sanPhamChiTiets_kichCos_IdKichCo",
                         column: x => x.IdKichCo,
                         principalTable: "kichCos",
-                        principalColumn: "IdKichCo",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "IdKichCo");
                     table.ForeignKey(
                         name: "FK_sanPhamChiTiets_mauSacs_IdMauSac",
                         column: x => x.IdMauSac,
                         principalTable: "mauSacs",
-                        principalColumn: "IdMauSac",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "IdMauSac");
                     table.ForeignKey(
                         name: "FK_sanPhamChiTiets_sanPhams_IdSanPham",
                         column: x => x.IdSanPham,
                         principalTable: "sanPhams",
-                        principalColumn: "IdSanPham",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "IdSanPham");
                 });
 
             migrationBuilder.CreateTable(
@@ -642,11 +611,6 @@ namespace AppData.Migrations
                 column: "IdchucVu");
 
             migrationBuilder.CreateIndex(
-                name: "IX_sanPhamChiTiets_IdDayGiay",
-                table: "sanPhamChiTiets",
-                column: "IdDayGiay");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_sanPhamChiTiets_IdKichCo",
                 table: "sanPhamChiTiets",
                 column: "IdKichCo");
@@ -712,9 +676,6 @@ namespace AppData.Migrations
 
             migrationBuilder.DropTable(
                 name: "hoaDons");
-
-            migrationBuilder.DropTable(
-                name: "dayGiay");
 
             migrationBuilder.DropTable(
                 name: "kichCos");

@@ -13,7 +13,7 @@ namespace AppData.Model
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public Guid IdDeGiay { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
-        [CheckTenDayGiay]
+        [CheckTenDeGiay]
         public string TenDeGiay { get; set; }
 		[DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
 		[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]

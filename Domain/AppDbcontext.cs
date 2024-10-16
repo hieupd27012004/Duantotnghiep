@@ -26,7 +26,7 @@ namespace AppData
 
 		public DbSet<DanhMuc> danhMuc { get; set; }
 
-		public DbSet<DayGiay> dayGiay { get; set; }
+		//public DbSet<DayGiay> dayGiay { get; set; }
 
 		public DbSet<DeGiay> deGiay { get; set; }
 
