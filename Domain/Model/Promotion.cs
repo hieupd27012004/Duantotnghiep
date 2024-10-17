@@ -16,7 +16,7 @@ namespace AppData.Model
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
 		[Range(1, 90, ErrorMessage = "Giá trị Promotion phải nằm trong khoảng 1% đến 90%")]
-		public double PhanTramGiam { get; set; }
+		public int PhanTramGiam { get; set; }
 		[DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
 		[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
 		//[Range(typeof(DateTime), "1/1/2020", "12/31/2025", ErrorMessage = "Không Trong Thời Gian Cho Phép")]
@@ -30,8 +30,20 @@ namespace AppData.Model
 		//[Range(typeof(DateTime), "1/1/2020", "12/31/2025", ErrorMessage = "Không Trong Thời Gian Cho Phép")]
 		public DateTime NgayKetThuc { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
-		public string TrangThai { get; set; }
+		public int TrangThai { get; set; }
 
-		public ICollection<HoaDon>? HoaDons { get; set; }
-	}
+		public virtual ICollection<PromotionSanPhamChiTiet>? PromotionSanPhamChiTiets { get; set; }
+        public string GetTrangThaiDisplay()
+        {
+            return TrangThai switch
+            {
+                0 => "Disabled",
+                1 => "Active",
+                2 => "Paused",
+                3 => "Expired",
+                _ => "Unknown"
+            };
+        }
+    }
+
 }
