@@ -28,6 +28,22 @@ namespace AppData.Configurations
 				   .WithMany(p => p.SanPhamChiTiets)
 				   .HasForeignKey(p => p.IdSanPham);
 
+			builder.HasOne(p => p.DayGiay)
+				   .WithMany(p => p.SanPhamChiTiets)
+				   .HasForeignKey(p => p.IdDayGiay);
+
+			builder.HasOne(p => p.DeGiay)
+				   .WithMany(p => p.SanPhamChiTiets)
+				   .HasForeignKey(p => p.IdDeGiay);
+
+			builder.HasMany(spct => spct.HinhAnhs)
+				.WithOne(ha => ha.SanPhamChiTiet)
+				.HasForeignKey(ha => ha.IdSanPhamChiTiet)
+				.OnDelete(DeleteBehavior.Cascade);
+			builder.HasMany(spct => spct.PromotionSanPhamChiTiets)
+				.WithOne(psct => psct.SanPhamChiTiet)
+				.HasForeignKey(psct => psct.IdSanPhamChiTiet);
+		}
 			//builder.HasOne(p => p.DayGiay)
 			//	   .WithMany(p => p.SanPhamChiTiets)
 			//	   .HasForeignKey(p => p.IdDayGiay);

@@ -50,7 +50,7 @@ namespace AppData
 
 		public DbSet<KhachHang> khachHangs { get; set; }
 
-		public DbSet<Promotion> khuyenMais { get; set; }
+		public DbSet<Promotion> promotions { get; set; }
 
 		public DbSet<LichSuHoaDon> lichSuHoaDons { get; set; }
 

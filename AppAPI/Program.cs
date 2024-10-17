@@ -61,6 +61,7 @@ builder.Services.AddTransient<IThuongHieuRepo, ThuongHieuRepo>();
 builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 
 //Hình Ảnh
+//Hình ảnh
 builder.Services.AddTransient<IHinhAnhRepo, HinhAnhRepo>();
 
 
@@ -83,6 +84,10 @@ builder.Services.AddTransient<IKichCoRepo, KichCoRepo > ();
 // Màu Sắc
 builder.Services.AddTransient<IMauSacService, MauSacService>();
 builder.Services.AddTransient<IMauSacRepo, MauSacRepo>();
+builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
+//Promotion
+builder.Services.AddTransient<IPromotionRepo, PromotionRepo>();
+builder.Services.AddTransient<IPromotionService, PromotionService>();
 
 var app = builder.Build();
 
