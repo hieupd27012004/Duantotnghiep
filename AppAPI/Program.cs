@@ -89,6 +89,14 @@ builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
 builder.Services.AddTransient<IPromotionRepo, PromotionRepo>();
 builder.Services.AddTransient<IPromotionService, PromotionService>();
 
+// Sản Phẩm Chi Tiết Màu Sắc
+builder.Services.AddTransient<ISanPhamChiTietMauSacRepo, SanPhamChiTietMauSacRepo>();
+builder.Services.AddTransient<ISanPhamChiTietMauSacService, SanPhamChiTietMauSacService>();
+
+// Sản Phẩm Chi Tiết Kích Cỡ
+builder.Services.AddTransient<ISanPhamChiTietKichCoRepo, SanPhamChiTietKichCoRepo>();
+builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCoService>();
+
 var app = builder.Build();
 
 

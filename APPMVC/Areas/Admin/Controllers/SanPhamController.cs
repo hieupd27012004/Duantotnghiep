@@ -12,83 +12,75 @@ namespace APPMVC.Areas.Admin.Controllers
     [Area("Admin")]
     public class SanPhamController : Controller
     {
-        private readonly ISanPhamChiTietService _SanphamCTService;
-        private readonly ISanPhamService _SanphamService;
-        private readonly IChatLieuService _ChatLieuService;
-        private readonly IDeGiayService _DeGiayService;
-        private readonly IDanhMucService _DanhMucService;
-        private readonly IThuongHieuService _IThuongHieuService;
-        private readonly IKieuDangService _KieuDangService;
-        private readonly IMauSacService _MauSacService;
-        private readonly IKichCoService _KichCoService;
+        private readonly ISanPhamChiTietService _sanPhamCTService;
+        private readonly ISanPhamService _sanPhamService;
+        private readonly IChatLieuService _chatLieuService;
+        private readonly IDeGiayService _deGiayService;
+        private readonly IDanhMucService _danhMucService;
+        private readonly IThuongHieuService _thuongHieuService;
+        private readonly IKieuDangService _kieuDangService;
+        private readonly IMauSacService _mauSacService;
+        private readonly IKichCoService _kichCoService;
+        private readonly ISanPhamChiTietMauSacService _sanPhamChiTietMauSacService;
+        private readonly ISanPhamChiTietKichCoService _sanPhamChiTietKichCoService;
 
-        public SanPhamController(ISanPhamService sanPhamService, ISanPhamChiTietService sanPhamChiTietService, IDeGiayService deGiayService, IDanhMucService danhMucService, IThuongHieuService thuongHieuService, IChatLieuService chatLieuService, IKieuDangService kieuDangService, IMauSacService mauSacService,
-        IKichCoService kichCoService)
+        public SanPhamController(ISanPhamService sanPhamService,
+                                 ISanPhamChiTietService sanPhamChiTietService,
+                                 IDeGiayService deGiayService,
+                                 IDanhMucService danhMucService,
+                                 IThuongHieuService thuongHieuService,
+                                 IChatLieuService chatLieuService,
+                                 IKieuDangService kieuDangService,
+                                 IMauSacService mauSacService,
+                                 IKichCoService kichCoService,
+                                 ISanPhamChiTietMauSacService sanPhamChiTietMauSacService,
+                                 ISanPhamChiTietKichCoService sanPhamChiTietKichCoService)
         {
-            _SanphamCTService = sanPhamChiTietService;
-            _SanphamService = sanPhamService;
-            _DeGiayService = deGiayService;
-            _DanhMucService = danhMucService;
-            _IThuongHieuService = thuongHieuService;
-            _ChatLieuService = chatLieuService;
-            _KieuDangService = kieuDangService;
-            _MauSacService = mauSacService;
-            _KichCoService = kichCoService;
+            _sanPhamCTService = sanPhamChiTietService;
+            _sanPhamService = sanPhamService;
+            _deGiayService = deGiayService;
+            _danhMucService = danhMucService;
+            _thuongHieuService = thuongHieuService;
+            _chatLieuService = chatLieuService;
+            _kieuDangService = kieuDangService;
+            _mauSacService = mauSacService;
+            _kichCoService = kichCoService;
+            _sanPhamChiTietMauSacService = sanPhamChiTietMauSacService;
+            _sanPhamChiTietKichCoService = sanPhamChiTietKichCoService;
         }
         [HttpGet]
-        public async Task<IActionResult> Getall(string? name, int page = 1)
+        public async Task<IActionResult> GetAll(string? name, int page = 1)
         {
             page = page < 1 ? 1 : page;
             int pageSize = 5;
 
-            // Lấy danh sách sản phẩm dựa theo tên
-            List<SanPham> timten = await _SanphamService.GetSanPhams(name);
+            // Fetch all products based on the name filter
+            var sanPhams = await _sanPhamService.GetSanPhams(name);
+            var sanPhamViewModels = new List<SanPhamViewModel>();
 
-            if (timten != null)
+            foreach (var sanPham in sanPhams)
             {
-                // Tạo danh sách view model với thông tin chi tiết của sản phẩm
-                var sanPhamViewModels = new List<SanPhamViewModel>();
+                // Fetch product details for the current product
+                var sanPhamChiTietList = await _sanPhamCTService.GetSanPhamChiTietBySanPhamId(sanPham.IdSanPham);
 
-                foreach (var sanPham in timten)
-                {
-                    // Lấy SanPhamChiTiet dựa vào IdSanPham
-                    var sanPhamChiTiet = await _SanphamCTService.GetSanPhamChiTietBySanPhamId(sanPham.IdSanPham);
+                // Calculate total quantity for this specific product
+                double totalQuantity = sanPhamChiTietList.Sum(s => s.SoLuong ?? 0); // Assuming SoLuong is the property holding the quantity
 
-                    // Tạo đối tượng SanPhamViewModel
-                    var viewModel = new SanPhamViewModel
-                    {
-                        SanPham = sanPham,
-                        SanPhamChiTiet = sanPhamChiTiet ?? new SanPhamChiTiet() // Nếu không tìm thấy, tạo đối tượng trống
-                    };
-
-                    sanPhamViewModels.Add(viewModel);
-                }
-
-                // Phân trang
-                var pagedSanPhamViewModels = sanPhamViewModels.ToPagedList(page, pageSize);
-                return View(pagedSanPhamViewModels);
-            }
-            else
-            {
-                // Nếu không tìm thấy sản phẩm
-                List<SanPham> sanPhams = await _SanphamService.GetSanPhams(name);
-                var sanPhamViewModels = sanPhams.Select(sanPham => new SanPhamViewModel
+                sanPhamViewModels.Add(new SanPhamViewModel
                 {
                     SanPham = sanPham,
-                    SanPhamChiTiet = new SanPhamChiTiet()
-                }).ToList();
-
-                var pagedSanPhamViewModels = sanPhamViewModels.ToPagedList(page, pageSize);
-                return View(pagedSanPhamViewModels);
+                    TotalQuantity = totalQuantity, // Set the total quantity
+                    SanPhamChiTiet = sanPhamChiTietList // Directly assign the list
+                });
             }
+
+            var pagedSanPhamViewModels = sanPhamViewModels.ToPagedList(page, pageSize);
+            return View(pagedSanPhamViewModels);
         }
-
-
         public async Task<IActionResult> Create()
         {
             await LoadViewBags();
-
-            var sanPham = new SanPham()
+            var sanPham = new SanPham
             {
                 IdSanPham = Guid.NewGuid(),
                 NgayTao = DateTime.Now,
@@ -98,26 +90,39 @@ namespace APPMVC.Areas.Admin.Controllers
                 KichHoat = 1
             };
 
-            var sanPhamChiTiet = new SanPhamChiTiet()
+            var sanPhamChiTiet = new List<SanPhamChiTiet>
             {
-                IdSanPhamChiTiet = Guid.NewGuid(),
-                Gia = 100000,
-                SoLuong = 100,
-                NgayCapNhat = DateTime.Now,
-                NgayTao = DateTime.Now,
-                NguoiCapNhat = "Admin",
-                NguoiTao = "Admin",
-                GioiTinh = "Nam",
-                KichHoat = 1,
             };
 
             var viewModel = new SanPhamViewModel
             {
                 SanPham = sanPham,
-                SanPhamChiTiet = sanPhamChiTiet
+                SanPhamChiTiet = sanPhamChiTiet,
+                KichCoOptions = await GetKichCoOptions() ?? new List<SelectListItem>(),
+                MauSacOptions = await GetMauSacOptions() ?? new List<SelectListItem>()
             };
 
             return View(viewModel);
+        }
+
+        private async Task<List<SelectListItem>> GetKichCoOptions()
+        {
+            var kichCos = await _kichCoService.GetKichCo(null) ?? new List<KichCo>();
+            return kichCos.Select(k => new SelectListItem
+            {
+                Value = k.IdKichCo.ToString(),
+                Text = k.TenKichCo
+            }).ToList();
+        }
+
+        private async Task<List<SelectListItem>> GetMauSacOptions()
+        {
+            var mauSacs = await _mauSacService.GetMauSac(null) ?? new List<MauSac>();
+            return mauSacs.Select(m => new SelectListItem
+            {
+                Value = m.IdMauSac.ToString(),
+                Text = m.TenMauSac
+            }).ToList();
         }
 
         [HttpPost]
@@ -125,60 +130,91 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Ghi lại thông tin lỗi ModelState
-                foreach (var modelState in ModelState.Values)
-                {
-                    foreach (var error in modelState.Errors)
-                    {
-                        Console.WriteLine(error.ErrorMessage);
-                    }
-                }
-                TempData["Error"] = "Dữ liệu không hợp lệ.";
-                await LoadViewBags(); // Gọi lại LoadViewBags
-                return View(viewModel); // Trả về view với dữ liệu hiện tại
+                await LoadViewBags();
+                return View(viewModel);
             }
 
             try
             {
-                // Tạo SanPham
-                await _SanphamService.Create(viewModel.SanPham);
+                // Create the main product
+                await _sanPhamService.Create(viewModel.SanPham);
                 var idSanPham = viewModel.SanPham.IdSanPham;
-                viewModel.SanPhamChiTiet.IdSanPham = idSanPham;
 
-                // Tạo SanPhamChiTiet
-                await _SanphamCTService.Create(viewModel.SanPhamChiTiet);
+                // Create combinations
+                foreach (var combination in viewModel.Combinations)
+                {
+                    combination.Gia = combination.Gia > 0 ? combination.Gia : 100000; // Default price
+                    combination.SoLuong = combination.SoLuong > 0 ? combination.SoLuong : 10; // Default quantity
+                    combination.XuatXu = string.IsNullOrEmpty(combination.XuatXu) ? "Việt Nam" : combination.XuatXu; // Default origin
+
+                    var sanPhamChiTiet = new SanPhamChiTiet
+                    {
+                        IdSanPhamChiTiet = Guid.NewGuid(),
+                        IdSanPham = idSanPham,
+                        Gia = combination.Gia,
+                        SoLuong = combination.SoLuong,
+                        XuatXu = combination.XuatXu,
+                        GioiTinh = "Nam",
+                        NgayTao = DateTime.Now,
+                        NgayCapNhat = DateTime.Now,
+                        NguoiTao = "Admin",
+                        NguoiCapNhat = "Admin",
+                        KichHoat = 1
+                    };
+
+                    // Save the new SanPhamChiTiet to the database
+                    await _sanPhamCTService.Create(sanPhamChiTiet);
+
+                    // Create relationships for sizes and colors
+                    foreach (var kichCoId in viewModel.SelectedKichCoIds)
+                    {
+                        await _sanPhamChiTietKichCoService.Create(new SanPhamChiTietKichCo
+                        {
+                            IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+                            IdKichCo = Guid.Parse(kichCoId)
+                        });
+                    }
+
+                    foreach (var mauSacId in viewModel.SelectedMauSacIds)
+                    {
+                        await _sanPhamChiTietMauSacService.Create(new SanPhamChiTietMauSac
+                        {
+                            IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+                            IdMauSac = Guid.Parse(mauSacId)
+                        });
+                    }
+                }
+
                 TempData["Success"] = "Thêm mới thành công";
-                return RedirectToAction("Getall");
+                return RedirectToAction("GetAll");
             }
             catch (Exception ex)
             {
-                // Ghi lại thông báo lỗi
                 Console.WriteLine($"Error: {ex.Message}");
                 TempData["Error"] = "Thêm mới thất bại: " + ex.Message;
             }
 
-
-            await LoadViewBags(); // Load view bags again for the view
-            return View(viewModel); // Return to the view with the current data
+            await LoadViewBags();
+            return View(viewModel);
         }
 
         private async Task LoadViewBags()
         {
-            var ListChatLieu = await _ChatLieuService.GetChatLieu(null);
-            var ListDeGiay = await _DeGiayService.GetDeGiay(null);
-            var ListDanhMuc = await _DanhMucService.GetDanhMuc(null);
-            var ListThuongHieu = await _IThuongHieuService.GetThuongHieu(null);
-            var ListKieuDang = await _KieuDangService.GetKieuDang(null);
-            var ListMauSac = await _MauSacService.GetMauSac(null);
-            var ListKichCo = await _KichCoService.GetKichCo(null);
+            var listChatLieu = await _chatLieuService.GetChatLieu(null);
+            var listDeGiay = await _deGiayService.GetDeGiay(null);
+            var listDanhMuc = await _danhMucService.GetDanhMuc(null);
+            var listThuongHieu = await _thuongHieuService.GetThuongHieu(null);
+            var listKieuDang = await _kieuDangService.GetKieuDang(null);
+            var listMauSac = await _mauSacService.GetMauSac(null);
+            var listKichCo = await _kichCoService.GetKichCo(null);
 
-            ViewBag.IdChatLieu = new SelectList(ListChatLieu, "IdChatLieu", "TenChatLieu");
-            ViewBag.IdDeGiay = new SelectList(ListDeGiay, "IdDeGiay", "TenDeGiay");
-            ViewBag.IdDanhMuc = new SelectList(ListDanhMuc, "IdDanhMuc", "TenDanhMuc");
-            ViewBag.IdThuongHieu = new SelectList(ListThuongHieu, "IdThuongHieu", "TenThuongHieu");
-            ViewBag.IdKieuDang = new SelectList(ListKieuDang, "IdKieuDang", "TenKieuDang");
-            ViewBag.IdKichCo = new SelectList(ListKichCo, "IdKichCo", "TenKichCo");
-            ViewBag.IdMauSac = new SelectList(ListMauSac, "IdMauSac", "TenMauSac");
+            ViewBag.IdChatLieu = new SelectList(listChatLieu, "IdChatLieu", "TenChatLieu");
+            ViewBag.IdDeGiay = new SelectList(listDeGiay, "IdDeGiay", "TenDeGiay");
+            ViewBag.IdDanhMuc = new SelectList(listDanhMuc, "IdDanhMuc", "TenDanhMuc");
+            ViewBag.IdThuongHieu = new SelectList(listThuongHieu, "IdThuongHieu", "TenThuongHieu");
+            ViewBag.IdKieuDang = new SelectList(listKieuDang, "IdKieuDang", "TenKieuDang");
+            ViewBag.IdKichCo = new SelectList(listKichCo, "IdKichCo", "TenKichCo");
+            ViewBag.IdMauSac = new SelectList(listMauSac, "IdMauSac", "TenMauSac");
         }
     }
 }

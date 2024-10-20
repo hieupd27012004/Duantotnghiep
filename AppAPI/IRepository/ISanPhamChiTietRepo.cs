@@ -10,6 +10,6 @@ namespace AppAPI.IRepository
         bool Update(SanPhamChiTiet sanPhamChitiet);
         bool Delete(Guid id);
 
-        Task<SanPhamChiTiet> GetSanPhamChiTietBySanPhamId(Guid sanPhamId);
+        Task<List<SanPhamChiTiet>> GetSanPhamChiTietBySanPhamId(Guid sanPhamId);
     }
 }
