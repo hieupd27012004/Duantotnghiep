@@ -1,3 +1,4 @@
+using AppAPI.Service;
 using AppData;
 using APPMVC.IService;
 using APPMVC.Service;
@@ -35,6 +36,9 @@ builder.Services.AddTransient<ISanPhamChiTietService, SanPhamChiTietService>();
 builder.Services.AddTransient<INhanVienService, NhanVienService>();
 builder.Services.AddTransient<IKhachHangService, KhachHangService>();
 builder.Services.AddTransient<IChucVuService, ChucVuService>();
+
+builder.Services.AddTransient<ISanPhamChiTietMauSacService, SanPhamChiTietMauSacService>();
+builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCoService>();
 
 
 builder.Services.AddCors(options =>

@@ -52,7 +52,7 @@
                     <div class="panel-body">
                         <table class="table">
                             <thead>
-                                <tr>                                   
+                                <tr>
                                     <th>STT</th>
                                     <th>Tên sản phẩm</th>
                                     <th hidden>Ngày cập nhật</th>
@@ -77,7 +77,7 @@
                                         <td>@item.SanPham.NgayTao.ToString("dd/MM/yyyy")</td>
                                         <td hidden>@Html.DisplayFor(modelItem => item.SanPham.NguoiCapNhat)</td>
                                         <td hidden>@Html.DisplayFor(modelItem => item.SanPham.NguoiTao)</td>
-                                        <td>@item.SanPhamChiTiet.SoLuong</td>
+                                        <td>@item.TotalQuantity</td>
                                         <td>
                                             @(item.SanPham.KichHoat == 1 ? "Hoạt động" : "Không hoạt động")
                                         </td>
