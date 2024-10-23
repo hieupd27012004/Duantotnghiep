@@ -31,64 +31,84 @@ namespace APPMVC.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching HinhAnh list");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách hình ảnh.";
                 return View(new List<HinhAnh>());
             }
         }
 
         public IActionResult Upload()
         {
+            // Display any messages from TempData if they exist
+            ViewBag.SuccessMessage = TempData["SuccessMessage"];
+            ViewBag.ErrorMessage = TempData["ErrorMessage"];
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upload(IFormFile file, Guid idMauSac)
+        public async Task<IActionResult> Upload(IFormFile file)
         {
-            if (file == null || file.Length == 0)
-            {
-                ModelState.AddModelError("file", "Please select a file to upload.");
-                return View();
-            }
-
-            // Log the content type for debugging
-            _logger.LogInformation($"Received file: {file.FileName}, ContentType: {file.ContentType}");
-
-            var allowedTypes = new List<string> { "image/jpeg", "image/png", "image/gif" };
-            if (!allowedTypes.Contains(file.ContentType))
-            {
-                ModelState.AddModelError("file", "The selected file type is not supported.");
-                return View();
-            }
-
             try
             {
+                _logger.LogInformation($"Upload request started - File name: {file?.FileName}, File size: {file?.Length} bytes");
+
+                if (file == null || file.Length == 0)
+                {
+                    _logger.LogWarning("Upload failed: File is null or empty");
+                    TempData["ErrorMessage"] = "Vui lòng chọn file để tải lên.";
+                    return View();
+                }
+
+                if (!file.ContentType.StartsWith("image/"))
+                {
+                    _logger.LogWarning($"Upload failed: Invalid file type - {file.ContentType}");
+                    TempData["ErrorMessage"] = "File được chọn không phải là hình ảnh hợp lệ.";
+                    return View();
+                }
+
                 using (var memoryStream = new MemoryStream())
                 {
                     await file.CopyToAsync(memoryStream);
+                    var fileBytes = memoryStream.ToArray();
+
+                    _logger.LogInformation($"File successfully read into memory - Size: {fileBytes.Length} bytes");
+
                     var hinhAnh = new HinhAnh
                     {
                         IdHinhAnh = Guid.NewGuid(),
                         LoaiFileHinhAnh = file.ContentType,
-                        DataHinhAnh = memoryStream.ToArray(),
-                        IdMauSac = idMauSac
+                        DataHinhAnh = fileBytes,
                     };
 
-                    var result = await _hinhAnhService.UploadAsync(hinhAnh);
-                    if (result)
+                    _logger.LogInformation($"Created HinhAnh object - Id: {hinhAnh.IdHinhAnh}, ContentType: {hinhAnh.LoaiFileHinhAnh}");
+
+                    try
                     {
-                        TempData["SuccessMessage"] = "Image uploaded successfully.";
-                        return RedirectToAction(nameof(Index));
+                        var result = await _hinhAnhService.UploadAsync(hinhAnh);
+                        _logger.LogInformation($"UploadAsync result: {result}");
+
+                        if (result)
+                        {
+                            TempData["SuccessMessage"] = "Tải lên hình ảnh thành công!";
+                            return RedirectToAction(nameof(Index)); // Redirect to Index on success
+                        }
+                        else
+                        {
+                            _logger.LogWarning("UploadAsync returned false");
+                            TempData["ErrorMessage"] = "Không thể tải lên hình ảnh. Vui lòng thử lại sau.";
+                        }
                     }
-                    else
+                    catch (Exception uploadEx)
                     {
-                        ModelState.AddModelError("", "Failed to upload the image. Please check server logs for details.");
+                        _logger.LogError(uploadEx, "Error in UploadAsync service call");
+                        TempData["ErrorMessage"] = $"Lỗi khi tải lên: {uploadEx.Message}";
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Exception occurred during image upload");
-                ModelState.AddModelError("", $"An error occurred: {ex.Message}");
+                _logger.LogError(ex, "Unhandled exception in Upload action");
+                TempData["ErrorMessage"] = $"Có lỗi xảy ra: {ex.Message}";
             }
 
             return View();
