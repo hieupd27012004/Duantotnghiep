@@ -19,5 +19,6 @@ namespace AppData.ViewModel
         public List<SelectListItem>? MauSacOptions { get; set; }
         public List<CombinationViewModel> Combinations { get; set; } = new List<CombinationViewModel>();
         public double TotalQuantity { get; set; }
+
     }
 }

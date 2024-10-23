@@ -42,7 +42,7 @@ namespace APPMVC.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upload(IFormFile file, Guid idSanPhamChiTiet)
+        public async Task<IActionResult> Upload(IFormFile file, Guid idMauSac)
         {
             if (file == null || file.Length == 0)
             {
@@ -50,16 +50,18 @@ namespace APPMVC.Controllers
                 return View();
             }
 
-            if (!file.ContentType.StartsWith("image/"))
+            // Log the content type for debugging
+            _logger.LogInformation($"Received file: {file.FileName}, ContentType: {file.ContentType}");
+
+            var allowedTypes = new List<string> { "image/jpeg", "image/png", "image/gif" };
+            if (!allowedTypes.Contains(file.ContentType))
             {
-                ModelState.AddModelError("file", "The selected file is not a valid image.");
+                ModelState.AddModelError("file", "The selected file type is not supported.");
                 return View();
             }
 
             try
             {
-                _logger.LogInformation($"Starting upload process for file: {file.FileName}, Size: {file.Length} bytes, Type: {file.ContentType}, IdSanPhamChiTiet: {idSanPhamChiTiet}");
-
                 using (var memoryStream = new MemoryStream())
                 {
                     await file.CopyToAsync(memoryStream);
@@ -68,21 +70,17 @@ namespace APPMVC.Controllers
                         IdHinhAnh = Guid.NewGuid(),
                         LoaiFileHinhAnh = file.ContentType,
                         DataHinhAnh = memoryStream.ToArray(),
-                        IdSanPhamChiTiet = idSanPhamChiTiet
+                        IdMauSac = idMauSac
                     };
-
-                    _logger.LogInformation($"Created HinhAnh object: Id={hinhAnh.IdHinhAnh}, Type={hinhAnh.LoaiFileHinhAnh}, Size={hinhAnh.DataHinhAnh.Length} bytes");
 
                     var result = await _hinhAnhService.UploadAsync(hinhAnh);
                     if (result)
                     {
-                        _logger.LogInformation($"Successfully uploaded image with Id: {hinhAnh.IdHinhAnh}");
                         TempData["SuccessMessage"] = "Image uploaded successfully.";
                         return RedirectToAction(nameof(Index));
                     }
                     else
                     {
-                        _logger.LogWarning($"Failed to upload image with Id: {hinhAnh.IdHinhAnh}");
                         ModelState.AddModelError("", "Failed to upload the image. Please check server logs for details.");
                     }
                 }

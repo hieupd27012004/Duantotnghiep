@@ -16,7 +16,7 @@ namespace AppAPI.Controllers
         }
 
         [HttpPost("UploadHinhAnh")]
-        public async Task<IActionResult> UploadHinhAnh(IFormFile file, Guid idSanPhamChiTiet)
+        public async Task<IActionResult> UploadHinhAnh(IFormFile file, Guid idMauSac)
         {
             if (file == null || file.Length == 0)
             {

@@ -28,7 +28,7 @@ namespace AppData.Model
 		public string NguoiTao { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public int KichHoat { get; set; }
-
+        public virtual ICollection<HinhAnh>? HinhAnhs { get; set; }
         public virtual ICollection<SanPhamChiTietMauSac>? SanPhamChiTietMauSacs { get; set; }
     }
 }
