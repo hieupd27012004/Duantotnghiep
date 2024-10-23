@@ -61,8 +61,10 @@ namespace AppData
 		public DbSet<SanPham> sanPhams { get; set; }
 
 		public DbSet<SanPhamChiTiet> sanPhamChiTiets{ get; set; }
+        public DbSet<SanPhamChiTietKichCo> sanPhamChiTietKichCos { get; set; }
+        public DbSet<SanPhamChiTietMauSac> sanPhamChiTietMausacs { get; set; }
 
-		public DbSet<ThuongHieu> thuongHieus { get; set; }
+        public DbSet<ThuongHieu> thuongHieus { get; set; }
 
 		public DbSet<TrangThai> trangThais { get; set; }
 

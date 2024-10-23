@@ -1,0 +1,101 @@
+﻿using AppAPI.IRepository;
+using AppAPI.IService;
+using AppData.Model;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks; // Thêm namespace này để sử dụng Task
+
+namespace AppAPI.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class SanPhamChiTietKichCoController : ControllerBase
+    {
+        private readonly ISanPhamChiTietKichCoService _service;
+
+        public SanPhamChiTietKichCoController(ISanPhamChiTietKichCoService service)
+        {
+            _service = service;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllKichCo()
+        {
+            var kichCos = await _service.GetSanPhamChiTietKichCoAsync();
+            return Ok(kichCos);
+        }
+
+        [HttpGet("getbyid")]
+        public async Task<IActionResult> Get(Guid id)
+        {
+            try
+            {
+                var sanPhamChiTietKichCo = await _service.GetKichCoByIdAsync(id);
+                if (sanPhamChiTietKichCo == null)
+                {
+                    return NotFound($"SanPhamChiTietKichCo with ID {id} not found.");
+                }
+                return Ok(sanPhamChiTietKichCo);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/SanPhamChiTietKichCo/them
+        [HttpPost("them")]
+        public async Task<IActionResult> Post(SanPhamChiTietKichCo sanPhamChiTietKichCo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                await _service.CreateAsync(sanPhamChiTietKichCo);
+                return Ok(sanPhamChiTietKichCo);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // PUT: api/SanPhamChiTietKichCo/Sua
+        [HttpPut("Sua")]
+        public async Task<IActionResult> Put(SanPhamChiTietKichCo sanPhamChiTietKichCo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                await _service.UpdateAsync(sanPhamChiTietKichCo);
+                return Ok(sanPhamChiTietKichCo);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // DELETE: api/SanPhamChiTietKichCo/Xoa?id=<guid>
+        [HttpDelete("Xoa")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
+            {
+                await _service.DeleteAsync(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+    }
+}

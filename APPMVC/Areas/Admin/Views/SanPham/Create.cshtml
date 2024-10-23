@@ -39,11 +39,11 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <label asp-for="SanPham.IdThuongHieu" class="control-label">Thương hiệu</label>
-                                <select asp-for="SanPham.IdThuongHieu" class="form-control" asp-items="@(ViewBag.IdThuongHieu)"></select>
+                                <select asp-for="SanPham.IdThuongHieu" class="form-control" asp-items="@(ViewBag.IdThuongHieu)" ></select>
                             </div>
                             <div class="col">
                                 <label asp-for="SanPham.IdKieuDang" class="control-label">Kiểu dáng</label>
-                                <select asp-for="SanPham.IdKieuDang" class="form-control" asp-items="@(ViewBag.IdKieuDang)"></select>
+                                <select asp-for="SanPham.IdKieuDang" class="form-control" asp-items="@(ViewBag.IdKieuDang)" ></select>
                             </div>
                         </div>
                         <div class="form-group" hidden>
@@ -81,59 +81,67 @@
                             <input asp-for="SanPham.Sale" class="form-control" />
                             <span asp-validation-for="SanPham.Sale" class="text-danger"></span>
                         </div>
-                        <input asp-for="SanPhamChiTiet.IdSanPhamChiTiet" class="form-control"  hidden>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label asp-for="SanPhamChiTiet.IdKichCo" class="control-label">Kích cỡ</label>
-                                <select asp-for="SanPhamChiTiet.IdKichCo" class="form-control" asp-items="@(ViewBag.IdKichCo)"></select>
+                        @*                         <input asp-for="SanPhamChiTiet.IdSanPhamChiTiet" class="form-control"  hidden> *@
+                            <div class="row mb-3">
+                                <div class="col">
+                                @if (Model.KichCoOptions != null)
+
+                                {
+                                            <div class="form-group">
+                                                <label asp-for="SelectedKichCoIds" class="control-label">Chọn Kích Cỡ</label>
+                                                <div>
+                                            @foreach (var kichCoOption in Model.KichCoOptions)
+
+                                            {
+                                                            <input type="checkbox" name="SelectedKichCoIds" value="@kichCoOption.Value" />
+                                                            <label>@kichCoOption.Text</label>
+                                            }
+                                                </div>
+                                            </div>
+                                }
+                                </div>
+                                <div class="col">
+                                @if (Model.MauSacOptions != null)
+
+                                {
+                                            <div class="form-group">
+                                                <label asp-for="SelectedMauSacIds" class="control-label">Chọn Màu Sắc</label>
+                                                <div>
+                                            @foreach (var mauSacOption in Model.MauSacOptions)
+
+                                            {
+                                                            <input type="checkbox" name="SelectedMauSacIds" value="@mauSacOption.Value" />
+                                                            <label>@mauSacOption.Text</label>
+                                            }
+                                                </div>
+                                            </div>
+                                }
+                                </div>
                             </div>
-                            <div class="col">
-                                <label asp-for="SanPhamChiTiet.IdMauSac" class="control-label">Màu sắc</label>
-                                <select asp-for="SanPhamChiTiet.IdMauSac" class="form-control" asp-items="@(ViewBag.IdMauSac)"></select>
+                                          <div class="form-group">
+                            <label class="control-label">Tổ hợp Kích Cỡ và Màu Sắc</label>
+                            <div id="combinations" class="border p-2">
+                                <strong>Các Tổ Hợp:</strong>
+                                <br />
+                                <table id="combinations-table" class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Tên Sản Phẩm</th>
+                                            <th>Kích Cỡ</th>
+                                            <th>Màu Sắc</th>
+                                            <th>Giá</th>
+                                            <th>Số Lượng</th>
+                                            <th>Xuất Xứ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="combinations-tbody">
+                                        <!-- Nội dung sẽ được cập nhật bởi JavaScript -->
+                                    </tbody>
+                                </table>
+                                <p id="no-combinations-message" style="display:none;">Không có tổ hợp nào được chọn.</p>
                             </div>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label asp-for="SanPhamChiTiet.Gia" class="control-label">Giá</label>
-                                <input asp-for="SanPhamChiTiet.Gia" class="form-control" />
-                                <span asp-validation-for="SanPhamChiTiet.Gia" class="text-danger"></span>
-                            </div>
-                            <div class="col">
-                                <label asp-for="SanPhamChiTiet.SoLuong" class="control-label">Số lượng</label>
-                                <input asp-for="SanPhamChiTiet.SoLuong" class="form-control" />
-                                <span asp-validation-for="SanPhamChiTiet.SoLuong" class="text-danger"></span>
-                            </div>
-                            <div class="col">
-                                <label asp-for="SanPhamChiTiet.XuatXu" class="control-label">Xuất xứ</label>
-                                <input asp-for="SanPhamChiTiet.XuatXu" class="form-control" />
-                                <span asp-validation-for="SanPhamChiTiet.XuatXu" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="form-group" hidden>
-                            <label asp-for="SanPhamChiTiet.NgayCapNhat" class="control-label"></label>
-                            <input asp-for="SanPhamChiTiet.NgayCapNhat" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
-                            <span asp-validation-for="SanPhamChiTiet.NgayCapNhat" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" hidden>
-                            <label asp-for="SanPhamChiTiet.NgayTao" class="control-label"></label>
-                            <input asp-for="SanPhamChiTiet.NgayTao" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
-                            <span asp-validation-for="SanPhamChiTiet.NgayTao" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" hidden>
-                            <label asp-for="SanPhamChiTiet.NguoiCapNhat" class="control-label"></label>
-                            <input asp-for="SanPhamChiTiet.NguoiCapNhat" class="form-control" />
-                            <span asp-validation-for="SanPhamChiTiet.NguoiCapNhat" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" hidden>
-                            <label asp-for="SanPhamChiTiet.NguoiTao" class="control-label"></label>
-                            <input asp-for="SanPhamChiTiet.NguoiTao" class="form-control" />
-                            <span asp-validation-for="SanPhamChiTiet.NguoiTao" class="text-danger"></span>
-                        </div>
-                        <div class="form-group" hidden>
-                            <label asp-for="SanPhamChiTiet.KichHoat" class="control-label"></label>
-                            <input asp-for="SanPhamChiTiet.KichHoat" class="form-control" />
-                            <span asp-validation-for="SanPhamChiTiet.KichHoat" class="text-danger"></span>
-                        </div>
+
                         <br />
                         <div class="form-group mb-3 d-flex justify-content-center">
                             <div class="mx-auto">
@@ -148,3 +156,52 @@
      </div>
 </div>
 
+@section Scripts {
+        <script>
+            $(document).ready(function () {
+                function updateCombinations() {
+                    console.log("Updating combinations..."); // Debug log
+                    const selectedKichCoIds = $("input[name='SelectedKichCoIds']:checked").map(function () {
+                        return $(this).next("label").text();
+                    }).get();
+
+                    const selectedMauSacIds = $("input[name='SelectedMauSacIds']:checked").map(function () {
+                        return $(this).next("label").text();
+                    }).get();
+
+                    // Get product name from input
+                    const tenSanPham = $("input[name='SanPham.TenSanPham']").val();
+
+                    console.log("Selected Kich Co: ", selectedKichCoIds);
+                    console.log("Selected Mau Sac: ", selectedMauSacIds);
+
+                    const combinationsTbody = $("#combinations-tbody");
+                    combinationsTbody.empty();
+
+                    if (selectedKichCoIds.length > 0 && selectedMauSacIds.length > 0) {
+                        let index = 0; // Initialize index
+                        selectedKichCoIds.forEach(function (kichCo) {
+                            selectedMauSacIds.forEach(function (mauSac) {
+                                const row = $("<tr>");
+                                row.append($("<td>").text(tenSanPham));
+                                row.append($("<td>").text(kichCo));
+                                row.append($("<td>").text(mauSac));
+                                row.append($("<td>").append($("<input type='number' name='Combinations[" + index + "].Gia' class='form-control d-inline' style='width: auto; display: inline-block;' value='100000' placeholder='Giá'>")));
+                                row.append($("<td>").append($("<input type='number' name='Combinations[" + index + "].SoLuong' class='form-control d-inline' style='width: auto; display: inline-block;' value='10' placeholder='Số lượng'>")));
+                                row.append($("<td>").append($("<input type='text' name='Combinations[" + index + "].XuatXu' class='form-control d-inline' style='width: auto; display: inline-block;' value='Việt Nam' placeholder='Xuất xứ'>")));
+                                combinationsTbody.append(row);
+
+                                index++; // Increment index for the next combination
+                            });
+                        });
+                    } else {
+                        combinationsTbody.append("<tr><td colspan='6'>Không có tổ hợp nào được chọn.</td></tr>");
+                    }
+                }
+
+                // Event listeners for checkboxes
+                $("input[name='SelectedKichCoIds']").change(updateCombinations);
+                $("input[name='SelectedMauSacIds']").change(updateCombinations);
+            });
+        </script>
+}

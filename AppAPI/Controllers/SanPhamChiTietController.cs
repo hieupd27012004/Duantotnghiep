@@ -111,12 +111,12 @@ namespace AppAPI.Controllers
         {
             try
             {
-                var sanPhamChiTiet = await _service.GetSanPhamChiTietBySanPhamId(sanPhamId);
-                if (sanPhamChiTiet == null)
+                var sanPhamChiTietList = await _service.GetSanPhamChiTietBySanPhamId(sanPhamId);
+                if (sanPhamChiTietList == null || !sanPhamChiTietList.Any())
                 {
-                    return NotFound($"SanPhamChiTiet with SanPhamId {sanPhamId} not found.");
+                    return NotFound($"No SanPhamChiTiet found for SanPhamId {sanPhamId}.");
                 }
-                return Ok(sanPhamChiTiet);
+                return Ok(sanPhamChiTietList);
             }
             catch (Exception ex)
             {
