@@ -46,9 +46,6 @@ namespace APPMVC.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-
-        public async Task<IActionResult> Upload(IFormFile file, Guid idMauSac)
-
         public async Task<IActionResult> Upload(IFormFile file)
 
         {
@@ -84,7 +81,6 @@ namespace APPMVC.Controllers
                     return View();
                 }
 
-
                 using (var memoryStream = new MemoryStream())
                 {
                     await file.CopyToAsync(memoryStream);
@@ -96,17 +92,6 @@ namespace APPMVC.Controllers
                     {
                         IdHinhAnh = Guid.NewGuid(),
                         LoaiFileHinhAnh = file.ContentType,
-
-                        DataHinhAnh = memoryStream.ToArray(),
-                        IdMauSac = idMauSac
-                    };
-
-                    var result = await _hinhAnhService.UploadAsync(hinhAnh);
-                    if (result)
-                    {
-                        TempData["SuccessMessage"] = "Image uploaded successfully.";
-                        return RedirectToAction(nameof(Index));
-
                         DataHinhAnh = fileBytes,
                     };
 
@@ -127,16 +112,11 @@ namespace APPMVC.Controllers
                             _logger.LogWarning("UploadAsync returned false");
                             TempData["ErrorMessage"] = "Không thể tải lên hình ảnh. Vui lòng thử lại sau.";
                         }
-
                     }
                     catch (Exception uploadEx)
                     {
-
-                        ModelState.AddModelError("", "Failed to upload the image. Please check server logs for details.");
-
                         _logger.LogError(uploadEx, "Error in UploadAsync service call");
                         TempData["ErrorMessage"] = $"Lỗi khi tải lên: {uploadEx.Message}";
-
                     }
                 }
             }
