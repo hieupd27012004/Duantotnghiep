@@ -25,7 +25,9 @@
     <div class="col-md-6">
         <form asp-action="Upload" enctype="multipart/form-data" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <input type="hidden" name="idSanPhamChiTiet" value="@Guid.Empty" />
+
 
             <div class="form-group mb-3">
                 <label for="file" class="control-label">Chọn Hình Ảnh</label>

@@ -24,10 +24,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
     {
-        builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
     });
 });
 //Khach Hang
@@ -60,11 +59,6 @@ builder.Services.AddTransient<IDanhMucRepo, DanhMucRepo>();
 builder.Services.AddTransient<IThuongHieuRepo, ThuongHieuRepo>();
 builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 
-//Hình Ảnh
-//Hình ảnh
-builder.Services.AddTransient<IHinhAnhRepo, HinhAnhRepo>();
-
-
 // Sản Phẩm Chi Tiết
 builder.Services.AddTransient<ISanPhamChiTietService, SanPhamChiTietService>();
 builder.Services.AddTransient<ISanPhamChiTietRepo, SanPhamChiTietRepo>();
@@ -84,7 +78,11 @@ builder.Services.AddTransient<IKichCoRepo, KichCoRepo > ();
 // Màu Sắc
 builder.Services.AddTransient<IMauSacService, MauSacService>();
 builder.Services.AddTransient<IMauSacRepo, MauSacRepo>();
+
+// Hình Ảnh
 builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
+builder.Services.AddTransient<IHinhAnhRepo, HinhAnhRepo>();
+
 //Promotion
 builder.Services.AddTransient<IPromotionRepo, PromotionRepo>();
 builder.Services.AddTransient<IPromotionService, PromotionService>();
