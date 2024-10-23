@@ -47,10 +47,25 @@ namespace APPMVC.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(IFormFile file)
+
         {
             try
             {
                 _logger.LogInformation($"Upload request started - File name: {file?.FileName}, File size: {file?.Length} bytes");
+
+
+            // Log the content type for debugging
+            _logger.LogInformation($"Received file: {file.FileName}, ContentType: {file.ContentType}");
+
+            var allowedTypes = new List<string> { "image/jpeg", "image/png", "image/gif" };
+            if (!allowedTypes.Contains(file.ContentType))
+            {
+                ModelState.AddModelError("file", "The selected file type is not supported.");
+                return View();
+            }
+
+            try
+            {
 
                 if (file == null || file.Length == 0)
                 {
