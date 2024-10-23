@@ -25,15 +25,16 @@
     <div class="col-md-6">
         <form asp-action="Upload" enctype="multipart/form-data" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-           
+            <input type="hidden" name="idSanPhamChiTiet" value="@Guid.Empty" />
+
             <div class="form-group mb-3">
                 <label for="file" class="control-label">Chọn Hình Ảnh</label>
                 <input type="file" id="file" name="file" class="form-control" accept="image/*" required />
             </div>
 
             <div class="form-group mb-3">
-                <input type="submit" value="Tải Lên" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Quay Lại Danh Sách</a>
+                <input type="submit" value="Upload" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
             </div>
         </form>
     </div>
@@ -52,7 +53,6 @@
     document.getElementById('file').onchange = function (evt) {
         var tgt = evt.target || window.event.srcElement,
             files = tgt.files;
-
         if (files && files.length) {
             var file = files[0];
             var url = URL.createObjectURL(file);
