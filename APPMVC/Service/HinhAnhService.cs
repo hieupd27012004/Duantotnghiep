@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using System.Net.Http.Headers;
+using System.IO;
+using System.Linq;
 
 namespace APPMVC.Service
 {
@@ -27,20 +30,39 @@ namespace APPMVC.Service
 
                 Console.WriteLine($"Preparing to upload HinhAnh: Id={hinhAnh.IdHinhAnh}, Type={hinhAnh.LoaiFileHinhAnh}, Size={hinhAnh.DataHinhAnh?.Length ?? 0} bytes");
 
-                var response = await _httpClient.PostAsJsonAsync("api/HinhAnh/UploadHinhAnh", hinhAnh);
+                // Create multipart form content
+                var content = new MultipartFormDataContent();
+
+                // Add the image data
+                var imageContent = new ByteArrayContent(hinhAnh.DataHinhAnh);
+                imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse(hinhAnh.LoaiFileHinhAnh);
+
+                // Add other properties as JSON
+                var metadata = new
+                {
+                    hinhAnh.IdHinhAnh,
+                    hinhAnh.LoaiFileHinhAnh
+                };
+                var metadataContent = new StringContent(
+                    System.Text.Json.JsonSerializer.Serialize(metadata),
+                    System.Text.Encoding.UTF8,
+                    "application/json"
+                );
+
+                // Get file extension from content type (e.g., "image/jpeg" -> ".jpeg")
+                var extension = "." + hinhAnh.LoaiFileHinhAnh.Split('/').Last();
+
+                content.Add(imageContent, "file", "image" + extension);
+                content.Add(metadataContent, "metadata");
+
+                var response = await _httpClient.PostAsync("api/HinhAnh/UploadHinhAnh", content);
 
                 Console.WriteLine($"Upload response status: {response.StatusCode}");
 
-                var content = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Response content: {content}");
+                var responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Response content: {responseContent}");
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine($"Upload failed. Status: {response.StatusCode}, Content: {content}");
-                    return false;
-                }
-
-                return true;
+                return response.IsSuccessStatusCode;
             }
             catch (HttpRequestException ex)
             {
