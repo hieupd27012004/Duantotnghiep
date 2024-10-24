@@ -17,12 +17,11 @@ namespace AppData.ViewModel
         public double? Gia { get; set; }
         public double? SoLuong { get; set; }
         public string? XuatXu { get; set; }
-        public Guid IdSanPhamChiTiet { get; set; }
+        public Guid? IdSanPhamChiTiet { get; set; }
         public List<HinhAnh>? hinhAnhs { get; set; }
-        public Guid? IdMauSac { get; set; }
 
         [NotMapped]
-        public List<IFormFile>? Files { get; set; }
+        public List<IFormFile>? Files { get; set; } = new List<IFormFile>();
     }
 
 }

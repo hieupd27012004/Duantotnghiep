@@ -21,15 +21,14 @@ namespace AppData.Model
 
 		//[Required(ErrorMessage = "Không Được Để Trống")]
 		public int? TrangThai { get; set; }
+        public Guid? IdSanPhamChiTiet { get; set; }
 
-		[Display(Name = "Upload File")]
-
-        public Guid? IdMauSac { get; set; }
+        [Display(Name = "Upload File")]
 
         [NotMapped]
-        public List<IFormFile> Files { get; set; }
+        public List<IFormFile>? Files { get; set; }
 
-        public virtual MauSac? MauSac { get; set; }
+        public virtual SanPhamChiTiet? SanPhamChiTiet { get; set; }
 
 	}
 }
