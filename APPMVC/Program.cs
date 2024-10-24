@@ -66,9 +66,14 @@ if (!app.Environment.IsDevelopment())
 	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 	app.UseHsts();
 }
-
+app.UseSession();
 
 app.UseHttpsRedirection();
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
 app.UseStaticFiles();
 
 app.UseCors("AllowAll");
@@ -79,18 +84,18 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
-    name: "default",
-    pattern: "{area=Admin}/{controller=HomeAdmin}/{action=Index}/{id?}");
+        name: "default",
+        pattern: "{area=Admin}/{controller=HomeAdmin}/{action=Index}/{id?}");
 
     endpoints.MapControllerRoute(
-    name: "areas",
-    pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}");
+        name: "areas",
+        pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}");
 
     // Cấu hình route cho area Customer
     endpoints.MapControllerRoute(
         name: "Client",
         pattern: "{area:exists}/{controller=HomeClient}/{action=Index}/{id?}",
         defaults: new { area = "Client", controller = "HomeClient", action = "Index" });
-
 });
+
 app.Run();

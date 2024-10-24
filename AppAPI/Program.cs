@@ -97,8 +97,11 @@ builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCo
 
 var app = builder.Build();
 
+app.UseStaticFiles();
 
+app.UseHttpsRedirection();
 
+app.UseAuthorization();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

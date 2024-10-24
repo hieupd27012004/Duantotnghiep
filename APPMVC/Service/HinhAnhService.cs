@@ -41,7 +41,9 @@ namespace APPMVC.Service
                 var metadata = new
                 {
                     hinhAnh.IdHinhAnh,
-                    hinhAnh.LoaiFileHinhAnh
+                    hinhAnh.LoaiFileHinhAnh,
+                    hinhAnh.TrangThai, // Include TrangThai
+                    hinhAnh.IdSanPhamChiTiet // Include IdSanPhamChiTiet
                 };
                 var metadataContent = new StringContent(
                     System.Text.Json.JsonSerializer.Serialize(metadata),
@@ -49,7 +51,7 @@ namespace APPMVC.Service
                     "application/json"
                 );
 
-                // Get file extension from content type (e.g., "image/jpeg" -> ".jpeg")
+                // Get file extension from content type
                 var extension = "." + hinhAnh.LoaiFileHinhAnh.Split('/').Last();
 
                 content.Add(imageContent, "file", "image" + extension);
@@ -67,13 +69,11 @@ namespace APPMVC.Service
             catch (HttpRequestException ex)
             {
                 Console.WriteLine($"HTTP request error when uploading HinhAnh: {ex.Message}");
-                Console.WriteLine($"Error details: {ex.InnerException?.Message}");
                 return false;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error when uploading HinhAnh: {ex.Message}");
-                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return false;
             }
         }
