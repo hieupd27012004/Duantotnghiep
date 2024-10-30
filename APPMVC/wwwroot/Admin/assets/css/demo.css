@@ -4,6 +4,11 @@
 ******************************************************************************/
 /* Thêm thuộc tính !important để override các thuộc tính CSS đang đè lên nó */
 /* Thêm lớp CSS mới để target vào icon edit */
+.image-display {
+    display: flex !important; /* Use flexbox for horizontal layout */
+    flex-direction: row !important; /* Align items in a row */
+    flex-wrap: wrap !important; /* Allow wrapping to the next line if necessary */
+}
 /*css phần chuyển trang*/
 .pagination {
     justify-content: center;

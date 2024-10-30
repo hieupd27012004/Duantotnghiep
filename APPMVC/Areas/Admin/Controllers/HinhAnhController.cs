@@ -52,6 +52,16 @@ namespace APPMVC.Controllers
             {
                 _logger.LogInformation($"Upload request started - File name: {file?.FileName}, File size: {file?.Length} bytes");
 
+                // Log the content type for debugging
+                _logger.LogInformation($"Received file: {file.FileName}, ContentType: {file.ContentType}");
+
+                var allowedTypes = new List<string> { "image/jpeg", "image/png", "image/gif" };
+                if (!allowedTypes.Contains(file.ContentType))
+                {
+                    ModelState.AddModelError("file", "The selected file type is not supported.");
+                    return View();
+                }
+
                 if (file == null || file.Length == 0)
                 {
                     _logger.LogWarning("Upload failed: File is null or empty");
@@ -78,6 +88,7 @@ namespace APPMVC.Controllers
                         IdHinhAnh = Guid.NewGuid(),
                         LoaiFileHinhAnh = file.ContentType,
                         DataHinhAnh = fileBytes,
+                        TrangThai = 1
                     };
 
                     _logger.LogInformation($"Created HinhAnh object - Id: {hinhAnh.IdHinhAnh}, ContentType: {hinhAnh.LoaiFileHinhAnh}");
@@ -113,6 +124,7 @@ namespace APPMVC.Controllers
 
             return View();
         }
+
 
         public async Task<IActionResult> Delete(Guid id)
         {

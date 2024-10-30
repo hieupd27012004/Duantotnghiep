@@ -2,6 +2,7 @@ using AppAPI.Service;
 using AppData;
 using APPMVC.IService;
 using APPMVC.Service;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -9,12 +10,26 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbcontext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10485760; // 10 MB
+});
 
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian tồn tại của session
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -42,16 +57,6 @@ builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCo
 builder.Services.AddTransient<IVoucherService, VoucherService>();
 
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", builder =>
-    {
-        builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
-});
 
 var app = builder.Build();
 app.UseSession();
@@ -62,9 +67,14 @@ if (!app.Environment.IsDevelopment())
 	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 	app.UseHsts();
 }
-
+app.UseSession();
 
 app.UseHttpsRedirection();
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
 app.UseStaticFiles();
 
 app.UseCors("AllowAll");
@@ -75,18 +85,18 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
-    name: "default",
-    pattern: "{area=Admin}/{controller=HomeAdmin}/{action=Index}/{id?}");
+        name: "default",
+        pattern: "{area=Admin}/{controller=HomeAdmin}/{action=Index}/{id?}");
 
     endpoints.MapControllerRoute(
-    name: "areas",
-    pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}");
+        name: "areas",
+        pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}");
 
     // Cấu hình route cho area Customer
     endpoints.MapControllerRoute(
         name: "Client",
         pattern: "{area:exists}/{controller=HomeClient}/{action=Index}/{id?}",
         defaults: new { area = "Client", controller = "HomeClient", action = "Index" });
-
 });
+
 app.Run();

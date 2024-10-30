@@ -14,7 +14,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card mb-4" style="padding: 20px">
-                    <form asp-action="Create">
+                    <form asp-action="Create" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input asp-for="SanPham.IdSanPham" class="form-control"  hidden>
                         <div class="form-group">
@@ -88,7 +88,7 @@
 
                                 {
                                             <div class="form-group">
-                                                <label asp-for="SelectedKichCoIds" class="control-label">Chọn Kích Cỡ</label>
+                                                <label asp-for="SelectedKichCoIds" class="control-label">Chọn Kích Cỡ:</label>
                                                 <div>
                                             @foreach (var kichCoOption in Model.KichCoOptions)
 
@@ -105,7 +105,7 @@
 
                                 {
                                             <div class="form-group">
-                                                <label asp-for="SelectedMauSacIds" class="control-label">Chọn Màu Sắc</label>
+                                                <label asp-for="SelectedMauSacIds" class="control-label">Chọn Màu Sắc:</label>
                                                 <div>
                                             @foreach (var mauSacOption in Model.MauSacOptions)
 
@@ -132,6 +132,8 @@
                                             <th>Giá</th>
                                             <th>Số Lượng</th>
                                             <th>Xuất Xứ</th>
+                                            <th>Hình ảnh</th>
+                                            <th>Hình ảnh mẫu</th>
                                         </tr>
                                     </thead>
                                     <tbody id="combinations-tbody">
@@ -145,7 +147,7 @@
                         <br />
                         <div class="form-group mb-3 d-flex justify-content-center">
                             <div class="mx-auto">
-                                <input type="submit" value="Create" class="btn btn-primary" />
+                                <input type="submit" value="Create" class="btn btn-primary" enctype="multipart/form-data" />
                                 <a asp-area="Admin" asp-action="Getall" class="btn btn-secondary">Back to List</a>
                             </div>
                         </div>
@@ -157,51 +159,89 @@
 </div>
 
 @section Scripts {
-        <script>
-            $(document).ready(function () {
-                function updateCombinations() {
-                    console.log("Updating combinations..."); // Debug log
-                    const selectedKichCoIds = $("input[name='SelectedKichCoIds']:checked").map(function () {
-                        return $(this).next("label").text();
-                    }).get();
+    <script>
+        $(document).ready(function () {
+            let combinationIndex = 0; 
+            const kichCoNames = {};
+            const mauSacNames = {}; 
 
-                    const selectedMauSacIds = $("input[name='SelectedMauSacIds']:checked").map(function () {
-                        return $(this).next("label").text();
-                    }).get();
+            $("input[name='SelectedKichCoIds']").each(function() {
+                kichCoNames[$(this).val()] = $(this).next('label').text(); 
+            });
 
-                    // Get product name from input
-                    const tenSanPham = $("input[name='SanPham.TenSanPham']").val();
+            $("input[name='SelectedMauSacIds']").each(function() {
+                mauSacNames[$(this).val()] = $(this).next('label').text(); 
+            })
 
-                    console.log("Selected Kich Co: ", selectedKichCoIds);
-                    console.log("Selected Mau Sac: ", selectedMauSacIds);
+            function updateCombinations() {
+                const selectedKichCoIds = $("input[name='SelectedKichCoIds']:checked").map(function () {
+                    return $(this).val(); 
+                }).get();
 
-                    const combinationsTbody = $("#combinations-tbody");
-                    combinationsTbody.empty();
+                const selectedMauSacIds = $("input[name='SelectedMauSacIds']:checked").map(function () {
+                    return $(this).val(); 
+                }).get();
 
-                    if (selectedKichCoIds.length > 0 && selectedMauSacIds.length > 0) {
-                        let index = 0; // Initialize index
-                        selectedKichCoIds.forEach(function (kichCo) {
-                            selectedMauSacIds.forEach(function (mauSac) {
-                                const row = $("<tr>");
-                                row.append($("<td>").text(tenSanPham));
-                                row.append($("<td>").text(kichCo));
-                                row.append($("<td>").text(mauSac));
-                                row.append($("<td>").append($("<input type='number' name='Combinations[" + index + "].Gia' class='form-control d-inline' style='width: auto; display: inline-block;' value='100000' placeholder='Giá'>")));
-                                row.append($("<td>").append($("<input type='number' name='Combinations[" + index + "].SoLuong' class='form-control d-inline' style='width: auto; display: inline-block;' value='10' placeholder='Số lượng'>")));
-                                row.append($("<td>").append($("<input type='text' name='Combinations[" + index + "].XuatXu' class='form-control d-inline' style='width: auto; display: inline-block;' value='Việt Nam' placeholder='Xuất xứ'>")));
-                                combinationsTbody.append(row);
+                const tenSanPham = $("input[name='SanPham.TenSanPham']").val();
+                const combinationsContainer = $("#combinations");
+                combinationsContainer.empty();
+                combinationIndex = 0;
 
-                                index++; // Increment index for the next combination
-                            });
+                if (selectedKichCoIds.length > 0 && selectedMauSacIds.length > 0) {
+                    const headerRow = $("<tr><th>Tên Sản Phẩm</th><th>Kích Cỡ</th><th>Màu Sắc</th><th>Giá</th><th>Số Lượng</th><th>Xuất Xứ</th><th>Hình ảnh</th><th>Hình ảnh mẫu</th></tr>");
+                    combinationsContainer.append("<strong>Các Tổ Hợp:</strong><table class='table table-bordered'><thead>" + headerRow.prop('outerHTML') + "</thead><tbody id='combinations-tbody'></tbody></table>");
+
+                    selectedMauSacIds.forEach(function (mauSacId) {
+                        selectedKichCoIds.forEach(function (kichCoId) {
+                            const row = $("<tr>");
+                            row.append($("<td>").text(tenSanPham));
+                            row.append($("<td>").text(kichCoNames[kichCoId])); 
+                            row.append($("<td>").text(mauSacNames[mauSacId])); 
+                            row.append($("<td>").append($("<input type='number' name='Combinations[" + combinationIndex + "].Gia' class='form-control' value='100000' placeholder='Giá'>")));
+                            row.append($("<td>").append($("<input type='number' name='Combinations[" + combinationIndex + "].SoLuong' class='form-control' value='10' placeholder='Số lượng'>")));
+                            row.append($("<td>").append($("<input type='text' name='Combinations[" + combinationIndex + "].XuatXu' class='form-control' value='Việt Nam' placeholder='Xuất xứ'>")));
+
+                            const imageCell = $("<td><input type='file' name='Combinations[" + combinationIndex + "].Files' class='form-control image-upload' multiple></td>");
+                            const sampleImageCell = $("<td class='image-display' style='display: flex; flex-direction: row; flex-wrap: wrap;'></td>");
+                            row.append(imageCell).append(sampleImageCell);
+
+                            $("#combinations-tbody").append(row);
+                            combinationIndex++; 
                         });
-                    } else {
-                        combinationsTbody.append("<tr><td colspan='6'>Không có tổ hợp nào được chọn.</td></tr>");
-                    }
+                    });
+                } else {
+                    combinationsContainer.append("<p>Không có tổ hợp nào được chọn.</p>");
                 }
 
-                // Event listeners for checkboxes
-                $("input[name='SelectedKichCoIds']").change(updateCombinations);
-                $("input[name='SelectedMauSacIds']").change(updateCombinations);
-            });
-        </script>
+                $(".image-upload").change(function () {
+                    const files = this.files;
+                    const imageContainer = $(this).closest("tr").find(".image-display");
+                    imageContainer.empty();
+
+                    if (files.length > 3) {
+                        alert("Bạn chỉ có thể chọn tối đa 3 hình ảnh.");
+                        $(this).val(""); // Reset file input
+                        return;
+                    }
+
+                    $.each(files, function (index, file) {
+                        if (!file.type.match('image.*')) {
+                            alert("Chỉ có thể chọn các tệp hình ảnh.");
+                            return;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            const image = $("<img src='" + e.target.result + "' width='100' height='100' style='margin-right: 5px;'>"); 
+                            imageContainer.append(image);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                });
+            }
+
+            $("input[name='SelectedKichCoIds']").change(updateCombinations);
+            $("input[name='SelectedMauSacIds']").change(updateCombinations);
+        });
+    </script>
 }

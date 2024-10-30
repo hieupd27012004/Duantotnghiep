@@ -23,10 +23,19 @@ namespace AppAPI.Controllers
                 return BadRequest("No file was uploaded.");
             }
 
+            // Deserialize metadata
+            var hinhAnhMetadata = System.Text.Json.JsonSerializer.Deserialize<HinhAnh>(metadata);
+            if (hinhAnhMetadata == null)
+            {
+                return BadRequest("Invalid metadata.");
+            }
+
             var hinhAnh = new HinhAnh
             {
                 LoaiFileHinhAnh = file.ContentType,
-                DataHinhAnh = await ReadFileAsync(file)
+                DataHinhAnh = await ReadFileAsync(file),
+                IdSanPhamChiTiet = hinhAnhMetadata.IdSanPhamChiTiet,
+                TrangThai = hinhAnhMetadata.TrangThai
             };
 
             var result = await _service.UploadAsync(hinhAnh);

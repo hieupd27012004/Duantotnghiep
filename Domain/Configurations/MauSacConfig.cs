@@ -14,6 +14,38 @@ namespace AppData.Configurations
 		public void Configure(EntityTypeBuilder<MauSac> builder)
 		{
 			builder.HasKey(p => p.IdMauSac);
-		}
+            builder.HasData(
+                      new MauSac
+                      {
+                          IdMauSac = Guid.NewGuid(),
+                          TenMauSac = "Red",
+                          NgayCapNhat = DateTime.Now,
+                          NgayTao = DateTime.Now,
+                          NguoiCapNhat = "Admin",
+                          NguoiTao = "Admin",
+                          KichHoat = 1
+                      },
+                      new MauSac
+                      {
+                          IdMauSac = Guid.NewGuid(),
+                          TenMauSac = "Green",
+                          NgayCapNhat = DateTime.Now,
+                          NgayTao = DateTime.Now,
+                          NguoiCapNhat = "Admin",
+                          NguoiTao = "Admin",
+                          KichHoat = 1
+                      },
+                      new MauSac
+                      {
+                          IdMauSac = Guid.NewGuid(),
+                          TenMauSac = "Blue",
+                          NgayCapNhat = DateTime.Now,
+                          NgayTao = DateTime.Now,
+                          NguoiCapNhat = "Admin",
+                          NguoiTao = "Admin",
+                          KichHoat = 1
+                      }
+                  );
+        }
 	}
 }

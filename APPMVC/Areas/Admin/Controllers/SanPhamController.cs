@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Xml.Linq;
 using Microsoft.EntityFrameworkCore;
 using AppData.ViewModel;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 
 namespace APPMVC.Areas.Admin.Controllers
 {
@@ -23,18 +25,21 @@ namespace APPMVC.Areas.Admin.Controllers
         private readonly IKichCoService _kichCoService;
         private readonly ISanPhamChiTietMauSacService _sanPhamChiTietMauSacService;
         private readonly ISanPhamChiTietKichCoService _sanPhamChiTietKichCoService;
+        private readonly IHinhAnhService _hinhAnhService;
 
-        public SanPhamController(ISanPhamService sanPhamService,
-                                 ISanPhamChiTietService sanPhamChiTietService,
-                                 IDeGiayService deGiayService,
-                                 IDanhMucService danhMucService,
-                                 IThuongHieuService thuongHieuService,
-                                 IChatLieuService chatLieuService,
-                                 IKieuDangService kieuDangService,
-                                 IMauSacService mauSacService,
-                                 IKichCoService kichCoService,
-                                 ISanPhamChiTietMauSacService sanPhamChiTietMauSacService,
-                                 ISanPhamChiTietKichCoService sanPhamChiTietKichCoService)
+        public SanPhamController(
+            ISanPhamService sanPhamService,
+            ISanPhamChiTietService sanPhamChiTietService,
+            IDeGiayService deGiayService,
+            IDanhMucService danhMucService,
+            IThuongHieuService thuongHieuService,
+            IChatLieuService chatLieuService,
+            IKieuDangService kieuDangService,
+            IMauSacService mauSacService,
+            IKichCoService kichCoService,
+            ISanPhamChiTietMauSacService sanPhamChiTietMauSacService,
+            ISanPhamChiTietKichCoService sanPhamChiTietKichCoService,
+            IHinhAnhService hinhAnhService)
         {
             _sanPhamCTService = sanPhamChiTietService;
             _sanPhamService = sanPhamService;
@@ -47,36 +52,37 @@ namespace APPMVC.Areas.Admin.Controllers
             _kichCoService = kichCoService;
             _sanPhamChiTietMauSacService = sanPhamChiTietMauSacService;
             _sanPhamChiTietKichCoService = sanPhamChiTietKichCoService;
+            _hinhAnhService = hinhAnhService;
         }
+
         [HttpGet]
         public async Task<IActionResult> GetAll(string? name, int page = 1)
         {
             page = page < 1 ? 1 : page;
             int pageSize = 5;
 
-            // Fetch all products based on the name filter
             var sanPhams = await _sanPhamService.GetSanPhams(name);
             var sanPhamViewModels = new List<SanPhamViewModel>();
 
             foreach (var sanPham in sanPhams)
             {
-                // Fetch product details for the current product
                 var sanPhamChiTietList = await _sanPhamCTService.GetSanPhamChiTietBySanPhamId(sanPham.IdSanPham);
-
-                // Calculate total quantity for this specific product
-                double totalQuantity = sanPhamChiTietList.Sum(s => s.SoLuong ?? 0); // Assuming SoLuong is the property holding the quantity
+                double totalQuantity = sanPhamChiTietList.Sum(s => s.SoLuong ?? 0);
 
                 sanPhamViewModels.Add(new SanPhamViewModel
                 {
                     SanPham = sanPham,
-                    TotalQuantity = totalQuantity, // Set the total quantity
-                    SanPhamChiTiet = sanPhamChiTietList // Directly assign the list
+                    TotalQuantity = totalQuantity,
+                    SanPhamChiTiet = sanPhamChiTietList
                 });
             }
 
-            var pagedSanPhamViewModels = sanPhamViewModels.ToPagedList(page, pageSize);
+            var sortedSanPhamViewModels = sanPhamViewModels.OrderByDescending(s => s.SanPham.NgayTao).ToList();
+
+            var pagedSanPhamViewModels = sortedSanPhamViewModels.ToPagedList(page, pageSize);
             return View(pagedSanPhamViewModels);
         }
+
         public async Task<IActionResult> Create()
         {
             await LoadViewBags();
@@ -90,14 +96,9 @@ namespace APPMVC.Areas.Admin.Controllers
                 KichHoat = 1
             };
 
-            var sanPhamChiTiet = new List<SanPhamChiTiet>
-            {
-            };
-
             var viewModel = new SanPhamViewModel
             {
                 SanPham = sanPham,
-                SanPhamChiTiet = sanPhamChiTiet,
                 KichCoOptions = await GetKichCoOptions() ?? new List<SelectListItem>(),
                 MauSacOptions = await GetMauSacOptions() ?? new List<SelectListItem>()
             };
@@ -136,17 +137,17 @@ namespace APPMVC.Areas.Admin.Controllers
 
             try
             {
-                // Create the main product
                 await _sanPhamService.Create(viewModel.SanPham);
                 var idSanPham = viewModel.SanPham.IdSanPham;
 
-                // Create combinations
+                if (viewModel.Combinations == null || !viewModel.Combinations.Any())
+                {
+                    TempData["Error"] = "Không có tổ hợp nào được chọn.";
+                    return View(viewModel);
+                }
+
                 foreach (var combination in viewModel.Combinations)
                 {
-                    combination.Gia = combination.Gia > 0 ? combination.Gia : 100000; // Default price
-                    combination.SoLuong = combination.SoLuong > 0 ? combination.SoLuong : 10; // Default quantity
-                    combination.XuatXu = string.IsNullOrEmpty(combination.XuatXu) ? "Việt Nam" : combination.XuatXu; // Default origin
-
                     var sanPhamChiTiet = new SanPhamChiTiet
                     {
                         IdSanPhamChiTiet = Guid.NewGuid(),
@@ -162,10 +163,8 @@ namespace APPMVC.Areas.Admin.Controllers
                         KichHoat = 1
                     };
 
-                    // Save the new SanPhamChiTiet to the database
                     await _sanPhamCTService.Create(sanPhamChiTiet);
 
-                    // Create relationships for sizes and colors
                     foreach (var kichCoId in viewModel.SelectedKichCoIds)
                     {
                         await _sanPhamChiTietKichCoService.Create(new SanPhamChiTietKichCo
@@ -183,6 +182,27 @@ namespace APPMVC.Areas.Admin.Controllers
                             IdMauSac = Guid.Parse(mauSacId)
                         });
                     }
+
+                    if (combination.Files != null && combination.Files.Count > 0)
+                    {
+                        foreach (var file in combination.Files)
+                        {
+                            if (file.Length > 0)
+                            {
+                                var imageData = await ConvertFileToByteArray(file);
+                                var hinhAnh = new HinhAnh
+                                {
+                                    IdHinhAnh = Guid.NewGuid(),
+                                    LoaiFileHinhAnh = file.ContentType,
+                                    DataHinhAnh = imageData,
+                                    TrangThai = 1, // Ensure this is set correctly
+                                    IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet // Ensure this is not null
+                                };
+
+                                await _hinhAnhService.UploadAsync(hinhAnh);
+                            }
+                        }
+                    }
                 }
 
                 TempData["Success"] = "Thêm mới thành công";
@@ -196,6 +216,15 @@ namespace APPMVC.Areas.Admin.Controllers
 
             await LoadViewBags();
             return View(viewModel);
+        }
+
+        private async Task<byte[]> ConvertFileToByteArray(IFormFile file)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+                return memoryStream.ToArray();
+            }
         }
 
         private async Task LoadViewBags()
