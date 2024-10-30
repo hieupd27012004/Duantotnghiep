@@ -68,6 +68,9 @@ namespace AppData
 
 		public DbSet<TrangThai> trangThais { get; set; }
 
+		public DbSet<Voucher> vouchers { get; set; }
+		public DbSet<LichSuSuDungVoucher> LichSuSuDungVouchers { get; set; }
+
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 			optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=daantotnghiep;Trusted_Connection=True;TrustServerCertificate=True;");
