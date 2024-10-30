@@ -1,4 +1,5 @@
 
+using AppAPI.Hubs;
 using AppAPI.IRepository;
 using AppAPI.IService;
 using AppAPI.Repository;
@@ -89,6 +90,10 @@ builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
 builder.Services.AddTransient<IPromotionRepo, PromotionRepo>();
 builder.Services.AddTransient<IPromotionService, PromotionService>();
 
+//Voucher
+builder.Services.AddTransient<IVoucherRepo, VoucherRepo>();
+builder.Services.AddTransient<IVoucherService, VoucherService>();
+
 // Sản Phẩm Chi Tiết Màu Sắc
 builder.Services.AddTransient<ISanPhamChiTietMauSacRepo, SanPhamChiTietMauSacRepo>();
 builder.Services.AddTransient<ISanPhamChiTietMauSacService, SanPhamChiTietMauSacService>();
@@ -96,6 +101,10 @@ builder.Services.AddTransient<ISanPhamChiTietMauSacService, SanPhamChiTietMauSac
 // Sản Phẩm Chi Tiết Kích Cỡ
 builder.Services.AddTransient<ISanPhamChiTietKichCoRepo, SanPhamChiTietKichCoRepo>();
 builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCoService>();
+
+//Check thời gian áp dụng voucher
+builder.Services.AddHostedService<VoucherStatusUpdater>();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -107,6 +116,13 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
+
+app.UseRouting();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<VoucherHub>("/voucherHub");
+});
 
 
 app.UseCors("AllowAll");

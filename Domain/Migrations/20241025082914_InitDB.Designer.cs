@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
-    [Migration("20241020060527_duan")]
-    partial class duan
+    [Migration("20241025082914_InitDB")]
+    partial class InitDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -398,7 +398,8 @@ namespace AppData.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("HoTen")
                         .HasColumnType("nvarchar(max)");
@@ -407,7 +408,8 @@ namespace AppData.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("MatKhau")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime?>("NgayCapNhat")
                         .HasColumnType("datetime2");
@@ -523,6 +525,33 @@ namespace AppData.Migrations
                     b.HasIndex("IdHoaDon");
 
                     b.ToTable("lichSuHoaDons");
+                });
+
+            modelBuilder.Entity("AppData.Model.LichSuSuDungVoucher", b =>
+                {
+                    b.Property<Guid>("IdVoucher")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IdKhachHang")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IdLichSuVoucher")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IdOrder")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("NgaySuDungVoucher")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("IdVoucher", "IdKhachHang");
+
+                    b.HasIndex("IdKhachHang");
+
+                    b.HasIndex("IdVoucher", "IdKhachHang", "IdOrder")
+                        .IsUnique();
+
+                    b.ToTable("LichSuSuDungVouchers");
                 });
 
             modelBuilder.Entity("AppData.Model.MauSac", b =>
@@ -729,6 +758,7 @@ namespace AppData.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double?>("Gia")
+                        .IsRequired()
                         .HasColumnType("float");
 
                     b.Property<string>("GioiTinh")
@@ -753,9 +783,11 @@ namespace AppData.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double?>("SoLuong")
+                        .IsRequired()
                         .HasColumnType("float");
 
                     b.Property<string>("XuatXu")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdSanPhamChiTiet");
@@ -840,6 +872,51 @@ namespace AppData.Migrations
                     b.HasKey("IdTrangThai");
 
                     b.ToTable("trangThais");
+                });
+
+            modelBuilder.Entity("AppData.Model.Voucher", b =>
+                {
+                    b.Property<Guid>("VoucherId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("GiaTriDonHangToiThieu")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GiaTriGiam")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LoaiGiamGia")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MaVoucher")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MoTaVoucher")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("NgayBatDau")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NgayKetThuc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SoLuongVoucherConLai")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoTienToiDa")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TongSoLuongVoucher")
+                        .HasColumnType("int");
+
+                    b.HasKey("VoucherId");
+
+                    b.ToTable("vouchers");
                 });
 
             modelBuilder.Entity("AppData.Model.DiaChi", b =>
@@ -971,6 +1048,25 @@ namespace AppData.Migrations
                         .IsRequired();
 
                     b.Navigation("HoaDon");
+                });
+
+            modelBuilder.Entity("AppData.Model.LichSuSuDungVoucher", b =>
+                {
+                    b.HasOne("AppData.Model.KhachHang", "KhachHang")
+                        .WithMany("LichSuSuDungVouchers")
+                        .HasForeignKey("IdKhachHang")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AppData.Model.Voucher", "Voucher")
+                        .WithMany("LichSuSuDungVouchers")
+                        .HasForeignKey("IdVoucher")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("KhachHang");
+
+                    b.Navigation("Voucher");
                 });
 
             modelBuilder.Entity("AppData.Model.NhanVien", b =>
@@ -1122,6 +1218,8 @@ namespace AppData.Migrations
                     b.Navigation("DiaChis");
 
                     b.Navigation("HoaDons");
+
+                    b.Navigation("LichSuSuDungVouchers");
                 });
 
             modelBuilder.Entity("AppData.Model.KichCo", b =>
@@ -1181,6 +1279,11 @@ namespace AppData.Migrations
                     b.Navigation("GiaoDich");
 
                     b.Navigation("HoaDons");
+                });
+
+            modelBuilder.Entity("AppData.Model.Voucher", b =>
+                {
+                    b.Navigation("LichSuSuDungVouchers");
                 });
 #pragma warning restore 612, 618
         }

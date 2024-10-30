@@ -14,6 +14,19 @@ namespace AppData.Configurations
 		public void Configure(EntityTypeBuilder<KhachHang> builder)
 		{
 			builder.HasKey(p => p.IdKhachHang);
-		}
+
+            builder.Property(p => p.Email)
+            .HasMaxLength(100);
+
+            builder.Property(p => p.SoDienThoai)
+                .HasMaxLength(10);
+
+            builder.Property(p => p.MatKhau)
+                .HasMaxLength(200);
+
+            builder.HasMany(kh => kh.LichSuSuDungVouchers)
+                .WithOne(lsv => lsv.KhachHang)
+                .HasForeignKey(lsv => lsv.IdKhachHang);
+        }
 	}
 }

@@ -39,6 +39,7 @@ builder.Services.AddTransient<IChucVuService, ChucVuService>();
 
 builder.Services.AddTransient<ISanPhamChiTietMauSacService, SanPhamChiTietMauSacService>();
 builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCoService>();
+builder.Services.AddTransient<IVoucherService, VoucherService>();
 
 
 builder.Services.AddCors(options =>

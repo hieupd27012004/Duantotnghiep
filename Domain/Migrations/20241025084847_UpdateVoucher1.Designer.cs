@@ -4,6 +4,7 @@ using AppData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
-    partial class AppDbcontextModelSnapshot : ModelSnapshot
+    [Migration("20241025084847_UpdateVoucher1")]
+    partial class UpdateVoucher1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -902,16 +904,6 @@ namespace AppData.Migrations
 
                     b.Property<DateTime>("NgayTao")
                         .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("NgayUpdate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("NguoiTao")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NguoiUpdate")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SoLuongVoucherConLai")
                         .HasColumnType("int");
