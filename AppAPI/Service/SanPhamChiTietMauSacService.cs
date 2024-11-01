@@ -44,5 +44,10 @@ namespace AppAPI.Service
         {
             return _repository.Delete(id);
         }
+
+        public async Task<List<MauSac>> GetMauSacIdsBySanPhamChiTietId(Guid sanPhamChiTietId)
+        {
+            return await _repository.GetMauSacIdsBySanPhamChiTietId(sanPhamChiTietId);
+        }
     }
 }

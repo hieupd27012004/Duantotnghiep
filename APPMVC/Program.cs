@@ -58,7 +58,6 @@ builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCo
 
 
 var app = builder.Build();
-app.UseSession();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

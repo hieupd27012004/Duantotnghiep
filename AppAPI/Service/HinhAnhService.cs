@@ -68,5 +68,10 @@ namespace AppAPI.Service
                 return null;
             }
         }
+
+        public async Task<List<HinhAnh>> GetHinhAnhsBySanPhamChiTietId(Guid sanPhamChiTietId)
+        {
+            return await _repository.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTietId);
+        }
     }
 }

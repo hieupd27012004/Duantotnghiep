@@ -73,5 +73,20 @@ namespace AppAPI.Repository
         {
             return await _context.hinhAnh.ToListAsync();
         }
+
+        public async Task<List<HinhAnh>> GetHinhAnhsBySanPhamChiTietId(Guid sanPhamChiTietId)
+        {
+            if (sanPhamChiTietId == Guid.Empty)
+            {
+                Console.WriteLine("Invalid SanPhamChiTietId: Guid.Empty");
+                return new List<HinhAnh>(); 
+            }
+
+            var hinhAnhs = await _context.hinhAnh
+                                          .Where(h => h.IdSanPhamChiTiet == sanPhamChiTietId)
+                                          .ToListAsync();
+
+            return hinhAnhs;
+        }
     }
 }

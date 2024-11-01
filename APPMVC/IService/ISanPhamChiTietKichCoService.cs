@@ -15,5 +15,7 @@ namespace APPMVC.IService
 
         // Delete a KichCo by ID
         Task Delete(Guid id);
+
+        Task<List<KichCo>> GetKichCoIdsBySanPhamChiTietId(Guid sanPhamChiTietId);
     }
 }

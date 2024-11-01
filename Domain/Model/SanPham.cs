@@ -10,10 +10,11 @@ namespace AppData.Model
 {
 	public class SanPham
 	{
+    
+        //[Required(ErrorMessage = "Không Được Để Trống")]
+        public Guid IdSanPham { get; set; }
 		//[Required(ErrorMessage = "Không Được Để Trống")]
-		public Guid IdSanPham { get; set; }
-		//[Required(ErrorMessage = "Không Được Để Trống")]
-		[CheckTenSanPham]
+		//[CheckTenSanPham]
 		public string? TenSanPham { get; set; }
 		[DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
 		[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
@@ -35,11 +36,11 @@ namespace AppData.Model
 		//[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
 		//[Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
 		public double Sale { get; set; }
-		public Guid? IdChatLieu { get; set; }
-		public Guid? IdKieuDang { get; set; }
-		public Guid? IdThuongHieu { get; set; }
-		public Guid? IdDanhMuc { get; set; }
-        public Guid? IdDeGiay { get; set; }
+		public Guid IdChatLieu { get; set; }
+		public Guid IdKieuDang { get; set; }
+		public Guid IdThuongHieu { get; set; }
+		public Guid IdDanhMuc { get; set; }
+        public Guid IdDeGiay { get; set; }
 
         public virtual DeGiay? DeGiay { get; set; }
         public virtual ChatLieu? ChatLieu { get; set; }

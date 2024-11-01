@@ -4,10 +4,12 @@ namespace AppAPI.IService
 {
     public interface ISanPhamService
     {
-        List<SanPham> GetSanPham(string? name);
-        SanPham GetSanPhamById(Guid id);
-        bool Create(SanPham sanPham);
-        bool Update(SanPham sanPham);
-        bool Delete(Guid id);
+        Task<IEnumerable<SanPham>> GetSanPhamAsync(string? name); // Changed List<SanPham> to IEnumerable<SanPham>
+        Task<SanPham?> GetSanPhamByIdAsync(Guid id);
+        Task<bool> CreateAsync(SanPham sanPham);
+        Task<bool> UpdateAsync(SanPham sanPham);
+        Task<bool> DeleteAsync(Guid id);
+
+        Task<ThuongHieu?> GetThuongHieuBySanPhamIdAsync(Guid sanPhamId);
     }
 }

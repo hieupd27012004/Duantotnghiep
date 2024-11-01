@@ -1,6 +1,7 @@
 ﻿using AppAPI.IRepository;
 using AppData;
 using AppData.Model;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,6 +48,18 @@ namespace AppAPI.Repository
                 return _context.SaveChanges() > 0; // Returns true if changes were saved
             }
             return false; // Return false if the item was not found
+        }
+
+        public async Task<List<MauSac>> GetMauSacIdsBySanPhamChiTietId(Guid sanPhamChiTietId)
+        {
+            var result = await _context.sanPhamChiTietMausacs
+             .Where(m => m.IdSanPhamChiTiet == sanPhamChiTietId)
+             .Select(m => m.MauSac)
+             .ToListAsync();
+
+          
+            return result;
+
         }
     }
 }

@@ -15,5 +15,7 @@ namespace AppAPI.IRepository
 
         // Delete a Mau Sac by ID
         bool Delete(Guid id);
+
+        Task<List<MauSac>> GetMauSacIdsBySanPhamChiTietId(Guid sanPhamChiTietId);
     }
 }
