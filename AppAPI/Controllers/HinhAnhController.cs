@@ -89,6 +89,17 @@ namespace AppAPI.Controllers
             var hinhAnhs = await _service.GetHinhAnhsAsync();
             return Ok(hinhAnhs);
         }
+
+        [HttpGet("GetHinhAnhsBySanPhamChiTietId")]
+        public async Task<IActionResult> GetHinhAnhsBySanPhamChiTietId(Guid sanPhamChiTietId)
+        {
+            var hinhAnhs = await _service.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTietId);
+            if (hinhAnhs == null || !hinhAnhs.Any())
+            {
+                return NotFound("No images found for the specified product detail ID.");
+            }
+
+            return Ok(hinhAnhs);
+        }
     }
 }
-//Test push

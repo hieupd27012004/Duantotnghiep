@@ -21,5 +21,7 @@ namespace AppAPI.IRepository
 
         // Xóa một Kich Co theo ID
         Task<bool> DeleteAsync(Guid id);
+
+        Task<List<KichCo>> GetKichCoIdsBySanPhamChiTietId(Guid sanPhamChiTietId);
     }
 }

@@ -20,12 +20,12 @@ namespace AppData.Configurations
 				   .HasForeignKey(p => p.IdDanhMuc);
 
 
-			builder.HasOne(p => p.ThuongHieu)
+            builder.HasOne(p => p.ThuongHieu)
 				   .WithMany(p => p.SanPhams)
 				   .HasForeignKey(p => p.IdThuongHieu);
 
 
-			builder.HasOne(p => p.KieuDang)
+            builder.HasOne(p => p.KieuDang)
 				   .WithMany(p => p.SanPhams)
 				   .HasForeignKey(p => p.IdKieuDang);
 

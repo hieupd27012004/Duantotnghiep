@@ -11,5 +11,7 @@ namespace AppAPI.IRepository
         Task<HinhAnh> GetHinhAnhByIdAsync(Guid id);
         Task<bool> UploadAsync(HinhAnh hinhAnh);
         Task<bool> DeleteAsync(Guid id);
+
+        Task<List<HinhAnh>> GetHinhAnhsBySanPhamChiTietId(Guid sanPhamChiTietId);
     }
 }

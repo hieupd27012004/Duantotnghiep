@@ -25,25 +25,25 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <label asp-for="SanPham.IdChatLieu" class="control-label">Chất liệu</label>
-                                <select asp-for="SanPham.IdChatLieu" class="form-control" asp-items="@(ViewBag.IdChatLieu)"></select>
+                                <select asp-for="IdChatLieu" class="form-control" asp-items="ViewBag.IdChatLieu"></select>
                             </div>
                             <div class="col">
                                 <label asp-for="SanPham.IdDeGiay" class="control-label">Đế giày</label>
-                                <select asp-for="SanPham.IdDeGiay" class="form-control" asp-items="@(ViewBag.IdDeGiay)"></select>
+                                <select asp-for="IdDeGiay" class="form-control" asp-items="@(ViewBag.IdDeGiay)"></select>
                             </div>
                             <div class="col">
                                 <label asp-for="SanPham.IdDanhMuc" class="control-label">Danh mục</label>
-                                <select asp-for="SanPham.IdDanhMuc" class="form-control" asp-items="@(ViewBag.IdDanhMuc)"></select>
+                                <select asp-for="IdDanhMuc" class="form-control" asp-items="@(ViewBag.IdDanhMuc)"></select>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col">
                                 <label asp-for="SanPham.IdThuongHieu" class="control-label">Thương hiệu</label>
-                                <select asp-for="SanPham.IdThuongHieu" class="form-control" asp-items="@(ViewBag.IdThuongHieu)" ></select>
+                                <select asp-for="IdThuongHieu" class="form-control" asp-items="@(ViewBag.IdThuongHieu)" ></select>
                             </div>
                             <div class="col">
                                 <label asp-for="SanPham.IdKieuDang" class="control-label">Kiểu dáng</label>
-                                <select asp-for="SanPham.IdKieuDang" class="form-control" asp-items="@(ViewBag.IdKieuDang)" ></select>
+                                <select asp-for="IdKieuDang" class="form-control" asp-items="@(ViewBag.IdKieuDang)" ></select>
                             </div>
                         </div>
                         <div class="form-group" hidden>

@@ -57,5 +57,19 @@ namespace AppAPI.Service
         {
             await _httpClient.DeleteAsync($"api/SanPhamChiTietMauSac/Xoa?id={id}");
         }
+
+        public async Task<List<MauSac>> GetMauSacIdsBySanPhamChiTietId(Guid sanPhamChiTietId)
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<MauSac>>($"api/SanPhamChiTietMauSac/mauSacIds?id={sanPhamChiTietId}");
+            }
+            catch (HttpRequestException ex)
+            {
+                // Handle error here
+                Console.WriteLine($"Error fetching Mau Sac IDs: {ex.Message}");
+                return new List<MauSac>(); // Return an empty list or handle accordingly
+            }
+        }
     }
 }

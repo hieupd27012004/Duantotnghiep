@@ -2,6 +2,8 @@
 using AppData.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace AppAPI.Controllers
 {
@@ -18,11 +20,11 @@ namespace AppAPI.Controllers
 
         // GET: api/SanPham/getall
         [HttpGet("getall")]
-        public IActionResult GetAll(string? name)
+        public async Task<IActionResult> GetAll(string? name)
         {
             try
             {
-                var sanPham = _service.GetSanPham(name);
+                var sanPham = await _service.GetSanPhamAsync(name); // Await the async method
                 return Ok(sanPham);
             }
             catch (Exception ex)
@@ -33,26 +35,36 @@ namespace AppAPI.Controllers
 
         // GET: api/SanPham/getbyid?id=<guid>
         [HttpGet("getbyid")]
-        public IActionResult Get(Guid id)
+        public async Task<IActionResult> Get(Guid id)
         {
             try
             {
-                var sanPham = _service.GetSanPhamById(id);
+                // Kiểm tra ID có hợp lệ không
+                if (id == Guid.Empty)
+                {
+                    return BadRequest("ID cannot be empty.");
+                }
+
+                Console.WriteLine($"Fetching product with ID: {id}");
+                var sanPham = await _service.GetSanPhamByIdAsync(id); // Gọi phương thức async
+
                 if (sanPham == null)
                 {
                     return NotFound($"SanPham with ID {id} not found.");
                 }
+
                 return Ok(sanPham);
             }
             catch (Exception ex)
             {
+                // Ghi lại ngoại lệ (cân nhắc sử dụng một framework ghi nhật ký)
+                Console.WriteLine($"An error occurred while retrieving the product: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
         // POST: api/SanPham/them
         [HttpPost("them")]
-        public IActionResult Post(SanPham sanPham)
+        public async Task<IActionResult> Post([FromBody] SanPham sanPham) // Use [FromBody] to bind the request body
         {
             if (!ModelState.IsValid)
             {
@@ -61,8 +73,12 @@ namespace AppAPI.Controllers
 
             try
             {
-                _service.Create(sanPham);
-                return Ok(sanPham);
+                var result = await _service.CreateAsync(sanPham); // Await the async method
+                if (!result)
+                {
+                    return BadRequest("Failed to create the product.");
+                }
+                return CreatedAtAction(nameof(Get), new { id = sanPham.IdSanPham }, sanPham); // Assuming SanPham has an Id property
             }
             catch (Exception ex)
             {
@@ -72,7 +88,7 @@ namespace AppAPI.Controllers
 
         // PUT: api/SanPham/Sua
         [HttpPut("Sua")]
-        public IActionResult Put(SanPham sanPham)
+        public async Task<IActionResult> Put([FromBody] SanPham sanPham) // Use [FromBody] to bind the request body
         {
             if (!ModelState.IsValid)
             {
@@ -81,7 +97,11 @@ namespace AppAPI.Controllers
 
             try
             {
-                _service.Update(sanPham);
+                var result = await _service.UpdateAsync(sanPham); // Await the async method
+                if (!result)
+                {
+                    return BadRequest("Failed to update the product.");
+                }
                 return Ok(sanPham);
             }
             catch (Exception ex)
@@ -92,15 +112,38 @@ namespace AppAPI.Controllers
 
         // DELETE: api/SanPham/Xoa?id=<guid>
         [HttpDelete("Xoa")]
-        public IActionResult Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                _service.Delete(id);
-                return Ok();
+                var result = await _service.DeleteAsync(id); // Await the async method
+                if (!result)
+                {
+                    return NotFound($"SanPham with ID {id} not found.");
+                }
+                return NoContent(); // 204 No Content
             }
             catch (Exception ex)
             {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("getthuonghieu")]
+        public async Task<IActionResult> GetThuongHieuBySanPhamId(Guid sanPhamId)
+        {
+            try
+            {
+                var thuongHieu = await _service.GetThuongHieuBySanPhamIdAsync(sanPhamId);
+                if (thuongHieu == null)
+                {
+                    return NotFound($"ThuongHieu for SanPham with ID {sanPhamId} not found.");
+                }
+                return Ok(thuongHieu);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while retrieving the brand for product ID {sanPhamId}: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }

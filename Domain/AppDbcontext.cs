@@ -73,7 +73,7 @@ namespace AppData
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
-			optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=daantotnghiep;Trusted_Connection=True;TrustServerCertificate=True;");
+			optionsBuilder/*.UseLazyLoadingProxies()*/.UseSqlServer("Server=.\\SQLEXPRESS;Database=daantotnghiep;Trusted_Connection=True;TrustServerCertificate=True;");
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

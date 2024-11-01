@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using System.IO;
 using System.Linq;
+using System.Net;
 
 namespace APPMVC.Service
 {
@@ -139,6 +140,34 @@ namespace APPMVC.Service
             {
                 Console.WriteLine($"Error when getting HinhAnh by ID: {ex.Message}");
                 return null;
+            }
+        }
+
+        public async Task<List<HinhAnh>> GetHinhAnhsBySanPhamChiTietId(Guid sanPhamChiTietId)
+        {
+            if (sanPhamChiTietId == Guid.Empty)
+            {
+                // Log hoặc xử lý việc không có giá trị IdSanPhamChiTiet
+                Console.WriteLine("Invalid IdSanPhamChiTiet: Guid.Empty");
+                return new List<HinhAnh>(); // Hoặc xử lý phù hợp hơn
+            }
+
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/HinhAnh/GetHinhAnhsBySanPhamChiTietId?sanPhamChiTietId={sanPhamChiTietId}");
+
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<List<HinhAnh>>() ?? new List<HinhAnh>();
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"HTTP request error when getting HinhAnhs by SanPhamChiTietId: {ex.Message}");
+                return new List<HinhAnh>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error when getting HinhAnhs by SanPhamChiTietId: {ex.Message}");
+                return new List<HinhAnh>();
             }
         }
     }

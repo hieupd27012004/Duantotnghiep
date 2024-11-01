@@ -1,0 +1,62 @@
+﻿@model AppData.ViewModel.SanPhamChiTietItemViewModel
+@{
+    ViewData["Title"] = "UpdateSPCT";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Chi Tiết Sản Phẩm</h2>
+
+<form asp-action="UpdateSPCT" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="IdSanPhamChiTiet" />
+
+    <div class="form-group">
+        <label>ID Sản Phẩm:</label>
+        <span>@Model.IdSanPhamChiTiet</span>
+    </div>
+
+    <div class="form-group">
+        <label>Hình ảnh:</label>
+        @if (Model.HinhAnhs != null && Model.HinhAnhs.Any())
+        {
+            foreach (var hinhAnh in Model.HinhAnhs)
+            {
+                var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
+                var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
+                <img src="@imageUrl" alt="Hình ảnh sản phẩm" style="max-width: 200px; max-height: 200px; margin: 5px;" />
+            }
+        }
+        else
+        {
+            <span>Không có hình ảnh cho sản phẩm này.</span>
+        }
+    </div>
+
+    <div class="form-group">
+        <label>Giá:</label>
+        <input type="number" asp-for="Gia" class="form-control" step="0.01" required />
+    </div>
+
+    <div class="form-group">
+        <label>Số lượng:</label>
+        <input type="number" asp-for="SoLuong" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label>Xuất xứ:</label>
+        <input type="text" asp-for="XuatXu" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label>Màu sắc:</label>
+        <input type="hidden" asp-for="MauSac" value="@string.Join(",", Model.MauSac ?? new List<string>())" />
+        <input type="text" value="@string.Join(", ", Model.MauSac ?? new List<string>())" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label>Kích cỡ:</label>
+        <input type="hidden" asp-for="KichCo" value="@string.Join(",", Model.KichCo ?? new List<string>())" />
+        <input type="text" value="@string.Join(", ", Model.KichCo ?? new List<string>())" class="form-control" readonly />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+</form>

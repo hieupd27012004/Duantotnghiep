@@ -16,5 +16,7 @@ namespace APPMVC.IService
 
         // Delete a Mau Sac by ID
         Task Delete(Guid id);
+
+        Task<List<MauSac>> GetMauSacIdsBySanPhamChiTietId(Guid sanPhamChiTietId);
     }
 }

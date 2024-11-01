@@ -98,5 +98,22 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("mauSacIds")]
+        public async Task<IActionResult> GetMauSacIdsBySanPhamChiTietId(Guid id )
+        {
+            try
+            {
+                var mauSacIds = await _service.GetMauSacIdsBySanPhamChiTietId(id);
+                if (mauSacIds == null || !mauSacIds.Any())
+                {
+                    return NotFound($"No MauSac IDs found for SanPhamChiTiet with ID {id}.");
+                }
+                return Ok(mauSacIds);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

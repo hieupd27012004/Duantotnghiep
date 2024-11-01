@@ -12,7 +12,7 @@ namespace AppData.Model
 	public class HinhAnh
 	{
 		//[Required(ErrorMessage = "Không Được Để Trống")]
-		public Guid? IdHinhAnh { get; set; }
+		public Guid IdHinhAnh { get; set; }
 
 		//[Required(ErrorMessage = "Không được để trống")]
 		public byte[]? DataHinhAnh { get; set; }

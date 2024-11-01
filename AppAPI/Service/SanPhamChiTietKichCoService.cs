@@ -34,6 +34,11 @@ namespace AppAPI.Service
             return await _repository.GetKichCoByIdAsync(id);
         }
 
+        public async Task<List<KichCo>> GetKichCoIdsBySanPhamChiTietId(Guid sanPhamChiTietId)
+        {
+            return await _repository.GetKichCoIdsBySanPhamChiTietId(sanPhamChiTietId);
+        }
+
         public async Task<List<SanPhamChiTietKichCo>> GetSanPhamChiTietKichCoAsync()
         {
             // Gọi phương thức của repository để lấy danh sách Kich Co

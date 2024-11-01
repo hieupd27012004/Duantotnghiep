@@ -51,5 +51,19 @@ namespace AppAPI.Service
         {
             await _httpClient.PutAsJsonAsync("api/SanPhamChiTietKichCo/Sua", sanPhamChiTietKichCo);
         }
+
+        public async Task<List<KichCo>> GetKichCoIdsBySanPhamChiTietId(Guid sanPhamChiTietId)
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<KichCo>>($"api/SanPhamChiTietKichCo/kichCoIds?sanPhamChiTietId={sanPhamChiTietId}");
+            }
+            catch (HttpRequestException ex)
+            {
+                // Handle error here
+                Console.WriteLine($"Error fetching Mau Sac IDs: {ex.Message}");
+                return new List<KichCo>(); // Return an empty list or handle accordingly
+            }
+        }
     }
 }

@@ -28,10 +28,7 @@ namespace AppAPI.Repository
 
         public async Task<SanPhamChiTietKichCo> GetKichCoByIdAsync(Guid id)
         {
-            return await _context.sanPhamChiTietKichCos
-                .Include(s => s.SanPhamChiTiet)
-                .Include(k => k.KichCo)
-                .FirstOrDefaultAsync(x => x.IdSanPhamChiTiet == id); // Sử dụng FirstOrDefaultAsync để tìm kiếm không đồng bộ
+            return await _context.sanPhamChiTietKichCos.FirstOrDefaultAsync(x => x.IdSanPhamChiTiet == id); 
         }
 
         public async Task<bool> CreateAsync(SanPhamChiTietKichCo kichCo)
@@ -55,6 +52,17 @@ namespace AppAPI.Repository
                 return await _context.SaveChangesAsync() > 0; // Returns true if changes were saved
             }
             return false; // Return false if the item was not found
+        }
+
+        public async Task<List<KichCo>> GetKichCoIdsBySanPhamChiTietId(Guid sanPhamChiTietId)
+        {
+
+            return await _context.sanPhamChiTietKichCos
+                .Where(x => x.IdSanPhamChiTiet == sanPhamChiTietId )
+                .Select(x => x.KichCo)
+                .ToListAsync();
+
+
         }
     }
 }
