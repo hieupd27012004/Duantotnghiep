@@ -9,7 +9,6 @@ namespace AppData.Model
 {
 	public class DiaChi
 	{
-		[Required(ErrorMessage = "Không Được Để Trống")]
 		public Guid IdDiaChi { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string HoTen { get; set; }
@@ -19,8 +18,8 @@ namespace AppData.Model
 		public string SoDienThoai { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string Diachi { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
-		public string DiaChiMacDinh { get; set; }
+		
+		public bool DiaChiMacDinh { get; set; }
 		[DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
 		[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
 		//[Range(typeof(DateTime), "1/1/2020", "12/31/2025", ErrorMessage = "Không Trong Thời Gian Cho Phép")]

@@ -66,9 +66,46 @@ namespace AppAPI.Repository
 
         public async Task<KhachHang> UpdateKH(KhachHang kh)
         {
-           _context.khachHangs.Update(kh);
+
+            _context.Entry(kh).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return kh;
+        }
+        public async Task<KhachHang> UpdateKHThongTin(KhachHang kh)
+        {
+
+            var khachHang = _context.khachHangs.Find(kh.IdKhachHang);
+            if(khachHang !=  null)
+            {
+                khachHang.HoTen = kh.HoTen;
+                khachHang.SoDienThoai = kh.SoDienThoai;
+                khachHang.Email = kh.Email;
+                khachHang.NgayCapNhat = DateTime.Now;
+                _context.Update(kh);
+                _context.SaveChangesAsync();
+                return kh;
+
+            }
+            return kh;
+        }
+        public async Task<bool> ChangePassword(Guid id,string newPassword)
+        {
+
+            var ChangePassword = _context.khachHangs.Find(id);
+            if(ChangePassword == null) return false;
+            ChangePassword.MatKhau = newPassword;
+            _context.khachHangs.Update(ChangePassword);
+            _context.SaveChangesAsync();
+            return true;    
+        }
+        public async Task<bool> ResetPass(string email, string newPassword)
+        {
+            var khachHang = _context.khachHangs.FirstOrDefault(e => e.Email == email);
+            if (khachHang == null) return false;
+            khachHang.MatKhau = newPassword;
+            _context.khachHangs.Update(khachHang);
+            await _context.SaveChangesAsync();
+            return true;
         }
         public async Task<KhachHang?> Login(string email, string password)
         {
@@ -86,5 +123,6 @@ namespace AppAPI.Repository
             //Hợp lệ trả về kh
             return kh;  
         }
+        
     }
 }

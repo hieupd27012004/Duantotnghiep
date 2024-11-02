@@ -1,4 +1,6 @@
+
 using AppAPI.Service;
+
 using AppData;
 using APPMVC.IService;
 using APPMVC.Service;
@@ -19,6 +21,9 @@ builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian tồn tại của session
 });
+
+builder.Services.AddMemoryCache();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -29,6 +34,7 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
+
 
 
 // Add services to the container.
@@ -52,13 +58,21 @@ builder.Services.AddTransient<INhanVienService, NhanVienService>();
 builder.Services.AddTransient<IKhachHangService, KhachHangService>();
 builder.Services.AddTransient<IChucVuService, ChucVuService>();
 
+builder.Services.AddTransient<IDiaChiService, DiaChiService>();
+builder.Services.AddDbContext<AppDbcontext>();
+
+
 builder.Services.AddTransient<ISanPhamChiTietMauSacService, SanPhamChiTietMauSacService>();
 builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCoService>();
 builder.Services.AddTransient<IVoucherService, VoucherService>();
 
 
 
+
 var app = builder.Build();
+
+
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -78,7 +92,7 @@ app.UseStaticFiles();
 
 app.UseCors("AllowAll");
 app.UseRouting();
-
+app.UseSession();
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>

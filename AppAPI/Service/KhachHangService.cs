@@ -45,7 +45,19 @@ namespace AppAPI.Service
         public async Task<KhachHang> UpdateKhachHang(KhachHang kh)
         {
             return await _repo.UpdateKH(kh);
-            
         }
+        public async Task<KhachHang> UpdateKHThongTin(KhachHang kh)
+        {
+            return await _repo.UpdateKHThongTin(kh);
+        }
+        public async Task<bool> ChangePassword(Guid id, string newPassword)
+        {
+            return await _repo.ChangePassword(id, newPassword);
+        }
+        public async Task<bool> ResetPass(string email, string newPassword)
+        {
+            return await _repo.ResetPass(email, newPassword);
+        }
+
     }
 }

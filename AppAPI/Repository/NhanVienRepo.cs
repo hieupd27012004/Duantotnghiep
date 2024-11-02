@@ -77,5 +77,40 @@ namespace AppAPI.Repository
             await _context.SaveChangesAsync();
             return nv;
         }
+        public async Task<NhanVien> UpdateThongTin(NhanVien nv)
+        {
+            var nhanVien =  _context.nhanViens.Find(nv.IdNhanVien);
+            if(nhanVien != null)
+            {
+                nhanVien.TenNhanVien = nv.TenNhanVien;
+                nhanVien.SoDienThoai = nv.SoDienThoai;
+                nhanVien.Email = nv.Email;
+                nhanVien.AnhNhanVien = nv.AnhNhanVien;
+                nhanVien.DiaChi = nv.DiaChi;
+                nhanVien.NgayCapNhat = DateTime.Now;
+                _context.Update(nv);
+                 _context.SaveChanges();
+                return nv;
+            }
+            return nv;
+        }
+        public async Task<bool> DoiMK(Guid idNhanVien, string newPassWord)
+        {
+            var nhanVien = await _context.nhanViens.FindAsync(idNhanVien);
+            if (nhanVien == null) return false;
+            nhanVien.MatKhau = newPassWord;
+            _context.nhanViens.Update(nhanVien);
+            await _context.SaveChangesAsync();
+            return true;     
+        }
+        public  async Task<bool> ResetPass(string email, string newPassword)
+        {
+            var nhanVien =  _context.nhanViens.FirstOrDefault(e => e.Email == email);
+            if(nhanVien == null) return false ;
+            nhanVien.MatKhau = newPassword;
+            _context.nhanViens.Update(nhanVien) ;
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

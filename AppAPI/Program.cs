@@ -2,14 +2,18 @@
 using AppAPI.Hubs;
 using AppAPI.IRepository;
 using AppAPI.IService;
+using AppAPI.ModelRestPassword;
 using AppAPI.Repository;
 using AppAPI.Service;
 using AppData;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -17,6 +21,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.Configure<RedisSettings>(builder.Configuration.GetSection("RedisSettings"));
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetValue<string>("RedisSettings:ConnectionString");
+});
 
 builder.Services.AddDbContext<AppDbcontext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -72,6 +81,19 @@ builder.Services.AddTransient<ISanPhamRepo, SanPhamRepo>();
 builder.Services.AddTransient<INhanVienService, NhanVienService>();
 builder.Services.AddTransient<INhanVienRepo, NhanVienRepo>();
 
+
+//Địa Chỉ
+builder.Services.AddTransient<IDiaChiService, DiaChiService>();
+builder.Services.AddTransient<IDiaChiRepo, DiaChiRepo>();
+
+//Mail
+
+builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddTransient<IEmailRepo, EmailRepo>();
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+
+var app = builder.Build();
+
 // Kích Cỡ
 builder.Services.AddTransient<IKichCoService, KichCoService>();
 builder.Services.AddTransient<IKichCoRepo, KichCoRepo > ();
@@ -108,6 +130,7 @@ var app = builder.Build();
 
 app.UseStaticFiles();
 
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
@@ -117,6 +140,7 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
+
 
 app.UseRouting();
 app.UseEndpoints(endpoints =>
