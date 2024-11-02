@@ -1,4 +1,4 @@
-﻿using AppData.Model;
+using AppData.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace AppData
 
 		public DbSet<DanhMuc> danhMuc { get; set; }
 
-		public DbSet<DayGiay> dayGiay { get; set; }
+		//public DbSet<DayGiay> dayGiay { get; set; }
 
 		public DbSet<DeGiay> deGiay { get; set; }
 
@@ -50,7 +50,7 @@ namespace AppData
 
 		public DbSet<KhachHang> khachHangs { get; set; }
 
-		public DbSet<Promotion> khuyenMais { get; set; }
+		public DbSet<Promotion> promotions { get; set; }
 
 		public DbSet<LichSuHoaDon> lichSuHoaDons { get; set; }
 
@@ -61,14 +61,21 @@ namespace AppData
 		public DbSet<SanPham> sanPhams { get; set; }
 
 		public DbSet<SanPhamChiTiet> sanPhamChiTiets{ get; set; }
+    public DbSet<SanPhamChiTietKichCo> sanPhamChiTietKichCos { get; set; }
+    public DbSet<SanPhamChiTietMauSac> sanPhamChiTietMausacs { get; set; }
 
-		public DbSet<ThuongHieu> thuongHieus { get; set; }
+    public DbSet<ThuongHieu> thuongHieus { get; set; }
 
 		public DbSet<TrangThai> trangThais { get; set; }
 
+		public DbSet<Voucher> vouchers { get; set; }
+		public DbSet<LichSuSuDungVoucher> LichSuSuDungVouchers { get; set; }
+
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
+
 			optionsBuilder.UseSqlServer("Server=DESKTOP-UC1K64J\\SQLEXPRESS04;Database=daantotnghiep;Trusted_Connection=True;TrustServerCertificate=True;");
+
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

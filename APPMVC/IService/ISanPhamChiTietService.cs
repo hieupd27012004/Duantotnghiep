@@ -10,5 +10,9 @@ namespace APPMVC.IService
         Task Update(SanPhamChiTiet sanPhamChiTiet);
         Task Delete(Guid id);
 
+        Task<List<SanPhamChiTiet>> GetSanPhamChiTietBySanPhamId(Guid sanPhamId);
     }
+
 }
+
+

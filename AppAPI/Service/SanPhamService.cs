@@ -16,31 +16,79 @@ namespace AppAPI.Service
             _repository = repository;
         }
 
-        public bool Create(SanPham sanPham)
+        public async Task<bool> CreateAsync(SanPham sanPham)
         {
-            return _repository.Create(sanPham);
+            try
+            {
+                return await _repository.CreateAsync(sanPham);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (consider using a logging framework)
+                Console.WriteLine($"An error occurred while creating the product: {ex.Message}");
+                return false; // Indicate failure
+            }
         }
 
-        public bool Delete(Guid id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
-            return _repository.Delete(id);
+            try
+            {
+                return await _repository.DeleteAsync(id);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"An error occurred while deleting the product: {ex.Message}");
+                return false; // Indicate failure
+            }
         }
 
-        public SanPham GetSanPhamById(Guid id)
+        public async Task<SanPham?> GetSanPhamByIdAsync(Guid id)
         {
-            return _repository.GetSanPhamById(id);
+            try
+            {
+                return await _repository.GetSanPhamByIdAsync(id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while retrieving the product: {ex.Message}");
+                return null; // Indicate failure
+            }
         }
 
-        // Phương thức GetSanPham (Bất đồng bộ)
-        public List<SanPham> GetSanPham(string? name)
+
+        public async Task<bool> UpdateAsync(SanPham sanPham)
         {
-            return _repository.GetSanPham(name);
+            try
+            {
+                return await _repository.UpdateAsync(sanPham);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"An error occurred while updating the product: {ex.Message}");
+                return false; // Indicate failure
+            }
         }
 
-        // Phương thức Update (Bất đồng bộ)
-        public bool Update(SanPham sanPham)
+        public async Task<IEnumerable<SanPham>> GetSanPhamAsync(string? name)
         {
-            return _repository.Update(sanPham);
+            try
+            {
+                return await _repository.GetSanPhamAsync(name);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"An error occurred while retrieving products: {ex.Message}");
+                return new List<SanPham>(); // Return an empty list in case of failure
+            }
+        }
+
+        public async Task<ThuongHieu?> GetThuongHieuBySanPhamIdAsync(Guid sanPhamId)
+        {
+               return await _repository.GetThuongHieuBySanPhamIdAsync(sanPhamId);
         }
     }
 }

@@ -4,10 +4,12 @@ namespace AppAPI.IRepository
 {
     public interface ISanPhamRepo
     {
-        List<SanPham> GetSanPham(string? name);
-        SanPham GetSanPhamById(Guid id);
-        bool Create(SanPham sanPham);
-        bool Update(SanPham sanPham);
-        bool Delete(Guid id);
+        Task<List<SanPham>> GetSanPhamAsync(string? name);
+        Task<SanPham?> GetSanPhamByIdAsync(Guid id);
+        Task<bool> CreateAsync(SanPham sanPham);
+        Task<bool> UpdateAsync(SanPham sanPham);
+        Task<bool> DeleteAsync(Guid id);
+        Task<ThuongHieu?> GetThuongHieuBySanPhamIdAsync(Guid sanPhamId);
+
     }
 }

@@ -10,8 +10,7 @@ namespace AppData.Model
 {
 	public class MauSac
 	{
-		[Required(ErrorMessage = "Không Được Để Trống")]
-		public Guid IdMauSac { get; set; }
+		public Guid? IdMauSac { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
         [CheckTenMauSac]
         public string TenMauSac { get; set; }
@@ -29,7 +28,6 @@ namespace AppData.Model
 		public string NguoiTao { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public int KichHoat { get; set; }
-
-		public virtual ICollection<SanPhamChiTiet>? SanPhamChiTiets { get; set; }
-	}
+        public virtual ICollection<SanPhamChiTietMauSac>? SanPhamChiTietMauSacs { get; set; }
+    }
 }

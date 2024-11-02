@@ -11,22 +11,22 @@ namespace AppData.Model
 {
 	public class HinhAnh
 	{
-		[Required(ErrorMessage = "Không Được Để Trống")]
+		//[Required(ErrorMessage = "Không Được Để Trống")]
 		public Guid IdHinhAnh { get; set; }
 
-		[Required(ErrorMessage = "Không được để trống")]
-		public byte[] DataHinhAnh { get; set; }
-		[Required(ErrorMessage = "Không được để trống")]
-		public string LoaiFileHinhAnh { get; set; }
+		//[Required(ErrorMessage = "Không được để trống")]
+		public byte[]? DataHinhAnh { get; set; }
+		//[Required(ErrorMessage = "Không được để trống")]
+		public string? LoaiFileHinhAnh { get; set; }
 
-		[Required(ErrorMessage = "Không Được Để Trống")]
-		public int TrangThai { get; set; }
+		//[Required(ErrorMessage = "Không Được Để Trống")]
+		public int? TrangThai { get; set; }
+        public Guid? IdSanPhamChiTiet { get; set; }
 
-		[Display(Name = "Upload File")]
+        [Display(Name = "Upload File")]
 
-		public Guid? IdSanPhamChiTiet { get; set; }
-		[NotMapped]
-        public IFormFile File { get; set; }
+        [NotMapped]
+        public List<IFormFile>? Files { get; set; }
 
         public virtual SanPhamChiTiet? SanPhamChiTiet { get; set; }
 

@@ -17,7 +17,8 @@ namespace AppData.Configurations
 
 			builder.HasOne(p => p.SanPhamChiTiet)
 			   .WithMany(p => p.HinhAnhs)
-			   .HasForeignKey(p => p.IdSanPhamChiTiet);
-		}
+			   .HasForeignKey(p => p.IdSanPhamChiTiet)
+               .OnDelete(DeleteBehavior.Cascade);
+        }
 	}
 }

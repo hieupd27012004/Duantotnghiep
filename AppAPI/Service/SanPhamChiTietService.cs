@@ -1,6 +1,7 @@
 ﻿using AppAPI.IRepository;
 using AppAPI.IService;
 using AppData.Model;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -41,6 +42,11 @@ namespace AppAPI.Service
         public bool Update(SanPhamChiTiet sanPhamChiTiet)
         {
             return _repository.Update(sanPhamChiTiet);
+        }
+
+        public async Task<List<SanPhamChiTiet>> GetSanPhamChiTietBySanPhamId(Guid sanPhamId)
+        {
+            return await _repository.GetSanPhamChiTietBySanPhamId(sanPhamId);
         }
     }
 }

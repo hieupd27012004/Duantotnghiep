@@ -1,5 +1,6 @@
 ﻿using AppData.Model;
 using APPMVC.IService;
+using System.Net;
 
 namespace APPMVC.Service
 {
@@ -38,6 +39,28 @@ namespace APPMVC.Service
         public async Task Update(SanPhamChiTiet sanPhamChiTiet)
         {
             await _httpClient.PutAsJsonAsync("api/SanPhamChiTiet/Sua", sanPhamChiTiet);
+        }
+
+        public async Task<List<SanPhamChiTiet>> GetSanPhamChiTietBySanPhamId(Guid sanPhamId)
+        {
+            var response = await _httpClient.GetAsync($"api/SanPhamChiTiet/getbysanphamid?sanPhamId={sanPhamId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Read the response content as a list of SanPhamChiTiet
+                var sanPhamChiTietList = await response.Content.ReadFromJsonAsync<List<SanPhamChiTiet>>();
+                return sanPhamChiTietList;
+            }
+            else if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                // No data found, return an empty list instead of null
+                return new List<SanPhamChiTiet>();
+            }
+            else
+            {
+                // Handle other errors
+                throw new HttpRequestException($"Error calling API: {response.StatusCode}");
+            }
         }
     }
 }

@@ -29,15 +29,55 @@ namespace APPMVC.Service
             return repo;
         }
 
-        public Task<SanPham> GetSanPhamById(Guid id)
+        public async Task<SanPham?> GetSanPhamById(Guid id)
         {
-            var sanPham = _httpClient.GetFromJsonAsync<SanPham>($"api/SanPham/getbyid?id={id}");
-            return sanPham;
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/SanPham/getbyid?id={id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<SanPham>();
+                }
+                else
+                {
+                    Console.WriteLine($"Error retrieving product: {response.StatusCode}");
+                    return null; // Trả về null nếu không tìm thấy
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"An error occurred while retrieving the product: {ex.Message}");
+                return null; // Trả về null nếu có lỗi
+            }
         }
 
         public async Task Update(SanPham sanPham)
         {
             await _httpClient.PutAsJsonAsync("api/SanPham/Sua", sanPham);
+        }
+
+        public async Task<ThuongHieu?> GetThuongHieuBySanPhamIdAsync(Guid sanPhamId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/SanPham/getthuonghieu?id={sanPhamId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<ThuongHieu>();
+                }
+                else
+                {
+                    Console.WriteLine($"Error retrieving brand: {response.StatusCode}");
+                    return null;
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"An error occurred while retrieving the brand: {ex.Message}");
+                return null;
+            }
         }
     }
 }

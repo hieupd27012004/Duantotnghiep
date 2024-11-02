@@ -1,10 +1,6 @@
-﻿using AppData.Model;
+﻿using AppAPI.IService;
+using AppData.Model;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using AppAPI.IService;
 
 namespace AppAPI.Controllers
 {
@@ -20,17 +16,26 @@ namespace AppAPI.Controllers
         }
 
         [HttpPost("UploadHinhAnh")]
-        public async Task<IActionResult> UploadHinhAnh(IFormFile file, Guid idSanPhamChiTiet)
+        public async Task<IActionResult> UploadHinhAnh([FromForm] IFormFile file, [FromForm] string metadata)
         {
             if (file == null || file.Length == 0)
             {
                 return BadRequest("No file was uploaded.");
             }
 
+            // Deserialize metadata
+            var hinhAnhMetadata = System.Text.Json.JsonSerializer.Deserialize<HinhAnh>(metadata);
+            if (hinhAnhMetadata == null)
+            {
+                return BadRequest("Invalid metadata.");
+            }
+
             var hinhAnh = new HinhAnh
             {
                 LoaiFileHinhAnh = file.ContentType,
-                DataHinhAnh = await ReadFileAsync(file)
+                DataHinhAnh = await ReadFileAsync(file),
+                IdSanPhamChiTiet = hinhAnhMetadata.IdSanPhamChiTiet,
+                TrangThai = hinhAnhMetadata.TrangThai
             };
 
             var result = await _service.UploadAsync(hinhAnh);
@@ -84,6 +89,17 @@ namespace AppAPI.Controllers
             var hinhAnhs = await _service.GetHinhAnhsAsync();
             return Ok(hinhAnhs);
         }
+
+        [HttpGet("GetHinhAnhsBySanPhamChiTietId")]
+        public async Task<IActionResult> GetHinhAnhsBySanPhamChiTietId(Guid sanPhamChiTietId)
+        {
+            var hinhAnhs = await _service.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTietId);
+            if (hinhAnhs == null || !hinhAnhs.Any())
+            {
+                return NotFound("No images found for the specified product detail ID.");
+            }
+
+            return Ok(hinhAnhs);
+        }
     }
 }
-//Test push

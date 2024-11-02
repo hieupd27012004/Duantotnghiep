@@ -1,4 +1,5 @@
 
+using AppAPI.Hubs;
 using AppAPI.IRepository;
 using AppAPI.IService;
 using AppAPI.ModelRestPassword;
@@ -33,10 +34,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
     {
-        builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
     });
 });
 //Khach Hang
@@ -46,8 +46,12 @@ builder.Services.AddTransient<IKhachHangRepo, KhachHangRepo>();
 builder.Services.AddTransient<IChucVuService, ChucVuService>();
 builder.Services.AddTransient<IChucVuRepo, ChucVuRepo>();
 // Dây giày
-builder.Services.AddTransient<IDayGiayService, DayGiayService>();
-builder.Services.AddTransient<IDayGiayRepo, DayGiayRepo>();
+//builder.Services.AddTransient<IDayGiayService, DayGiayService>();
+//builder.Services.AddTransient<IDayGiayRepo, DayGiayRepo>();
+
+//Đế Giày
+builder.Services.AddTransient<IDeGiayService, DeGiayService>();
+builder.Services.AddTransient<IDeGiayRepo, DeGiayRepo>();
 
 //Chất liêu
 builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
@@ -65,10 +69,6 @@ builder.Services.AddTransient<IDanhMucRepo, DanhMucRepo>();
 builder.Services.AddTransient<IThuongHieuRepo, ThuongHieuRepo>();
 builder.Services.AddTransient<IThuongHieuService, ThuongHieuService>();
 
-//Hình Ảnh
-builder.Services.AddTransient<IHinhAnhRepo, HinhAnhRepo>();
-
-
 // Sản Phẩm Chi Tiết
 builder.Services.AddTransient<ISanPhamChiTietService, SanPhamChiTietService>();
 builder.Services.AddTransient<ISanPhamChiTietRepo, SanPhamChiTietRepo>();
@@ -80,6 +80,7 @@ builder.Services.AddTransient<ISanPhamRepo, SanPhamRepo>();
 // Nhân Viên
 builder.Services.AddTransient<INhanVienService, NhanVienService>();
 builder.Services.AddTransient<INhanVienRepo, NhanVienRepo>();
+
 
 //Địa Chỉ
 builder.Services.AddTransient<IDiaChiService, DiaChiService>();
@@ -93,13 +94,61 @@ builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpS
 
 var app = builder.Build();
 
+// Kích Cỡ
+builder.Services.AddTransient<IKichCoService, KichCoService>();
+builder.Services.AddTransient<IKichCoRepo, KichCoRepo > ();
 
+// Màu Sắc
+builder.Services.AddTransient<IMauSacService, MauSacService>();
+builder.Services.AddTransient<IMauSacRepo, MauSacRepo>();
+
+// Hình Ảnh
+builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
+builder.Services.AddTransient<IHinhAnhRepo, HinhAnhRepo>();
+
+//Promotion
+builder.Services.AddTransient<IPromotionRepo, PromotionRepo>();
+builder.Services.AddTransient<IPromotionService, PromotionService>();
+
+//Voucher
+builder.Services.AddTransient<IVoucherRepo, VoucherRepo>();
+builder.Services.AddTransient<IVoucherService, VoucherService>();
+
+// Sản Phẩm Chi Tiết Màu Sắc
+builder.Services.AddTransient<ISanPhamChiTietMauSacRepo, SanPhamChiTietMauSacRepo>();
+builder.Services.AddTransient<ISanPhamChiTietMauSacService, SanPhamChiTietMauSacService>();
+
+// Sản Phẩm Chi Tiết Kích Cỡ
+builder.Services.AddTransient<ISanPhamChiTietKichCoRepo, SanPhamChiTietKichCoRepo>();
+builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCoService>();
+
+//Check thời gian áp dụng voucher
+builder.Services.AddHostedService<VoucherStatusUpdater>();
+builder.Services.AddSignalR();
+
+var app = builder.Build();
+
+app.UseStaticFiles();
+
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
+
+
+app.UseRouting();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<VoucherHub>("/voucherHub");
+});
+
 
 app.UseCors("AllowAll");
 

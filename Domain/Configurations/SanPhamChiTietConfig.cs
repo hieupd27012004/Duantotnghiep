@@ -9,28 +9,33 @@ using System.Threading.Tasks;
 
 namespace AppData.Configurations
 {
-	public class SanPhamChiTietConfig : IEntityTypeConfiguration<SanPhamChiTiet>
-	{
-		public void Configure(EntityTypeBuilder<SanPhamChiTiet> builder)
-		{
-			builder.HasKey(p => p.IdSanPhamChiTiet);
+    public class SanPhamChiTietConfig : IEntityTypeConfiguration<SanPhamChiTiet>
+    {
+        public void Configure(EntityTypeBuilder<SanPhamChiTiet> builder)
+        {
+            builder.HasKey(p => p.IdSanPhamChiTiet);
 
-			builder.HasOne(p => p.KichCo)
-			   .WithMany(kh => kh.SanPhamChiTiets)
-			   .HasForeignKey(p => p.IdKichCo);
+            // Cấu hình mối quan hệ với KichCo
+            builder.HasMany(spct => spct.SanPhamChiTietKichCos)
+               .WithOne(spctk => spctk.SanPhamChiTiet)
+               .HasForeignKey(spctk => spctk.IdSanPhamChiTiet);
 
+            // Cấu hình mối quan hệ với bảng trung gian SanPhamChiTietMauSac
+            builder.HasMany(spct => spct.SanPhamChiTietMauSacs)
+                .WithOne(spctm => spctm.SanPhamChiTiet)
+                .HasForeignKey(spctm => spctm.IdSanPhamChiTiet);
 
-			builder.HasOne(p => p.MauSac)
-				   .WithMany(p => p.SanPhamChiTiets)
-				   .HasForeignKey(p => p.IdMauSac);
+            builder.HasOne(p => p.SanPham)
+                   .WithMany(p => p.SanPhamChiTiets)
+                   .HasForeignKey(p => p.IdSanPham);
 
-			builder.HasOne(p => p.SanPham)
-				   .WithMany(p => p.SanPhamChiTiets)
-				   .HasForeignKey(p => p.IdSanPham);
-
-			builder.HasOne(p => p.DayGiay)
-				   .WithMany(p => p.SanPhamChiTiets)
-				   .HasForeignKey(p => p.IdDayGiay);
+            builder.HasMany(spct => spct.PromotionSanPhamChiTiets)
+                .WithOne(psct => psct.SanPhamChiTiet)
+                .HasForeignKey(psct => psct.IdSanPhamChiTiet);
         }
-	}
+        //builder.HasOne(p => p.DayGiay)
+        //	   .WithMany(p => p.SanPhamChiTiets)
+        //	   .HasForeignKey(p => p.IdDayGiay);
+    }
 }
+
