@@ -41,5 +41,31 @@ namespace APPMVC.Areas.Admin.Controllers
             }
             return View(kh);
         }
+        public async Task<IActionResult> Edit(Guid id)
+        {
+
+            var kh = await _service.GetIdKhachHang(id);
+            if(kh == null)
+            {
+                return NotFound();
+            }
+            return View(kh);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Edit(KhachHang kh)
+        {
+            if (ModelState.IsValid)
+            {
+                await _service.UpdateKhachHang(kh);
+                return RedirectToAction("Index");
+            }
+            return View(kh);
+        }
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            await _service.DeleteKhachHang(id);
+            return RedirectToAction("Index");
+        }
+
     }
 }

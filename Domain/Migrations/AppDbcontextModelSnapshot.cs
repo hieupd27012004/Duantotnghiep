@@ -175,9 +175,8 @@ namespace AppData.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("DiaChiMacDinh")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("DiaChiMacDinh")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Diachi")
                         .IsRequired()

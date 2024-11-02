@@ -54,19 +54,74 @@
 
 				<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
 					<div class="dropdown">
-					<li>
-						<a class="nav-link" type="button" id="dropdownMenu1" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="true">
+						<li>
+							<a class="nav-link" type="button" id="dropdownMenu1" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="true">
 							<img src="~/Client/images/user.svg">
 							<span class="caret"></span>
-						</a>
-					</li>
-					<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-						<li><a href="@Url.Action("Register", "KhachHang", new { area = "Client" })"><img src="" alt="">Đăng Nhập/ Đăng Ký</a></li>
-					</ul>
+							</a>
+						</li>
+						@if (ViewContext.HttpContext.Session.GetString("KhachHang") != null)// Kiểm tra login
+						{
+							var idKhach = ViewContext.HttpContext.Session.GetString("IdKhachHang");
+							var tenKhach = ViewContext.HttpContext.Session.GetString("TenKhachHang");
+						<ul class="dropdown-menu dropdown-menu-end">
+							<li>
+								<div class="flex-grow-1">
+									<span class="fw-semibold d-block" style="font-family: Arial, sans-serif; font-size: 15px; font-weight: 300; color: #333;">
+										Hello: @tenKhach
+									</span>
+								</div>
+							</li>
+							<li>
+								<div class="dropdown-divider"></div>
+							</li>
+							<li>
+								<a class="dropdown-item" href="@Url.Action("ThongTinKhachHang", "KhachHang", new { area = "Client" })">
+									<i class="bx bx-user me-2"></i>
+									<span class="align-middle fw-semibold" style="font-family: Arial, sans-serif; font-size: 14px; font-weight: 300; color: #333; transition: color 0.3s ease, font-size 0.3s ease;"
+										  onmouseover="this.style.color='#007bff'; this.style.fontSize='16px';"
+										  onmouseout="this.style.color='#333'; this.style.fontSize='14px';">
+										Tài Khoản Của Tôi
+									</span>
+
+								</a>
+							</li>
+							<li>
+								<a class="dropdown-item" href="#">
+									<i class="bx bx-cog me-2"></i>
+									<span class="align-middle fw-semibold" style="font-family: Arial, sans-serif; font-size: 14px; font-weight: 300; color: #333; transition: color 0.3s ease, font-size 0.3s ease;"
+										  onmouseover="this.style.color='#007bff'; this.style.fontSize='16px';"
+										  onmouseout="this.style.color='#333'; this.style.fontSize='14px';">
+										Đơn Mua
+									</span>
+								</a>
+							</li>
+							<li>
+								<a class="dropdown-item" href="#">
+									<i class="bx bx-cog me-2"></i>
+									<span class="align-middle fw-semibold" style="font-family: Arial, sans-serif; font-size: 14px; font-weight: 300; color: #333; transition: color 0.3s ease, font-size 0.3s ease;"
+										  onmouseover="this.style.color='#007bff'; this.style.fontSize='16px';"
+										  onmouseout="this.style.color='#333'; this.style.fontSize='14px';">
+										Đăng Xuất
+									</span>
+								</a>
+							</li>
+						</ul>
+						}
+						else
+						{
+							<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+								<li><a href="@Url.Action("Login", "KhachHang", new { area = "Client" })"><img src="" alt="">Đăng Nhập/ Đăng Ký</a></li>
+							</ul>
+						}
+
+						@* <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+							<li><a href="@Url.Action("Login", "KhachHang", new { area = "Client" })"><img src="" alt="">Đăng Nhập/ Đăng Ký</a></li>
+						</ul> *@
+					</div>
+					<li><a class="nav-link" href="cart.html"><img src="~/Client/images/cart.svg"></a></li>
+				</ul>
 			</div>
-			<li><a class="nav-link" href="cart.html"><img src="~/Client/images/cart.svg"></a></li>
-			</ul>
-		</div>
 		</div>
 
 	</nav>

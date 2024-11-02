@@ -1,0 +1,44 @@
+﻿@model IEnumerable<AppData.Model.DiaChi>
+
+@{
+    ViewData["Title"] = "Danh Sách Địa Chỉ";
+}
+
+<h1>Danh Sách Địa Chỉ</h1>
+
+<p>
+    <a asp-action="Create" asp-controller="DiaChi">Thêm Địa Chỉ Mới</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id Địa Chỉ</th>
+            <th>Họ Tên</th>
+            <th>Số Điện Thoại</th>
+            <th>Địa Chỉ</th>
+            <th>Địa Chỉ Mặc Định</th>
+            <th>Ngày Tạo</th>
+            <th>Ngày Cập Nhật</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.IdDiaChi</td>
+                <td>@item.HoTen</td>
+                <td>@item.SoDienThoai</td>
+                <td>@item.Diachi</td>
+                <td>@item.DiaChiMacDinh</td>
+                <td>@item.NgayTao.ToString("dd-MM-yyyy")</td>
+                <td>@item.NgayCapNhat.ToString("dd-MM-yyyy")</td>
+                <td>
+                    <a asp-action="EditDiaChi" asp-controller="DiaChi" asp-route-id="@item.IdDiaChi">Sửa</a> |
+                    <a asp-action="Delete" asp-controller="DiaChi" asp-route-id="@item.IdDiaChi">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

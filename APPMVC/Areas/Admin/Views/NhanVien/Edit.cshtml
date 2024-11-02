@@ -1,0 +1,127 @@
+﻿@model AppData.Model.NhanVien
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>NhanVien</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="IdNhanVien" class="control-label"></label>
+                <input asp-for="IdNhanVien" class="form-control" readonly />
+                <span asp-validation-for="IdNhanVien" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TenNhanVien" class="control-label"></label>
+                <input asp-for="TenNhanVien" class="form-control" />
+                <span asp-validation-for="TenNhanVien" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SoDienThoai" class="control-label"></label>
+                <input asp-for="SoDienThoai" class="form-control" />
+                <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Ảnh Nhân Viên Hiện Tại</label>
+                @if (!string.IsNullOrEmpty(Model.AnhNhanVien))
+                {
+                    <div>
+                        <img src="~/Admin/imgNV/@Model.AnhNhanVien" class="img-fluid rounded" style="max-width: 200px; max-height: 200px;" />
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        <span>Chưa có ảnh</span>
+                    </div>
+                }
+            </div>
+            <div class="form-group">
+                <label for="imgFile" class="control-label">Chọn Ảnh Mới (nếu có)</label>
+                <input type="file" name="imgFile" class="form-control" />
+                <span asp-validation-for="AnhNhanVien" class="text-danger"></span>
+            </div>
+
+            @if (ViewData.ModelState.ErrorCount > 0)
+            {
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+            <div class="form-group">
+                <label asp-for="MatKhau" class="control-label"></label>
+                <input asp-for="MatKhau" class="form-control" />
+                <span asp-validation-for="MatKhau" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AuthProvider" class="control-label"></label>
+                <input asp-for="AuthProvider" class="form-control" />
+                <span asp-validation-for="AuthProvider" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DiaChi" class="control-label"></label>
+                <input asp-for="DiaChi" class="form-control" />
+                <span asp-validation-for="DiaChi" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NgayCapNhat" class="control-label"></label>
+                <input asp-for="NgayCapNhat" class="form-control" />
+                <span asp-validation-for="NgayCapNhat" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NgayTao" class="control-label"></label>
+                <input asp-for="NgayTao" class="form-control" />
+                <span asp-validation-for="NgayTao" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NguoiTao" class="control-label"></label>
+                <input asp-for="NguoiTao" class="form-control" />
+                <span asp-validation-for="NguoiTao" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NguoiCapNhat" class="control-label"></label>
+                <input asp-for="NguoiCapNhat" class="form-control" />
+                <span asp-validation-for="NguoiCapNhat" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="KichHoat" class="control-label"></label>
+                <input asp-for="KichHoat" class="form-control" />
+                <span asp-validation-for="KichHoat" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TrangThai" class="control-label"></label>
+                <input asp-for="TrangThai" class="form-control" />
+                <span asp-validation-for="TrangThai" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="IdchucVu" class="control-label"></label>
+                <input asp-for="IdchucVu" class="form-control" />
+                <span asp-validation-for="IdchucVu" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

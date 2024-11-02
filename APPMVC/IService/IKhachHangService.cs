@@ -9,6 +9,11 @@ namespace APPMVC.IService
         Task<KhachHang?> LoginKH(string email, string password);
         Task AddKhachHang(KhachHang kh);
         Task UpdateKhachHang(KhachHang kh);
+        Task UpdateKHThongTin(KhachHang kh);
+        Task<bool> ChangePassword(Guid id, string newPassword, string confirmPassword);
         Task DeleteKhachHang(Guid id);
+        Task<bool> ResetPassword(string email, string newPassword, string confirmPassword);
+        Task<bool> SendVerificationCode(string email);
+        Task<string> GetVerificationCodeFromRedisAsync(string email);
     }
 }

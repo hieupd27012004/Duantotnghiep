@@ -12,5 +12,8 @@ namespace AppAPI.IRepository
         Task<NhanVien> GetByEmail(string email);
         Task<NhanVien> GetBySDT(string sdT);
         Task DeleteDM(Guid id);
+        Task<NhanVien> UpdateThongTin(NhanVien nv);
+        Task<bool> DoiMK(Guid idNhanVien, string newPassword);
+        Task<bool> ResetPass(string email, string newPassword);
     }
 }

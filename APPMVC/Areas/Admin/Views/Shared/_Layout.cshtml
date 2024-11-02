@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+@inject AppData.AppDbcontext context;
+<!DOCTYPE html>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
 <!-- =========================================================
 * Sneat - Bootstrap 5 HTML Admin Template - Pro | v1.0.0
@@ -59,11 +61,14 @@
 </head>
 
 <body>
+    @{
+        var isLoggedIn = ViewContext.HttpContext.Session.GetString("NhanVien") != null;
+
+    }
     <!-- Layout wrapper -->
 <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
         <!-- Menu -->
-
         <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
             <div class="app-brand demo">
                 <a href="index.html" class="app-brand-link">
@@ -123,7 +128,7 @@
             <ul class="menu-inner py-1">
                 <!-- Dashboard -->
                 <li class="menu-item active">
-                        <a href="@Url.Action("Index", "HomeAdmin", new { area = "Admin" })" class="menu-link">
+                        <a href="@Url.Action("Index", "HomeAdmin", new { area = "Admin" })" class="menu-link" >
                         <i class="menu-icon tf-icons bx bx-home-circle"></i>
                         <div data-i18n="Analytics">Thống kê</div>
                     </a>
@@ -140,7 +145,7 @@
                     </a>
                     <ul class="menu-sub">
                         <li class="menu-item">
-                                <a href="@Url.Action("Index", "NhanVien", new { area = "Admin" })" class="menu-link">
+                                <a href="@Url.Action("Index", "NhanVien", new { area = "Admin" })" class="menu-link" @* onclick="return checkLogin();" *@>
                                 <div data-i18n="Account">Account</div>
                             </a>
                         </li>
@@ -162,9 +167,14 @@
                         <div data-i18n="Authentications">Khách Hàng</div>
                     </a>
                     <ul class="menu-sub">
+                            <li class="menu-item">
+                                <a href="@Url.Action("Index", "KhachHang", new { area = "Admin" })" class="menu-link" @* onclick="return checkLogin();" *@ target="_blank">
+                                    <div data-i18n="Basic">Account</div>
+                                </a>
+                            </li>
                         <li class="menu-item">
-                            <a href="auth-login-basic.html" class="menu-link" target="_blank">
-                                <div data-i18n="Basic">Login</div>
+                                <a href="@Url.Action("Getall", "DiaChi", new { area = "Admin" })" class="menu-link" target="_blank">
+                                    <div data-i18n="Basic">Address</div>
                             </a>
                         </li>
                         <li class="menu-item">
@@ -172,11 +182,7 @@
                                 <div data-i18n="Basic">Register</div>
                             </a>
                         </li>
-                        <li class="menu-item">
-                                <a href="@Url.Action("Index", "KhachHang", new { area = "Admin" })" class="menu-link" target="_blank">
-                                <div data-i18n="Basic">Account</div>
-                            </a>
-                        </li>
+                        
                     </ul>
                 </li>
                 <!-- Components -->
@@ -277,60 +283,75 @@
                         <!-- Place this tag where you want the button to render. -->
                         <!-- User -->
                         <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                            <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                                <div class="avatar avatar-online">
-                                    <img src="/Admin/assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
-                                </div>
-                            </a>
+                                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                                    <div class="avatar avatar-online">
+                                        @if (ViewContext.HttpContext.Session.GetString("NhanVien") != null)
+                                        {
+                                            var linkAvt = ViewContext.HttpContext.Session.GetString("AvatarUrl");
+                                            <img src="@Url.Content($"~/Admin/imgNV/{linkAvt}")" alt="User Avatar" class="w-px-40  h-px-40 rounded-circle" />
+                                        }
+                                        else
+                                        {
+                                            <img src="/Admin/assets/img/avatars/user.png" alt="Default Avatar" class="w-px-40 h-auto rounded-circle" />
+                                        }
+                                    </div>
+                                </a>
+                               
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <div class="d-flex">
-                                            <div class="flex-shrink-0 me-3">
-                                                <div class="avatar avatar-online">
-                                                        <img src="/Admin/assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                @if(ViewContext.HttpContext.Session.GetString("NhanVien") != null)
+                                    {
+                                        var linkAvt = ViewContext.HttpContext.Session.GetString("AvatarUrl");
+                                        var tenNhanVien = ViewContext.HttpContext.Session.GetString("NhanVienName");
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <div class="d-flex">
+                                                    <div class="flex-shrink-0 me-3">
+                                                        <div class="avatar avatar-online">
+                                                            <img src="@Url.Content($"~/Admin/imgNV/{linkAvt}")" alt="User Avatar" class="w-px-40 h-px-40 rounded-circle" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <span class="fw-semibold d-block">@tenNhanVien</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <span class="fw-semibold d-block">John Doe</span>
-                                                <small class="text-muted">Admin</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li>
-                                    <div class="dropdown-divider"></div>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bx bx-user me-2"></i>
-                                        <span class="align-middle">My Profile</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bx bx-cog me-2"></i>
-                                        <span class="align-middle">Settings</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <span class="d-flex align-items-center align-middle">
-                                            <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
-                                            <span class="flex-grow-1 align-middle">Billing</span>
-                                            <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
-                                        </span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <div class="dropdown-divider"></div>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="auth-login-basic.html">
-                                        <i class="bx bx-power-off me-2"></i>
-                                        <span class="align-middle">Log Out</span>
-                                    </a>
-                                </li>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider"></div>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="@Url.Action("MyProfile", "NhanVien", new { area = "Admin" })">
+                                                <i class="bx bx-user me-2"></i>
+                                                <span class="align-middle">My Profile</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="bx bx-cog me-2"></i>
+                                                <span class="align-middle">Settings</span>
+                                            </a>
+                                        </li>
+                                        
+                                        <li>
+                                            <div class="dropdown-divider"></div>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="auth-login-basic.html">
+                                                <i class="bx bx-power-off me-2"></i>
+                                                <span class="align-middle">Log Out</span>
+                                            </a>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" href="@Url.Action("Login", "NhanVien", new { area = "Admin" })">
+                                                <i class="bx bx-log-in me-2"></i>
+                                                <span class="align-middle">SignIn</span>
+                                            </a>
+                                        </li>
+                                    }
+
                             </ul>
                         </li>
                         <!--/ User -->
@@ -352,8 +373,19 @@
 
     <!-- Overlay -->
     <div class="layout-overlay layout-menu-toggle"></div>
+       
 </div>
+<script>
+    function checkLogin() {
+        var isLoggedIn = @Html.Raw(isLoggedIn.ToString().ToLower());
+        if (!isLoggedIn) {
+            alert('Bạn Cần Đăng Nhập Để Thực Hiện Chức Năng Này');
+            return false;
+        }
+        return true;
 
+    }
+</script>
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
