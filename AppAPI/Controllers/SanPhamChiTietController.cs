@@ -72,7 +72,7 @@ namespace AppAPI.Controllers
 
         // PUT: api/SanPhamChiTiet/Sua
         [HttpPut("Sua")]
-        public IActionResult Put(SanPhamChiTiet sanPhamChiTiet)
+        public async Task<IActionResult> Put(SanPhamChiTiet sanPhamChiTiet)
         {
             if (!ModelState.IsValid)
             {
@@ -81,8 +81,12 @@ namespace AppAPI.Controllers
 
             try
             {
-                _service.Update(sanPhamChiTiet);
-                return Ok(sanPhamChiTiet);
+                var result = await _service.Update(sanPhamChiTiet); // Gọi phương thức Update bất đồng bộ
+                if (result)
+                {
+                    return Ok(sanPhamChiTiet);
+                }
+                return NotFound(); // Trả về 404 nếu không tìm thấy sản phẩm chi tiết
             }
             catch (Exception ex)
             {
@@ -92,12 +96,16 @@ namespace AppAPI.Controllers
 
         // DELETE: api/SanPhamChiTiet/Xoa?id=<guid>
         [HttpDelete("Xoa")]
-        public IActionResult Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                _service.Delete(id);
-                return Ok();
+                var result = await _service.Delete(id); 
+                if (result)
+                {
+                    return Ok(); 
+                }
+                return NotFound(); 
             }
             catch (Exception ex)
             {

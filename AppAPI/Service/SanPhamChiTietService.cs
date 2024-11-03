@@ -22,9 +22,9 @@ namespace AppAPI.Service
             return _repository.Create(sanPhamChiTiet);
         }
 
-        public bool Delete(Guid id)
+        public async Task<bool> Delete(Guid id)
         {
-            return _repository.Delete(id);
+            return await _repository.Delete(id); 
         }
 
         public SanPhamChiTiet GetSanPhamChitietById(Guid id)
@@ -39,9 +39,9 @@ namespace AppAPI.Service
         }
 
         // Phương thức Update (Bất đồng bộ)
-        public bool Update(SanPhamChiTiet sanPhamChiTiet)
+        public async Task<bool> Update(SanPhamChiTiet sanPhamChiTiet)
         {
-            return _repository.Update(sanPhamChiTiet);
+            return await _repository.Update(sanPhamChiTiet); 
         }
 
         public async Task<List<SanPhamChiTiet>> GetSanPhamChiTietBySanPhamId(Guid sanPhamId)

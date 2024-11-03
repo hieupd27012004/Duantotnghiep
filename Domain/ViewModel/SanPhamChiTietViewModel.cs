@@ -1,4 +1,6 @@
 ﻿using AppData.Model;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,12 +33,13 @@ namespace AppData.ViewModel
     {
         public Guid IdSanPhamChiTiet { get; set; }
         public List<HinhAnh>? HinhAnhs { get; set; }
-        public List<string> MauSac { get; set; } = new List<string>(); // Khởi tạo với danh sách rỗng
-        public List<string> KichCo { get; set; } = new List<string>(); // Khởi tạo với danh sách rỗng
+        public List<string> MauSac { get; set; } = new List<string>();
+        public List<string> KichCo { get; set; } = new List<string>();
         public double? Gia { get; set; }
         public double? SoLuong { get; set; }
         public string? XuatXu { get; set; }
-        //public bool TrangThai { get; set; }
-        public bool Chon { get; set; } // Trạng thái chọn để sửa
+        public bool Chon { get; set; }
+        public List<IFormFile>? Files { get; set; } = new List<IFormFile>();
+
     }
 }

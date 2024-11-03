@@ -257,12 +257,12 @@
                                                 <input type="text" name="SanPhamChiTietList[@Model.SanPhamChiTietList.IndexOf(chiTiet)].XuatXu" value="@chiTiet.XuatXu" class="xuat-xu-input readonly-input" readonly />
                                             </td>
                                             <td>
-                                                <button type="submit" formaction="@Url.Action("UpdateSPCT", "SanPham", new { Id = chiTiet.IdSanPhamChiTiet })" class="btn btn-primary" style="margin-right: 5px;">
+                                              <a href="@Url.Action("UpdateSPCT", "SanPham", new { Id = chiTiet.IdSanPhamChiTiet })" class="btn btn-primary" style="margin-right: 5px;">
                                                     <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button type="button" onclick="confirmDelete('@Html.Raw(Url.Action("DeleteSanPhamChiTiet", "SanPham", new { id = chiTiet.IdSanPhamChiTiet }))')" class="btn btn-danger">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                             </a>
+                                              <a href="@Url.Action("DeleteSanPhamChiTiet", "SanPham", new { sanPhamChiTietId = chiTiet.IdSanPhamChiTiet })" class="btn btn-danger"  style="margin-right: 5px;">
+                                                  <i class="fas fa-trash"></i>
+                                             </a>
                                             </td>
                                         </tr>
                                     }
@@ -309,35 +309,5 @@
             });
         });
     });
-    function confirmDelete(sanPhamChiTietId) {
-        const url = '@Url.Action("DeleteSanPhamChiTiet", "SanPham")';
-        console.log("Delete URL: ", url); // Log URL để kiểm tra
-        if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: { sanPhamChiTietId: sanPhamChiTietId },
-                success: function (response) {
-                    alert(response); // Hiển thị thông báo thành công
-                    // Xóa hàng trong bảng
-                    $('tr').has('input[value="' + sanPhamChiTietId + '"]').remove();
-                },
-                error: function (xhr, status, error) {
-                    // Ghi chi tiết lỗi ra console
-                    console.error("Error Status: ", status);
-                    console.error("Error Thrown: ", error);
-                    console.error("Response Text: ", xhr.responseText);
-
-                    // Hiển thị thông báo lỗi cho người dùng
-                    let errorMessage = "Có lỗi xảy ra: ";
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage += xhr.responseJSON.message; // Nếu có thông điệp lỗi từ server
-                    } else {
-                        errorMessage += xhr.statusText; // Lấy thông điệp lỗi mặc định
-                    }
-                    alert(errorMessage); // Hiển thị thông báo lỗi
-                }
-            });
-        }
-    }
+      
 </script>
