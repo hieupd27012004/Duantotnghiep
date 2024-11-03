@@ -28,19 +28,19 @@ namespace AppAPI.Repository
             }
         }
 
-        public bool Delete(Guid id)
+        public async Task<bool> Delete(Guid id)
         {
-            var hinhAnhs =  _context.hinhAnh.Where(h => h.IdSanPhamChiTiet == id).ToList();
+            var hinhAnhs = _context.hinhAnh.Where(h => h.IdSanPhamChiTiet == id).ToList();
 
             // Xóa tất cả hình ảnh liên quan
             _context.hinhAnh.RemoveRange(hinhAnhs);
 
             // Xóa sản phẩm chi tiết
-            var sanPhamChiTiet =  _context.sanPhamChiTiets.Find(id);
+            var sanPhamChiTiet = await _context.sanPhamChiTiets.FindAsync(id); // Sử dụng FindAsync để tìm kiếm bất đồng bộ
             if (sanPhamChiTiet != null)
             {
                 _context.sanPhamChiTiets.Remove(sanPhamChiTiet);
-                 _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(); // Chờ cho đến khi lưu thay đổi hoàn tất
                 return true;
             }
 
@@ -58,24 +58,30 @@ namespace AppAPI.Repository
             var list = _context.sanPhamChiTiets.ToList();
             return list;
         }
-        public bool Update(SanPhamChiTiet sanPhamChitiet)
+        public async Task<bool> Update(SanPhamChiTiet sanPhamChiTiet)
         {
-            var sanPhamChitietUpdate = _context.sanPhamChiTiets.Find(sanPhamChitiet.IdSanPhamChiTiet);
+            // Tìm sản phẩm chi tiết trong cơ sở dữ liệu
+            var sanPhamChitietUpdate = await _context.sanPhamChiTiets.FindAsync(sanPhamChiTiet.IdSanPhamChiTiet);
+
             if (sanPhamChitietUpdate != null)
             {
-                sanPhamChitietUpdate.Gia = sanPhamChitiet.Gia;
-                sanPhamChitietUpdate.SoLuong = sanPhamChitiet.SoLuong;
-                sanPhamChitietUpdate.NgayCapNhat = sanPhamChitiet.NgayCapNhat;
-                sanPhamChitietUpdate.NgayTao = sanPhamChitiet.NgayTao;
-                sanPhamChitietUpdate.NguoiCapNhat = sanPhamChitiet.NguoiCapNhat;
-                sanPhamChitietUpdate.NguoiTao = sanPhamChitiet.NguoiTao;
-                //sanPhamChitietUpdate.KichHoat = sanPhamChitiet.KichHoat == 1 ? 1 : 0;
-                sanPhamChitietUpdate.XuatXu = sanPhamChitiet.XuatXu;
-                _context.sanPhamChiTiets.Update(sanPhamChitietUpdate);
-                _context.SaveChanges();
-                return true;
+                // Cập nhật các thuộc tính của sản phẩm chi tiết
+                sanPhamChitietUpdate.Gia = sanPhamChiTiet.Gia;
+                sanPhamChitietUpdate.SoLuong = sanPhamChiTiet.SoLuong;
+                sanPhamChitietUpdate.NgayCapNhat = sanPhamChiTiet.NgayCapNhat;
+                sanPhamChitietUpdate.NgayTao = sanPhamChiTiet.NgayTao;
+                sanPhamChitietUpdate.NguoiCapNhat = sanPhamChiTiet.NguoiCapNhat;
+                sanPhamChitietUpdate.NguoiTao = sanPhamChiTiet.NguoiTao;
+                sanPhamChitietUpdate.XuatXu = sanPhamChiTiet.XuatXu;
+                // Nếu cần thiết, hãy quyết định có cập nhật thuộc tính KichHoat hay không
+                // sanPhamChitietUpdate.KichHoat = sanPhamChiTiet.KichHoat == 1 ? 1 : 0;
+
+                // Lưu thay đổi vào cơ sở dữ liệu
+                await _context.SaveChangesAsync();
+                return true; // Trả về true nếu cập nhật thành công
             }
-            return false;
+
+            return false; // Trả về false nếu không tìm thấy sản phẩm chi tiết
         }
 
         public async Task<List<SanPhamChiTiet>> GetSanPhamChiTietBySanPhamId(Guid sanPhamId)

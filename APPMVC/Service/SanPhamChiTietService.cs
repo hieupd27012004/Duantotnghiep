@@ -21,7 +21,7 @@ namespace APPMVC.Service
 
         public async Task Delete(Guid id)
         {
-            await _httpClient.DeleteAsync($"api/SanPhamChiTiet/Xoa?id={id}");
+           await _httpClient.DeleteAsync($"api/SanPhamChiTiet/Xoa?id={id}");
         }
 
         public Task<List<SanPhamChiTiet>> GetSanPhamChiTiets()

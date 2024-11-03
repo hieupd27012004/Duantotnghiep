@@ -483,104 +483,132 @@ namespace APPMVC.Areas.Admin.Controllers
             await LoadViewBags();
             return View(viewModel);
         }
-          [HttpGet]
-     public async Task<IActionResult> UpdateSPCT(Guid Id)
-     {
-         // Xử lý GET request
-         var sanPhamChiTiet = await _sanPhamCTService.GetSanPhamChiTietById(Id);
-         if (sanPhamChiTiet == null)
-         {
-             Console.WriteLine($"No product detail found for product with ID {Id}.");
-             return NotFound("Product detail not found.");
-         }
 
-         var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
-         var mauSacTenList = mauSacList.Select(ms => ms.TenMauSac).ToList();
+        [HttpGet]
+        public async Task<IActionResult> UpdateSPCT(Guid Id)
+        {
+            // Xử lý GET request
+            var sanPhamChiTiet = await _sanPhamCTService.GetSanPhamChiTietById(Id);
+            if (sanPhamChiTiet == null)
+            {
+                Console.WriteLine($"No product detail found for product with ID {Id}.");
+                return NotFound("Product detail not found.");
+            }
 
-         var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
-         var kichCoTenList = kichCoList.Select(kc => kc.TenKichCo).ToList();
+            var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
+            var mauSacTenList = mauSacList.Select(ms => ms.TenMauSac).ToList();
 
-         var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
+            var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
+            var kichCoTenList = kichCoList.Select(kc => kc.TenKichCo).ToList();
 
-         // Tạo view model cho sản phẩm chi tiết
-         var model = new SanPhamChiTietItemViewModel
-         {
-             IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
-             HinhAnhs = hinhAnhs,
-             MauSac = mauSacTenList,
-             KichCo = kichCoTenList,
-             Gia = sanPhamChiTiet.Gia,
-             SoLuong = sanPhamChiTiet.SoLuong,
-             XuatXu = sanPhamChiTiet.XuatXu,
-         };
+            var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
 
-         return View(model);
-     }
+            var model = new SanPhamChiTietItemViewModel
+            {
+                IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+                HinhAnhs = hinhAnhs,
+                MauSac = mauSacTenList,
+                KichCo = kichCoTenList,
+                Gia = sanPhamChiTiet.Gia,
+                SoLuong = sanPhamChiTiet.SoLuong,
+                XuatXu = sanPhamChiTiet.XuatXu,
 
-     [HttpPost]
-     public async Task<IActionResult> UpdateSPCT(SanPhamChiTietItemViewModel viewModel)
-     {
-         // Xử lý POST request
-         if (!ModelState.IsValid)
-         {
-             foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-             {
-                 Console.WriteLine(error.ErrorMessage);
-             }
-             return View(viewModel);
-         }
+            };
 
-         try
-         {
-             // Lấy chi tiết sản phẩm hiện tại từ cơ sở dữ liệu
-             var sanPhamChiTiet = await _sanPhamCTService.GetSanPhamChiTietById(viewModel.IdSanPhamChiTiet);
-             if (sanPhamChiTiet == null)
-             {
-                 TempData["Error"] = "Sản phẩm không tồn tại.";
-                 return RedirectToAction("Edit", "SanPham", new { area = "Admin", id = sanPhamChiTiet.IdSanPham });
-             }
-
-             // Cập nhật các thuộc tính của sản phẩm
-             sanPhamChiTiet.Gia = viewModel.Gia;
-             sanPhamChiTiet.SoLuong = viewModel.SoLuong;
-             sanPhamChiTiet.XuatXu = viewModel.XuatXu;
-
-             // Lưu thay đổi vào cơ sở dữ liệu
-             await _sanPhamCTService.Update(sanPhamChiTiet);
-
-             // Thông báo thành công
-             TempData["Success"] = "Cập nhật thành công";
-             return RedirectToAction("GetAll");
-         }
-         catch (Exception ex)
-         {
-             TempData["Error"] = "Cập nhật thất bại: " + ex.Message;
-             return View(viewModel);
-         }
-     }
-
+            return View(model);
+        }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteSanPhamChiTiet(Guid sanPhamChiTietId)
+        public async Task<IActionResult> UpdateSPCT(SanPhamChiTietItemViewModel viewModel)
         {
-            if (sanPhamChiTietId == Guid.Empty)
+            // Xử lý POST request
+            if (!ModelState.IsValid)
             {
-                return Json(new { success = false, message = "ID cannot be empty." });
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+                return View(viewModel);
             }
 
             try
             {
-                // Logic xóa sản phẩm chi tiết
-                await _sanPhamCTService.Delete(sanPhamChiTietId);
-                return Json(new { success = true, message = "Product detail deleted successfully." });
+                // Lấy chi tiết sản phẩm hiện tại từ cơ sở dữ liệu
+                var sanPhamChiTiet = await _sanPhamCTService.GetSanPhamChiTietById(viewModel.IdSanPhamChiTiet);
+                if (sanPhamChiTiet == null)
+                {
+                    TempData["Error"] = "Sản phẩm không tồn tại.";
+                    return RedirectToAction("Edit", "SanPham", new { area = "Admin", id = sanPhamChiTiet.IdSanPham });
+                }
+
+                // Cập nhật các thuộc tính của sản phẩm
+                sanPhamChiTiet.Gia = viewModel.Gia;
+                sanPhamChiTiet.SoLuong = viewModel.SoLuong;
+                sanPhamChiTiet.XuatXu = viewModel.XuatXu;
+
+                var existingImages = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
+                foreach (var existingImage in existingImages)
+                {
+                    await _hinhAnhService.DeleteAsync(existingImage.IdHinhAnh);
+                }
+
+                // Xử lý hình ảnh mới
+                if (viewModel.Files != null && viewModel.Files.Count > 0)
+                {
+                    foreach (var file in viewModel.Files)
+                    {
+                        if (file.Length > 0)
+                        {
+                            var imageData = await ConvertFileToByteArray(file);
+                            var hinhAnh = new HinhAnh
+                            {
+                                IdHinhAnh = Guid.NewGuid(),
+                                LoaiFileHinhAnh = file.ContentType,
+                                DataHinhAnh = imageData,
+                                TrangThai = 1,
+                                IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet
+                            };
+
+                            await _hinhAnhService.UploadAsync(hinhAnh);
+                        }
+                    }
+                }
+
+                // Lưu thay đổi vào cơ sở dữ liệu
+                await _sanPhamCTService.Update(sanPhamChiTiet);
+
+                // Thông báo thành công
+                TempData["Success"] = "Cập nhật thành công";
+                return RedirectToAction("GetAll");
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Failed to delete product detail: " + ex.Message });
+                TempData["Error"] = "Cập nhật thất bại: " + ex.Message;
+                return View(viewModel);
             }
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteSanPhamChiTiet(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                TempData["ErrorMessage"] = "ID cannot be empty.";
+                return RedirectToAction("Index"); // Redirect to your desired action
+            }
 
+            try
+            {
+                await _sanPhamCTService.Delete(id);
+                TempData["SuccessMessage"] = "Product detail deleted successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Failed to delete product detail: " + ex.Message;
+            }
+
+            return RedirectToAction("Index");
+        }
         private async Task LoadViewBags()
         {
             var listChatLieu = await _chatLieuService.GetChatLieu(null);
