@@ -1,77 +1,99 @@
-﻿@model IEnumerable<AppData.Model.DiaChi>
-
+﻿@model X.PagedList.IPagedList<AppData.ViewModel.DiaChiViewModel>
+@using X.PagedList.Mvc.Core
 @{
-    ViewData["Title"] = "Getall";
+    ViewData["Title"] = "GetAll";
+    Layout = "~/Areas/Client/Views/Shared/_Tttk.cshtml";
 }
 
-<h1>Getall</h1>
+<div class="content-wrapper">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success" style="padding: 10px; margin-right:20px; margin-top:20px; position: absolute;">
+            @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" style="padding: 10px; margin-right:20px; margin-top:20px; position: absolute;">
+            @TempData["Error"]
+        </div>
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.IdDiaChi)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.HoTen)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SoDienThoai)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Diachi)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DiaChiMacDinh)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NgayTao)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NgayCapNhat)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdKhachHang)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdDiaChi)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.HoTen)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SoDienThoai)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Diachi)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DiaChiMacDinh)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NgayTao)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NgayCapNhat)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdKhachHang)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">Quản lý địa chỉ /</span> Danh sách địa chỉ
+        </h4>
+
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <a asp-action="Create" class="btn btn-primary">Tạo Mới</a>
+            </div>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th hidden>Id</th>
+                    <th>Tên Người Nhận</th>
+                    <th>Số Điện Thoại</th>
+                    <th>Địa Chỉ</th>
+                    <th>Địa Chỉ Mặc Định</th>
+                    <th hidden>Ngày Tạo</th>
+                    <th hidden>Ngày Cập Nhật</th>
+                    <th>Khách Hàng</th>
+                    <th>Chức Năng</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td hidden>@Html.DisplayFor(modelItem => item.IdDiaChi)</td>
+                            <td>@Html.DisplayFor(modelItem => item.HoTen)</td>
+                            <td>@Html.DisplayFor(modelItem => item.SoDienThoai)</td>
+                            <td>
+                                @if (string.IsNullOrEmpty(item.Diachi))
+                                {
+                                    <span>Địa chỉ này chưa được cập nhật</span>
+                                }
+                                else
+                                {
+                                    @item.Diachi
+                                }
+                            </td>
+                            <td>@Html.DisplayFor(modelItem => item.DiaChiMacDinh)</td>
+                            <td hidden>@item.NgayTao.ToString("dd/MM/yyyy")</td>
+                            <td hidden>@item.NgayCapNhat.ToString("dd/MM/yyyy")</td>
+                            <td>@item.CustomerName</td>
+                            <td>
+                                @Html.ActionLink("Sửa", "Edit", new { id = item.IdDiaChi }, new { @class = "btn btn-warning btn-sm" })
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="text-center">Không có địa chỉ nào được tìm thấy.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            @Html.PagedListPager(Model, page => Url.Action("Getall", new { page }),
+                     new PagedListRenderOptions
+            {
+                DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                MaximumPageNumbersToDisplay = 5,
+                LiElementClasses = new[] { "page-item" },
+                PageClasses = new[] { "page-link" }
+            })
+        </div>
+    </div>
+</div>

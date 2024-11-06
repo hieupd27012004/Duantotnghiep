@@ -23,21 +23,24 @@ namespace APPMVC.Areas.Client.Controllers
 
             return View();
         }
-      
-        public IActionResult Register()
+
+        public async Task<IActionResult> Register(KhachHang kh = null)
         {
-            
-            return View();
-        }
-        [HttpPost]
-        public async Task<IActionResult> Register(KhachHang kh)
-        {
+
             if (ModelState.IsValid)
             {
                 try
                 {
+                    kh.IdKhachHang = Guid.NewGuid();
+                    kh.AuthProvider = "1";
+                    kh.NgayTao = DateTime.Now;
+                    kh.NgayCapNhat = DateTime.Now;
+                    kh.NguoiTao = "Clien";
+                    kh.NguoiCapNhat = "Clien";
+                    kh.KichHoat = 1;
                     await _service.AddKhachHang(kh);
-                    return RedirectToAction("DangKyThanhCong");
+                    TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay.";
+                    return RedirectToAction("Login");
                 }
                 catch (Exception ex)
                 {
@@ -46,10 +49,8 @@ namespace APPMVC.Areas.Client.Controllers
             }
             else
             {
-                // Lấy tất cả các lỗi trong ModelState
+                // Xử lý lỗi
                 var allErrors = ModelState.Values.SelectMany(v => v.Errors).ToList();
-
-                // Ghi lại chi tiết lỗi ra màn hình console hoặc log
                 foreach (var error in allErrors)
                 {
                     if (!string.IsNullOrEmpty(error.ErrorMessage))
@@ -62,12 +63,10 @@ namespace APPMVC.Areas.Client.Controllers
                         Console.WriteLine($"Exception: {error.Exception.Message}");
                     }
                 }
-
-                // Thêm một thông báo lỗi chung cho người dùng (nếu cần)
                 ModelState.AddModelError("", "Có lỗi xảy ra khi điền thông tin, vui lòng kiểm tra lại.");
             }
 
-            return View(kh);
+            return View(kh); // Trả về View với dữ liệu đã nhập
         }
         public IActionResult DangKyThanhCong()
         {
@@ -81,47 +80,49 @@ namespace APPMVC.Areas.Client.Controllers
             // Trả về view với dữ liệu từ Session
             return View((object)sessionData);
         }
-        public IActionResult Login()
-        {
-            return View();
-        }
-        [HttpPost]
-        public async Task<IActionResult> Login(KhachHang khach)
-        {
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    // Thực hiện đăng nhập
-                    var kh = await _service.LoginKH(khach.Email, khach.MatKhau);
-                    if (kh != null)
-                    {
-                        // Lưu thông tin khách hàng vào session
-                        HttpContext.Session.SetString("KhachHang", JsonConvert.SerializeObject(kh));
-						HttpContext.Session.SetString("TenKhachHang", kh.HoTen);
-						HttpContext.Session.SetString("IdKhachHang", JsonConvert.SerializeObject(kh.IdKhachHang));
-						return RedirectToAction("DangNhapThanhCong");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("", "Đăng nhập thất bại. Kiểm tra lại email hoặc mật khẩu.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", ex.Message);
-                }
-            }
-            var errors = ModelState.Values.SelectMany(v => v.Errors);
-            foreach (var error in errors)
-            {
-                Console.WriteLine(error.ErrorMessage);
-            }
-            return View(khach);
-        }
+		public IActionResult Login()
+		{
+			return View();
+		}
 
-        
-        public IActionResult ThongTinKhachHang()
+		[HttpPost]
+		public async Task<IActionResult> Login(KhachHang khach)
+		{
+			if (ModelState.IsValid)
+			{
+				try
+				{
+					// Thực hiện đăng nhập
+					var kh = await _service.LoginKH(khach.Email, khach.MatKhau);
+					if (kh != null)
+					{
+						// Lưu thông tin khách hàng vào session
+						HttpContext.Session.SetString("KhachHang", JsonConvert.SerializeObject(kh));
+						HttpContext.Session.SetString("TenKhachHang", kh.HoTen);
+						HttpContext.Session.SetString("IdKhachHang", kh.IdKhachHang.ToString()); // Chuyển đổi sang chuỗi
+						return RedirectToAction("Index", "HomeClient", new { area = "Client" }); // Chuyển hướng đến trang Index
+					}
+					else
+					{
+						ModelState.AddModelError("", "Đăng nhập thất bại. Kiểm tra lại email hoặc mật khẩu.");
+					}
+				}
+				catch (Exception ex)
+				{
+					ModelState.AddModelError("", ex.Message);
+				}
+			}
+
+			var errors = ModelState.Values.SelectMany(v => v.Errors);
+			foreach (var error in errors)
+			{
+				Console.WriteLine(error.ErrorMessage);
+			}
+			return View(khach);
+		}
+
+
+		public IActionResult ThongTinKhachHang()
         {
             var sessionData = HttpContext.Session.GetString("KhachHang");
 
