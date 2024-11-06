@@ -149,7 +149,7 @@
                                 <div data-i18n="Account">Account</div>
                             </a>
                         </li>
-                        <li class="menu-item">
+                    @*     <li class="menu-item">
                             <a href="pages-account-settings-notifications.html" class="menu-link">
                                 <div data-i18n="Notifications">Notifications</div>
                             </a>
@@ -158,7 +158,7 @@
                             <a href="pages-account-settings-connections.html" class="menu-link">
                                 <div data-i18n="Connections">Connections</div>
                             </a>
-                        </li>
+                        </li> *@
                     </ul>
                 </li>
                 <li class="menu-item">
@@ -168,20 +168,20 @@
                     </a>
                     <ul class="menu-sub">
                             <li class="menu-item">
-                                <a href="@Url.Action("Index", "KhachHang", new { area = "Admin" })" class="menu-link" @* onclick="return checkLogin();" *@ target="_blank">
+                                <a href="@Url.Action("Index", "KhachHang", new { area = "Admin" })" class="menu-link">
                                     <div data-i18n="Basic">Account</div>
                                 </a>
                             </li>
                         <li class="menu-item">
-                                <a href="@Url.Action("Getall", "DiaChi", new { area = "Admin" })" class="menu-link" target="_blank">
+                                <a href="@Url.Action("Getall", "DiaChi", new { area = "Admin" })" class="menu-link">
                                     <div data-i18n="Basic">Address</div>
                             </a>
                         </li>
-                        <li class="menu-item">
+                       @*  <li class="menu-item">
                             <a href="auth-register-basic.html" class="menu-link" target="_blank">
                                 <div data-i18n="Basic">Register</div>
                             </a>
-                        </li>
+                        </li> *@
                         
                     </ul>
                 </li>

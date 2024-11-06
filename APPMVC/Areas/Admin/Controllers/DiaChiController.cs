@@ -1,5 +1,7 @@
 ﻿using AppData.Model;
+using AppData.ViewModel;
 using APPMVC.IService;
+using Castle.Core.Resource;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using X.PagedList;
@@ -22,19 +24,44 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             page = page < 1 ? 1 : page;
             int pageSize = 5;
-            List<DiaChi> timten = await _services.GetDiaChi(name);
 
-            if (timten != null)
+            List<DiaChi> diaChis = await _services.GetDiaChi(name);
+            List<KhachHang> customers = await _serviceKH.GetAllKhachHang();
+
+            List<DiaChiViewModel> viewModels;
+
+            if (diaChis != null && diaChis.Any())
             {
-                var pagedDCs = timten.ToPagedList(page, pageSize);
-                return View(pagedDCs);
+                viewModels = diaChis.Select(address => new DiaChiViewModel
+                {
+                    IdDiaChi = address.IdDiaChi, // Assuming this property exists
+                    HoTen = address.HoTen, // Assuming this property exists
+                    SoDienThoai = address.SoDienThoai, // Assuming this property exists
+                    Diachi = address.Diachi, // Assuming this property exists
+                    DiaChiMacDinh = address.DiaChiMacDinh, // Assuming this property exists
+                    NgayTao = address.NgayTao, // Assuming this property exists
+                    NgayCapNhat = address.NgayCapNhat, // Assuming this property exists
+                    CustomerName = customers.FirstOrDefault(c => c.IdKhachHang == address.IdKhachHang)?.HoTen
+                }).ToList();
             }
             else
             {
-                List<DiaChi> dc = await _services.GetDiaChi(name);
-                var pagedDC = dc.ToPagedList(page, pageSize);
-                return View(pagedDC);
+                List<DiaChi> allDiaChis = await _services.GetDiaChi(null);
+                viewModels = allDiaChis.Select(address => new DiaChiViewModel
+                {
+                    IdDiaChi = address.IdDiaChi, // Assuming this property exists
+                    HoTen = address.HoTen, // Assuming this property exists
+                    SoDienThoai = address.SoDienThoai, // Assuming this property exists
+                    Diachi = address.Diachi, // Assuming this property exists
+                    DiaChiMacDinh = address.DiaChiMacDinh, // Assuming this property exists
+                    NgayTao = address.NgayTao, // Assuming this property exists
+                    NgayCapNhat = address.NgayCapNhat, // Assuming this property exists
+                    CustomerName = customers.FirstOrDefault(c => c.IdKhachHang == address.IdKhachHang)?.HoTen
+                }).ToList();
             }
+
+            var pagedDCs = viewModels.ToPagedList(page, pageSize);
+            return View(pagedDCs);
         }
         public async Task<IActionResult> Create()
         {

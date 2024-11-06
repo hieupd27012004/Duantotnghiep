@@ -87,7 +87,9 @@ namespace AppAPI.Repository
                 nhanVien.Email = nv.Email;
                 nhanVien.AnhNhanVien = nv.AnhNhanVien;
                 nhanVien.DiaChi = nv.DiaChi;
-                nhanVien.NgayCapNhat = DateTime.Now;
+                nhanVien.NgayCapNhat = nv.NgayCapNhat;
+                nhanVien.NgayTao = nv.NgayTao;
+                nhanVien.IdchucVu = nv.IdchucVu;
                 _context.Update(nv);
                  _context.SaveChanges();
                 return nv;
