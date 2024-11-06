@@ -99,7 +99,7 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
         name: "default",
-        pattern: "{area=Admin}/{controller=HomeAdmin}/{action=Index}/{id?}");
+        pattern: "{area=Client}/{controller=HomeClient}/{action=Index}/{id?}");
 
     endpoints.MapControllerRoute(
         name: "areas",
@@ -107,9 +107,9 @@ app.UseEndpoints(endpoints =>
 
     // Cấu hình route cho area Customer
     endpoints.MapControllerRoute(
-        name: "Client",
-        pattern: "{area:exists}/{controller=HomeClient}/{action=Index}/{id?}",
-        defaults: new { area = "Client", controller = "HomeClient", action = "Index" });
+        name: "Admin",
+        pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}",
+        defaults: new { area = "Admin", controller = "HomeAdmin", action = "Index" });
 });
 
 app.Run();
