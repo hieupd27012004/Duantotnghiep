@@ -587,6 +587,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 return View(viewModel);
             }
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteSanPhamChiTiet(Guid id)
@@ -594,7 +595,7 @@ namespace APPMVC.Areas.Admin.Controllers
             if (id == Guid.Empty)
             {
                 TempData["ErrorMessage"] = "ID cannot be empty.";
-                return RedirectToAction("Index"); // Redirect to your desired action
+                return RedirectToAction("Index"); 
             }
 
             try
