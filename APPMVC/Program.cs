@@ -48,7 +48,6 @@ builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
 builder.Services.AddTransient<IKieuDangService, KieuDangService>();
 builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
 builder.Services.AddTransient<IPromotionService, PromotionService>();
-
 builder.Services.AddTransient<IDeGiayService, DeGiayService>();
 builder.Services.AddTransient<IKichCoService, KichCoService>();
 builder.Services.AddTransient<IMauSacService, MauSacService>();
@@ -57,11 +56,11 @@ builder.Services.AddTransient<ISanPhamChiTietService, SanPhamChiTietService>();
 builder.Services.AddTransient<INhanVienService, NhanVienService>();
 builder.Services.AddTransient<IKhachHangService, KhachHangService>();
 builder.Services.AddTransient<IChucVuService, ChucVuService>();
-
+builder.Services.AddTransient<IGioHangChiTietService, GioHangChiTietService>();
 builder.Services.AddTransient<IDiaChiService, DiaChiService>();
+builder.Services.AddTransient<IHoaDonService, HoaDonService>();
+builder.Services.AddTransient<IHoaDonChiTietService, IHoaDonChiTietService>();
 builder.Services.AddDbContext<AppDbcontext>();
-
-
 builder.Services.AddTransient<ISanPhamChiTietMauSacService, SanPhamChiTietMauSacService>();
 builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCoService>();
 builder.Services.AddTransient<IVoucherService, VoucherService>();
