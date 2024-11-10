@@ -1,0 +1,108 @@
+﻿using AppAPI.IService;
+using AppData.Model;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AppAPI.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class HoaDonChiTietController : ControllerBase
+    {
+        private readonly IHoaDonChiTietService _service;
+
+        public HoaDonChiTietController(IHoaDonChiTietService service)
+        {
+            _service = service;
+        }
+
+        // GET: api/HoaDonChiTiet/getall
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+                var hoaDonChiTietList = await _service.GetAllAsync();
+                return Ok(hoaDonChiTietList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/HoaDonChiTiet/getbyid?id=<guid>
+        [HttpGet("getbyid")]
+        public async Task<IActionResult> Get(Guid id)
+        {
+            try
+            {
+                var hoaDonChiTiet = await _service.GetByIdAsync(id);
+                if (hoaDonChiTiet == null)
+                {
+                    return NotFound($"HoaDonChiTiet with ID {id} not found.");
+                }
+                return Ok(hoaDonChiTiet);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/HoaDonChiTiet/them
+        [HttpPost("them")]
+        public async Task<IActionResult> Post([FromBody] HoaDonChiTiet hoaDonChiTiet)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                await _service.AddAsync(hoaDonChiTiet);
+                return CreatedAtAction(nameof(Get), new { id = hoaDonChiTiet.IdHoaDonChiTiet }, hoaDonChiTiet);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // PUT: api/HoaDonChiTiet/sua
+        [HttpPut("sua")]
+        public async Task<IActionResult> Put([FromBody] HoaDonChiTiet hoaDonChiTiet)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                await _service.UpdateAsync(hoaDonChiTiet);
+                return Ok(hoaDonChiTiet);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // DELETE: api/HoaDonChiTiet/xoa?id=<guid>
+        [HttpDelete("xoa")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
+            {
+                await _service.DeleteAsync(id);
+                return NoContent(); // 204 No Content
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+    }
+}

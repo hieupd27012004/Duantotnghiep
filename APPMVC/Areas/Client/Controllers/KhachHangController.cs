@@ -269,5 +269,14 @@ namespace APPMVC.Areas.Client.Controllers
             ModelState.AddModelError("", "Đổi mật khẩu thất bại. Vui lòng thử lại.");
             return View();
         }
-    }
+
+		public IActionResult Logout()
+		{
+			HttpContext.Session.Clear();
+
+			TempData["SuccessMessage"] = "Bạn đã đăng xuất thành công.";
+
+			return RedirectToAction("Login");
+		}
+	}
 }

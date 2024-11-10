@@ -1,30 +1,38 @@
-﻿
+﻿@model List<AppData.ViewModel.GioHangChiTietViewModel>
+
 @{
-    ViewData["Title"] = "Card";
+    ViewData["Title"] = "Cart";
     Layout = "~/Areas/Client/Views/Shared/_LayoutClient.cshtml";
 }
+<style>
+    .hero {
+        background-image: url('https://ananas.vn/wp-content/uploads/kv_basas_mobileBanner_4_2019.jpg');
+        background-size: cover; /* Đảm bảo ảnh phủ kín */
+        background-position: center; /* Căn giữa ảnh */
+        height: 400px; /* Bạn có thể điều chỉnh chiều cao theo nhu cầu */
+        display: flex; /* Để sử dụng flexbox cho căn chỉnh */
+        align-items: center; /* Căn giữa theo chiều dọc */
+        color: white; /* Đặt màu chữ trắng cho dễ đọc */
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Tạo hiệu ứng bóng cho chữ */
+    }
 
+</style>
 <div class="hero">
     <div class="container">
-        <div class="row justify-content-between">
-            <div class="col-lg-5">
-                <div class="intro-excerpt">
-                    <h1>Cart</h1>
-                </div>
-            </div>
-            <div class="col-lg-7">
+        <div class="row justify-content-center align-items-center text-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 text-white  mb-4">Your Shopping Cart</h1>
+                <p class="lead text-white ">Manage your items and proceed to checkout</p>
             </div>
         </div>
     </div>
 </div>
-
-
 <div class="untree_co-section before-footer-section">
     <div class="container">
         <div class="row mb-5">
-            <form class="col-md-12" method="post">
+            <form class="col-md-12" method="post" action="/Cart/Update">
                 <div class="site-blocks-table">
-                    <table class="table">
+                    <table class="table ">
                         <thead>
                             <tr>
                                 <th class="product-thumbnail">Image</th>
@@ -36,55 +44,36 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td class="product-thumbnail">
-                                    <img src="images/product-1.png" alt="Image" class="img-fluid">
-                                </td>
-                                <td class="product-name">
-                                    <h2 class="h5 text-black">Product 1</h2>
-                                </td>
-                                <td>$49.00</td>
-                                <td>
-                                    <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px;">
-                                        <div class="input-group-prepend">
-                                            <button class="btn btn-outline-black decrease" type="button">&minus;</button>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="product-thumbnail">
+                                        <img src="@item.HinhAnhs" alt="Image" class="img-fluid">
+                                    </td>
+                                    <td class="product-name">
+                                        <h2 class="h5 text-black">@item.TenSanPham</h2>
+                                    </td>
+                                    <td>@item.DonGia.ToString("C")</td>
+                                    <td>
+                                        <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px;">
+                                            <div class="input-group-prepend">
+                                                <button class="btn btn-outline-black decrease" type="button">&minus;</button>
+                                            </div>
+                                            <input type="number" name="quantities[@item.IdGioHangChiTiet]" class="form-control text-center quantity-amount" value="@item.SoLuong" min="1" aria-label="Quantity" />
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-black increase" type="button">&plus;</button>
+                                            </div>
                                         </div>
-                                        <input type="text" class="form-control text-center quantity-amount" value="1" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-outline-black increase" type="button">&plus;</button>
-                                        </div>
-                                    </div>
-
-                                </td>
-                                <td>$49.00</td>
-                                <td><a href="#" class="btn btn-black btn-sm">X</a></td>
-                            </tr>
-
-                            <tr>
-                                <td class="product-thumbnail">
-                                    <img src="images/product-2.png" alt="Image" class="img-fluid">
-                                </td>
-                                <td class="product-name">
-                                    <h2 class="h5 text-black">Product 2</h2>
-                                </td>
-                                <td>$49.00</td>
-                                <td>
-                                    <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px;">
-                                        <div class="input-group-prepend">
-                                            <button class="btn btn-outline-black decrease" type="button">&minus;</button>
-                                        </div>
-                                        <input type="text" class="form-control text-center quantity-amount" value="1" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-outline-black increase" type="button">&plus;</button>
-                                        </div>
-                                    </div>
-
-                                </td>
-                                <td>$49.00</td>
-                                <td><a href="#" class="btn btn-black btn-sm">X</a></td>
-                            </tr>
+                                    </td>
+                                    <td>@item.TongTien.ToString("C")</td>
+                                    <td>
+                                        <button type="submit" formaction="/Cart/Remove/@item.IdGioHangChiTiet" class="btn btn-black btn-sm">X</button>
+                                    </td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
+                    <hr/>
                 </div>
             </form>
         </div>
@@ -93,10 +82,10 @@
             <div class="col-md-6">
                 <div class="row mb-5">
                     <div class="col-md-6 mb-3 mb-md-0">
-                        <button class="btn btn-black btn-sm btn-block">Update Cart</button>
+                        <button type="submit" formmethod="post" class="btn btn-black btn-sm btn-block">Update Cart</button>
                     </div>
                     <div class="col-md-6">
-                        <button class="btn btn-outline-black btn-sm btn-block">Continue Shopping</button>
+                        <button class="btn btn-outline-black btn-sm btn-block" onclick="window.location='@Url.Action("Index", "Products")'">Continue Shopping</button>
                     </div>
                 </div>
                 <div class="row">
@@ -105,7 +94,7 @@
                         <p>Enter your coupon code if you have one.</p>
                     </div>
                     <div class="col-md-8 mb-3 mb-md-0">
-                        <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">
+                        <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code" />
                     </div>
                     <div class="col-md-4">
                         <button class="btn btn-black">Apply Coupon</button>
@@ -125,7 +114,7 @@
                                 <span class="text-black">Subtotal</span>
                             </div>
                             <div class="col-md-6 text-right">
-                                <strong class="text-black">$230.00</strong>
+                                <strong class="text-black">@Model.Sum(item => item.TongTien).ToString("C")</strong>
                             </div>
                         </div>
                         <div class="row mb-5">
@@ -133,13 +122,13 @@
                                 <span class="text-black">Total</span>
                             </div>
                             <div class="col-md-6 text-right">
-                                <strong class="text-black">$230.00</strong>
+                                <strong class="text-black">@Model.Sum(item => item.TongTien).ToString("C")</strong>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-12">
-                                <button class="btn btn-black btn-lg py-3 btn-block" onclick="window.location='checkout.html'">Proceed To Checkout</button>
+                                <button class="btn btn-black btn-lg py-3 btn-block" onclick="window.location='@Url.Action("Checkout", "Cart")'">Proceed To Checkout</button>
                             </div>
                         </div>
                     </div>

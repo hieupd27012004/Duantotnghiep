@@ -11,10 +11,7 @@ namespace AppData.Model
 	{
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public Guid IdGioHangChiTiet { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
-		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
-		[Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
-		public double DonGia { get; set; }
+
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
 		[Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
