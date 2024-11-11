@@ -33,13 +33,13 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 viewModels = diaChis.Select(address => new DiaChiViewModel
                 {
-                    IdDiaChi = address.IdDiaChi, // Assuming this property exists
-                    HoTen = address.HoTen, // Assuming this property exists
-                    SoDienThoai = address.SoDienThoai, // Assuming this property exists
-                    Diachi = address.Diachi, // Assuming this property exists
-                    DiaChiMacDinh = address.DiaChiMacDinh, // Assuming this property exists
-                    NgayTao = address.NgayTao, // Assuming this property exists
-                    NgayCapNhat = address.NgayCapNhat, // Assuming this property exists
+                    IdDiaChi = address.IdDiaChi, 
+                    HoTen = address.HoTen, 
+                    SoDienThoai = address.SoDienThoai,
+                    Diachi = address.Diachi, 
+                    DiaChiMacDinh = address.DiaChiMacDinh, 
+                    NgayTao = address.NgayTao,
+                    NgayCapNhat = address.NgayCapNhat,
                     CustomerName = customers.FirstOrDefault(c => c.IdKhachHang == address.IdKhachHang)?.HoTen
                 }).ToList();
             }
@@ -48,13 +48,13 @@ namespace APPMVC.Areas.Client.Controllers
                 List<DiaChi> allDiaChis = await _services.GetDiaChi(null);
                 viewModels = allDiaChis.Select(address => new DiaChiViewModel
                 {
-                    IdDiaChi = address.IdDiaChi, // Assuming this property exists
-                    HoTen = address.HoTen, // Assuming this property exists
-                    SoDienThoai = address.SoDienThoai, // Assuming this property exists
-                    Diachi = address.Diachi, // Assuming this property exists
-                    DiaChiMacDinh = address.DiaChiMacDinh, // Assuming this property exists
-                    NgayTao = address.NgayTao, // Assuming this property exists
-                    NgayCapNhat = address.NgayCapNhat, // Assuming this property exists
+                    IdDiaChi = address.IdDiaChi,
+                    HoTen = address.HoTen,
+                    SoDienThoai = address.SoDienThoai, 
+                    Diachi = address.Diachi,
+                    DiaChiMacDinh = address.DiaChiMacDinh, 
+                    NgayTao = address.NgayTao,
+                    NgayCapNhat = address.NgayCapNhat,
                     CustomerName = customers.FirstOrDefault(c => c.IdKhachHang == address.IdKhachHang)?.HoTen
                 }).ToList();
             }
