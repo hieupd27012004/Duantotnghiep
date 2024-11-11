@@ -18,6 +18,7 @@ namespace AppAPI.Repository
             try
             {
                 _context.nhanViens.AddAsync(nv);
+
                 await _context.SaveChangesAsync();
                 return nv;
             }

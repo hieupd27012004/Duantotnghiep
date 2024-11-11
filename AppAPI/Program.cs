@@ -30,6 +30,11 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddDbContext<AppDbcontext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddHttpClient("GHN", client =>
+{
+    client.BaseAddress = new Uri("https://online-gateway.ghn.vn/shiip/public-api/");
+    client.DefaultRequestHeaders.Add("Token", "1b11f9f8-257d-11ef-99a7-3ed37c49343e");
+});
 // Enable CORS
 builder.Services.AddCors(options =>
 {
@@ -87,10 +92,17 @@ builder.Services.AddTransient<IHoaDonRepo, HoaDonRepo>();
 builder.Services.AddTransient<IHoaDonService, HoaDonService>();
 builder.Services.AddTransient<IHoaDonChiTietRepo, HoaDonChiTietRepo>();
 builder.Services.AddTransient<IHoaDonChiTietService, HoaDonChiTietService>();
+builder.Services.AddTransient<ILichSuHoaDonRepo, LichSuHoaDonRepo>();
+builder.Services.AddTransient<ILichSuHoaDonService, LichSuHoaDonService>();
+builder.Services.AddTransient<IGiaoDichRepo, GiaoDichRepo>();
+builder.Services.AddTransient<IGiaoDichService, GiaoDichService>();
 
+builder.Services.AddScoped<IDiaChiRepo, DiaChiRepo>();
+builder.Services.AddScoped<IDiaChiService, DiaChiService>();
 // Check time for voucher application
 builder.Services.AddHostedService<VoucherStatusUpdater>();
 builder.Services.AddSignalR();
+
 
 var app = builder.Build();
 

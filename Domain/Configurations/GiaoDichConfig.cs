@@ -24,6 +24,11 @@ namespace AppData.Configurations
 				.WithMany(p => p.GiaoDich)
 				.HasForeignKey(p => p.IdTrangThai)
 				.OnDelete(DeleteBehavior.NoAction);
-		}
+            builder.HasOne(p => p.NhanVien)
+                .WithMany(p => p.GiaoDiches)
+                .HasForeignKey(p => p.IdNhanVien)
+                .OnDelete(DeleteBehavior.NoAction);
+
+        }
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using AppAPI.IRepository;
 using AppAPI.IService;
 using AppData.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppAPI.Service
 {
@@ -11,37 +12,52 @@ namespace AppAPI.Service
         {
             _repository = repo;
         }
-        public bool Create(DiaChi diaChi)
+        public Task<List<DiaChi>> GetAll()
         {
-           return _repository.Create(diaChi);
+           return _repository.GetAll();
         }
 
-        public bool Delete(Guid id)
+        public Task<List<DiaChi>> GetByIdKh(Guid idKhachHang)
         {
-            return _repository.Delete(id);
+           return _repository.GetByIdKh(idKhachHang);
+        }
+        public Task<DiaChi> GetByIdAsync(Guid idDiaChi)
+        {
+            return _repository.GetByIdAsync(idDiaChi);
         }
 
-        public List<DiaChi> GetDiaChi(string? name)
+        public Task<DiaChi> AddAsync(DiaChi diaChi)
         {
-            return _repository.GetDiaChi(name);
+            return _repository.AddAsync(diaChi);
+        }
+        public Task<DiaChi> UpdateAsync(DiaChi diaChi)
+        {
+            return _repository.UpdateAsync(diaChi);
+        }
+        public Task<bool> DeleteAsync(Guid idDiaChi)
+        {
+            return _repository.DeleteAsync(idDiaChi);
+        }
+        public Task<List<Province>> GetProvincesAsync()
+        {
+           return _repository.GetProvincesAsync();
+        }
+        public Task<List<District>> GetDistrictsAsync(int provinceId)
+        {
+            return _repository.GetDistrictsAsync(provinceId);
+        }      
+        public Task<List<Ward>> GetWardsAsync(int districtId)
+        {
+            return _repository.GetWardsAsync(districtId);
+        }
+        public  Task<int> GetAddressCountByCustomerId(Guid customerId)
+        {
+            return _repository.GetAddressCountByCustomerId(customerId);
+        }
+        public  Task<bool> HasDefaultAddressAsync(Guid customerId)
+        {
+            return _repository.HasDefaultAddressAsync(customerId);
         }
 
-        public DiaChi GetDiaChiById(Guid id)
-        {
-            return _repository.GetDiaChiById(id);
-        }
-
-        public bool Update(DiaChi diaChi)
-        {
-            return _repository.Update(diaChi);
-        }
-        public async Task<List<DiaChi>> GetDiaChiByIdKH(Guid id)
-        {
-            return await _repository.GetDiaChiByIdKH(id);
-        }
-        public bool UpdateDCbyIdKH(Guid id, DiaChi diaChi)
-        {
-            return _repository.UpdateDCbyIdKH(id,diaChi);
-        }
     }
 }

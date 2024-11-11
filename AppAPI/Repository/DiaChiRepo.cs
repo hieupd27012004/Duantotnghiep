@@ -2,118 +2,140 @@
 using AppData;
 using AppData.Model;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace AppAPI.Repository
 {
     public class DiaChiRepo : IDiaChiRepo
     {
         private readonly AppDbcontext _context;
-        public DiaChiRepo()
+        private readonly IHttpClientFactory _httpClientFactory;
+        public DiaChiRepo(AppDbcontext context, IHttpClientFactory httpClientFactory)
         {
-            _context = new AppDbcontext();
+            _context = context;
+            _httpClientFactory = httpClientFactory;
         }
-        public bool Create(DiaChi diaChi)
+        public async Task<List<DiaChi>> GetAll()
         {
-            try
+            return await _context.diaChi.ToListAsync();
+        }
+        public async Task<List<DiaChi>> GetByIdKh(Guid idKhachHang)
+        {
+            return await _context.diaChi.Where(x => x.IdKhachHang == idKhachHang).ToListAsync();
+        }
+        public  async Task<DiaChi> GetByIdAsync(Guid idDiaChi)
+        {
+            var Getdc = _context.diaChi.Find(idDiaChi);
+            return  Getdc;
+        }
+        public async Task<DiaChi> AddAsync(DiaChi diaChi)
+        {
+            _context.diaChi.Add(diaChi);
+            await _context.SaveChangesAsync();
+            return diaChi;
+        }
+        public async Task<DiaChi> UpdateAsync(DiaChi diaChi)
+        {
+            var existingDiaChi = await _context.diaChi.FindAsync(diaChi.IdDiaChi);
+            if (existingDiaChi == null)
             {
-                _context.diaChi.Add(diaChi);
-                _context.SaveChanges();
-                return true;
+                return null; // Không tìm thấy địa chỉ
             }
-            catch (Exception ex)
-            {
-                return false;
-            }
+
+            // Cập nhật các trường dữ liệu trong đối tượng hiện tại
+            existingDiaChi.HoTen = diaChi.HoTen;
+            existingDiaChi.SoDienThoai = diaChi.SoDienThoai;
+            existingDiaChi.ProvinceId = diaChi.ProvinceId;
+            existingDiaChi.ProvinceName = diaChi.ProvinceName;
+            existingDiaChi.DistrictId = diaChi.DistrictId;
+            existingDiaChi.DistrictName = diaChi.DistrictName;
+            existingDiaChi.WardId = diaChi.WardId;
+            existingDiaChi.WardName = diaChi.WardName;
+            existingDiaChi.DiaChiMacDinh = diaChi.DiaChiMacDinh;
+
+            // Lưu thay đổi vào cơ sở dữ liệu
+            await _context.SaveChangesAsync();
+            return existingDiaChi;
         }
 
-        public bool Delete(Guid id)
+        public async Task<bool> DeleteAsync(Guid idDiaChi)
         {
-            try
+            var diaChi = await _context.diaChi.FindAsync(idDiaChi);
+            if(diaChi == null) return false;
+            _context.diaChi.Remove(diaChi);
+            return await _context.SaveChangesAsync() > 0;
+        }
+        public async Task<List<Province>> GetProvincesAsync()
+        {
+            var client = _httpClientFactory.CreateClient("GHN");
+
+            var response = await client.GetAsync("https://online-gateway.ghn.vn/shiip/public-api/master-data/province");
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadAsStringAsync();
+            var ghnReponse = JsonConvert.DeserializeObject<GHNResponse<Province>>(result);
+            return ghnReponse.Data.ToList();
+        }
+        public async Task<List<District>> GetDistrictsAsync(int provinceId)
+        {
+            var client = _httpClientFactory.CreateClient("GHN");
+
+            var content = new StringContent(JsonConvert.SerializeObject(new { province_id = provinceId }), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("https://online-gateway.ghn.vn/shiip/public-api/master-data/district", content);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadAsStringAsync();
+            var ghnResponse = JsonConvert.DeserializeObject<GHNResponse<District>>(result);
+
+            return ghnResponse.Data.ToList();
+        }
+        public async Task<List<Ward>> GetWardsAsync(int districtId)
+        {
+            var client = _httpClientFactory.CreateClient("GHN");
+
+            // Thêm token nếu GHN yêu cầu
+            //client.DefaultRequestHeaders.Add("Token", "1b11f9f8-257d-11ef-99a7-3ed37c49343e"); // Thay YOUR_API_KEY bằng API key thật nếu cần
+
+            var content = new StringContent(JsonConvert.SerializeObject(new { district_id = districtId }), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("https://online-gateway.ghn.vn/shiip/public-api/master-data/ward", content);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Raw Response: " + result);  // Log dữ liệu thô để kiểm tra
+
+            var ghnResponse = JsonConvert.DeserializeObject<GHNResponse<Ward>>(result);
+
+            if (ghnResponse == null || ghnResponse.Data == null || !ghnResponse.Data.Any())
             {
-                var getId = _context.diaChi.Find(id);
-                if (getId != null)
-                {
-                    _context.diaChi.Remove(getId);
-                    _context.SaveChanges();
-                    return true;
-                }
-                return false;
+                Console.WriteLine("No wards found for districtId: " + districtId);
+                return new List<Ward>();
             }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+
+            return ghnResponse.Data.ToList();
+        }
+        public class GHNResponse<T>
+        {
+            [JsonProperty("code")]
+            public string Code { get; set; }
+
+            [JsonProperty("message")]
+            public string Message { get; set; }
+
+            [JsonProperty("data")]
+            public IEnumerable<T> Data { get; set; }
         }
 
-        public List<DiaChi> GetDiaChi(string? name)
+        //Check số lượng thêm cho khách hàng và địa chỉ mặc định
+        public async Task<int> GetAddressCountByCustomerId(Guid customerId)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                return _context.diaChi.ToList();
-            }
-            else
-            {
-                return _context.diaChi.Where(d => d.HoTen.Contains(name)).ToList();
-            }
+            return await _context.diaChi.CountAsync(d => d.IdKhachHang == customerId);
         }
-
-        public DiaChi GetDiaChiById(Guid id)
+        public async Task<bool> HasDefaultAddressAsync(Guid customerId)
         {
-            var DcId = _context.diaChi.Find(id);
-            return DcId;
-        }
-
-        public bool Update(DiaChi diaChi)
-        {
-            var diaChiUpdate = _context.diaChi.Find(diaChi.IdDiaChi);
-            if(diaChiUpdate != null)
-            {
-                diaChiUpdate.HoTen = diaChi.HoTen;
-                diaChiUpdate.SoDienThoai = diaChi.SoDienThoai;
-                diaChiUpdate.DiaChiMacDinh = diaChi.DiaChiMacDinh;
-                diaChiUpdate.NgayTao = diaChi.NgayTao;
-                diaChiUpdate.NgayCapNhat = diaChi.NgayCapNhat;
-                diaChiUpdate.IdKhachHang = diaChi.IdKhachHang;
-                _context.diaChi.Update(diaChiUpdate);
-                _context.SaveChanges();
-                return true;
-            }
-            return false;
-        }
-        public async Task<List<DiaChi>> GetDiaChiByIdKH(Guid idKH)
-        {
-            return await _context.diaChi.Where(dc => dc.IdKhachHang == idKH).ToListAsync();
-        }
-        public bool UpdateDCbyIdKH(Guid id, DiaChi dc)
-        {
-            try
-            {
-                var diaChiUpdate = _context.diaChi.FirstOrDefault(d => d.IdKhachHang == id && d.IdDiaChi == dc.IdDiaChi);
-
-                if (diaChiUpdate != null)
-                {
-                    diaChiUpdate.HoTen = dc.HoTen;
-                    diaChiUpdate.SoDienThoai = dc.SoDienThoai;
-                    diaChiUpdate.DiaChiMacDinh = dc.DiaChiMacDinh;
-                    diaChiUpdate.NgayTao = dc.NgayTao;
-                    diaChiUpdate.NgayCapNhat = DateTime.Now;
-
-                    _context.diaChi.Update(diaChiUpdate);
-                    _context.SaveChanges();
-                    return true;
-                }
-                else
-                {
-                    // Log hoặc Debug message nếu không tìm thấy địa chỉ
-                    Console.WriteLine("Không tìm thấy địa chỉ để cập nhật.");
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi khi cập nhật địa chỉ: {ex.Message}");
-                return false;
-            }
+            var result = await _context.diaChi.Where(x => x.IdKhachHang == customerId && x.DiaChiMacDinh).ToListAsync();
+            Console.WriteLine($"API: {result.Count} địa chỉ mặc định tìm thấy.");
+            return result.Any();
         }
     }
 }

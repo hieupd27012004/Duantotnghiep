@@ -59,12 +59,13 @@ builder.Services.AddTransient<IChucVuService, ChucVuService>();
 builder.Services.AddTransient<IGioHangChiTietService, GioHangChiTietService>();
 builder.Services.AddTransient<IDiaChiService, DiaChiService>();
 builder.Services.AddTransient<IHoaDonService, HoaDonService>();
-builder.Services.AddTransient<IHoaDonChiTietService, IHoaDonChiTietService>();
+builder.Services.AddTransient<IHoaDonChiTietService, HoaDonChiTietService>();
 builder.Services.AddDbContext<AppDbcontext>();
 builder.Services.AddTransient<ISanPhamChiTietMauSacService, SanPhamChiTietMauSacService>();
 builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCoService>();
 builder.Services.AddTransient<IVoucherService, VoucherService>();
-
+builder.Services.AddTransient<ILichSuHoaDonService, LichSuHoaDonService>();
+builder.Services.AddTransient<IGiaoDichService, GiaoDichService>();
 
 
 
@@ -88,7 +89,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.UseStaticFiles();
-
 app.UseCors("AllowAll");
 app.UseRouting();
 app.UseSession();
