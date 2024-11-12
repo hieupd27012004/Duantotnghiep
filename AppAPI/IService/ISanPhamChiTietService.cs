@@ -10,6 +10,7 @@ namespace AppAPI.IService
         Task<bool> Update(SanPhamChiTiet sanPhamChiTiet);
         Task<bool> Delete(Guid id);
         Task<List<SanPhamChiTiet>> GetSanPhamChiTietBySanPhamId(Guid sanPhamId);
+        Task<Guid?> GetIdSanPhamChiTietByFilter(Guid idSanPham, Guid idKichCo, Guid idMauSac);
     }
 
 }

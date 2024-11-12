@@ -87,5 +87,13 @@ namespace AppAPI.Repository
             }
             return false;
         }
+        public async Task<List<KichCo>> GetKichCoBySanPhamId(Guid sanPhamId)
+        {
+            return await _context.sanPhamChiTietKichCos
+                .Where(spctkc => spctkc.SanPhamChiTiet.IdSanPham == sanPhamId)
+                .Select(spctkc => spctkc.KichCo)
+                .Distinct()
+                .ToListAsync();
+        }
     }
 }

@@ -39,5 +39,10 @@ namespace APPMVC.Service
         {
             await _httpClient.PutAsJsonAsync("api/MauSac/Sua", mauSac);
         }
+        public Task<List<MauSac>> GetMauSacBySanPhamId(Guid sanPhamId)
+        {
+            var mauSac = _httpClient.GetFromJsonAsync<List<MauSac>>($"api/MauSac/getmausacbyid?sanPhamId={sanPhamId}");
+            return mauSac;
+        }
     }
 }

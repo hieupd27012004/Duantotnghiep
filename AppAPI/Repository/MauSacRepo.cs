@@ -87,5 +87,13 @@ namespace AppAPI.Repository
             }
             return false;
         }
+        public async Task<List<MauSac>> GetMauSacBySanPhamId(Guid sanPhamId)
+        {
+            return await _context.sanPhamChiTietMausacs
+                .Where(spctms => spctms.SanPhamChiTiet.IdSanPham == sanPhamId)
+                .Select(spctms => spctms.MauSac)
+                .Distinct()
+                .ToListAsync();
+        }
     }
 }

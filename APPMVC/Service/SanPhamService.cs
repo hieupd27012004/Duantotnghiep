@@ -79,5 +79,10 @@ namespace APPMVC.Service
                 return null;
             }
         }
+        public Task<List<SanPham>>GetSanPhamClient(string? name)
+        {
+            var response = _httpClient.GetFromJsonAsync<List<SanPham>>($"api/SanPham/getallspclient?name={name}");
+            return response;
+        }
     }
 }

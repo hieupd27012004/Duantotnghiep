@@ -170,5 +170,13 @@ namespace APPMVC.Service
                 return new List<HinhAnh>();
             }
         }
+        public async Task<HinhAnh> GetRepresentativeImageByMauSac(Guid sanPhamChiTietId, Guid mauSacId)
+        {
+            // Get images for the specific SanPhamChiTiet
+            var hinhAnhs = await GetHinhAnhsBySanPhamChiTietId(sanPhamChiTietId);
+
+            // Return the first image (you might want to implement a more sophisticated selection method)
+            return hinhAnhs.FirstOrDefault();
+        }
     }
 }

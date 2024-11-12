@@ -1,5 +1,6 @@
 ﻿using AppData.Model;
 using APPMVC.IService;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Net;
 
 namespace APPMVC.Service
@@ -21,7 +22,7 @@ namespace APPMVC.Service
 
         public async Task Delete(Guid id)
         {
-           await _httpClient.DeleteAsync($"api/SanPhamChiTiet/Xoa?id={id}");
+            await _httpClient.DeleteAsync($"api/SanPhamChiTiet/Xoa?id={id}");
         }
 
         public Task<List<SanPhamChiTiet>> GetSanPhamChiTiets()
@@ -60,6 +61,19 @@ namespace APPMVC.Service
             {
                 // Handle other errors
                 throw new HttpRequestException($"Error calling API: {response.StatusCode}");
+            }
+        }
+        public async Task<Guid?> GetIdSanPhamChiTietByFilter(Guid idSanPham, Guid idKichCo, Guid idMauSac)
+        {
+
+            var response = await _httpClient.GetAsync($"api/SanPhamChiTiet/get-by-filter?idSanPham={idSanPham}&idKichCo={idKichCo}&idMauSac={idMauSac}");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<Guid>();
+            }
+            else
+            {
+                return null;
             }
         }
     }

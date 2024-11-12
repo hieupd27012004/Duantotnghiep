@@ -3,6 +3,7 @@ using AppData.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 namespace AppAPI.Controllers
@@ -33,6 +34,19 @@ namespace AppAPI.Controllers
             }
         }
 
+        [HttpGet("getallspclient")]
+        public async Task<IActionResult> GetAllSP(string? name)
+        {
+            try
+            {
+                var sanPham = await _service.GetSanPhamClientAsync(name);
+                return Ok(sanPham);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
         // GET: api/SanPham/getbyid?id=<guid>
         [HttpGet("getbyid")]
         public async Task<IActionResult> Get(Guid id)
@@ -147,5 +161,6 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+       
     }
 }
