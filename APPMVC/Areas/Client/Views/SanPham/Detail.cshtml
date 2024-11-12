@@ -1,27 +1,36 @@
 ﻿@model APPMVC.ViewModel.SanPhamChiTietClientViewModel
+@{
+    ViewData["Title"] = "Detail";
+    Layout = "~/Areas/Client/Views/Shared/_SanphamCT.cshtml";
+}
 
 <div class="container">
     <div class="row">
+        <!-- Hình ảnh sản phẩm -->
+        <div class="col-lg-6">
+            <div class="product-detail-image">
+        @*         <img src="@(Model.HinhAnh != null ? $"data:image;base64,{Convert.ToBase64String(Model.HinhAnh)}" : "/images/default-product.jpg")" class="img-fluid" alt="@Model.TenSanPham"> *@
+            </div>
+        </div>
 
-        <div class="col-md-6 product-details">
-            <h1>@Model.TenSanPham</h1>
+        <!-- Thông tin sản phẩm -->
+        <div class="col-lg-6 product-detail-info">
+            <h2>@Model.TenSanPham</h2>
 
             <p id="product-price" class="price">
-                @(Model.Gia.ToString("N0") ?? "Liên hệ") VND
+                @(Model.Gia.HasValue ? Model.Gia.Value.ToString("N0") : "Không có giá trị") VND
             </p>
 
             <div class="color-options">
-                <p>Chọn Màu</p>
+                <p><strong>Chọn Màu:</strong></p>
                 <div class="btn-group color-selector" role="group">
                     @if (Model.AvailableColors != null)
                     {
                         @foreach (var color in Model.AvailableColors)
                         {
-                            <a value="@color.IdMauSac"
-                                    class="btn btn-outline-secondary color-btn"
-                                    type="button">
+                            <button value="@color.IdMauSac" class="btn btn-dark color-btn" type="button" style="border-radius: 5px;">
                                 @color.TenMauSac
-                            </a>
+                            </button>
                         }
                     }
                 </div>
@@ -29,7 +38,7 @@
 
             <div class="size-options">
                 <p>
-                    Chọn Size
+                    <strong>Chọn Size:</strong>
                     <a class="float-end" href="#size-guide">
                         <i class="fas fa-ruler"></i> Hướng Dẫn Size
                     </a>
@@ -39,41 +48,50 @@
                     {
                         @foreach (var size in Model.AvailableSizes)
                         {
-                            <a value="@size.IdKichCo"
-                                    class="btn btn-outline-secondary size-btn"
-                                    type="button">
+                            <button value="@size.IdKichCo" class="btn btn-dark size-btn" type="button" style="border-radius: 5px;">
                                 @size.TenKichCo
-                            </a>
+                            </button>
                         }
                     }
                 </div>
             </div>
 
-            <div class="actions">
+            <div class="product-detail-specs">
+                <ul>
+                    <li><strong>Materials:</strong> Leather, Synthetic Materials</li>
+                    <li><strong>Weight:</strong> 350g</li>
+                    <li><strong>Made in:</strong> Vietnam</li>
+                </ul>
+            </div>
+
+            <p>
+                The radiance lives on in the @Model.TenSanPham, the basketball original that puts a fresh spin on what you know best: durably stitched overlays, clean finishes and the perfect amount of flash to make you shine.
+            </p>
+
+            <div class="actions mt-3">
                 <button id="add-to-cart-btn" class="btn btn-primary" type="button">
                     Thêm vào giỏ hàng
                 </button>
+                <button class="btn btn-dark" onclick="showDetailPopup()">Xem chi tiết</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    $(document).ready(function () {
-        let selectedColor = null;
-        let selectedSize = null;
-        let sanPhamId = '@Model.IdSanPham';
+   $(document).ready(function () {
+    let selectedColor = null;
+    let selectedSize = null;
+    let sanPhamId = '@Model.IdSanPham';
 
-    });
-    // Xử lý chọn màu
     $('.color-btn').click(function () {
         $('.color-btn').removeClass('active');
         $(this).addClass('active');
         selectedColor = $(this).val();
+        console.log("Màu đã chọn:", selectedColor);
         updateProductVariant();
     });
 
-    // Xử lý chọn size
     $('.size-btn').click(function () {
         $('.size-btn').removeClass('active');
         $(this).addClass('active');
@@ -81,25 +99,22 @@
         updateProductVariant();
     });
 
-    // function updateProductVariant() {
-    if (selectedColor && selectedSize) {
-        // Gửi yêu cầu để cập nhật thông tin sản phẩm dựa trên màu và kích thước đã chọn
-        $.ajax({
-            url: '/SanPham/GetVariant',
-            type: 'GET',
-            data: { productId: sanPhamId, colorId: selectedColor, sizeId: selectedSize },
-            success: function (data) {
-                $('#product-price').text(data.price.toLocaleString() + ' VND');
-                // Cập nhật các thông tin khác nếu cần
-            },
-            error: function () {
-                alert('Không thể cập nhật thông tin sản phẩm. Vui lòng thử lại.');
-            }
-        });
+    function updateProductVariant() {
+        if (selectedColor && selectedSize) {
+            $.ajax({
+                url: '/SanPham/GetVariant',
+                type: 'GET',
+                data: { productId: sanPhamId, colorId: selectedColor, sizeId: selectedSize },
+                success: function (data) {
+                    $('#product-price').text(data.price.toLocaleString() + ' VND');
+                },
+                error: function () {
+                    alert('Không thể cập nhật thông tin sản phẩm. Vui lòng thử lại.');
+                }
+            });
+        }
     }
-            }
 
-    // Xử lý thêm vào giỏ hàng
     $('#add-to-cart-btn').click(function () {
         if (!selectedColor || !selectedSize) {
             alert('Vui lòng chọn màu và kích thước trước khi thêm vào giỏ hàng.');
@@ -118,4 +133,50 @@
             }
         });
     });
+});
 </script>
+
+<style>
+    .color-btn, .size-btn {
+    transition: box-shadow 0.3s ease; /* Hiệu ứng chuyển tiếp cho bóng */
+}
+
+.color-btn.active, .size-btn.active {
+    background-color: #0056b3; /* Màu nền khi nút được chọn */
+    color: #fff; /* Màu chữ */
+    box-shadow: 0 0 10px rgba(0, 86, 179, 0.7), 0 0 20px rgba(0, 86, 179, 0.5); /* Hiệu ứng phát sáng */
+}
+    .product-detail-image {
+        text-align: center;
+    }
+
+    .product-detail-info {
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .price {
+        font-size: 24px;
+        color: #007bff;
+        margin-bottom: 20px;
+    }
+
+    .color-options, .size-options {
+        margin-bottom: 20px;
+    }
+
+    .btn-dark {
+        margin-right: 5px;
+        border-radius: 5px;
+    }
+
+    .actions {
+        margin-top: 20px;
+    }
+
+    #add-to-cart-btn {
+        width: 100%;
+    }
+</style>

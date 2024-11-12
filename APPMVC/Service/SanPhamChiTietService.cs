@@ -63,13 +63,13 @@ namespace APPMVC.Service
                 throw new HttpRequestException($"Error calling API: {response.StatusCode}");
             }
         }
-        public async Task<Guid?> GetIdSanPhamChiTietByFilter(Guid idSanPham, Guid idKichCo, Guid idMauSac)
+        public async Task<SanPhamChiTiet> GetIdSanPhamChiTietByFilter(Guid idSanPham, Guid idKichCo, Guid idMauSac)
         {
 
             var response = await _httpClient.GetAsync($"api/SanPhamChiTiet/get-by-filter?idSanPham={idSanPham}&idKichCo={idKichCo}&idMauSac={idMauSac}");
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<Guid>();
+                return await response.Content.ReadFromJsonAsync<SanPhamChiTiet>();
             }
             else
             {

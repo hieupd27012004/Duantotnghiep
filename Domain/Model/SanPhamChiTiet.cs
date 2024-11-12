@@ -40,7 +40,7 @@ namespace AppData.Model
         //[Required(ErrorMessage = "Không Được Để Trống")]
         public string? NguoiTao { get; set; }
         public int KichHoat { get; set; }
-        public Guid? IdSanPham { get; set; }
+        public Guid IdSanPham { get; set; }
         public virtual SanPham? SanPham { get; set; }
 
         public virtual ICollection<HinhAnh>? HinhAnhs { get; set; }

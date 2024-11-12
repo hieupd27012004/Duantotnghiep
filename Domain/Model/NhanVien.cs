@@ -39,5 +39,7 @@ namespace AppData.Model
 		public virtual ChucVu? chucVu { get; set; }
 
 		public ICollection<HoaDon>? HoaDons { get; set; }
-	}
+
+        public ICollection<GiaoDich>? GiaoDiches { get; set; }
+    }
 }
