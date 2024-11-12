@@ -85,17 +85,17 @@ namespace AppAPI.Repository
                  .Where(s => s.IdSanPham == sanPhamId)
                  .ToListAsync();
         }
-        public async Task<Guid?> GetIdSanPhamChiTietByFilter(Guid idSanPham, Guid idKichCo, Guid idMauSac)
-        {
-            var query = await (from spct in _context.sanPhamChiTiets
-                               join spctms in _context.sanPhamChiTietMausacs on spct.IdSanPhamChiTiet equals spctms.IdSanPhamChiTiet
-                               join spctkc in _context.sanPhamChiTietKichCos on spct.IdSanPhamChiTiet equals spctkc.IdSanPhamChiTiet
-                               where spct.IdSanPham == idSanPham
-                                     && spctms.IdMauSac == idMauSac
-                                     && spctkc.IdKichCo == idKichCo
-                               select spct.IdSanPhamChiTiet).FirstOrDefaultAsync();
+		public async Task<SanPhamChiTiet> GetIdSanPhamChiTietByFilter(Guid idSanPham, Guid idKichCo, Guid idMauSac)
+		{
+			var query = await (from spct in _context.sanPhamChiTiets
+							   join spctms in _context.sanPhamChiTietMausacs on spct.IdSanPhamChiTiet equals spctms.IdSanPhamChiTiet
+							   join spctkc in _context.sanPhamChiTietKichCos on spct.IdSanPhamChiTiet equals spctkc.IdSanPhamChiTiet
+							   where spct.IdSanPham == idSanPham
+									 && spctms.IdMauSac == idMauSac
+									 && spctkc.IdKichCo == idKichCo
+							   select spct).FirstOrDefaultAsync();
 
-            return query;
-        }
-    }
+			return query;
+		}
+	}
 }

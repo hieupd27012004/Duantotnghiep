@@ -7,14 +7,14 @@ namespace APPMVC.ViewModel
         public Guid IdSanPham { get; set; }
         public string TenSanPham { get; set; }
         public string MoTa { get; set; }
-        public double Gia { get; set; }
+        public double? Gia { get; set; }
 
         public List<KichCoViewModel> AvailableSizes { get; set; }
         public List<MauSacViewModel> AvailableColors { get; set; }
     }
     public class KichCoViewModel
     {
-        public Guid IdKichCo { get; set; }
+        public Guid? IdKichCo { get; set; }
         public string TenKichCo { get; set; }
     }
 
