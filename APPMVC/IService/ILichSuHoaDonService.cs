@@ -9,5 +9,7 @@ namespace APPMVC.IService
         Task AddAsync(LichSuHoaDon lichSuHoaDon);
         Task UpdateAsync(LichSuHoaDon lichSuHoaDon);
         Task DeleteAsync(Guid id);
+
+        Task<List<LichSuHoaDon>> GetByIdHoaDonAsync(Guid idHoaDon);
     }
 }

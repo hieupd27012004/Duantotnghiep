@@ -37,5 +37,10 @@ namespace AppAPI.Service
         {
             await _lichSuHoaDonRepository.DeleteAsync(id);
         }
+
+        public async Task<List<LichSuHoaDon>> GetByIdHoaDonAsync(Guid idHoaDon)
+        {
+            return await _lichSuHoaDonRepository.GetByIdHoaDonAsync(idHoaDon);
+        }
     }
 }

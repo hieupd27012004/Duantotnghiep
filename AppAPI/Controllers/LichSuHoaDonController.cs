@@ -104,5 +104,24 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("getbyidhoadon")]
+        public async Task<IActionResult> GetByIdHoaDon(Guid idHoaDon)
+        {
+            try
+            {
+                var lichSuHoaDonList = await _service.GetByIdHoaDonAsync(idHoaDon);
+                if (lichSuHoaDonList == null || !lichSuHoaDonList.Any())
+                {
+                    return NotFound($"LichSuHoaDon with IdHoaDon {idHoaDon} not found.");
+                }
+                return Ok(lichSuHoaDonList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
     }
 }
