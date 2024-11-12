@@ -45,6 +45,13 @@ namespace APPMVC.Service
             return await response.Content.ReadFromJsonAsync<LichSuHoaDon>();
         }
 
+        public async Task<List<LichSuHoaDon>> GetByIdHoaDonAsync(Guid idHoaDon)
+        {
+            var response = await _httpClient.GetAsync($"api/LichSuHoaDon/getbyidhoadon?idHoaDon={idHoaDon}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<LichSuHoaDon>>();
+        }
+
         // Cập nhật lịch sử hóa đơn
         public async Task UpdateAsync(LichSuHoaDon lichSuHoaDon)
         {
