@@ -30,17 +30,13 @@ namespace AppAPI.Repository
 
         public async Task<bool> Delete(Guid id)
         {
-            var hinhAnhs = _context.hinhAnh.Where(h => h.IdSanPhamChiTiet == id).ToList();
 
-            // Xóa tất cả hình ảnh liên quan
-            _context.hinhAnh.RemoveRange(hinhAnhs);
 
-            // Xóa sản phẩm chi tiết
-            var sanPhamChiTiet = await _context.sanPhamChiTiets.FindAsync(id); // Sử dụng FindAsync để tìm kiếm bất đồng bộ
+            var sanPhamChiTiet = await _context.sanPhamChiTiets.FindAsync(id); 
             if (sanPhamChiTiet != null)
             {
                 _context.sanPhamChiTiets.Remove(sanPhamChiTiet);
-                await _context.SaveChangesAsync(); // Chờ cho đến khi lưu thay đổi hoàn tất
+                await _context.SaveChangesAsync(); 
                 return true;
             }
 
@@ -73,8 +69,7 @@ namespace AppAPI.Repository
                 sanPhamChitietUpdate.NguoiCapNhat = sanPhamChiTiet.NguoiCapNhat;
                 sanPhamChitietUpdate.NguoiTao = sanPhamChiTiet.NguoiTao;
                 sanPhamChitietUpdate.XuatXu = sanPhamChiTiet.XuatXu;
-                // Nếu cần thiết, hãy quyết định có cập nhật thuộc tính KichHoat hay không
-                // sanPhamChitietUpdate.KichHoat = sanPhamChiTiet.KichHoat == 1 ? 1 : 0;
+                sanPhamChitietUpdate.KichHoat = sanPhamChiTiet.KichHoat == 1 ? 1 : 0;
 
                 // Lưu thay đổi vào cơ sở dữ liệu
                 await _context.SaveChangesAsync();

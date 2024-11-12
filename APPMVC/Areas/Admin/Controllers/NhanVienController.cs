@@ -1,11 +1,15 @@
 ﻿using AppData.Model;
+using AppData.ViewModel;
 using APPMVC.IService;
+using Castle.Core.Resource;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Net;
 using System.Text;
+using X.PagedList;
 
 namespace APPMVC.Areas.Admin.Controllers
 {
@@ -22,12 +26,36 @@ namespace APPMVC.Areas.Admin.Controllers
             _memoryCache = memoryCache;
         }
         // GET: NhanVienController
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var nhanVien = await _service.GetAllNhaVien();
-            return View(nhanVien);
-        }
+            page = page < 1 ? 1 : page; 
+            int pageSize = 5;
 
+            var nhanVienList = await _service.GetAllNhaVien();
+
+            var chucVuList = await chucVuService.GetAllChucVu(); 
+
+            var nhanVienViewModels = nhanVienList.Select(nv => new NhanVienViewModel
+            {
+                IdNhanVien = nv.IdNhanVien,
+                TenNhanVien = nv.TenNhanVien,
+                SoDienThoai = nv.SoDienThoai,
+                Email = nv.Email,
+                DiaChi = nv.DiaChi,
+                TenChucVu = chucVuList.FirstOrDefault(c => c.IdChucVu == nv.IdchucVu)?.TenChucVu,
+                AnhNhanVien = nv.AnhNhanVien,
+                KichHoat = nv.KichHoat,
+                TrangThai = nv.TrangThai,
+                NgayTao = nv.NgayTao,
+                NgayCapNhat = nv.NgayCapNhat
+            }).ToList();
+
+            // Thực hiện phân trang
+            var pagedNhanViens = nhanVienViewModels.ToPagedList(page, pageSize);
+
+            return View(pagedNhanViens);
+        }
         // GET: NhanVienController/Details/5
         public ActionResult Details(int id)
         {
@@ -45,6 +73,8 @@ namespace APPMVC.Areas.Admin.Controllers
                 AuthProvider = "Trống",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
+                NguoiCapNhat = "admin",
+                NguoiTao = "admin",
 
             };
             return View(nv);
@@ -107,46 +137,60 @@ namespace APPMVC.Areas.Admin.Controllers
         }
 
 
-        public async Task<IActionResult> Edit(Guid id)
-        {
-            var nhanVien = await _service.GetIdNhanVien(id);
-            if (nhanVien == null)
+            public async Task<IActionResult> Edit(Guid id)
             {
-                return NotFound();
+                var nhanVien = await _service.GetIdNhanVien(id);
+                if (nhanVien == null)
+                {
+                    return NotFound();
+                }
+
+                List<ChucVu> chucVus = await chucVuService.GetAllChucVu();
+
+                var viewModel = new NhanVienViewModel
+                {
+                    NhanVien = nhanVien,
+                    ChucVuList = chucVus
+                };
+
+                return View(viewModel);
             }
-            return View(nhanVien);
-        }
-        // POST: NhanVienController/Edit/5
+
         [HttpPost]
-        public async Task<IActionResult> Edit(NhanVien nv, IFormFile imgFile)
+        public async Task<IActionResult> Edit(NhanVienViewModel model, IFormFile? imgFile)
         {
             if (ModelState.IsValid)
             {
                 // Lấy thông tin nhân viên cũ để xóa ảnh cũ
-                var existingNV = await _service.GetIdNhanVien(nv.IdNhanVien);
+                var existingNV = await _service.GetIdNhanVien(model.NhanVien.IdNhanVien);
+
+                if (existingNV == null)
+                {
+                    ModelState.AddModelError("", "Nhân viên không tồn tại.");
+                    model.ChucVuList = await chucVuService.GetAllChucVu();
+                    return View(model);
+                }
 
                 // Kiểm tra xem có file ảnh mới được tải lên không
                 if (imgFile != null && imgFile.Length > 0)
                 {
-                    // Kiểm tra loại file (chỉ chấp nhận các định dạng ảnh)
                     var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
                     var ext = Path.GetExtension(imgFile.FileName).ToLowerInvariant();
 
-                    // Kiểm tra phần mở rộng có hợp lệ không
                     if (!permittedExtensions.Contains(ext))
                     {
                         ModelState.AddModelError("", "Chỉ chấp nhận các file ảnh với định dạng .jpg, .jpeg, .png, .gif.");
-                        return View(nv);
+                        model.ChucVuList = await chucVuService.GetAllChucVu();
+                        return View(model);
                     }
 
-                    // Kiểm tra kích thước file (giới hạn 5MB)
                     if (imgFile.Length > 5 * 1024 * 1024)
                     {
                         ModelState.AddModelError("", "File ảnh phải nhỏ hơn 5MB.");
-                        return View(nv);
+                        model.ChucVuList = await chucVuService.GetAllChucVu();
+                        return View(model);
                     }
 
-                    // Tạo đường dẫn đến thư mục lưu trữ hình ảnh
                     string uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Admin", "imgNV");
 
                     // Xóa ảnh cũ nếu tồn tại
@@ -169,19 +213,34 @@ namespace APPMVC.Areas.Admin.Controllers
                     }
 
                     // Gán tên file vào thuộc tính AnhNhanVien của đối tượng NhanVien
-                    nv.AnhNhanVien = imgFile.FileName;
+                    model.NhanVien.AnhNhanVien = imgFile.FileName;
+                }
+                else
+                {
+                    // Nếu không có file ảnh mới, giữ nguyên giá trị cũ
+                    model.NhanVien.AnhNhanVien = existingNV.AnhNhanVien;
                 }
 
                 // Cập nhật thông tin nhân viên
-                await _service.UpdateNV(nv);
-                return RedirectToAction("Index");
+                try
+                {
+                    await _service.UpdateNV(model.NhanVien);
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Có lỗi xảy ra khi cập nhật thông tin nhân viên: " + ex.Message);
+                    model.ChucVuList = await chucVuService.GetAllChucVu();
+                    return View(model);
+                }
             }
             else
             {
-                return View(nv);
+                // Repopulate the ChucVuList if the model state is invalid
+                model.ChucVuList = await chucVuService.GetAllChucVu();
+                return View(model);
             }
         }
-
         //Sửa Thông Tin Của Nhân Viên
         public async Task<IActionResult> EditProfile(Guid id)
         {

@@ -1,6 +1,10 @@
 ﻿using AppData.Model;
 using APPMVC.IService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Xml.Linq;
+using X.PagedList;
+using AppData.ViewModel;
 
 namespace APPMVC.Areas.Admin.Controllers
 {
@@ -8,28 +12,45 @@ namespace APPMVC.Areas.Admin.Controllers
     public class KhachHangController : Controller
     {
         private readonly IKhachHangService _service;
-        public KhachHangController(IKhachHangService service)
+        private readonly IDiaChiService _diaChiService;
+        public KhachHangController(IKhachHangService service, IDiaChiService diaChiService)
         {
             _service = service;
+            _diaChiService = diaChiService;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-           var getAll = await _service.GetAllKhachHang();
-            return View(getAll);
+            page = page < 1 ? 1 : page;
+            int pageSize = 5;
+
+            var khachHangs = await _service.GetAllKhachHang();
+            var khachHangViewModels = new List<KhachHangViewModel>();
+
+            foreach (var khachHang in khachHangs)
+            {
+                var diaChiList = await _diaChiService.GetDiaChiByIdKH(khachHang.IdKhachHang);
+
+
+                var diaChi = diaChiList?.FirstOrDefault(); 
+
+             
+                khachHangViewModels.Add(new KhachHangViewModel
+                {
+                    KhachHang = khachHang,
+                    DiaChi = diaChi?.Diachi 
+                });
+            }
+
+            var sortedKhachHangViewModels = khachHangViewModels
+                .OrderByDescending(k => k.KhachHang.NgayTao) // Adjust based on your model
+                .ToList();
+
+            var pagedKhachHangViewModels = sortedKhachHangViewModels.ToPagedList(page, pageSize);
+            return View(pagedKhachHangViewModels);
         }
         public IActionResult Create()
         {
-            var kh = new KhachHang()
-            {
-                IdKhachHang = Guid.NewGuid(),
-                AuthProvider = "tạm trống",
-                NgayTao = DateTime.Now,
-                NgayCapNhat = DateTime.Now,
-                NguoiTao = "Tự tạo",
-                NguoiCapNhat = "Trôngs",
-                KichHoat = 1
-            };
-            return View(kh);
+            return PartialView("Create");
         }
         [HttpPost]
         public async Task<IActionResult> Create(KhachHang kh)

@@ -72,7 +72,8 @@ namespace AppAPI.Repository
                 diaChiUpdate.SoDienThoai = diaChi.SoDienThoai;
                 diaChiUpdate.DiaChiMacDinh = diaChi.DiaChiMacDinh;
                 diaChiUpdate.NgayTao = diaChi.NgayTao;
-                diaChiUpdate.NgayCapNhat = DateTime.Now;
+                diaChiUpdate.NgayCapNhat = diaChi.NgayCapNhat;
+                diaChiUpdate.IdKhachHang = diaChi.IdKhachHang;
                 _context.diaChi.Update(diaChiUpdate);
                 _context.SaveChanges();
                 return true;

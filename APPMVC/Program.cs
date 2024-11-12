@@ -48,7 +48,6 @@ builder.Services.AddTransient<IChatLieuService, ChatLieuService>();
 builder.Services.AddTransient<IKieuDangService, KieuDangService>();
 builder.Services.AddTransient<IHinhAnhService, HinhAnhService>();
 builder.Services.AddTransient<IPromotionService, PromotionService>();
-
 builder.Services.AddTransient<IDeGiayService, DeGiayService>();
 builder.Services.AddTransient<IKichCoService, KichCoService>();
 builder.Services.AddTransient<IMauSacService, MauSacService>();
@@ -57,15 +56,16 @@ builder.Services.AddTransient<ISanPhamChiTietService, SanPhamChiTietService>();
 builder.Services.AddTransient<INhanVienService, NhanVienService>();
 builder.Services.AddTransient<IKhachHangService, KhachHangService>();
 builder.Services.AddTransient<IChucVuService, ChucVuService>();
-
+builder.Services.AddTransient<IGioHangChiTietService, GioHangChiTietService>();
 builder.Services.AddTransient<IDiaChiService, DiaChiService>();
+builder.Services.AddTransient<IHoaDonService, HoaDonService>();
+builder.Services.AddTransient<IHoaDonChiTietService, HoaDonChiTietService>();
 builder.Services.AddDbContext<AppDbcontext>();
-
-
 builder.Services.AddTransient<ISanPhamChiTietMauSacService, SanPhamChiTietMauSacService>();
 builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCoService>();
 builder.Services.AddTransient<IVoucherService, VoucherService>();
-
+builder.Services.AddTransient<ILichSuHoaDonService, LichSuHoaDonService>();
+builder.Services.AddTransient<IGiaoDichService, GiaoDichService>();
 
 
 
@@ -99,7 +99,7 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
         name: "default",
-        pattern: "{area=Admin}/{controller=HomeAdmin}/{action=Index}/{id?}");
+        pattern: "{area=Client}/{controller=HomeClient}/{action=Index}/{id?}");
 
     endpoints.MapControllerRoute(
         name: "areas",
@@ -107,9 +107,9 @@ app.UseEndpoints(endpoints =>
 
     // Cấu hình route cho area Customer
     endpoints.MapControllerRoute(
-        name: "Client",
-        pattern: "{area:exists}/{controller=HomeClient}/{action=Index}/{id?}",
-        defaults: new { area = "Client", controller = "HomeClient", action = "Index" });
+        name: "Admin",
+        pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}",
+        defaults: new { area = "Admin", controller = "HomeAdmin", action = "Index" });
 });
 
 app.Run();

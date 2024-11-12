@@ -7,6 +7,7 @@ using AppAPI.Service;
 using AppData;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -80,7 +81,16 @@ builder.Services.AddTransient<ISanPhamChiTietMauSacRepo, SanPhamChiTietMauSacRep
 builder.Services.AddTransient<ISanPhamChiTietMauSacService, SanPhamChiTietMauSacService>();
 builder.Services.AddTransient<ISanPhamChiTietKichCoRepo, SanPhamChiTietKichCoRepo>();
 builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCoService>();
-
+builder.Services.AddTransient<IGioHangChiTietRepo, GioHangChiTietRepo>();
+builder.Services.AddTransient<IGioHangChiTietService, GioHangChiTietService>();
+builder.Services.AddTransient<IHoaDonRepo, HoaDonRepo>();
+builder.Services.AddTransient<IHoaDonService, HoaDonService>();
+builder.Services.AddTransient<IHoaDonChiTietRepo, HoaDonChiTietRepo>();
+builder.Services.AddTransient<IHoaDonChiTietService, HoaDonChiTietService>();
+builder.Services.AddTransient<ILichSuHoaDonRepo, LichSuHoaDonRepo>();
+builder.Services.AddTransient<ILichSuHoaDonService, ILichSuHoaDonService>();
+builder.Services.AddTransient<IGiaoDichRepo, GiaoDichRepo>();
+builder.Services.AddTransient<IGiaoDichService, GiaoDichService>();
 // Check time for voucher application
 builder.Services.AddHostedService<VoucherStatusUpdater>();
 builder.Services.AddSignalR();

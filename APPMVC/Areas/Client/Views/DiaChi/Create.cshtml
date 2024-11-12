@@ -1,0 +1,78 @@
+﻿@model AppData.Model.DiaChi
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Areas/Client/Views/Shared/_Tttk.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4">
+            <span class="text-muted fw-light">Quản lý địa chỉ /</span> Tạo Địa Chỉ Mới
+        </h4>
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <!-- Center the form -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form asp-action="Create">
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <input type="hidden" asp-for="IdDiaChi" />
+
+                            <div class="form-group mb-3">
+                                <label asp-for="HoTen" class="control-label">Họ Tên</label>
+                                <input asp-for="HoTen" class="form-control" placeholder="Nhập họ tên" />
+                                <span asp-validation-for="HoTen" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="SoDienThoai" class="control-label">Số Điện Thoại</label>
+                                <input asp-for="SoDienThoai" class="form-control" placeholder="Nhập số điện thoại" />
+                                <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="NgayTao" class="control-label">Ngày Tạo</label>
+                                <input asp-for="NgayTao" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
+                                <span asp-validation-for="NgayTao" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="NgayCapNhat" class="control-label">Ngày Cập Nhật</label>
+                                <input asp-for="NgayCapNhat" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" />
+                                <span asp-validation-for="NgayCapNhat" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="Diachi" class="control-label">Địa Chỉ</label>
+                                <input asp-for="Diachi" class="form-control" placeholder="Nhập địa chỉ" />
+                                <span asp-validation-for="Diachi" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group form-check mb-3">
+                                <input class="form-check-input" asp-for="DiaChiMacDinh" />
+                                <label class="form-check-label" for="DiaChiMacDinh">
+                                    @Html.DisplayNameFor(model => model.DiaChiMacDinh)
+                                </label>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label asp-for="IdKhachHang" class="control-label">Khách Hàng</label>
+                                <select asp-for="IdKhachHang" class="form-control" asp-items="@(new SelectList(ViewBag.KhachHang, "IdKhachHang", "HoTen"))">
+                                    <option value="">Chọn khách hàng</option>
+                                </select>
+                                <span asp-validation-for="IdKhachHang" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <input type="submit" value="Tạo mới" class="btn btn-primary" />
+                                <a asp-action="Index" class="btn btn-secondary" style="margin-left:15px;">Quay lại danh sách</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

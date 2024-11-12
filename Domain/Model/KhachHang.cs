@@ -28,14 +28,14 @@ namespace AppData.Model
 
 		[DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
 		[DisplayFormat(DataFormatString = "{0:dd-MM-yyyy}", ApplyFormatInEditMode = true)]
-		public DateTime? NgayTao { get; set; }
+		public DateTime NgayTao { get; set; }
 
 		[DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
 		[DisplayFormat(DataFormatString = "{0:dd-MM-yyyy}", ApplyFormatInEditMode = true)]
-		public DateTime? NgayCapNhat { get; set; }
+		public DateTime NgayCapNhat { get; set; }
 		public string? NguoiTao { get; set; }
 		public string? NguoiCapNhat { get; set; }
-		public int? KichHoat { get; set; }
+		public int KichHoat { get; set; }
 
 		public virtual GioHang? GioHang { get; set; }
 		public virtual ICollection<DiaChi>? DiaChis { get; set; }
