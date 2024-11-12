@@ -11,5 +11,7 @@ namespace AppAPI.IService
         Task<bool> DeleteAsync(Guid id);
 
         Task<ThuongHieu?> GetThuongHieuBySanPhamIdAsync(Guid sanPhamId);
+
+        Task<IEnumerable<SanPham>> GetSanPhamClientAsync(string? name);
     }
 }

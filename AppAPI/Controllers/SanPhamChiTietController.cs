@@ -131,6 +131,23 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
+        [HttpGet("get-by-filter")]
+        public async Task<IActionResult> GetIdSanPhamChiTietByFilter([FromQuery] Guid idSanPham, [FromQuery] Guid idKichCo, [FromQuery] Guid idMauSac)
+        {
+            try
+            {
+                var result = await _service.GetIdSanPhamChiTietByFilter(idSanPham, idKichCo, idMauSac);
+                if (result == null)
+                {
+                    return NotFound("Không tìm thấy sản phẩm phù hợp");
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Lỗi server: " + ex.Message);
+            }
+        }
     }
 }
+

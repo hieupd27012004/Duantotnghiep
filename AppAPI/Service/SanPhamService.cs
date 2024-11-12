@@ -88,7 +88,20 @@ namespace AppAPI.Service
 
         public async Task<ThuongHieu?> GetThuongHieuBySanPhamIdAsync(Guid sanPhamId)
         {
-               return await _repository.GetThuongHieuBySanPhamIdAsync(sanPhamId);
+            return await _repository.GetThuongHieuBySanPhamIdAsync(sanPhamId);
+        }
+        public async Task<IEnumerable<SanPham>> GetSanPhamClientAsync(string? name)
+        {
+            try
+            {
+                return await _repository.GetSanPhamClientAsync(name);
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine($"Lỗi GetSanPhamClient SanPhamService");
+                return new List<SanPham>();
+            }
         }
     }
 }

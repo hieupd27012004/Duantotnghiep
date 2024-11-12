@@ -30,7 +30,7 @@ namespace AppAPI.Repository
                         .FirstOrDefaultAsync(cl => cl.IdChatLieu == sanPham.ChatLieu.IdChatLieu);
                     if (existingChatLieu != null)
                     {
-                        sanPham.ChatLieu = existingChatLieu; 
+                        sanPham.ChatLieu = existingChatLieu;
                     }
                 }
 
@@ -40,7 +40,7 @@ namespace AppAPI.Repository
                         .FirstOrDefaultAsync(dm => dm.IdDanhMuc == sanPham.DanhMuc.IdDanhMuc);
                     if (existingDanhMuc != null)
                     {
-                        sanPham.DanhMuc = existingDanhMuc; 
+                        sanPham.DanhMuc = existingDanhMuc;
                     }
                 }
 
@@ -60,7 +60,7 @@ namespace AppAPI.Repository
                         .FirstOrDefaultAsync(kd => kd.IdKieuDang == sanPham.KieuDang.IdKieuDang);
                     if (existingKieuDang != null)
                     {
-                        sanPham.KieuDang = existingKieuDang; 
+                        sanPham.KieuDang = existingKieuDang;
                     }
                 }
 
@@ -70,7 +70,7 @@ namespace AppAPI.Repository
                         .FirstOrDefaultAsync(th => th.IdThuongHieu == sanPham.ThuongHieu.IdThuongHieu);
                     if (existingThuongHieu != null)
                     {
-                        sanPham.ThuongHieu = existingThuongHieu; 
+                        sanPham.ThuongHieu = existingThuongHieu;
                     }
                 }
 
@@ -124,7 +124,21 @@ namespace AppAPI.Repository
             }
         }
 
-
+        public async Task<List<SanPham>> GetSanPhamClientAsync(string? name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return await _context.sanPhams
+                    .Where(sp => sp.KichHoat == 1)
+                    .ToListAsync();
+            }
+            else
+            {
+                return await _context.sanPhams
+                    .Where(sp => sp.KichHoat == 1 && sp.TenSanPham.Contains(name))
+                    .ToListAsync();
+            }
+        }
 
         public async Task<bool> UpdateAsync(SanPham sanPham)
         {
@@ -139,9 +153,9 @@ namespace AppAPI.Repository
                 sanPhamUpdate.KichHoat = sanPham.KichHoat == 1 ? 1 : 0;
                 sanPhamUpdate.MoTa = sanPham.MoTa;
                 sanPhamUpdate.IdThuongHieu = sanPham.IdThuongHieu;
-                sanPhamUpdate.IdChatLieu = sanPham.IdChatLieu;   
-                sanPhamUpdate.IdDanhMuc = sanPham.IdDanhMuc;       
-                sanPhamUpdate.IdDeGiay = sanPham.IdDeGiay;         
+                sanPhamUpdate.IdChatLieu = sanPham.IdChatLieu;
+                sanPhamUpdate.IdDanhMuc = sanPham.IdDanhMuc;
+                sanPhamUpdate.IdDeGiay = sanPham.IdDeGiay;
                 sanPhamUpdate.IdKieuDang = sanPham.IdKieuDang;
 
                 _context.sanPhams.Update(sanPhamUpdate);

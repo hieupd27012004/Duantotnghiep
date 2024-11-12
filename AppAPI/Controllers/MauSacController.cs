@@ -105,5 +105,11 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("getmausacbyid")]
+        public async Task<ActionResult<List<MauSac>>> GetMauSacBySanPhamId(Guid sanPhamId)
+        {
+            var mauSacs = await _service.GetMauSacBySanPhamId(sanPhamId);
+            return Ok(mauSacs);
+        }
     }
 }

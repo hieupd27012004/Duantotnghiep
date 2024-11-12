@@ -1,0 +1,121 @@
+﻿@model APPMVC.ViewModel.SanPhamChiTietClientViewModel
+
+<div class="container">
+    <div class="row">
+
+        <div class="col-md-6 product-details">
+            <h1>@Model.TenSanPham</h1>
+
+            <p id="product-price" class="price">
+                @(Model.Gia.ToString("N0") ?? "Liên hệ") VND
+            </p>
+
+            <div class="color-options">
+                <p>Chọn Màu</p>
+                <div class="btn-group color-selector" role="group">
+                    @if (Model.AvailableColors != null)
+                    {
+                        @foreach (var color in Model.AvailableColors)
+                        {
+                            <a value="@color.IdMauSac"
+                                    class="btn btn-outline-secondary color-btn"
+                                    type="button">
+                                @color.TenMauSac
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="size-options">
+                <p>
+                    Chọn Size
+                    <a class="float-end" href="#size-guide">
+                        <i class="fas fa-ruler"></i> Hướng Dẫn Size
+                    </a>
+                </p>
+                <div class="btn-group size-selector" role="group">
+                    @if (Model.AvailableSizes != null)
+                    {
+                        @foreach (var size in Model.AvailableSizes)
+                        {
+                            <a value="@size.IdKichCo"
+                                    class="btn btn-outline-secondary size-btn"
+                                    type="button">
+                                @size.TenKichCo
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="add-to-cart-btn" class="btn btn-primary" type="button">
+                    Thêm vào giỏ hàng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        let selectedColor = null;
+        let selectedSize = null;
+        let sanPhamId = '@Model.IdSanPham';
+
+    });
+    // Xử lý chọn màu
+    $('.color-btn').click(function () {
+        $('.color-btn').removeClass('active');
+        $(this).addClass('active');
+        selectedColor = $(this).val();
+        updateProductVariant();
+    });
+
+    // Xử lý chọn size
+    $('.size-btn').click(function () {
+        $('.size-btn').removeClass('active');
+        $(this).addClass('active');
+        selectedSize = $(this).val();
+        updateProductVariant();
+    });
+
+    // function updateProductVariant() {
+    if (selectedColor && selectedSize) {
+        // Gửi yêu cầu để cập nhật thông tin sản phẩm dựa trên màu và kích thước đã chọn
+        $.ajax({
+            url: '/SanPham/GetVariant',
+            type: 'GET',
+            data: { productId: sanPhamId, colorId: selectedColor, sizeId: selectedSize },
+            success: function (data) {
+                $('#product-price').text(data.price.toLocaleString() + ' VND');
+                // Cập nhật các thông tin khác nếu cần
+            },
+            error: function () {
+                alert('Không thể cập nhật thông tin sản phẩm. Vui lòng thử lại.');
+            }
+        });
+    }
+            }
+
+    // Xử lý thêm vào giỏ hàng
+    $('#add-to-cart-btn').click(function () {
+        if (!selectedColor || !selectedSize) {
+            alert('Vui lòng chọn màu và kích thước trước khi thêm vào giỏ hàng.');
+            return;
+        }
+
+        $.ajax({
+            url: '/Cart/Add',
+            type: 'POST',
+            data: { productId: sanPhamId, colorId: selectedColor, sizeId: selectedSize },
+            success: function () {
+                alert('Sản phẩm đã được thêm vào giỏ hàng.');
+            },
+            error: function () {
+                alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.');
+            }
+        });
+    });
+</script>

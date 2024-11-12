@@ -79,12 +79,12 @@ namespace AppAPI.Repository
             if (sanPhamChiTietId == Guid.Empty)
             {
                 Console.WriteLine("Invalid SanPhamChiTietId: Guid.Empty");
-                return new List<HinhAnh>(); 
+                return new List<HinhAnh>();
             }
 
             var hinhAnhs = await _context.hinhAnh
-                                          .Where(h => h.IdSanPhamChiTiet == sanPhamChiTietId)
-                                          .ToListAsync();
+                .Where(h => h.IdSanPhamChiTiet == sanPhamChiTietId)
+                .ToListAsync();
 
             return hinhAnhs;
         }

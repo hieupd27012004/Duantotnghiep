@@ -1,0 +1,106 @@
+﻿@model List<APPMVC.ViewModel.SanPhamClientViewModel>
+
+<div class="container">
+    <div class="row">
+        @foreach (var sanPham in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card product-card">
+                    <div class="card-body">
+                        <h5 class="card-title">@sanPham.TenSanPham</h5>
+
+                        <div class="image-container">
+                            <img id="mainImage_@sanPham.IdSanPham"
+                                 src="@(sanPham.RepresentativeImage != null ? $"data:image;base64,{Convert.ToBase64String(sanPham.RepresentativeImage)}" : "/images/default-product.jpg")"
+                                 class="img-fluid main-image"
+                                 alt="@sanPham.TenSanPham"
+                                 data-original-image="@(sanPham.RepresentativeImage != null ? $"data:image;base64,{Convert.ToBase64String(sanPham.RepresentativeImage)}" : "/images/default-product.jpg")" />
+                        </div>
+
+                        <div class="product-info">
+                            <p class="card-text default-info">
+                                <strong>Số lượng màu:</strong> @sanPham.SoLuongMau
+                            </p>
+                            <div class="color-images">
+                                @foreach (var colorImage in sanPham.ColorImages)
+                                {
+                                    <img src="data:image;base64,@Convert.ToBase64String(colorImage.AnhDaiDien)"
+                                         class="img-fluid color-image"
+                                         data-main-image="@Convert.ToBase64String(colorImage.AnhDaiDien)"
+                                         alt="@colorImage.MauSacTen"
+                                         title="@colorImage.MauSacTen" />
+                                }
+                            </div>
+                        </div>
+
+                        <p class="card-text">
+                            <strong>Giá:</strong>
+                            @(sanPham.GiaThapNhat?.ToString("N0") ?? "N/A") -
+                            @(sanPham.GiaCaoNhat?.ToString("N0") ?? "N/A") VND
+                        </p>
+
+                        <a href="@Url.Action("Detail", "SanPham", new { sanphamId = sanPham.IdSanPham })"
+                           class="btn btn-primary">
+                            Xem chi tiết
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .product-card .color-images {
+        display: none;
+    }
+
+    .product-card:hover .default-info {
+        display: none;
+    }
+
+    .product-card:hover .color-images {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .product-card .color-image {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        margin: 5px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: border-color 0.3s ease;
+    }
+
+        .product-card .color-image:hover {
+            border-color: #007bff;
+        }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const productCards = document.querySelectorAll('.product-card');
+
+        productCards.forEach(card => {
+            const mainImage = card.querySelector('.main-image');
+            const colorImages = card.querySelectorAll('.color-image');
+
+            colorImages.forEach(colorImage => {
+                colorImage.addEventListener('click', function () {
+                    // Thay đổi ảnh khi click vào màu
+                    mainImage.src = 'data:image;base64,' + this.getAttribute('data-main-image');
+                });
+            });
+
+            // Khôi phục ảnh gốc khi rời khỏi khu vực màu
+            card.querySelector('.color-images').addEventListener('mouseleave', function () {
+                const originalImage = mainImage.getAttribute('data-original-image');
+                mainImage.src = originalImage;
+            });
+        });
+    });
+</script>

@@ -9,5 +9,7 @@ namespace AppAPI.IRepository
         bool Create(MauSac mauSac);
         bool Update(MauSac mauSac);
         bool Delete(Guid id);
+
+        Task<List<MauSac>> GetMauSacBySanPhamId(Guid sanPhamId);
     }
 }

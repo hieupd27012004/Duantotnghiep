@@ -10,5 +10,6 @@ namespace APPMVC.IService
         Task<bool> DeleteAsync(Guid id);
 
         Task<List<HinhAnh>> GetHinhAnhsBySanPhamChiTietId(Guid sanPhamChiTietId);
+        Task<HinhAnh> GetRepresentativeImageByMauSac(Guid sanPhamChiTietId, Guid mauSacId);
     }
 }
