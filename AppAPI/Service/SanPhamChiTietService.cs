@@ -52,5 +52,10 @@ namespace AppAPI.Service
         {
             return await _repository.GetIdSanPhamChiTietByFilter(idSanPham, idKichCo, idMauSac);
         }
+
+        public async Task<SanPhamDto> GetSanPhamByIdSanPhamChiTietAsync(Guid idSanPhamChiTiet)
+        {
+            return await _repository.GetSanPhamByIdSanPhamChiTietAsync(idSanPhamChiTiet);
+        }
     }
 }

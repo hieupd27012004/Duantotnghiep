@@ -11,11 +11,17 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+//builder.Services.AddControllers()
+//            .AddJsonOptions(options =>
+//            {
+//                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+//            });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -91,6 +97,8 @@ builder.Services.AddTransient<ILichSuHoaDonRepo, LichSuHoaDonRepo>();
 builder.Services.AddTransient<ILichSuHoaDonService, LichSuHoaDonService>();
 builder.Services.AddTransient<IGiaoDichRepo, GiaoDichRepo>();
 builder.Services.AddTransient<IGiaoDichService, GiaoDichService>();
+builder.Services.AddTransient<ICardRepo, CardRepo>();
+builder.Services.AddTransient<ICardService, CardService>();
 // Check time for voucher application
 builder.Services.AddHostedService<VoucherStatusUpdater>();
 builder.Services.AddSignalR();

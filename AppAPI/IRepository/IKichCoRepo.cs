@@ -10,5 +10,7 @@ namespace AppAPI.IRepository
         bool Update(KichCo kichCo);
         bool Delete(Guid id);
         Task<List<KichCo>> GetKichCoBySanPhamId(Guid sanPhamId);
+
+        Task<List<KichCo>> GetKichCoByIdsAsync(List<Guid> kichCoIds);
     }
 }

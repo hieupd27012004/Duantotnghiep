@@ -95,5 +95,12 @@ namespace AppAPI.Repository
                 .Distinct()
                 .ToListAsync();
         }
+
+        public async Task<List<KichCo>> GetKichCoByIdsAsync(List<Guid> kichCoIds)
+        {
+            return await _context.kichCos
+            .Where(kc => kichCoIds.Contains(kc.IdKichCo))
+            .ToListAsync();
+        }
     }
 }

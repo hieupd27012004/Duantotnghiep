@@ -1,26 +1,22 @@
 ﻿using AppData.Model;
+using AppData.ViewModel;
 
 namespace APPMVC.ViewModel
 {
     public class SanPhamChiTietClientViewModel
     {
         public Guid IdSanPham { get; set; }
-        public string TenSanPham { get; set; }
-        public string MoTa { get; set; }
+        public List<SanPhamChiTietItemViewModel> SanPhamChiTietList { get; set; }
+        public string? TenSanPham { get; set; }
+        public string? MoTa { get; set; }
         public double? Gia { get; set; }
-
-        public List<KichCoViewModel> AvailableSizes { get; set; }
-        public List<MauSacViewModel> AvailableColors { get; set; }
-    }
-    public class KichCoViewModel
-    {
-        public Guid? IdKichCo { get; set; }
-        public string TenKichCo { get; set; }
-    }
-
-    public class MauSacViewModel
-    {
-        public Guid? IdMauSac { get; set; }
-        public string TenMauSac { get; set; }
+        public double? SoLuong { get; set; }
+        public List<HinhAnh>? HinhAnhs { get; set; }
+        public List<string> MauSac { get; set; } = new List<string>();
+        public List<string> KichCo { get; set; } = new List<string>();
+        public List<MauSac> AvailableColors { get; set; } = new List<MauSac>(); // Danh sách màu sắc có sẵn
+        public List<KichCo> AvailableSizes { get; set; } = new List<KichCo>(); // Danh sách kích cỡ có sẵn
+        public Guid? SelectedColorId { get; set; }
+        public Guid? SelectedSizeId { get; set; }
     }
 }

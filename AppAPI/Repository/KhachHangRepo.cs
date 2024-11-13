@@ -15,22 +15,15 @@ namespace AppAPI.Repository
         public async Task<KhachHang> CreateKH(KhachHang kh)
         {
             kh.IdKhachHang = Guid.NewGuid();
-            kh.AuthProvider = "tạmtrống";
-            kh.NgayTao = DateTime.Now;
-            kh.NgayCapNhat = DateTime.Now;
-            kh.NguoiTao = kh.HoTen;
-            kh.NguoiCapNhat = kh.HoTen;
-            kh.KichHoat = 1;
             GioHang gioHang = new GioHang() 
-            { 
+            {
                 IdGioHang = Guid.NewGuid(),
                 IdKhachHang = kh.IdKhachHang,
-                KhachHang = kh,
             };
             kh.GioHang = gioHang;
 
-            _context.khachHangs.Add(kh);
-            await _context.SaveChangesAsync();
+                _context.khachHangs.Add(kh);
+                await _context.SaveChangesAsync();
             return kh;
         }
 

@@ -46,5 +46,10 @@ namespace AppAPI.Service
         {
             return await _repository.GetMauSacBySanPhamId(sanPhamId);
         }
+
+        public async Task<List<MauSac>> GetMauSacByIdsAsync(List<Guid> mauSacIds)
+        {
+            return await _repository.GetMauSacByIdsAsync(mauSacIds);
+        }
     }
 }

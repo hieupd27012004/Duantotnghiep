@@ -67,7 +67,7 @@ namespace APPMVC.Areas.Admin.Controllers
             foreach (var sanPham in sanPhams)
             {
                 var sanPhamChiTietList = await _sanPhamCTService.GetSanPhamChiTietBySanPhamId(sanPham.IdSanPham);
-                double totalQuantity = sanPhamChiTietList.Sum(s => s.SoLuong ?? 0);
+                double totalQuantity = sanPhamChiTietList.Sum(s => s.SoLuong );
 
                 sanPhamViewModels.Add(new SanPhamViewModel
                 {

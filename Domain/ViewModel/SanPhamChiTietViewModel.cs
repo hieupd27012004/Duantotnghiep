@@ -35,8 +35,8 @@ namespace AppData.ViewModel
         public List<HinhAnh>? HinhAnhs { get; set; }
         public List<string> MauSac { get; set; } = new List<string>();
         public List<string> KichCo { get; set; } = new List<string>();
-        public double? Gia { get; set; }
-        public double? SoLuong { get; set; }
+        public double Gia { get; set; }
+        public double SoLuong { get; set; }
         public string? XuatXu { get; set; }
         public bool Chon { get; set; }
         public List<IFormFile>? Files { get; set; } = new List<IFormFile>();

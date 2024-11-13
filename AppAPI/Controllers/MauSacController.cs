@@ -111,5 +111,23 @@ namespace AppAPI.Controllers
             var mauSacs = await _service.GetMauSacBySanPhamId(sanPhamId);
             return Ok(mauSacs);
         }
+        [HttpGet("getbyids")]
+        public async Task<IActionResult> GetByIds([FromQuery] List<Guid> mauSacIds)
+        {
+            if (mauSacIds == null || !mauSacIds.Any())
+            {
+                return BadRequest("Please provide at least one color ID.");
+            }
+
+            try
+            {
+                var mauSacs = await _service.GetMauSacByIdsAsync(mauSacIds);
+                return Ok(mauSacs);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

@@ -95,5 +95,12 @@ namespace AppAPI.Repository
                 .Distinct()
                 .ToListAsync();
         }
+
+        public async Task<List<MauSac>> GetMauSacByIdsAsync(List<Guid> mauSacIds)
+        {
+            return await _context.mauSacs
+            .Where(ms => mauSacIds.Contains(ms.IdMauSac))
+            .ToListAsync();
+        }
     }
 }

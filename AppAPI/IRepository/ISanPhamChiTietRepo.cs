@@ -14,5 +14,13 @@ namespace AppAPI.IRepository
 
         Task<SanPhamChiTiet> GetIdSanPhamChiTietByFilter(Guid idSanPham, Guid idKichCo, Guid idMauSac);
 
+        Task<SanPhamDto> GetSanPhamByIdSanPhamChiTietAsync(Guid idSanPhamChiTiet);
+
     }
+}
+public class SanPhamDto
+{
+    public Guid IdSanPham { get; set; }
+    public string TenSanPham { get; set; }
+    // Các thuộc tính cần thiết khác
 }

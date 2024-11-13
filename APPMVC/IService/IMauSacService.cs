@@ -10,5 +10,6 @@ namespace APPMVC.IService
         Task Update(MauSac mauSac);
         Task Delete(Guid id);
         Task<List<MauSac>> GetMauSacBySanPhamId(Guid sanPhamId);
+        Task<List<MauSac>> GetMauSacByIdsAsync(List<Guid> mauSacIds);
     }
 }

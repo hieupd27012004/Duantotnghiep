@@ -52,14 +52,10 @@ namespace AppAPI.Repository
 
         public async Task<List<MauSac>> GetMauSacIdsBySanPhamChiTietId(Guid sanPhamChiTietId)
         {
-            var result = await _context.sanPhamChiTietMausacs
+            return  await _context.sanPhamChiTietMausacs
              .Where(m => m.IdSanPhamChiTiet == sanPhamChiTietId)
              .Select(m => m.MauSac)
-             .ToListAsync();
-
-          
-            return result;
-
+             .ToListAsync();          
         }
     }
 }
