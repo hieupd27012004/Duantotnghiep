@@ -2,6 +2,8 @@
 using AppData;
 using AppAPI.IRepository;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace AppAPI.Repository
 {
@@ -32,11 +34,11 @@ namespace AppAPI.Repository
         {
 
 
-            var sanPhamChiTiet = await _context.sanPhamChiTiets.FindAsync(id); 
+            var sanPhamChiTiet = await _context.sanPhamChiTiets.FindAsync(id);
             if (sanPhamChiTiet != null)
             {
                 _context.sanPhamChiTiets.Remove(sanPhamChiTiet);
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
                 return true;
             }
 
@@ -81,21 +83,71 @@ namespace AppAPI.Repository
 
         public async Task<List<SanPhamChiTiet>> GetSanPhamChiTietBySanPhamId(Guid sanPhamId)
         {
-            return await _context.sanPhamChiTiets              
+            return await _context.sanPhamChiTiets
                  .Where(s => s.IdSanPham == sanPhamId)
                  .ToListAsync();
         }
-		public async Task<SanPhamChiTiet> GetIdSanPhamChiTietByFilter(Guid idSanPham, Guid idKichCo, Guid idMauSac)
-		{
-			var query = await (from spct in _context.sanPhamChiTiets
-							   join spctms in _context.sanPhamChiTietMausacs on spct.IdSanPhamChiTiet equals spctms.IdSanPhamChiTiet
-							   join spctkc in _context.sanPhamChiTietKichCos on spct.IdSanPhamChiTiet equals spctkc.IdSanPhamChiTiet
-							   where spct.IdSanPham == idSanPham
-									 && spctms.IdMauSac == idMauSac
-									 && spctkc.IdKichCo == idKichCo
-							   select spct).FirstOrDefaultAsync();
+        public async Task<SanPhamChiTiet> GetIdSanPhamChiTietByFilter(Guid idSanPham, Guid idKichCo, Guid idMauSac)
+        {
+            var query = await (from spct in _context.sanPhamChiTiets
+                               join spctms in _context.sanPhamChiTietMausacs on spct.IdSanPhamChiTiet equals spctms.IdSanPhamChiTiet
+                               join spctkc in _context.sanPhamChiTietKichCos on spct.IdSanPhamChiTiet equals spctkc.IdSanPhamChiTiet
+                               where spct.IdSanPham == idSanPham
+                                     && spctms.IdMauSac == idMauSac
+                                     && spctkc.IdKichCo == idKichCo
+                               select spct).FirstOrDefaultAsync();
 
-			return query;
-		}
-	}
+            return query;
+        }
+
+        public async Task<SanPhamDto> GetSanPhamByIdSanPhamChiTietAsync(Guid idSanPhamChiTiet)
+        {
+            // Kiểm tra xem idSanPhamChiTiet có hợp lệ không
+            if (idSanPhamChiTiet == Guid.Empty)
+            {
+                throw new ArgumentException("Invalid product detail ID.", nameof(idSanPhamChiTiet));
+            }
+
+            try
+            {
+                // Tìm sản phẩm chi tiết
+                var sanPhamChiTiet = await _context.sanPhamChiTiets
+                    .FirstOrDefaultAsync(spct => spct.IdSanPhamChiTiet == idSanPhamChiTiet);
+
+                // Kiểm tra nếu sanPhamChiTiet không null
+                if (sanPhamChiTiet == null)
+                {
+                    return null; // Không tìm thấy sản phẩm chi tiết
+                }
+
+                // Tìm sản phẩm tương ứng dựa trên IdSanPham
+                var sanPham = await _context.sanPhams
+                    .FirstOrDefaultAsync(sp => sp.IdSanPham == sanPhamChiTiet.IdSanPham);
+
+                // Nếu sản phẩm không tìm thấy, trả về null
+                if (sanPham == null)
+                {
+                    return null; // Không tìm thấy sản phẩm
+                }
+
+                // Chuyển đổi sản phẩm sang DTO
+                var sanPhamDto = new SanPhamDto
+                {
+                    IdSanPham = sanPham.IdSanPham,
+                    TenSanPham = sanPham.TenSanPham,
+                    // Map các thuộc tính khác nếu cần
+                };
+
+                return sanPhamDto; // Trả về DTO sản phẩm
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception("A database error occurred while retrieving the product.", dbEx);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An unexpected error occurred while retrieving the product.", ex);
+            }
+        }
+    }
 }

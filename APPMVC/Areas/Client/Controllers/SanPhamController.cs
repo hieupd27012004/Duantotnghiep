@@ -5,6 +5,8 @@ using AppData.Model;
 using AppAPI.Service;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Logging;
+using AppData.ViewModel;
+using Microsoft.EntityFrameworkCore;
 
 namespace APPMVC.Areas.Client.Controllers
 {
@@ -14,10 +16,13 @@ namespace APPMVC.Areas.Client.Controllers
         private readonly ISanPhamService _sanPhamservice;
         private readonly ISanPhamChiTietService _sanPhamCTservice;
         private readonly ISanPhamChiTietMauSacService _sanPhamChiTietMauSacService;
+        private readonly ISanPhamChiTietKichCoService _sanPhamChiTietKichCoService;
         private readonly IHinhAnhService _hinhAnhService;
         private readonly IKichCoService _kichCoService;
         private readonly IMauSacService _mauSacService;
         private readonly ILogger<SanPhamController> _logger;
+        private readonly IGioHangChiTietService _gioHangChiTietService;
+        private readonly ICardService _cardService;
         public SanPhamController(
             ISanPhamService sanPhamservice,
             ISanPhamChiTietService sanPhamCTservice,
@@ -25,14 +30,20 @@ namespace APPMVC.Areas.Client.Controllers
             IHinhAnhService hinhAnhService,
             IKichCoService kichCoService,
             IMauSacService mauSacService,
-            ILogger<SanPhamController> logger)
+            ISanPhamChiTietKichCoService sanPhamChiTietKichCoService,
+            IGioHangChiTietService gioHangChiTietService,
+            ILogger<SanPhamController> logger,
+            ICardService cardService)
         {
             _sanPhamservice = sanPhamservice;
             _sanPhamCTservice = sanPhamCTservice;
             _sanPhamChiTietMauSacService = sanPhamChiTietMauSacService;
+            _sanPhamChiTietKichCoService = sanPhamChiTietKichCoService;
             _hinhAnhService = hinhAnhService;
             _kichCoService = kichCoService;
             _mauSacService = mauSacService;
+            _gioHangChiTietService = gioHangChiTietService;
+            _cardService = cardService;
             _logger = logger;
         }
 
@@ -91,185 +102,153 @@ namespace APPMVC.Areas.Client.Controllers
             return View(sanPhamClientViewModels);
         }
 
-        public async Task<IActionResult> Detail(Guid sanphamId)
+        [HttpGet]
+        public async Task<IActionResult> Detail(Guid sanphamId, Guid? selectedColorId = null, Guid? selectedSizeId = null)
         {
             try
             {
-                // Kiểm tra ID hợp lệ
                 if (sanphamId == Guid.Empty)
                 {
                     return NotFound("Mã sản phẩm không hợp lệ");
                 }
 
-                // Lấy thông tin sản phẩm
-                var sanPhamChiTiet = await _sanPhamservice.GetSanPhamById(sanphamId);
-
-                // Kiểm tra sản phẩm có tồn tại không
-                if (sanPhamChiTiet == null)
+                var sanPham = await _sanPhamservice.GetSanPhamById(sanphamId);
+                if (sanPham == null)
                 {
                     return NotFound($"Không tìm thấy sản phẩm có mã {sanphamId}");
                 }
 
-                // Lấy danh sách kích cỡ
-                List<KichCo> availableSizes = null;
-                try
+                var sanPhamChiTietList = await _sanPhamCTservice.GetSanPhamChiTietBySanPhamId(sanphamId);
+                if (sanPhamChiTietList == null || !sanPhamChiTietList.Any())
                 {
-                    availableSizes = await _kichCoService.GetKichCoBySanPhamId(sanphamId);
-
-                    // Log thông tin chi tiết
-                    _logger.LogInformation($"Retrieved sizes for product {sanphamId}: {availableSizes?.Count ?? 0} sizes");
+                    return NotFound($"Không tìm thấy chi tiết sản phẩm cho {sanphamId}");
                 }
-                catch (Exception ex)
-                {
-                    // Log toàn bộ chi tiết lỗi
-                    _logger.LogError(ex, $"Error retrieving sizes for product {sanphamId}");
 
-                    // Trả về thông báo lỗi chi tiết
-                    return BadRequest(new
+                var sanPhamChiTietViewModels = new List<SanPhamChiTietItemViewModel>();
+                var availableColors = new List<MauSac>();
+                var availableSizes = new List<KichCo>();
+
+                foreach (var chiTiet in sanPhamChiTietList)
+                {
+                    var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
+                    availableColors.AddRange(mauSacList);
+
+                    var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
+                    availableSizes.AddRange(kichCoList);
+
+                    var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
+
+                    sanPhamChiTietViewModels.Add(new SanPhamChiTietItemViewModel
                     {
-                        message = "Lỗi khi lấy kích cỡ sản phẩm",
-                        details = ex.Message,
-                        stackTrace = ex.StackTrace
+                        IdSanPhamChiTiet = chiTiet.IdSanPhamChiTiet,
+                        HinhAnhs = hinhAnhs,
+                        MauSac = mauSacList.Select(ms => ms.TenMauSac).ToList(),
+                        KichCo = kichCoList.Select(kc => kc.TenKichCo).ToList(),
+                        Gia = chiTiet.Gia,
+                        SoLuong = chiTiet.SoLuong,
+                        XuatXu = chiTiet.XuatXu,
                     });
-                }
-
-                // Kiểm tra danh sách kích cỡ
-                if (availableSizes == null || !availableSizes.Any())
-                {
-                    _logger.LogWarning($"No sizes found for product {sanphamId}");
-                    return NotFound($"Không tìm thấy size của sản phẩm {sanphamId}");
-                }
-
-                // Tương tự với colors
-                List<MauSac> availableColors = null;
-                try
-                {
-                    availableColors = await _mauSacService.GetMauSacBySanPhamId(sanphamId);
-
-                    // Log thông tin chi tiết
-                    _logger.LogInformation($"Retrieved colors for product {sanphamId}: {availableColors?.Count ?? 0} colors");
-                }
-                catch (Exception ex)
-                {
-                    // Log toàn bộ chi tiết lỗi
-                    _logger.LogError(ex, $"Error retrieving colors for product {sanphamId}");
-
-                    // Trả về thông báo lỗi chi tiết
-                    return BadRequest(new
-                    {
-                        message = "Lỗi khi lấy màu sắc sản phẩm",
-                        details = ex.Message,
-                        stackTrace = ex.StackTrace
-                    });
-                }
-
-                // Kiểm tra danh sách màu sắc
-                if (availableColors == null || !availableColors.Any())
-                {
-                    _logger.LogWarning($"No colors found for product {sanphamId}");
-                    return NotFound($"Không tìm thấy màu của sản phẩm {sanphamId}");
                 }
 
                 var viewModel = new SanPhamChiTietClientViewModel
                 {
                     IdSanPham = sanphamId,
-                    TenSanPham = sanPhamChiTiet.TenSanPham,
-                    MoTa = sanPhamChiTiet.MoTa,
-                   
-
-                    AvailableSizes = availableSizes.Select(s => new KichCoViewModel
-                    {
-                        IdKichCo = s.IdKichCo,
-                        TenKichCo = s.TenKichCo
-                    }).ToList(),
-
-                    AvailableColors = availableColors.Select(c => new MauSacViewModel
-                    {
-                        IdMauSac = c.IdMauSac,
-                        TenMauSac = c.TenMauSac
-                    }).ToList()
+                    TenSanPham = sanPham.TenSanPham,
+                    MoTa = sanPham.MoTa,
+                    Gia = sanPhamChiTietViewModels.FirstOrDefault()?.Gia,
+                    SoLuong = sanPhamChiTietViewModels.FirstOrDefault()?.SoLuong,
+                    SanPhamChiTietList = sanPhamChiTietViewModels,
+                    HinhAnhs = sanPhamChiTietViewModels.SelectMany(d => d.HinhAnhs).Distinct().ToList(),
+                    AvailableColors = availableColors.Distinct().ToList(),
+                    AvailableSizes = availableSizes.Distinct().ToList(),
+                    SelectedColorId = selectedColorId,
+                    SelectedSizeId = selectedSizeId,
                 };
 
                 return View(viewModel);
             }
             catch (Exception ex)
             {
-                // Log lỗi toàn cục
-                _logger.LogError(ex, $"Unexpected error in product detail for {sanphamId}");
-
-                // Trả về trang lỗi hoặc thông báo lỗi
-                return StatusCode(500, new
-                {
-                    message = "Có lỗi xảy ra khi tải chi tiết sản phẩm",
-                    details = ex.Message,
-                    stackTrace = ex.StackTrace
-                });
+                return StatusCode(500, "Internal server error");
             }
         }
+        public async Task<IActionResult> GetVariant(Guid productId, Guid colorId, Guid sizeId)
+        {
 
-        // Các phương thức GetSizes và GetColors cũng cần được cập nhật tương tự
-        public async Task<IActionResult> GetSizes(Guid sanPhamId)
+            var sanPhamChiTiet = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(productId, sizeId, colorId);
+
+            if (sanPhamChiTiet == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy sản phẩm phù hợp" });
+            }
+
+            var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
+
+            return Json(new
+            {
+                success = true,
+                price = sanPhamChiTiet.Gia,
+                quantity = sanPhamChiTiet.SoLuong,
+                images = hinhAnhs.Select(h => new
+                {
+                    base64 = Convert.ToBase64String(h.DataHinhAnh),
+                    type = h.LoaiFileHinhAnh
+                }).ToList()
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddToCard(Guid productId, Guid colorId, Guid sizeId)
         {
             try
             {
-                var sizes = await _kichCoService.GetKichCoBySanPhamId(sanPhamId);
-
-                // Chuyển đổi sang ViewModel
-                var sizeViewModels = sizes?.Select(s => new KichCoViewModel
+                if (!ModelState.IsValid)
                 {
-                    IdKichCo = s.IdKichCo,
-                    TenKichCo = s.TenKichCo
-                }).ToList() ?? new List<KichCoViewModel>();
+                    return BadRequest(ModelState);
+                }
 
-                return Json(sizeViewModels);
+                var customerIdString = HttpContext.Session.GetString("IdKhachHang");
+                if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
+                {
+                    return Unauthorized(new { message = "Customer not found in session." });
+                }
+
+                var idGioHang = await _cardService.GetCartIdByCustomerIdAsync(customerId);
+                if (idGioHang == Guid.Empty)
+                {
+                    return NotFound(new { message = "Shopping cart not found for this customer." });
+                }
+
+                // Fetch product details
+                var sanPhamChiTiet = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(productId, sizeId, colorId);
+                if (sanPhamChiTiet == null)
+                {
+                    return Json(new { success = false, message = "Product not found" });
+                }
+
+                // Create the cart detail item
+                var gioHangChiTiet = new GioHangChiTiet
+                {
+                    IdGioHangChiTiet = Guid.NewGuid(),
+                    IdGioHang = idGioHang,
+                    IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+                    DonGia = sanPhamChiTiet.Gia,
+                    SoLuong = 1, // Adjust if needed
+                    TongTien = sanPhamChiTiet.Gia, // Assuming SoLuong is 1
+                    KichHoat = 1
+                };
+
+                await _gioHangChiTietService.AddAsync(gioHangChiTiet);
+
+                return Ok(new { message = "Item added to cart successfully", gioHangChiTiet });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Lỗi khi lấy kích cỡ cho sản phẩm {sanPhamId}");
-                return StatusCode(500, new
-                {
-                    message = "Có lỗi xảy ra khi tải kích cỡ",
-                    error = ex.Message
-                });
+                // Log the exception
+                Console.WriteLine($"Error in AddToCard: {ex.Message}");
+                return StatusCode(500, new { message = "An error occurred while adding to the cart." });
             }
         }
 
-        public async Task<IActionResult> GetColors(Guid sanPhamId)
-        {
-            try
-            {
-                var colors = await _mauSacService.GetMauSacBySanPhamId(sanPhamId);
-
-                // Chuyển đổi sang ViewModel
-                var colorViewModels = colors?.Select(c => new MauSacViewModel
-                {
-                    IdMauSac = c.IdMauSac,
-                    TenMauSac = c.TenMauSac
-                }).ToList() ?? new List<MauSacViewModel>();
-
-                return Json(colorViewModels);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Lỗi khi lấy màu sắc cho sản phẩm {sanPhamId}");
-                return StatusCode(500, new
-                {
-                    message = "Có lỗi xảy ra khi tải màu sắc",
-                    error = ex.Message
-                });
-            }
-        }
-        public async Task<IActionResult> GetProductDetailByFilter(Guid idSanPham, Guid idKichCo, Guid idMauSac)
-        {
-            var result = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(idSanPham, idKichCo, idMauSac);
-
-            if (result == null)
-            {
-                ViewBag.Message = "Không tìm thấy sản phẩm phù hợp";
-                return View("Error");
-            }
-
-            return View(result);
-        }
     }
 }

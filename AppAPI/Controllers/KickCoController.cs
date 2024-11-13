@@ -111,5 +111,24 @@ namespace AppAPI.Controllers
             var kichCos = await _service.GetKichCoBySanPhamId(sanPhamId);
             return Ok(kichCos);
         }
+
+        [HttpGet("getbyids")]
+        public async Task<IActionResult> GetByIds([FromQuery] List<Guid> kichCoIds)
+        {
+            if (kichCoIds == null || !kichCoIds.Any())
+            {
+                return BadRequest("Please provide at least one size ID.");
+            }
+
+            try
+            {
+                var kichCos = await _service.GetKichCoByIdsAsync(kichCoIds);
+                return Ok(kichCos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

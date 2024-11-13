@@ -66,7 +66,7 @@ builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCo
 builder.Services.AddTransient<IVoucherService, VoucherService>();
 builder.Services.AddTransient<ILichSuHoaDonService, LichSuHoaDonService>();
 builder.Services.AddTransient<IGiaoDichService, GiaoDichService>();
-
+builder.Services.AddTransient<ICardService, CardService>();
 
 
 var app = builder.Build();

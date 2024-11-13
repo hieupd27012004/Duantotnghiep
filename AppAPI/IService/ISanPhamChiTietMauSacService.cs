@@ -17,5 +17,6 @@ namespace AppAPI.IService
         bool Delete(Guid id);
 
         Task<List<MauSac>> GetMauSacIdsBySanPhamChiTietId(Guid sanPhamChiTietId);
+
     }
 }

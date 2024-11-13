@@ -43,6 +43,18 @@ namespace APPMVC.Service
         {
             var kichCo = _httpClient.GetFromJsonAsync<List<KichCo>>($"api/KichCo/getkichcobyid?sanPhamId={sanPhamId}");
             return kichCo;
-        } 
+        }
+
+        public async Task<List<KichCo>> GetKichCoByIdsAsync(List<Guid> kichCoIds)
+        {
+            if (kichCoIds == null || !kichCoIds.Any())
+            {
+                throw new ArgumentException("List of KichCo IDs cannot be null or empty.", nameof(kichCoIds));
+            }
+
+            // Join the IDs into a query string
+            var idsQuery = string.Join(",", kichCoIds);
+            return await _httpClient.GetFromJsonAsync<List<KichCo>>($"api/KichCo/getbyids?kichCoIds={idsQuery}");
+        }
     }
 }

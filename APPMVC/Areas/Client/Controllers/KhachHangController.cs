@@ -12,10 +12,12 @@ namespace APPMVC.Areas.Client.Controllers
         
         private readonly IKhachHangService _service;
         private readonly IDiaChiService _dcService;
-        public KhachHangController(IKhachHangService service, IDiaChiService diaChiService)
+        private readonly ICardService _cardService;
+        public KhachHangController(IKhachHangService service, IDiaChiService diaChiService, ICardService cardService)
         {
             _service = service;
             _dcService = diaChiService;
+            _cardService = cardService;
         }
 
         public IActionResult Index()
@@ -26,48 +28,45 @@ namespace APPMVC.Areas.Client.Controllers
 
         public async Task<IActionResult> Register(KhachHang kh = null)
         {
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    kh.IdKhachHang = Guid.NewGuid();
                     kh.AuthProvider = "1";
                     kh.NgayTao = DateTime.Now;
                     kh.NgayCapNhat = DateTime.Now;
-                    kh.NguoiTao = "Clien";
-                    kh.NguoiCapNhat = "Clien";
+                    kh.NguoiTao = "Client";
+                    kh.NguoiCapNhat = "Client";
                     kh.KichHoat = 1;
                     await _service.AddKhachHang(kh);
+
+                    // Set a success message and redirect to the Login action
                     TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay.";
                     return RedirectToAction("Login");
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", ex.Message);
+                    ModelState.AddModelError("", $"Error: {ex.Message}");
+                    if (ex.InnerException != null)
+                    {
+                        ModelState.AddModelError("", $"Inner Exception: {ex.InnerException.Message}");
+                    }
                 }
             }
             else
             {
-                // Xử lý lỗi
+                // Handle model state errors
                 var allErrors = ModelState.Values.SelectMany(v => v.Errors).ToList();
                 foreach (var error in allErrors)
                 {
-                    if (!string.IsNullOrEmpty(error.ErrorMessage))
-                    {
-                        Console.WriteLine($"Error: {error.ErrorMessage}");
-                    }
-
-                    if (error.Exception != null)
-                    {
-                        Console.WriteLine($"Exception: {error.Exception.Message}");
-                    }
+                    Console.WriteLine($"Error: {error.ErrorMessage}");
                 }
                 ModelState.AddModelError("", "Có lỗi xảy ra khi điền thông tin, vui lòng kiểm tra lại.");
             }
 
-            return View(kh); // Trả về View với dữ liệu đã nhập
+            return View(kh); // Return the view with the entered data
         }
+
         public IActionResult DangKyThanhCong()
         {
             return Content("OKroi");

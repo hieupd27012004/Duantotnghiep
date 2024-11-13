@@ -23,7 +23,7 @@ namespace AppAPI.Repository
             return await _context.sanPhamChiTietKichCos
                 .Include(s => s.SanPhamChiTiet)
                 .Include(k => k.KichCo)
-                .ToListAsync(); // Sử dụng ToListAsync() để thực hiện truy vấn không đồng bộ
+                .ToListAsync();
         }
 
         public async Task<SanPhamChiTietKichCo> GetKichCoByIdAsync(Guid id)

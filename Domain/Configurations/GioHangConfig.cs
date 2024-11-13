@@ -16,7 +16,7 @@ namespace AppData.Configurations
 		{
 			builder.HasKey(p => p.IdGioHang);
 
-			builder.HasOne(p => p.KhachHang).WithOne(p => p.GioHang).HasForeignKey<KhachHang>(p => p.IdKhachHang);
+			builder.HasOne(p => p.KhachHang).WithOne(p => p.GioHang).HasForeignKey<GioHang>(p => p.IdKhachHang);
 		}
 	}
 }

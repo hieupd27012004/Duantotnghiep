@@ -1,6 +1,10 @@
 ﻿using AppData.Model;
 using APPMVC.IService;
+using Newtonsoft.Json;
+using System.Net;
 using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 
 namespace APPMVC.Service
 {
@@ -38,8 +42,47 @@ namespace APPMVC.Service
 			return await response.Content.ReadFromJsonAsync<List<GioHangChiTiet>>();
 		}
 
-		// Lấy giỏ hàng chi tiết theo ID
-		public async Task<GioHangChiTiet> GetByIdAsync(Guid id)
+        public async Task<List<GioHangChiTiet>> GetByGioHangIdAsync(Guid gioHangId)
+        {
+            // Kiểm tra xem gioHangId có hợp lệ không
+            if (gioHangId == Guid.Empty)
+            {
+                throw new ArgumentException("Invalid cart ID.", nameof(gioHangId));
+            }
+
+            var response = await _httpClient.GetAsync($"api/GioHangChiTiet/getbygiohangid?gioHangId={gioHangId}");
+
+            // Kiểm tra phản hồi
+            if (!response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return new List<GioHangChiTiet>();
+                }
+
+                throw new Exception($"Error retrieving cart details: {response.ReasonPhrase}. Content: {content}");
+            }
+
+            try
+            {
+                // Đọc nội dung JSON
+                var jsonContent = await response.Content.ReadAsStringAsync();
+
+                // Deserialize JSON thành danh sách GioHangChiTiet
+                var gioHangChiTiets = JsonConvert.DeserializeObject<List<GioHangChiTiet>>(jsonContent);
+
+                return gioHangChiTiets ?? new List<GioHangChiTiet>();
+            }
+            catch (Newtonsoft.Json.JsonException jsonEx) // Chỉ định rõ namespace
+            {
+                throw new Exception("Error parsing JSON response.", jsonEx);
+            }
+        }
+
+        // Lấy giỏ hàng chi tiết theo ID
+        public async Task<GioHangChiTiet> GetByIdAsync(Guid id)
 		{
 			var response = await _httpClient.GetAsync($"api/GioHangChiTiet/getbyid?id={id}");
 			response.EnsureSuccessStatusCode();
@@ -53,4 +96,15 @@ namespace APPMVC.Service
 			response.EnsureSuccessStatusCode();
 		}
 	}
+}
+
+public class GioHangChiTiet
+{
+    public Guid IdGioHangChiTiet { get; set; }
+    public double DonGia { get; set; }
+    public double SoLuong { get; set; }
+    public double TongTien { get; set; }
+    public int KichHoat { get; set; }
+    public Guid IdGioHang { get; set; }
+    public Guid IdSanPhamChiTiet { get; set; }
 }

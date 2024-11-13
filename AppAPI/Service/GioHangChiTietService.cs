@@ -36,5 +36,10 @@ namespace AppAPI.Service
 		{
 			await _repository.DeleteAsync(id);
 		}
-	}
+
+        public async Task<List<GioHangChiTiet>> GetByGioHangIdAsync(Guid gioHangId)
+        {
+            return await _repository.GetByGioHangIdAsync(gioHangId);
+        }
+    }
 }

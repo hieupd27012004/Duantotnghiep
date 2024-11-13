@@ -7,13 +7,13 @@
 <style>
     .hero {
         background-image: url('https://ananas.vn/wp-content/uploads/kv_basas_mobileBanner_4_2019.jpg');
-        background-size: cover; /* Đảm bảo ảnh phủ kín */
-        background-position: center; /* Căn giữa ảnh */
-        height: 400px; /* Bạn có thể điều chỉnh chiều cao theo nhu cầu */
-        display: flex; /* Để sử dụng flexbox cho căn chỉnh */
-        align-items: center; /* Căn giữa theo chiều dọc */
-        color: white; /* Đặt màu chữ trắng cho dễ đọc */
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Tạo hiệu ứng bóng cho chữ */
+        background-size: cover; 
+        background-position: center; 
+        height: 400px;
+        display: flex;
+        align-items: center; 
+        color: white; 
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); 
     }
 
 </style>
@@ -48,7 +48,17 @@
                             {
                                 <tr>
                                     <td class="product-thumbnail">
-                                        <img src="@item.HinhAnhs" alt="Image" class="img-fluid">
+                                        @if (item.HinhAnhs != null && item.HinhAnhs.Any())
+                                        {
+                                            var hinhAnh = item.HinhAnhs.First();
+                                            var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
+                                            var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
+                                            <img src="@imageUrl" alt="Image" class="img-fluid" />
+                                        }
+                                        else
+                                        {
+                                            <span>No image available</span>
+                                        }
                                     </td>
                                     <td class="product-name">
                                         <h2 class="h5 text-black">@item.TenSanPham</h2>
@@ -128,7 +138,7 @@
 
                         <div class="row">
                             <div class="col-md-12">
-                                <button class="btn btn-black btn-lg py-3 btn-block" onclick="window.location='@Url.Action("Checkout", "Cart")'">Proceed To Checkout</button>
+                                <button class="btn btn-black btn-lg py-3 btn-block" onclick="window.location='@Url.Action("Checkout", "Cart")'">Thanh Toán</button>
                             </div>
                         </div>
                     </div>

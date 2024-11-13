@@ -9,5 +9,7 @@ namespace AppAPI.IRepository
 		Task AddAsync(GioHangChiTiet gioHangChiTiet);
 		Task UpdateAsync(GioHangChiTiet gioHangChiTiet);
 		Task DeleteAsync(Guid id);
-	}
+
+        Task<List<GioHangChiTiet>> GetByGioHangIdAsync(Guid gioHangId);
+    }
 }

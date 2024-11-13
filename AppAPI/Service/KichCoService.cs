@@ -46,5 +46,10 @@ namespace AppAPI.Service
         {
             return await _repository.GetKichCoBySanPhamId(sanPhamId);
         }
+
+        public async Task<List<KichCo>> GetKichCoByIdsAsync(List<Guid> kichCoIds)
+        {
+            return await _repository.GetKichCoByIdsAsync(kichCoIds);
+        }
     }
 }

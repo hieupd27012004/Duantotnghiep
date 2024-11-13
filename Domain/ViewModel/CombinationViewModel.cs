@@ -14,8 +14,8 @@ namespace AppData.ViewModel
         public string? TenSanPham { get; set; } 
         public string? KichCo { get; set; }
         public string? MauSac { get; set; }
-        public double? Gia { get; set; }
-        public double? SoLuong { get; set; }
+        public double Gia { get; set; }
+        public double SoLuong { get; set; }
         public string? XuatXu { get; set; }
         public Guid? IdSanPhamChiTiet { get; set; }
         public List<HinhAnh>? hinhAnhs { get; set; }

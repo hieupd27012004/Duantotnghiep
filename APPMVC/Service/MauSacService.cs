@@ -44,5 +44,18 @@ namespace APPMVC.Service
             var mauSac = _httpClient.GetFromJsonAsync<List<MauSac>>($"api/MauSac/getmausacbyid?sanPhamId={sanPhamId}");
             return mauSac;
         }
+
+        public async Task<List<MauSac>> GetMauSacByIdsAsync(List<Guid> mauSacIds)
+        {
+            if (mauSacIds == null || !mauSacIds.Any())
+            {
+                throw new ArgumentException("List of MauSac IDs cannot be null or empty.", nameof(mauSacIds));
+            }
+
+            // Join the IDs into a query string
+            var idsQuery = string.Join(",", mauSacIds);
+            return await _httpClient.GetFromJsonAsync<List<MauSac>>($"api/MauSac/getbyids?mauSacIds={idsQuery}");
+
+        }
     }
 }
