@@ -27,8 +27,14 @@ namespace APPMVC.Service
 			response.EnsureSuccessStatusCode();
 		}
 
-		// Xóa giỏ hàng chi tiết theo ID
-		public async Task DeleteAsync(Guid id)
+        public async Task ClearCartByIdAsync(Guid cartId)
+        {
+            var response = await _httpClient.DeleteAsync($"api/GioHangChiTiet/clear?cartId={cartId}");
+            response.EnsureSuccessStatusCode(); 
+        }
+
+        // Xóa giỏ hàng chi tiết theo ID
+        public async Task DeleteAsync(Guid id)
 		{
 			var response = await _httpClient.DeleteAsync($"api/GioHangChiTiet/xoa?id={id}");
 			response.EnsureSuccessStatusCode();

@@ -1,64 +1,114 @@
 ﻿@model AppData.ViewModel.ThanhToanViewModel
-
 @{
     ViewData["Title"] = "Checkout";
-    Layout = "~/Areas/Client/Views/Shared/_LayoutClient.cshtml"; 
+    Layout = "~/Areas/Client/Views/Shared/_LayoutClient.cshtml";
 }
+<style>
+    .custom-control-inline {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 1rem;
+    }
 
+    .custom-control-label {
+        display: inline-flex;
+        align-items: center;
+        font-weight: normal;
+        cursor: pointer;
+    }
+
+    .custom-control-label i {
+        font-size: 1.5rem;
+        margin-right: 0.5rem;
+    }
+
+    .custom-control-input:checked ~ .custom-control-label {
+        color: #007bff;
+    }
+</style>
 <div class="container">
-    <h2 class="my-4">Checkout</h2>
+    <div class="row">
+        <div class="col-md-8">
+            <h2 class="my-4">Thông tin giao hàng</h2>
+            <form asp-action="ProcessCheckout" method="post">
+                <div class="form-group">
+                    <label for="Dia_chi_12">Họ và tên</label>
+                    <input type="text" class="form-control" id="Dia_chi_12" name="NguoiNhan" value="@Model.NguoiNhan" required />
+                </div>
+                <div class="form-group">
+                    <label for="so_dien_thoai">Số điện thoại</label>
+                    <input type="tel" class="form-control" id="so_dien_thoai" name="SoDienThoaiNguoiNhan" value="@Model.SoDienThoaiNguoiNhan" required />
+                </div>
+                <div class="form-group">
+                    <label for="Dia_chi_cu_the">Địa chỉ cụ thể</label>
+                    <textarea class="form-control" id="Dia_chi_cu_the" name="DiaChiGiaoHang" rows="3" required>@Model.DiaChiGiaoHang</textarea>
+                </div>
 
-    <form asp-action="ProcessCheckout" method="post">
-        <div class="form-group">
-            <label for="name">Full Name</label>
-            <input type="text" class="form-control" id="name" name="Name" value="@Model.Name" required />
-        </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" class="form-control" id="email" name="Email" value="@Model.Email" required />
-        </div>
-        <div class="form-group">
-            <label for="address">Shipping Address</label>
-            <textarea class="form-control" id="address" name="Address" rows="3" required>@Model.Address</textarea>
-        </div>
-        <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input type="tel" class="form-control" id="phone" name="PhoneNumber" value="@Model.PhoneNumber" required />
-        </div>
+                <h4 class="my-3">Phương thức thanh toán</h4>
+                <div class="form-group">
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="thanh_toan_khi_nhan_hang" name="PaymentMethod" value="cash_on_delivery" class="custom-control-input" 
+                               @(Model.PaymentMethod == "cash_on_delivery" ? "checked" : "")>
+                        <label class="custom-control-label" for="thanh_toan_khi_nhan_hang">
+                            <i class="fas fa-money-bill-alt"></i>
+                            Thanh toán khi nhận hàng
+                        </label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="thanh_toan_ngay" name="PaymentMethod" value="online_payment" class="custom-control-input" 
+                               @(Model.PaymentMethod == "online_payment" ? "checked" : "")>
+                        <label class="custom-control-label" for="thanh_toan_ngay">
+                            <i class="fab fa-cc-visa"></i>
+                            Thanh toán ngay
+                        </label>
+                    </div>
+                </div>
 
-        <h4 class="my-3">Order Summary</h4>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.CartItems)
-                {
-                    <tr>
-                        <td>@item.ProductName</td>
-                        <td>@item.Quantity</td>
-                        <td>@item.Price.ToString("C")</td>
-                        <td>
-                            @{
-                                var total = item.Price * item.Quantity;
-                                @total.ToString("C")
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-
-        <div class="form-group">
-            <label for="total">Total Amount:</label>
-            <input type="text" class="form-control" id="total" value="@Model.CartItems.Sum(i => i.Price * i.Quantity).ToString("C")" readonly />
+                <button type="submit" class="btn btn-primary">Hoàn thành đặt hàng</button>
+            </form>
         </div>
 
-        <button type="submit" class="btn btn-primary">Complete Order</button>
-    </form>
+        <div class="col-md-4">
+            <h2 class="my-4">Đơn hàng</h2>
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="my-3">Thông tin đơn hàng</h4>
+                    @if (Model.CartItems != null && Model.CartItems.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Số lượng</th>
+                                    <th>Giá</th>
+                                    <th hidden>ID Sản phẩm Chi tiết</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.CartItems)
+                                {
+                                    <tr>
+                                        <td>@item.ProductName</td>
+                                        <td>@item.Quantity</td>
+                                        <td>@item.Price.ToString("C")</td>
+                                        <td hidden>@item.IdSanPhamChiTiet</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        <div class="form-group">
+                            <label for="tong_so_tien">Tổng số tiền</label>
+                            <input type="text" class="form-control" id="tong_so_tien"
+                                   value="@Model.CartItems.Sum(i => i.Price * i.Quantity).ToString("C")" readonly />
+                        </div>
+                    }
+                    else
+                    {
+                        <p>Giỏ hàng của bạn hiện đang trống.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

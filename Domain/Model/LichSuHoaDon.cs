@@ -23,7 +23,7 @@ namespace AppData.Model
 		public string TrangThai { get; set; }
 		public Guid IdHoaDon { get; set; }
 
-        public Guid IdNhanVien { get; set; }
+        public Guid? IdNhanVien { get; set; }
         public virtual HoaDon? HoaDon { get; set; }
 
         public virtual NhanVien? NhanVien { get; set; }

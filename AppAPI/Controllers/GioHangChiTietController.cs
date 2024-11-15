@@ -122,5 +122,18 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpDelete("clear")]
+        public async Task<IActionResult> ClearCart(Guid cartId)
+        {
+            try
+            {
+                await _service.ClearCartByIdAsync(cartId);
+                return NoContent(); // 204 No Content
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

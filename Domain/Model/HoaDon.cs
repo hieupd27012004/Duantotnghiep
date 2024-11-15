@@ -25,7 +25,7 @@ namespace AppData.Model
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
 		[Range(1,double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
-		public double TienShip { get; set; }
+		public double? TienShip { get; set; }
 		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
 		[Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
 		public double? TienGiam { get; set; }
@@ -49,8 +49,8 @@ namespace AppData.Model
 
 		public string TrangThai {get; set; }
 
-		public Guid IdKhachHang { get; set; }
-		public Guid IdNhanVien { get; set; }
+		public Guid? IdKhachHang { get; set; }
+		public Guid? IdNhanVien { get; set; }
 
 		public virtual KhachHang? KhachHang { get; set; }
 		public virtual NhanVien? NhanVien { get; set; }

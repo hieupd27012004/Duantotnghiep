@@ -26,8 +26,22 @@ namespace AppAPI.Repository
 
         public async Task AddAsync(HoaDon hoaDon)
         {
-            await _context.hoaDons.AddAsync(hoaDon);
-            await _context.SaveChangesAsync();
+            if (hoaDon == null)
+            {
+                throw new ArgumentNullException(nameof(hoaDon), "HoaDon cannot be null");
+            }
+
+            try
+            {
+                await _context.hoaDons.AddAsync(hoaDon);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Log the detailed error
+                var innerException = ex.InnerException?.Message ?? "No inner exception";
+                throw new Exception($"An error occurred while adding the HoaDon: {innerException}", ex);
+            }
         }
 
         public async Task UpdateAsync(HoaDon hoaDon)

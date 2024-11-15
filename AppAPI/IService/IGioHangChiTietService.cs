@@ -11,5 +11,7 @@ namespace AppAPI.IService
 		Task DeleteAsync(Guid id);
 
         Task<List<GioHangChiTiet>> GetByGioHangIdAsync(Guid gioHangId);
+
+        Task ClearCartByIdAsync(Guid cartId);
     }
 }
