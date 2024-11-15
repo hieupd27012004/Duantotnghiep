@@ -18,6 +18,11 @@ namespace AppData.Configurations
 			builder.HasOne(p => p.HoaDon)
 				   .WithMany(p => p.LichSuHoaDons)
 				   .HasForeignKey(p => p.IdHoaDon);
-		}
+
+            builder.HasOne(p => p.NhanVien)
+				   .WithMany(p => p.LichSuHoaDons)
+				   .HasForeignKey(p => p.IdNhanVien)
+                   .OnDelete(DeleteBehavior.Restrict); 
+        }
 	}
 }

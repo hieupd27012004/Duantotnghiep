@@ -65,7 +65,6 @@ builder.Services.AddTransient<ISanPhamChiTietMauSacService, SanPhamChiTietMauSac
 builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCoService>();
 builder.Services.AddTransient<IVoucherService, VoucherService>();
 builder.Services.AddTransient<ILichSuHoaDonService, LichSuHoaDonService>();
-builder.Services.AddTransient<IGiaoDichService, GiaoDichService>();
 builder.Services.AddTransient<ICardService, CardService>();
 
 
@@ -105,7 +104,6 @@ app.UseEndpoints(endpoints =>
         name: "areas",
         pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}");
 
-    // Cấu hình route cho area Customer
     endpoints.MapControllerRoute(
         name: "Admin",
         pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}",

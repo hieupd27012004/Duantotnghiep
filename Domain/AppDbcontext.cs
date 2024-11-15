@@ -32,7 +32,6 @@ namespace AppData
 
 		public DbSet<DiaChi> diaChi { get; set; }
 
-		public DbSet<GiaoDich> giaoDiches { get; set; }
 
 		public DbSet<GioHang> gioHang { get; set; }
 
@@ -61,13 +60,10 @@ namespace AppData
 		public DbSet<SanPham> sanPhams { get; set; }
 
 		public DbSet<SanPhamChiTiet> sanPhamChiTiets{ get; set; }
-    public DbSet<SanPhamChiTietKichCo> sanPhamChiTietKichCos { get; set; }
-    public DbSet<SanPhamChiTietMauSac> sanPhamChiTietMausacs { get; set; }
+		public DbSet<SanPhamChiTietKichCo> sanPhamChiTietKichCos { get; set; }
+		public DbSet<SanPhamChiTietMauSac> sanPhamChiTietMausacs { get; set; }
 
-    public DbSet<ThuongHieu> thuongHieus { get; set; }
-
-		public DbSet<TrangThai> trangThais { get; set; }
-
+		public DbSet<ThuongHieu> thuongHieus { get; set; }
 		public DbSet<Voucher> vouchers { get; set; }
 		public DbSet<LichSuSuDungVoucher> LichSuSuDungVouchers { get; set; }
 

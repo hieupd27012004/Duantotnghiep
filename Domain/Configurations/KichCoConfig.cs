@@ -18,7 +18,7 @@ namespace AppData.Configurations
             new KichCo
             {
                 IdKichCo = Guid.NewGuid(),
-                TenKichCo = "Small",
+                TenKichCo = "Size 37",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -28,7 +28,7 @@ namespace AppData.Configurations
             new KichCo
             {
                 IdKichCo = Guid.NewGuid(),
-                TenKichCo = "Medium",
+                TenKichCo = "Size 38",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -38,7 +38,7 @@ namespace AppData.Configurations
             new KichCo
             {
                 IdKichCo = Guid.NewGuid(),
-                TenKichCo = "Large",
+                TenKichCo = "Size 39",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
