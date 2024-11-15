@@ -47,15 +47,16 @@ namespace AppData.Model
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public int KichHoat { get; set; }
 
+		public string TrangThai {get; set; }
+
 		public Guid IdKhachHang { get; set; }
 		public Guid IdNhanVien { get; set; }
-		public Guid IdTrangThai { get; set; }
+
 		public virtual KhachHang? KhachHang { get; set; }
 		public virtual NhanVien? NhanVien { get; set; }
-		public virtual TrangThai? TrangThai { get; set; }
+
 
 		public virtual ICollection<LichSuHoaDon>? LichSuHoaDons { get; set; }
-		public virtual ICollection<GiaoDich>? GiaoDichs { get; set; }
 
 		public virtual ICollection<HoaDonChiTiet>? HoaDonChiTiets { get; set; }
 	}
