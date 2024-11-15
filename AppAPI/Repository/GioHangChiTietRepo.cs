@@ -52,5 +52,16 @@ namespace AppAPI.Repository
             .Where(x => x.IdGioHang == gioHangId) 
             .ToListAsync();
         }
+
+        public async Task ClearCartByIdAsync(Guid cartId) 
+        {
+            var cartItems = await _context.gioHangChiTiets
+            .Where(item => item.IdGioHang == cartId) 
+            .ToListAsync(); 
+
+            _context.gioHangChiTiets.RemoveRange(cartItems); 
+
+            await _context.SaveChangesAsync(); 
+        }
     }
 }

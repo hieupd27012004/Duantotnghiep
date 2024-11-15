@@ -52,7 +52,7 @@ namespace AppAPI.Controllers
 
         // POST: api/HoaDonChiTiet/them
         [HttpPost("them")]
-        public async Task<IActionResult> Post([FromBody] HoaDonChiTiet hoaDonChiTiet)
+        public async Task<IActionResult> Post([FromBody] List<HoaDonChiTiet> hoaDonChiTietList)
         {
             if (!ModelState.IsValid)
             {
@@ -61,8 +61,8 @@ namespace AppAPI.Controllers
 
             try
             {
-                await _service.AddAsync(hoaDonChiTiet);
-                return CreatedAtAction(nameof(Get), new { id = hoaDonChiTiet.IdHoaDonChiTiet }, hoaDonChiTiet);
+                await _service.AddAsync(hoaDonChiTietList); 
+                return CreatedAtAction(nameof(Get), null, hoaDonChiTietList); 
             }
             catch (Exception ex)
             {

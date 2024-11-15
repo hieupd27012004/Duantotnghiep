@@ -6,7 +6,7 @@ namespace AppAPI.IRepository
     {
         Task<List<HoaDonChiTiet>> GetAllAsync();
         Task<HoaDonChiTiet> GetByIdAsync(Guid id);
-        Task AddAsync(HoaDonChiTiet hoaDonChiTiet);
+        Task AddAsync(List<HoaDonChiTiet> hoaDonChiTietList);
         Task UpdateAsync(HoaDonChiTiet hoaDonChiTiet);
         Task DeleteAsync(Guid id);
     }

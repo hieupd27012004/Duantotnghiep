@@ -23,9 +23,9 @@ namespace AppAPI.Service
             return await _hoaDonChiTietRepository.GetByIdAsync(id);
         }
 
-        public async Task AddAsync(HoaDonChiTiet hoaDonChiTiet)
+        public async Task AddAsync(List<HoaDonChiTiet> hoaDonChiTietList)
         {
-            await _hoaDonChiTietRepository.AddAsync(hoaDonChiTiet);
+            await _hoaDonChiTietRepository.AddAsync(hoaDonChiTietList);
         }
 
         public async Task UpdateAsync(HoaDonChiTiet hoaDonChiTiet)

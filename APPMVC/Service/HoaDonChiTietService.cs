@@ -15,10 +15,9 @@ namespace APPMVC.Service
             };
         }
 
-        // Thêm chi tiết hóa đơn
-        public async Task AddAsync(HoaDonChiTiet hoaDonChiTiet)
+        public async Task AddAsync(List<HoaDonChiTiet> hoaDonChiTietList)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/HoaDonChiTiet/them", hoaDonChiTiet);
+            var response = await _httpClient.PostAsJsonAsync("api/HoaDonChiTiet/them", hoaDonChiTietList); 
             response.EnsureSuccessStatusCode();
         }
 

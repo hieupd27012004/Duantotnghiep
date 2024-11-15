@@ -41,5 +41,23 @@ namespace AppAPI.Service
         {
             return await _repository.GetByGioHangIdAsync(gioHangId);
         }
+
+        public async Task ClearCartByIdAsync(Guid cartId)
+        {
+            var cartItems = await _repository.GetByGioHangIdAsync(cartId); 
+
+            if (cartItems != null && cartItems.Count > 0)
+            {
+                foreach (var item in cartItems)
+                {
+                    await _repository.DeleteAsync(item.IdGioHangChiTiet); 
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Giỏ hàng không tồn tại hoặc đã rỗng."); 
+            }
+        }
+
     }
 }

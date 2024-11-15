@@ -1,5 +1,6 @@
 ﻿using AppData.Model;
 using APPMVC.IService;
+using Newtonsoft.Json;
 
 namespace APPMVC.Service
 {
@@ -18,8 +19,17 @@ namespace APPMVC.Service
         // Thêm hóa đơn
         public async Task AddAsync(HoaDon hoaDon)
         {
+            // Log the HoaDon object
+            Console.WriteLine(JsonConvert.SerializeObject(hoaDon));
+
             var response = await _httpClient.PostAsJsonAsync("api/HoaDon/them", hoaDon);
-            response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error: {content}"); // Log the error details
+                response.EnsureSuccessStatusCode(); // This will throw the HttpRequestException
+            }
         }
 
         // Xóa hóa đơn theo ID
