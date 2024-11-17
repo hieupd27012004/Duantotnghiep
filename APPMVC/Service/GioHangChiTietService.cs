@@ -95,8 +95,20 @@ namespace APPMVC.Service
 			return await response.Content.ReadFromJsonAsync<GioHangChiTiet>();
 		}
 
-		// Cập nhật giỏ hàng chi tiết
-		public async Task UpdateAsync(GioHangChiTiet gioHangChiTiet)
+        public async Task<double> GetTotalQuantityBySanPhamChiTietIdAsync(Guid sanPhamChiTietId, Guid cartId)
+        {
+            var response = await _httpClient.GetAsync($"api/GioHangChiTiet/gettotalquantity?sanPhamChiTietId={sanPhamChiTietId}&cartId={cartId}");
+
+            // Ensure the response is successful
+            response.EnsureSuccessStatusCode();
+
+            // Read the total quantity from the response
+            var totalQuantity = await response.Content.ReadFromJsonAsync<double>();
+            return totalQuantity;
+        }
+
+        // Cập nhật giỏ hàng chi tiết
+        public async Task UpdateAsync(GioHangChiTiet gioHangChiTiet)
 		{
 			var response = await _httpClient.PutAsJsonAsync("api/GioHangChiTiet/sua", gioHangChiTiet);
 			response.EnsureSuccessStatusCode();

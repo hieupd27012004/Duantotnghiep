@@ -1,4 +1,4 @@
-﻿using AppData.Model;
+﻿        using AppData.Model;
 using AppData.ViewModel;
 using APPMVC.IService;
 using Microsoft.AspNetCore.Mvc;
@@ -82,8 +82,19 @@ namespace APPMVC.Areas.Client.Controllers
                     var item = await _gioHangChiTietService.GetByIdAsync(model.IdGioHangChiTiet);
                     if (item != null)
                     {
+                        var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
+
+                        double totalQuantityInCart = await _gioHangChiTietService.GetTotalQuantityBySanPhamChiTietIdAsync(item.IdSanPhamChiTiet, item.IdGioHang);
+
+                        double availableStock = sanPhamChiTiet.SoLuong + item.SoLuong - totalQuantityInCart;
+
+                        if (model.Quantity > availableStock)
+                        {
+                            return Json(new { success = false, message = $"Requested quantity exceeds available stock for" });
+                        }
+
                         item.SoLuong = model.Quantity;
-                        item.TongTien = model.TongTien;
+                        item.TongTien = model.TongTien; 
                         await _gioHangChiTietService.UpdateAsync(item);
                     }
                 }
@@ -106,7 +117,6 @@ namespace APPMVC.Areas.Client.Controllers
         public async Task<IActionResult> ProcessCheckout(ThanhToanViewModel model)
         {
             model.CartItems = await GetCartItems();
-            // Check if the model state is valid
             if (ModelState.IsValid)
             {
                 var customerIdString = HttpContext.Session.GetString("IdKhachHang");
@@ -174,8 +184,11 @@ namespace APPMVC.Areas.Client.Controllers
                 try
                 {
                     await _hoaDonService.AddAsync(order);
-                    await _hoaDonChiTietService.AddAsync(orderDetails); 
-
+                    await _hoaDonChiTietService.AddAsync(orderDetails);
+                    foreach (var detail in orderDetails)
+                    {
+                        await DeductStockAsync(detail.IdSanPhamChiTiet, detail.SoLuong);
+                    }
                     var lichSu = new LichSuHoaDon
                     {
                         IdLichSuHoaDon = Guid.NewGuid(),
@@ -213,32 +226,40 @@ namespace APPMVC.Areas.Client.Controllers
             return 1; 
         }
 
-
+        public async Task DeductStockAsync(Guid productId, double quantity)
+        {
+            var product = await _sanPhamChiTietService.GetSanPhamChiTietById(productId);
+            if (product != null && product.SoLuong >= quantity)
+            {
+                product.SoLuong -= quantity;
+                await _sanPhamChiTietService.Update(product);
+            }
+            else
+            {
+                throw new Exception("Insufficient stock to fulfill the order.");
+            }
+        }
         private async Task<List<CartItemViewModel>> GetCartItems()
         {
             var customerIdString = HttpContext.Session.GetString("IdKhachHang");
 
-            // Validate customer ID from session
             if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
             {
                 return new List<CartItemViewModel>();
             }
 
-            // Get the cart ID for the customer
             var idGioHang = await _cardService.GetCartIdByCustomerIdAsync(customerId);
             if (idGioHang == Guid.Empty)
             {
                 return new List<CartItemViewModel>();
             }
 
-            // Get cart details
             var gioHangChiTiets = await _gioHangChiTietService.GetByGioHangIdAsync(idGioHang);
             if (gioHangChiTiets == null || !gioHangChiTiets.Any())
             {
                 return new List<CartItemViewModel>();
             }
 
-            // Create a list of tasks for fetching product details
             var tasks = new List<Task<CartItemViewModel>>();
             foreach (var item in gioHangChiTiets)
             {

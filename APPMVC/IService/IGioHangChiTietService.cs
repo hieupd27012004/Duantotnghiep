@@ -14,5 +14,7 @@ namespace APPMVC.IService
 
         Task ClearCartByIdAsync(Guid cartId);
 
+        Task<double> GetTotalQuantityBySanPhamChiTietIdAsync(Guid sanPhamChiTietId, Guid cartId);
+
     }
 }

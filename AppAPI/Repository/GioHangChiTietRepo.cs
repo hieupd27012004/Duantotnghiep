@@ -63,5 +63,14 @@ namespace AppAPI.Repository
 
             await _context.SaveChangesAsync(); 
         }
+
+        public async Task<double> GetTotalQuantityBySanPhamChiTietIdAsync(Guid sanPhamChiTietId, Guid cartId)
+        {
+            var cartDetails = await _context.gioHangChiTiets
+			   .Where(c => c.IdGioHang == cartId && c.IdSanPhamChiTiet == sanPhamChiTietId)
+			   .ToListAsync();
+
+            return cartDetails.Sum(c => c.SoLuong);
+        }
     }
 }

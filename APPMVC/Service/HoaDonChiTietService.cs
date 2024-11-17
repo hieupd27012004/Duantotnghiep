@@ -44,6 +44,13 @@ namespace APPMVC.Service
             return await response.Content.ReadFromJsonAsync<HoaDonChiTiet>();
         }
 
+        public async Task<List<HoaDonChiTiet>> GetByIdHoaDonAsync(Guid idHoaDon)
+        {
+            var response = await _httpClient.GetAsync($"api/HoaDonChiTiet/getbyidhd?idhoadon={idHoaDon}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<HoaDonChiTiet>>();
+        }
+
         // Cập nhật chi tiết hóa đơn
         public async Task UpdateAsync(HoaDonChiTiet hoaDonChiTiet)
         {

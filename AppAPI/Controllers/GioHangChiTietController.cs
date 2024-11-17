@@ -135,5 +135,18 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("gettotalquantity")]
+        public async Task<IActionResult> GetTotalQuantityBySanPhamChiTietId(Guid sanPhamChiTietId, Guid cartId)
+        {
+            try
+            {
+                var totalQuantity = await _service.GetTotalQuantityBySanPhamChiTietIdAsync(sanPhamChiTietId, cartId);
+                return Ok(totalQuantity);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }
