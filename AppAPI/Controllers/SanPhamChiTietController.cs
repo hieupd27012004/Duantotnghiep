@@ -166,6 +166,24 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("getbyhoadonchitiet")]
+        public async Task<IActionResult> GetByIdHoaDonChiTietAsync(Guid id)
+        {
+            try
+            {
+                var sanPhamChiTiet = await _service.GetByIdHoaDonChiTietAsync(id);
+                if (sanPhamChiTiet == null)
+                {
+                    return NotFound($"SanPhamChiTiet not found for HoaDonChiTiet ID {id}.");
+                }
+                return Ok(sanPhamChiTiet);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }
 

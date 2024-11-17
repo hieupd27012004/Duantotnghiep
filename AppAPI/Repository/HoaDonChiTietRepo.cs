@@ -45,5 +45,12 @@ namespace AppAPI.Repository
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<HoaDonChiTiet>> GetByIdHoaDonAsync(Guid idHoaDon)
+        {
+            return await _context.hoaDonChiTiets
+                .Where(h => h.IdHoaDon == idHoaDon) 
+                .ToListAsync();
+        }
     }
 }

@@ -149,5 +149,36 @@ namespace AppAPI.Repository
                 throw new Exception("An unexpected error occurred while retrieving the product.", ex);
             }
         }
+
+        public async Task<SanPhamChiTietDto> GetByIdHoaDonChiTietAsync(Guid id)
+        {
+            var hoaDonChiTiet = await _context.hoaDonChiTiets
+                .FirstOrDefaultAsync(h => h.IdHoaDonChiTiet == id); 
+
+            if (hoaDonChiTiet == null)
+            {
+                return null; 
+            }
+
+            var sanPhamChiTiet = await _context.sanPhamChiTiets
+                .FirstOrDefaultAsync(spct => spct.IdSanPhamChiTiet == hoaDonChiTiet.IdSanPhamChiTiet);
+
+            var sanPhamChiTietDto = new SanPhamChiTietDto
+            {
+                IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+                Gia = sanPhamChiTiet.Gia,
+                SoLuong = sanPhamChiTiet.SoLuong,
+                CoHienThi = sanPhamChiTiet.CoHienThi,
+                NgayCapNhat = sanPhamChiTiet.NgayCapNhat,
+                GioiTinh = sanPhamChiTiet.GioiTinh,
+                XuatXu = sanPhamChiTiet.XuatXu,
+                NgayTao = sanPhamChiTiet.NgayTao,
+                NguoiCapNhat = sanPhamChiTiet.NguoiCapNhat,
+                NguoiTao = sanPhamChiTiet.NguoiTao,
+                KichHoat = sanPhamChiTiet.KichHoat
+            };
+
+            return sanPhamChiTietDto;
+        }
     }
 }

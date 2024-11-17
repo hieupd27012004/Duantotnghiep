@@ -37,5 +37,10 @@ namespace AppAPI.Service
         {
             await _hoaDonChiTietRepository.DeleteAsync(id);
         }
+
+        public async Task<List<HoaDonChiTiet>> GetByIdHoaDonAsync(Guid idHoaDon)
+        {
+            return await _hoaDonChiTietRepository.GetByIdHoaDonAsync(idHoaDon);
+        }
     }
 }

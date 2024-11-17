@@ -9,5 +9,7 @@ namespace AppAPI.IService
         Task AddAsync(List<HoaDonChiTiet> hoaDonChiTietList);
         Task UpdateAsync(HoaDonChiTiet hoaDonChiTiet);
         Task DeleteAsync(Guid id);
+
+        Task<List<HoaDonChiTiet>> GetByIdHoaDonAsync(Guid idHoaDon);
     }
 }

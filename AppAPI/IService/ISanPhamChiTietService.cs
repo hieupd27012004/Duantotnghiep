@@ -13,6 +13,8 @@ namespace AppAPI.IService
         Task<SanPhamChiTiet> GetIdSanPhamChiTietByFilter(Guid idSanPham, Guid idKichCo, Guid idMauSac);
 
         Task<SanPhamDto> GetSanPhamByIdSanPhamChiTietAsync(Guid idSanPhamChiTiet);
+
+        Task<SanPhamChiTietDto> GetByIdHoaDonChiTietAsync(Guid id);
     }
 
 }

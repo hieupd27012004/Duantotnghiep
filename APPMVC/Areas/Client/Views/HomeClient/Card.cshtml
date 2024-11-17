@@ -175,14 +175,20 @@
     </div>
 </div>
 
+
 <script>
+    let previousQuantities = {};
+
     function initializeQuantityButtons() {
         document.querySelectorAll('.quantity-amount').forEach(input => {
+            const id = input.closest('tr').querySelector('td').textContent.trim();
+            previousQuantities[id] = input.value;
+
             input.addEventListener('input', function () {
                 if (parseInt(this.value) < 1) {
-                    this.value = 1;
+                    this.value = 1; // Ensure minimum quantity is 1
                 }
-                updateTotal();
+                updateTotal(); // Update total on input change
                 updateCartQuantity(this);
             });
         });
@@ -194,89 +200,105 @@
         document.querySelectorAll('.decrease').forEach(button => {
             button.addEventListener('click', handleDecrease);
         });
+
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', updateTotal);
+        });
     }
-    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', updateTotal);
-    });
-    function handleIncrease() {
-        const input = this.closest('.input-group').querySelector('.quantity-amount');
-        let currentVal = parseInt(input.value);
-        if (!isNaN(currentVal)) {
-            input.value = currentVal + 1;
-            updateTotal();
-            updateCartQuantity(input);
-        }
+
+function handleIncrease() {
+    const input = this.closest('.input-group').querySelector('.quantity-amount');
+    let currentVal = parseInt(input.value);
+    
+    if (!isNaN(currentVal)) {
+        input.value = currentVal + 1; 
+        updateTotal();
+        updateCartQuantity(input); 
     }
+}
 
     function handleDecrease() {
         const input = this.closest('.input-group').querySelector('.quantity-amount');
         let currentVal = parseInt(input.value);
-        if (currentVal > 1) {
-            input.value = currentVal - 1;
-            updateTotal();
-            updateCartQuantity(input);
+
+        if (!isNaN(currentVal)) {
+            if (currentVal > 2) {
+                input.value = currentVal - 1;
+                updateTotal();
+                updateCartQuantity(input);
+            } else if (currentVal === 2) {
+                input.value = 1;
+                updateTotal();
+                updateCartQuantity(input);
+            } else if (currentVal === 0) {
+                input.value = 1;
+                updateTotal();
+            }
         }
     }
-
     function updateTotal() {
         let subtotal = 0;
         let hasCheckedItems = false;
 
         document.querySelectorAll('tr[data-item-price]').forEach(row => {
-            const price = parseFloat(row.dataset.itemPrice); // Lấy giá từ thuộc tính data-item-price
+            const price = parseFloat(row.dataset.itemPrice);
             const quantity = parseInt(row.querySelector('.quantity-amount').value);
             const isChecked = row.querySelector('input[type="checkbox"]').checked;
 
-            const total = price * quantity; // Tính tổng dựa trên giá và số lượng
+            const total = price * quantity;
             row.querySelector('.total-price').textContent = total.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 
             if (isChecked) {
-                subtotal += total; // Chỉ cộng vào subtotal nếu mục đã được chọn
+                subtotal += total;
                 hasCheckedItems = true;
             }
         });
 
-        // Cập nhật subtotal và total
         document.getElementById('subtotal').textContent = subtotal.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
         document.getElementById('total').textContent = subtotal.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 
         const cartTotals = document.getElementById('cart-totals');
-        cartTotals.style.display = hasCheckedItems ? 'block' : 'none'; // Hiện thị hoặc ẩn tổng giỏ hàng
+        cartTotals.style.display = hasCheckedItems ? 'block' : 'none';
     }
 
-    function updateCartQuantity() {
-        const quantities = [];
+    function updateCartQuantity(input) {
+        const row = input.closest('tr');
+        const id = row.querySelector('td').textContent.trim();
+        const price = parseFloat(row.dataset.itemPrice);
+        const quantity = parseFloat(input.value);
+        const total = (price * quantity).toFixed(2);
 
-        document.querySelectorAll('.quantity-amount').forEach(input => {
-            const row = input.closest('tr');
-            const id = row.querySelector('td').textContent.trim(); 
-            const price = parseFloat(row.dataset.itemPrice); 
-            const quantity = parseFloat(input.value);
-            const total = (price * quantity).toFixed(2); 
+        const previousQuantity = previousQuantities[id];
 
-            quantities.push({
-                IdGioHangChiTiet: id,
-                Quantity: quantity,
-                TongTien: parseFloat(total) 
-            });
-        });
+        const quantities = [{
+            IdGioHangChiTiet: id,
+            Quantity: quantity,
+            TongTien: parseFloat(total)
+        }];
 
         fetch('/Client/HomeClient/UpdateQuantity', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(quantities) 
+            body: JSON.stringify(quantities)
         })
             .then(response => response.json())
             .then(data => {
                 if (!data.success) {
-                    alert('Failed to update quantities.');
+                    input.value = previousQuantity; 
+                    updateTotal();
+                    alert(data.message || 'Failed to update quantities.');
+                } else {
+                    previousQuantities[id] = quantity;
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                input.value = previousQuantity;
+            });
+
     }
 
     document.addEventListener('DOMContentLoaded', initializeQuantityButtons);
-
 </script>

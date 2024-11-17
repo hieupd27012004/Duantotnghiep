@@ -14,6 +14,8 @@ namespace APPMVC.IService
         Task<SanPhamChiTiet> GetIdSanPhamChiTietByFilter(Guid idSanPham, Guid idKichCo, Guid idMauSac);
 
         Task<SanPham> GetSanPhamByIdSanPhamChiTietAsync(Guid idSanPhamChiTiet);
+
+        Task<SanPhamChiTiet> GetByIdHoaDonChiTietAsync(Guid id);
     }
 
 }

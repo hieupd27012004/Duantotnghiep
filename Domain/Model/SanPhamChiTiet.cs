@@ -17,7 +17,7 @@ namespace AppData.Model
         public double Gia { get; set; }
         [Required(ErrorMessage = "Không Được Để Trống")]
         [RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
-        [Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
+        [Range(0, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
         public double SoLuong { get; set; }
 
         public string? CoHienThi { get; set; }

@@ -108,6 +108,26 @@ namespace APPMVC.Service
                 throw new Exception("Error parsing JSON response.", jsonEx);
             }
         }
+
+        public async Task<SanPhamChiTiet> GetByIdHoaDonChiTietAsync(Guid id)
+        {
+            var response = await _httpClient.GetAsync($"api/SanPhamChiTiet/getbyhoadonchitiet?id={id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<SanPhamChiTiet>();
+            }
+            else if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null; // Return null if not found
+            }
+            else
+            {
+                // Handle other errors
+                var content = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Error calling API: {response.StatusCode}. Content: {content}");
+            }
+        }
     }
 }
 // Lớp SanPham

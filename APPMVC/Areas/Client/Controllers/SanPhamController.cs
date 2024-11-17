@@ -225,6 +225,16 @@ namespace APPMVC.Areas.Client.Controllers
                 {
                     return Json(new { success = false, message = "Product not found" });
                 }
+                int requestedQuantity = 1; 
+                if (requestedQuantity <= 0) 
+                {
+                    return Json(new { success = false, message = "Quantity must be greater than zero." });
+                }
+
+                if (requestedQuantity > sanPhamChiTiet.SoLuong) 
+                {
+                    return Json(new { success = false, message = "Insufficient quantity available." });
+                }
 
                 // Create the cart detail item
                 var gioHangChiTiet = new GioHangChiTiet
@@ -233,8 +243,8 @@ namespace APPMVC.Areas.Client.Controllers
                     IdGioHang = idGioHang,
                     IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
                     DonGia = sanPhamChiTiet.Gia,
-                    SoLuong = 1, // Adjust if needed
-                    TongTien = sanPhamChiTiet.Gia, // Assuming SoLuong is 1
+                    SoLuong = requestedQuantity,
+                    TongTien = sanPhamChiTiet.Gia * requestedQuantity,
                     KichHoat = 1
                 };
 
