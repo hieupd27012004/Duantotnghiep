@@ -36,6 +36,12 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddDbContext<AppDbcontext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddHttpClient("GHN", client =>
+{
+    client.BaseAddress = new Uri("https://online-gateway.ghn.vn/shiip/public-api/");
+    client.DefaultRequestHeaders.Add("Token", "1b11f9f8-257d-11ef-99a7-3ed37c49343e");
+});
+
 // Enable CORS
 builder.Services.AddCors(options =>
 {
