@@ -28,7 +28,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
             foreach (var khachHang in khachHangs)
             {
-                var diaChiList = await _diaChiService.GetAllAsync(khachHang.IdKhachHang);
+                var diaChiList = await _diaChiService.GetDiaChiByIdKH(khachHang.IdKhachHang);
 
 
                 var diaChi = diaChiList?.FirstOrDefault(); 
@@ -37,8 +37,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 khachHangViewModels.Add(new KhachHangViewModel
                 {
                     KhachHang = khachHang,
-                    DiaChi = diaChi?.WardName,
-                    
+                    DiaChi = diaChi?.Diachi 
                 });
             }
 

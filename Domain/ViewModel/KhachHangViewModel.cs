@@ -17,10 +17,8 @@ namespace AppData.ViewModel
         public Guid IdDiaChi { get; set; } // Assuming you need the ID
         public string HoTen { get; set; } // Name of the recipient
         public string SoDienThoai { get; set; } // Phone number
-		public string ProvinceName { get; set; }
-		public string DistrictName { get; set; }
-		public string WardName { get; set; }
-		public bool DiaChiMacDinh { get; set; } // Default address flag
+        public string Diachi { get; set; } // Address
+        public bool DiaChiMacDinh { get; set; } // Default address flag
         public DateTime NgayTao { get; set; } // Creation date
         public DateTime NgayCapNhat { get; set; } // Update date
         public string CustomerName { get; set; } // Customer name
