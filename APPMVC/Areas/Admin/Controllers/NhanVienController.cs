@@ -345,8 +345,9 @@ namespace APPMVC.Areas.Admin.Controllers
                     {
                         // Lưu thông tin khách hàng vào session
                         HttpContext.Session.SetString("NhanVien", JsonConvert.SerializeObject(kh));
-                        HttpContext.Session.SetString("AvatarUrl", kh.AnhNhanVien); // Đường dẫn đến ảnh nhân viên
-                        HttpContext.Session.SetString("NhanVienName", kh.TenNhanVien); // Tên nhân viên
+                        HttpContext.Session.SetString("AvatarUrl", kh.AnhNhanVien); 
+                        HttpContext.Session.SetString("NhanVienName", kh.TenNhanVien);
+                        HttpContext.Session.SetString("IdNhanVien", kh.IdNhanVien.ToString());
                         HttpContext.Session.SetString("NhanVienRole", kh.chucVu != null ? kh.chucVu.TenChucVu : "Không xác định"); // Vai trò nhân viên
                         return RedirectToAction("DangNhapThanhCong");
                     }

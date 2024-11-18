@@ -9,5 +9,7 @@ namespace APPMVC.IService
         Task AddAsync(HoaDon hoaDon);
         Task UpdateAsync(HoaDon hoaDon);
         Task DeleteAsync(Guid id);
+
+        Task<HoaDon> GetByOrderNumberAsync(string orderNumber);
     }
 }

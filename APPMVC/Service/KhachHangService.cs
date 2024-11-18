@@ -42,7 +42,7 @@ namespace APPMVC.Service
             return await _httpClient.GetFromJsonAsync<List<KhachHang>>("/api/KhachHang/GetAllKhachHang");
         }
 
-        public Task<KhachHang> GetIdKhachHang(Guid id)
+        public Task<KhachHang> GetIdKhachHang(Guid? id)
         {
             var getkh = _httpClient.GetFromJsonAsync<KhachHang>($"/api/KhachHang/GetById?id={id}");
             return getkh;

@@ -13,29 +13,29 @@ namespace AppData.Model
 		public Guid IdHoaDon { get; set; }
 		[Required (ErrorMessage ="Không Được Để Trống")]
 		public string MaDon { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
-		public string NguoiNhan { get; set; }
-		[Required (ErrorMessage = "Không Được Để Trống")]
-		public string SoDienThoaiNguoiNhan { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
-		public string DiaChiGiaoHang { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
-		public string LoaiHoaDon { get; set; }
+		//[Required(ErrorMessage = "Không Được Để Trống")]
+		public string? NguoiNhan { get; set; }
+		//[Required (ErrorMessage = "Không Được Để Trống")]
+		public string? SoDienThoaiNguoiNhan { get; set; }
+		//[Required(ErrorMessage = "Không Được Để Trống")]
+		public string? DiaChiGiaoHang { get; set; }
+		//[Required(ErrorMessage = "Không Được Để Trống")]
+		public string? LoaiHoaDon { get; set; }
 		public string? GhiChu { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
-		[Range(1,double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
+		[Range(0,double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
 		public double? TienShip { get; set; }
 		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
-		[Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
+		[Range(0, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
 		public double? TienGiam { get; set; }
 		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
 		[Required(ErrorMessage = "Không Được Để Trống")]
-		[Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
+		[Range(0, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
 		public double TongTienDonHang { get; set; }
 		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
 		[Required(ErrorMessage = "Không Được Để Trống")]
-		[Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
+		[Range(0, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
 		public double TongTienHoaDon { get; set; }
 
 		[DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
