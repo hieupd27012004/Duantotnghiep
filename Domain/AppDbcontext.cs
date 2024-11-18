@@ -1,4 +1,4 @@
-using AppData.Model;
+﻿using AppData.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -66,11 +66,17 @@ namespace AppData
 		public DbSet<ThuongHieu> thuongHieus { get; set; }
 		public DbSet<Voucher> vouchers { get; set; }
 		public DbSet<LichSuSuDungVoucher> LichSuSuDungVouchers { get; set; }
+		public DbSet<Province> provinces { get; set; }
+		public DbSet<District> districts { get; set; }
+		public DbSet<Ward> wards { get; set; }
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 
-			optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=daantotnghiep;Trusted_Connection=True;TrustServerCertificate=True;");
+			//optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=daantotnghiep;Trusted_Connection=True;TrustServerCertificate=True;");
+
+			//Server Của Long
+			optionsBuilder.UseSqlServer("Server=DESKTOP-UC1K64J\\SQLEXPRESS04;Database=daantotnghiep;Trusted_Connection=True;TrustServerCertificate=True;");
 
 		}
 

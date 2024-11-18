@@ -1,153 +1,155 @@
 ﻿using AppData.Model;
-using AppData.ViewModel;
 using APPMVC.IService;
+using Castle.Core.Resource;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using X.PagedList;
 
 namespace APPMVC.Areas.Client.Controllers
 {
-    [Area("Client")]
-    public class DiaChiController : Controller
-    {
-        public IDiaChiService _services;
-        public IKhachHangService _serviceKH;
-        public DiaChiController(IDiaChiService services, IKhachHangService serviceKH)
-        {
-            _services = services;
-            _serviceKH = serviceKH;
-        }
+	[Area("Client")]
+	public class DiaChiController : Controller
+	{
+		private readonly IDiaChiService _services;
+		private readonly IKhachHangService _servicesKH;
+		public DiaChiController(IDiaChiService services, IKhachHangService khachHangService)
+		{
+			_services = services;
+			_servicesKH = khachHangService;
+		}
+		public async Task<IActionResult> GetAll()
+		{
+			var IdKhachHang = HttpContext.Session.GetString("IdKhachHang");
+			if (string.IsNullOrEmpty(IdKhachHang))
+			{
+				return RedirectToAction("Login", "KhachHang");
+			}
+			var id = Guid.Parse(IdKhachHang);
+			var diaChiList = await _services.GetAllAsync(id);
+			return View(diaChiList);
+		}
+		[HttpGet]
+		public async Task<IActionResult> Create()
+		{
+			var IdKhachHang = HttpContext.Session.GetString("IdKhachHang");
+			if (string.IsNullOrEmpty(IdKhachHang))
+			{
+				return RedirectToAction("Login", "Account");  // Nếu chưa đăng nhập, chuyển hướng đến trang login
+			}
+			ViewBag.Provinces = await _services.GetProvincesAsync();
+			return View();
+		}
+		[HttpPost]
+		public async Task<IActionResult> Create(DiaChi dc)
+		{
+			//Check số lượng địa chỉ
+			var IdKhachHang = HttpContext.Session.GetString("IdKhachHang");
+			var id = Guid.Parse(IdKhachHang);
+			int addressCount = await _services.GetAddressCountByCustomerId(id);
+			if (addressCount >= 3)
+			{
+				ModelState.AddModelError("", "Khách hàng này đã có tối đa 3 địa chỉ.");
+				await LoadDropDowns(dc);
+				return View(dc);
+			}
+			// Kiểm tra địa chỉ mặc định           
+			if (dc.DiaChiMacDinh)
+			{
+				bool check = await _services.HasDefaultAddressAsync(id);
+				if (check == false)
+				{
+					ModelState.AddModelError("", "Khách hàng này đã có một địa chỉ mặc định.");
+					await LoadDropDowns(dc);
+					return View(dc);
+				}
+			}
+			if (!ModelState.IsValid)
+			{
+				foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+				{
+					Console.WriteLine($"Error: {error.ErrorMessage}");  // In lỗi ra console
+				}
+				await LoadDropDowns(dc);
+				return View(dc);
+			}
+			if (string.IsNullOrEmpty(IdKhachHang))
+			{
+				return RedirectToAction("Login", "KhachHang");  // Nếu chưa đăng nhập, chuyển hướng đến trang login
+			}
+			dc.IdKhachHang = id;
+			//Nếu tất cả ok thì thêm =))
+			bool success = await _services.AddAsync(dc);
+			if (success)
+			{
+				return RedirectToAction("GetAll");
+			}
+			await LoadDropDowns(dc);
+			return View(dc);
+		}
+		//Xóa
+		public async Task<IActionResult> Delete(Guid idDiaChi)
+		{
+			await _services.DeleteAsync(idDiaChi);
+			return RedirectToAction("GetAll");
+		}
 
-        [HttpGet]
-        public async Task<IActionResult> Getall(string? name, int page = 1)
-        {
-            page = page < 1 ? 1 : page;
-            int pageSize = 5;
+		//Check các kiểu
+		[HttpGet]
+		public async Task<IActionResult> GetDistricts(int provinceId)
+		{
+			if (provinceId == 0)
+			{
+				return Json(new { error = "Invalid provinceId" });
+			}
+			var districts = await _services.GetDistrictsAsync(provinceId);
+			if (districts == null || districts.Count == 0)
+			{
+				return Json(new { error = "No districts found" });
+			}
+			var districtList = districts.Select(d => new { DistrictId = d.DistrictId, DistrictName = d.DistrictName }).ToList();
+			return Json(districtList);
+		}
 
-            List<DiaChi> diaChis = await _services.GetDiaChi(name);
-            List<KhachHang> customers = await _serviceKH.GetAllKhachHang();
+		[HttpGet]
+		public async Task<IActionResult> GetWards(int districtId)
+		{
+			var wards = await _services.GetWardsAsync(districtId);
+			var wardList = wards.Select(w => new {
+				WardId = w.WardId.ToString(),
+				WardName = w.WardName
+			}).ToList();
 
-            List<DiaChiViewModel> viewModels;
+			return Json(wardList);
+		}
+		[HttpGet]
+		public async Task<IActionResult> GetAddressCountByCustomerId(Guid customerId)
+		{
+			int count = await _services.GetAddressCountByCustomerId(customerId);
+			return Json(count);
+		}
+		//Hàm Phụ
+		private async Task LoadDropDowns(DiaChi dc)
+		{
+			// Lấy danh sách tỉnh từ DB
+			ViewBag.Provinces = await _services.GetProvincesAsync();
 
-            if (diaChis != null && diaChis.Any())
-            {
-                viewModels = diaChis.Select(address => new DiaChiViewModel
-                {
-                    IdDiaChi = address.IdDiaChi, 
-                    HoTen = address.HoTen, 
-                    SoDienThoai = address.SoDienThoai,
-                    Diachi = address.Diachi, 
-                    DiaChiMacDinh = address.DiaChiMacDinh, 
-                    NgayTao = address.NgayTao,
-                    NgayCapNhat = address.NgayCapNhat,
-                    CustomerName = customers.FirstOrDefault(c => c.IdKhachHang == address.IdKhachHang)?.HoTen
-                }).ToList();
-            }
-            else
-            {
-                List<DiaChi> allDiaChis = await _services.GetDiaChi(null);
-                viewModels = allDiaChis.Select(address => new DiaChiViewModel
-                {
-                    IdDiaChi = address.IdDiaChi,
-                    HoTen = address.HoTen,
-                    SoDienThoai = address.SoDienThoai, 
-                    Diachi = address.Diachi,
-                    DiaChiMacDinh = address.DiaChiMacDinh, 
-                    NgayTao = address.NgayTao,
-                    NgayCapNhat = address.NgayCapNhat,
-                    CustomerName = customers.FirstOrDefault(c => c.IdKhachHang == address.IdKhachHang)?.HoTen
-                }).ToList();
-            }
+			// Nếu ProvinceId có giá trị hợp lệ, lấy danh sách các quận theo ProvinceId
+			if (dc != null && dc.ProvinceId > 0)
+			{
+				ViewBag.Districts = await _services.GetDistrictsAsync(dc.ProvinceId);
+			}
+			else
+			{
+				ViewBag.Districts = new List<District>(); // Danh sách trống nếu dc không có ProvinceId
+			}
 
-            var pagedDCs = viewModels.ToPagedList(page, pageSize);
-            return View(pagedDCs);
-        }
-        public async Task<IActionResult> Create()
-        {
-            var khachHang = await _serviceKH.GetAllKhachHang();
-            ViewBag.KhachHang = khachHang;
-            DiaChi nv = new DiaChi()
-            {
-                IdDiaChi = Guid.NewGuid(),
-                NgayCapNhat = DateTime.Now,
-                NgayTao = DateTime.Now,
-
-            };
-            return View(nv);
-        }
-        [HttpPost]
-        public async Task<IActionResult> Create(DiaChi dc)
-        {
-            if (ModelState.IsValid)
-            {
-                await _services.Create(dc);
-                return RedirectToAction("Getall");
-            }
-            return View(dc);
-
-        }
-        public async Task<IActionResult> DiaChi()
-        {
-            var sessionData = HttpContext.Session.GetString("KhachHang");
-            if (string.IsNullOrEmpty(sessionData))
-            {
-                return RedirectToAction("Login");
-            }
-            var khachHang = JsonConvert.DeserializeObject<KhachHang>(sessionData);
-            var diaChiList = await _services.GetDiaChiByIdKH(khachHang.IdKhachHang);
-            return View(diaChiList);
-        }
-        public async Task<IActionResult> Edit(Guid id)
-        {
-            var khachHang = await _serviceKH.GetAllKhachHang();
-            ViewBag.KhachHang = khachHang;
-            var diaChi = await _services.GetDiaChiById(id);
-            if (diaChi == null)
-            {
-                return NotFound();
-            }
-
-            return View(diaChi);
-        }
-        [HttpPost]
-        public async Task<IActionResult> Edit(DiaChi dc)
-        {
-            if (ModelState.IsValid)
-            {
-                // Gọi service để cập nhật địa chỉ
-                await _services.Update(dc);
-
-                return RedirectToAction("Getall");
-            }
-
-            // Nếu ModelState không hợp lệ, trả về view với dữ liệu hiện tại
-            var khachHang = await _serviceKH.GetAllKhachHang();
-            ViewBag.KhachHang = khachHang;
-
-            return View(dc);
-        }
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            try
-            {
-                var diaChi = await _services.GetDiaChiById(id);
-
-                if (diaChi == null)
-                {
-                    return NotFound($"Địa chỉ với ID {id} không tồn tại.");
-                }
-
-                // Thực hiện xóa địa chỉ
-                await _services.Delete(id);
-
-                // Sau khi xóa thành công, điều hướng về trang danh sách
-                return RedirectToAction("Getall");
-            }
-            catch (Exception ex)
-            {
-                // Trả về thông báo lỗi nếu có vấn đề xảy ra trong quá trình xóa
-                return StatusCode(500, $"Đã xảy ra lỗi trong quá trình xóa: {ex.Message}");
-            }
-        }
-    }
+			// Nếu DistrictId có giá trị hợp lệ, lấy danh sách các phường theo DistrictId
+			if (dc != null && dc.DistrictId > 0)
+			{
+				ViewBag.Wards = await _services.GetWardsAsync(dc.DistrictId);
+			}
+			else
+			{
+				ViewBag.Wards = new List<Ward>(); // Danh sách trống nếu dc không có DistrictId
+			}
+		}
+	}
 }

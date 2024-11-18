@@ -5,120 +5,123 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AppAPI.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class DiaChiController : ControllerBase
-    {
-        private readonly IDiaChiService _service;
-        public DiaChiController(IDiaChiService service)
-        {
-            _service = service;
-        }
-        [HttpGet("GetAll")]
-        public IActionResult GetAll(string? name)
-        {
-            try
-            {
-                var dc = _service.GetDiaChi(name);
-                return Ok(dc);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-        [HttpGet("GetById")]
-        public IActionResult Get(Guid id)
-        {
-            try
-            {
-                var dc = _service.GetDiaChiById(id);
-                if (dc == null)
-                {
-                    return NotFound($"DiaChi with ID {id} not found.");
-                }
-                return Ok(dc);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-        [HttpPost("them")]
-        public IActionResult Post(DiaChi dc)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                _service.Create(dc);
-                return Ok(dc);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-        [HttpPut("Sua")]
-        public IActionResult Put(DiaChi diaChi)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                _service.Update(diaChi);
-                return Ok(diaChi);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-        [HttpDelete("Xoa")]
-        public IActionResult Delete(Guid id)
-        {
-            try
-            {
-                _service.Delete(id);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-        [HttpGet("GetDiaChiByIdKH")]
-        public async Task<ActionResult<List<DiaChi>>> GetAllDiaChiByIdKH(Guid id)
-        {
-            return Ok(await _service.GetDiaChiByIdKH(id));
-        }
-        [HttpPut("SuaTheoIdKH")]
-        public IActionResult PutIdKh(Guid id, DiaChi diaChi)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                var result =  _service.UpdateDCbyIdKH(id, diaChi);
-                if (result)
-                {
-                    return Ok(diaChi);
-                }
-                return NotFound("Địa Chỉ Không Tồn Tại");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-    }
+	[Route("api/[controller]")]
+	[ApiController]
+	public class DiaChiController : ControllerBase
+	{
+		private readonly IDiaChiService _service;
+		public DiaChiController(IDiaChiService service)
+		{
+			_service = service;
+		}
+		[HttpGet("GetProvinces")]
+		public async Task<IActionResult> GetProvinces()
+		{
+			var getProvinces = await _service.GetProvincesAsync();
+			return Ok(getProvinces);
+		}
+		[HttpGet("GetDistricts/{provinceId}")]
+		public async Task<IActionResult> GetDistricts(int provinceId)
+		{
+			var getDistricts = await _service.GetDistrictsAsync(provinceId);
+			return Ok(getDistricts);
+		}
+		[HttpGet("GetWards/{districtId}")]
+		public async Task<IActionResult> GetWards(int districtId)
+		{
+			var getWard = await _service.GetWardsAsync(districtId);
+			return Ok(getWard);
+		}
+		[HttpGet("GetAll")]
+		public async Task<IActionResult> GetAll()
+		{
+			var result = await _service.GetAll();
+			return Ok(result);
+		}
+		[HttpGet("GetByIdAsync")]
+		public async Task<IActionResult> GetById(Guid id)
+		{
+			try
+			{
+				var dc = await _service.GetByIdAsync(id);
+				if (dc == null)
+				{
+					return NotFound($"DiaChi with ID {id} not found.");
+				}
+				return Ok(dc);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error: {ex.Message}");
+			}
+		}
+		[HttpGet("GetByIdKh")]
+		public async Task<IActionResult> GetByIdKh(Guid idKhacHang)
+		{
+			try
+			{
+				var dc = await _service.GetByIdKh(idKhacHang);
+				if (dc == null)
+				{
+					return NotFound($"DiaChi with ID {idKhacHang} not found.");
+				}
+				return Ok(dc);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error: {ex.Message}");
+			}
+		}
+		[HttpPost("them")]
+		public async Task<IActionResult> Add(DiaChi dc)
+		{
+			return Ok(await _service.AddAsync(dc));
+		}
+		[HttpPut("Sua")]
+		public async Task<IActionResult> Put(Guid id, DiaChi diaChi)
+		{
+			diaChi.IdDiaChi = id;
+			return Ok(await _service.UpdateAsync(diaChi));
+		}
+		[HttpDelete("Xoa")]
+		public async Task<IActionResult> Delete(Guid idDiaChi)
+		{
+			return Ok(await _service.DeleteAsync(idDiaChi));
+		}
+		//Check 
+		[HttpGet("GetAddressCountByCustomerId/{customerId}")]
+		public async Task<IActionResult> GetAddressCountByCustomerId(Guid customerId)
+		{
+			try
+			{
+				var dc = await _service.GetAddressCountByCustomerId(customerId);
+				if (dc == null)
+				{
+					return NotFound($"DiaChi with ID {customerId} not found.");
+				}
+				return Ok(dc);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error: {ex.Message}");
+			}
+		}
+		[HttpGet("HasDefaultAddressAsync/{customerId}")]
+		public async Task<IActionResult> HasDefaultAddressAsync(Guid customerId)
+		{
+			try
+			{
+				var dc = await _service.HasDefaultAddressAsync(customerId);
+				if (dc == null)
+				{
+					return NotFound($"DiaChi with ID {customerId} not found.");
+				}
+				return Ok(dc);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Internal server error: {ex.Message}");
+			}
+		}
+	}
 }

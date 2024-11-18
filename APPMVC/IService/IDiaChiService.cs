@@ -2,14 +2,20 @@
 
 namespace APPMVC.IService
 {
-    public interface IDiaChiService
-    {
-        Task<List<DiaChi>> GetDiaChi(string? name);
-        Task<DiaChi> GetDiaChiById(Guid id);
-        Task<List<DiaChi>> GetDiaChiByIdKH(Guid id);
-        Task Create(DiaChi dc);
-        Task Update(DiaChi dc);
-        Task Delete(Guid id);
-        Task UpdateDCbyIdKH(Guid id,DiaChi diaChi);
-    }
+	public interface IDiaChiService
+	{
+		Task<List<DiaChi>> GetAll();
+		Task<List<DiaChi>> GetAllAsync(Guid idKhachHang);
+		Task<DiaChi> GetByIdAsync(Guid idDiaChi);
+		Task<bool> AddAsync(DiaChi diaChi);
+		Task<bool> UpdateAsync(Guid idDiaChi, DiaChi diaChi);
+		Task<bool> DeleteAsync(Guid idDiaChi);
+
+		Task<List<Province>> GetProvincesAsync();
+		Task<List<District>> GetDistrictsAsync(int provinceId);
+		Task<List<Ward>> GetWardsAsync(int districtId);
+		//Check số lượng thêm cho khách hàng và địa chỉ mặc định
+		Task<int> GetAddressCountByCustomerId(Guid customerId);
+		Task<bool> HasDefaultAddressAsync(Guid customerId);
+	}
 }
