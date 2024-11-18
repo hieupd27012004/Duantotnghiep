@@ -52,21 +52,16 @@ namespace APPMVC.Areas.Admin.Controllers
         }
         public async Task<ActionResult> Index(int page = 1)
         {
-            // Đảm bảo page không nhỏ hơn 1
             page = page < 1 ? 1 : page;
             int pageSize = 5;
 
-            // Lấy danh sách hóa đơn từ dịch vụ
             List<HoaDon> hoaDons = await _hoaDonService.GetAllAsync();
 
-            // Kiểm tra nếu hoaDons là null hoặc rỗng
             if (hoaDons == null || !hoaDons.Any())
             {
-                // Trả về view với một danh sách rỗng hoặc thông báo
                 return View(new List<HoaDon>());
             }
 
-            // Phân trang
             var pagedHoaDons = hoaDons.ToPagedList(page, pageSize);
 
             return View(pagedHoaDons);
@@ -88,7 +83,8 @@ namespace APPMVC.Areas.Admin.Controllers
 
             var lichSuHoaDons = await _lichSuHoaDonService.GetByIdHoaDonAsync(id);
 
-            // Lấy thông tin sản phẩm chi tiết cho mỗi hóa đơn chi tiết
+            var khachhang = await _khachHangService.GetIdKhachHang(hoaDon.IdKhachHang);
+
             var sanPhamChiTiets = new List<HoaDonChiTietViewModel.SanPhamChiTietViewModel>();
             foreach (var hoaDonChiTiet in hoaDonChiTietList)
             {
@@ -97,7 +93,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 if (sanPhamCT != null)
                 {
-                    // Fetch color and size details
+
                     var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
                     var mauSacTenList = mauSacList.Select(ms => ms.TenMauSac).ToList();
 
@@ -105,6 +101,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     var kichCoTenList = kichCoList.Select(kc => kc.TenKichCo).ToList();
 
                     var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
+
 
                     sanPhamChiTiets.Add(new HoaDonChiTietViewModel.SanPhamChiTietViewModel
                     {
@@ -128,7 +125,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 HoaDon = new HoaDonViewModel
                 {
                     MaDon = hoaDon.MaDon,
-                    KhachHang = hoaDon.KhachHang?.HoTen,
+                    KhachHang = khachhang.HoTen,
                     TrangThai = hoaDon.TrangThai,
                     SoDienThoaiNguoiNhan = hoaDon.SoDienThoaiNguoiNhan,
                     LoaiHoaDon = hoaDon.LoaiHoaDon,

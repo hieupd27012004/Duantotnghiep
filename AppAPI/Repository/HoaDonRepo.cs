@@ -59,5 +59,11 @@ namespace AppAPI.Repository
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<HoaDon> GetByOrderNumberAsync(string orderNumber)
+        {
+            return await _context.hoaDons
+                .FirstOrDefaultAsync(hd => hd.MaDon == orderNumber);
+        }
     }
 }

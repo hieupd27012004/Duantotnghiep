@@ -1,0 +1,94 @@
+﻿@model IEnumerable<AppData.Model.HoaDon>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .container-xxl {
+        max-width: 1320px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .product-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-gap: 20px;
+    }
+
+    .product-item {
+        padding: 20px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+        cursor: pointer;
+    }
+
+        .product-item:hover {
+            background-color: #e6e6e6;
+        }
+
+        .product-item h6 {
+            margin-top: 0;
+            margin-bottom: 0;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+    .delete-icon {
+        color: #ff6b6b;
+        cursor: pointer;
+    }
+</style>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">Bán Hàng Tại Quầy</span>
+    </h4>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4" style="padding: 20px">
+                <div class="header">
+                    <h2>Bán hàng</h2>
+                    <form action="@Url.Action("TaoHD", "BanHangTQ", new { area = "Admin" })" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-primary ms-2">+ Tạo Đơn Hàng</button>
+                    </form>
+                </div>
+                <div class="product-list">
+                    @if (Model == null || !Model.Any())
+                    {
+                        <p>Không có đơn hàng nào để hiển thị.</p>
+                    }
+                    else
+                    {
+                        var sortedInvoices = Model.OrderBy(invoice => int.Parse(invoice.MaDon.Substring(2))).ToList();
+
+                        int count = 1;
+                        foreach (var invoice in sortedInvoices)
+                        {
+                            <div class="product-item">
+                                <h6>Đơn hàng @count - @invoice.MaDon</h6>
+                                <i class="fas fa-trash delete-icon" title="Xóa" onclick="deleteInvoice(@invoice.IdHoaDon)"></i>
+                            </div>
+                            count++;
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function deleteInvoice(id) {
+        if (confirm("Bạn có chắc chắn muốn xóa đơn hàng này?")) {
+            // Simulate deletion. Implement actual deletion logic here.
+            alert(`Đơn hàng ${id} đã được xóa.`);
+        }
+        }
+</script>

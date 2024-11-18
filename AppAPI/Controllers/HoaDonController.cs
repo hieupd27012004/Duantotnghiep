@@ -104,5 +104,23 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("getbyordernumber")]
+        public async Task<IActionResult> GetByOrderNumber(string orderNumber)
+        {
+            try
+            {
+                var hoaDon = await _service.GetByOrderNumberAsync(orderNumber);
+                if (hoaDon == null)
+                {
+                    return NotFound($"HoaDon with order number {orderNumber} not found.");
+                }
+                return Ok(hoaDon);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

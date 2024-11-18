@@ -57,6 +57,7 @@ namespace AppData.ViewModel
             public string SoDienThoaiNguoiNhan { get; set; }
             public string LoaiHoaDon { get; set; }
             public string DiaChiGiaoHang { get; set; }
+
         }
     }
 }

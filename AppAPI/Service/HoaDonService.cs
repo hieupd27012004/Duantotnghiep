@@ -37,5 +37,10 @@ namespace AppAPI.Service
         {
             await _hoaDonRepository.DeleteAsync(id);
         }
+
+        public async Task<HoaDon> GetByOrderNumberAsync(string orderNumber)
+        {
+            return await _hoaDonRepository.GetByOrderNumberAsync(orderNumber);
+        }
     }
 }
