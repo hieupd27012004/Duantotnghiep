@@ -2,6 +2,7 @@
 using APPMVC.IService;
 using Castle.Core.Resource;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.WebSockets;
 
 namespace APPMVC.Areas.Client.Controllers
 {
@@ -47,17 +48,19 @@ namespace APPMVC.Areas.Client.Controllers
 			if (addressCount >= 3)
 			{
 				ModelState.AddModelError("", "Khách hàng này đã có tối đa 3 địa chỉ.");
-				await LoadDropDowns(dc);
+                ViewBag.Provinces = await _services.GetProvincesAsync();
+                await LoadDropDownsCreate(dc);
 				return View(dc);
 			}
 			// Kiểm tra địa chỉ mặc định           
 			if (dc.DiaChiMacDinh)
 			{
 				bool check = await _services.HasDefaultAddressAsync(id);
-				if (check == false)
+				if (check)
 				{
 					ModelState.AddModelError("", "Khách hàng này đã có một địa chỉ mặc định.");
-					await LoadDropDowns(dc);
+                    ViewBag.Provinces = await _services.GetProvincesAsync();
+                    await LoadDropDownsCreate(dc);
 					return View(dc);
 				}
 			}
@@ -67,7 +70,8 @@ namespace APPMVC.Areas.Client.Controllers
 				{
 					Console.WriteLine($"Error: {error.ErrorMessage}");  // In lỗi ra console
 				}
-				await LoadDropDowns(dc);
+                ViewBag.Provinces = await _services.GetProvincesAsync();
+                await LoadDropDownsCreate(dc);
 				return View(dc);
 			}
 			if (string.IsNullOrEmpty(IdKhachHang))
@@ -84,8 +88,52 @@ namespace APPMVC.Areas.Client.Controllers
 			await LoadDropDowns(dc);
 			return View(dc);
 		}
-		//Xóa
-		public async Task<IActionResult> Delete(Guid idDiaChi)
+        //Sua
+        public async Task<IActionResult> EditDC(Guid IdDiaChi)
+        {
+            var diaChi = await _services.GetByIdAsync(IdDiaChi);
+            await LoadDropDowns(diaChi);
+            if (diaChi == null) return NotFound();
+            ViewBag.HasDefaultAddress = await _services.HasDefaultAddressAsync(diaChi.IdKhachHang) && !diaChi.DiaChiMacDinh;
+            await LoadDropDowns(diaChi);
+            return View(diaChi);
+        }
+        [HttpPost]
+        public async Task<IActionResult> EditDC(Guid IdDiaChi, DiaChi dc)
+        {
+            if (dc.WardId == null)
+            {
+                ModelState.AddModelError("WardId", "Vui lòng chọn phường/xã.");
+                await LoadDropDowns(dc);  // Tải lại các dropdown
+                return View(dc);  // Trả về lại view với thông báo lỗi
+            }
+            if (IdDiaChi == Guid.Empty)
+            {
+                ModelState.AddModelError("", "ID địa chỉ không hợp lệ.");
+                await LoadDropDowns(dc);
+                return View(dc);
+            }
+
+
+            if (!ModelState.IsValid)
+            {
+                await LoadDropDowns(dc);
+                return View(dc);
+            }
+            var IdKhachHang = HttpContext.Session.GetString("IdKhachHang");
+            var id = Guid.Parse(IdKhachHang);
+			id = dc.IdKhachHang;
+            bool success = await _services.UpdateAsync(IdDiaChi, dc);
+            if (success)
+            {
+                return RedirectToAction("GetAll");
+            }
+
+            await LoadDropDowns(dc);
+            return View(dc);
+        }
+        //Xóa
+        public async Task<IActionResult> Delete(Guid idDiaChi)
 		{
 			await _services.DeleteAsync(idDiaChi);
 			return RedirectToAction("GetAll");
@@ -151,5 +199,15 @@ namespace APPMVC.Areas.Client.Controllers
 				ViewBag.Wards = new List<Ward>(); // Danh sách trống nếu dc không có DistrictId
 			}
 		}
-	}
+        public async Task LoadDropDownsCreate(DiaChi dc)
+        {
+            ViewBag.Districts = dc.ProvinceId != null
+                ? await _services.GetDistrictsAsync(dc.ProvinceId)
+                : new List<District>(); // Danh sách trống nếu chưa chọn tỉnh
+
+            ViewBag.Wards = dc.DistrictId != null
+                ? await _services.GetWardsAsync(dc.DistrictId)
+                : new List<Ward>(); // Danh sách trống nếu chưa chọn quận
+        }
+    }
 }
