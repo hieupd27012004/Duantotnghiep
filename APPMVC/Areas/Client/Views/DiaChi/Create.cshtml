@@ -13,19 +13,19 @@
 <form asp-action="Create" method="post">
     <div class="form-group mb-3">
         <label>Họ tên</label>
-        <input asp-for="HoTen" />
+        <input class="form-control" asp-for="HoTen" />
         <span asp-validation-for="HoTen"></span>
     </div>
 
     <div class="form-group mb-3">
         <label>Số điện thoại</label>
-        <input asp-for="SoDienThoai" />
+        <input class="form-control" asp-for="SoDienThoai" />
         <span asp-validation-for="SoDienThoai"></span>
     </div>
 
     <div class="form-group mb-3">
         <label>Mô Tả</label>
-        <input asp-for="MoTa" />
+        <input class="form-control" asp-for="MoTa" />
         <span asp-validation-for="MoTa"></span>
     </div>
 
@@ -39,7 +39,7 @@
 
     <div class="form-group mb-3">
         <label>Quận/Huyện</label>
-        <select id="DistrictId" asp-for="DistrictId">
+        <select id="DistrictId" class="form-control" asp-for="DistrictId">
             <option value="">Chọn quận/huyện</option>
         </select>
         <input type="hidden" id="DistrictName" name="DistrictName" asp-for="DistrictName" />
@@ -48,14 +48,14 @@
 
     <div class="form-group mb-3">
         <label>Phường/Xã</label>
-        <select id="WardId" asp-for="WardId">
+        <select id="WardId" asp-for="WardId" class="form-control">
             <option value="">Chọn phường/xã</option>
         </select>
         <input type="hidden" id="WardName" name="WardName" asp-for="WardName" />
     </div>
 
     <div class="form-group mb-3">
-        <input class="form-check-input" asp-for="DiaChiMacDinh" id="DiaChiMacDinh" />
+        <input class="form-check-input" asp-for="DiaChiMacDinh" id="DiaChiMacDinh" class="form-control" />
         <label for="DiaChiMacDinh">Đặt làm địa chỉ mặc định</label>
         <span asp-validation-for="DiaChiMacDinh"></span>
     </div>
@@ -131,13 +131,13 @@
             });
         });
         // //Check địa chỉ mặc định
-        $(document).ready(function () {
-            var isDefaultAddress = @Html.Raw(JsonConvert.SerializeObject(ViewBag.HasDefaultAddress));
-            if (isDefaultAddress) {
-                $('#DiaChiMacDinh').prop('disabled', true);
-                $('label[for="DiaChiMacDinh"]').text("Địa chỉ mặc định đã tồn tại");
-            }
-        });
+        // $(document).ready(function () {
+        //     var isDefaultAddress = @Html.Raw(JsonConvert.SerializeObject(ViewBag.HasDefaultAddress));
+        //     if (isDefaultAddress) {
+        //         $('#DiaChiMacDinh').prop('disabled', true);
+        //         $('label[for="DiaChiMacDinh"]').text("Địa chỉ mặc định đã tồn tại");
+        //     }
+        // });
         
         
     </script>
