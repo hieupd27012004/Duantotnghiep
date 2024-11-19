@@ -212,7 +212,6 @@ namespace APPMVC.Areas.Client.Controllers
                 }
             }
 
-            // Return to the checkout view with the existing model if the model state is invalid or an error occurred
             return View("Checkout", model);
         }
 

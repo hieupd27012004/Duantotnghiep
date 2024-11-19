@@ -55,7 +55,24 @@ namespace APPMVC.Service
             return await response.Content.ReadFromJsonAsync<HoaDon>();
         }
 
-        // Cập nhật hóa đơn
+        public async Task<HoaDon> GetByOrderNumberAsync(string orderNumber)
+        {
+            var response = await _httpClient.GetAsync($"api/HoaDon/getbyordernumber?orderNumber={orderNumber}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<HoaDon>();
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error retrieving HoaDon by order number: {content}");
+
+                return null; 
+            }
+        }
+
+
         public async Task UpdateAsync(HoaDon hoaDon)
         {
             var response = await _httpClient.PutAsJsonAsync("api/HoaDon/sua", hoaDon);
