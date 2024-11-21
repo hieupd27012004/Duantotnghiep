@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static AppData.ViewModel.HoaDonChiTietViewModel;
+using SanPhamChiTietViewModel = AppData.ViewModel.HoaDonChiTietViewModel.SanPhamChiTietViewModel;
 
 namespace APPMVC.Areas.Admin.Controllers
 {
@@ -97,9 +99,9 @@ namespace APPMVC.Areas.Admin.Controllers
                 SoDienThoaiNguoiNhan = null,
                 DiaChiGiaoHang = null,
                 LoaiHoaDon = "Tại Quầy",
-                TienShip = 1,
-                TongTienDonHang = 1,
-                TongTienHoaDon = 1,
+                TienShip = 0,
+                TongTienDonHang = 0,
+                TongTienHoaDon = 0,
                 NgayTao = DateTime.Now,
                 NguoiTao = "Nhân Viên",
                 KichHoat = 1,
@@ -157,13 +159,380 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 return 0;
             }
-            return allOrders.Max(order => int.Parse(order.MaDon.Substring(2)));
-        }
 
+            var orderNumbers = new List<int>();
+            foreach (var order in allOrders)
+            {
+                if (order.MaDon.Length > 2 &&
+                    int.TryParse(order.MaDon.Substring(2), out int orderNumber))
+                {
+                    orderNumbers.Add(orderNumber);
+                }
+            }
+
+            return orderNumbers.Any() ? orderNumbers.Max() : 0;
+        }
         private async Task<bool> IsOrderNumberExists(string orderNumber)
         {
             var existingOrder = await _hoaDonService.GetByOrderNumberAsync(orderNumber);
             return existingOrder != null;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Edit(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return BadRequest("ID không hợp lệ.");
+            }
+
+            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(id);
+
+            if (hoaDonChiTietList == null || !hoaDonChiTietList.Any())
+            {
+                hoaDonChiTietList = new List<HoaDonChiTiet>(); 
+            }
+
+            var hoaDon = await _hoaDonService.GetByIdAsync(id);
+            if (hoaDon == null)
+            {
+                return NotFound($"Hóa đơn với ID {id} không tồn tại.");
+            }
+
+            var lichSuHoaDons = await _lichSuHoaDonService.GetByIdHoaDonAsync(id);
+            //var khachhang = await _khachHangService.GetIdKhachHang(hoaDon.IdKhachHang);
+
+            var sanPhamChiTiets = new List<HoaDonChiTietViewModel.SanPhamChiTietViewModel>();
+            foreach (var hoaDonChiTiet in hoaDonChiTietList)
+            {
+                var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
+                var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(hoaDonChiTiet.IdSanPhamChiTiet);
+
+                if (sanPhamCT != null)
+                {
+                    var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
+                    var mauSacTenList = mauSacList.Select(ms => ms.TenMauSac).ToList();
+
+                    var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
+                    var kichCoTenList = kichCoList.Select(kc => kc.TenKichCo).ToList();
+
+                    var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
+
+                    sanPhamChiTiets.Add(new HoaDonChiTietViewModel.SanPhamChiTietViewModel
+                    {
+                        IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
+                        Quantity = hoaDonChiTiet.SoLuong,
+                        Price = sanPhamCT.Gia,
+                        ProductName = sanPham.TenSanPham,
+                        MauSac = mauSacTenList,
+                        KichCo = kichCoTenList,
+                        HinhAnhs = hinhAnhs,
+                        IdHoaDonChiTiet = hoaDonChiTiet.IdHoaDonChiTiet
+                        
+                    });
+                }
+            }
+            double tongTienHang = 0; 
+
+            foreach (var hoaDonChiTiet in hoaDonChiTietList)
+            {
+                var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
+                if (sanPhamCT != null)
+                {
+                    double thanhTien = hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia; 
+                    tongTienHang += thanhTien;
+                }
+            }
+            var viewModel = new HoaDonChiTietViewModel
+            {
+
+                DonGia = tongTienHang,
+                GiamGia = hoaDon.TienGiam,
+                TongTien = tongTienHang,
+
+                HoaDon = new HoaDonViewModel
+                {
+                    IdHoaDon = hoaDon.IdHoaDon,
+                    MaDon = hoaDon.MaDon,
+                    //KhachHang = khachhang.HoTen,
+                    TrangThai = hoaDon.TrangThai,
+                    SoDienThoaiNguoiNhan = hoaDon.SoDienThoaiNguoiNhan,
+                    LoaiHoaDon = hoaDon.LoaiHoaDon,
+                    DiaChiGiaoHang = hoaDon.DiaChiGiaoHang
+                },
+                SanPhamChiTiets = sanPhamChiTiets 
+            };
+
+            return View(viewModel);
+        }
+
+        public async Task<ActionResult> GetSanPhamChiTietList(Guid idHoaDon)
+        {
+            try
+            {
+                var sanPhamChiTietList = await _sanPhamCTService.GetSanPhamChiTiets();
+                var sanPhamChiTietViewModels = new List<SanPhamChiTietViewModel>();
+
+                foreach (var sanPhamCT in sanPhamChiTietList)
+                {
+                    var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(sanPhamCT.IdSanPhamChiTiet);
+
+                    var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
+                    var mauSacTenList = mauSacList.Select(ms => ms.TenMauSac).ToList();
+
+                    var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
+                    var kichCoTenList = kichCoList.Select(kc => kc.TenKichCo).ToList();
+
+                    var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
+
+                    sanPhamChiTietViewModels.Add(new SanPhamChiTietViewModel
+                    {
+                        IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
+                        Quantity = sanPhamCT.SoLuong,
+                        Price = sanPhamCT.Gia,
+                        ProductName = sanPham?.TenSanPham,
+                        MauSac = mauSacTenList,
+                        KichCo = kichCoTenList,
+                        HinhAnhs = hinhAnhs
+                    });
+                }
+
+                var result = (SanPhamChiTiets: sanPhamChiTietViewModels, IdHoaDon: idHoaDon);
+
+                return PartialView("~/Areas/Admin/Views/BanHangTQ/ListSanPhamChiTiet.cshtml", result);
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine($"Error in GetSanPhamChiTietList: {ex.Message}");
+                return StatusCode(500, new { message = "Đã xảy ra lỗi khi lấy danh sách sản phẩm chi tiết." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateSanPhamChiTiet(Guid IdSanPhamChiTiet, Guid IdHoaDon)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var sanPhamChiTiet = await _sanPhamCTService.GetSanPhamChiTietById(IdSanPhamChiTiet);
+                if (sanPhamChiTiet == null)
+                {
+                    return Json(new { success = false, message = "Sản phẩm không tồn tại." });
+                }
+
+                int requestedQuantity = 1;
+                if (requestedQuantity <= 0)
+                {
+                    return Json(new { success = false, message = "Số lượng phải lớn hơn 0." });
+                }
+
+                if (requestedQuantity > sanPhamChiTiet.SoLuong)
+                {
+                    return Json(new { success = false, message = "Số lượng yêu cầu vượt quá số lượng có sẵn." });
+                }
+
+                var hoaDonChiTiet = new HoaDonChiTiet
+                {
+                    IdHoaDonChiTiet = Guid.NewGuid(),
+                    IdHoaDon = IdHoaDon,
+                    IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+                    DonGia = sanPhamChiTiet.Gia,
+                    SoLuong = requestedQuantity,
+                    TongTien = sanPhamChiTiet.Gia * requestedQuantity,
+                    KichHoat = 1
+                };
+
+                await _hoaDonChiTietService.AddAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
+
+                sanPhamChiTiet.SoLuong -= requestedQuantity;
+
+                await _sanPhamCTService.Update(sanPhamChiTiet);
+
+                var updatedProductList = await GetSanPhamChiTietList(IdHoaDon);
+                return Json(new { success = true, message = "Thêm sản phẩm thành công.", html = updatedProductList });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in CreateSanPhamChiTiet: {ex.Message}");
+                return StatusCode(500, new { message = "Đã xảy ra lỗi khi thêm sản phẩm vào hóa đơn." });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> UpdateInvoiceDetails([FromBody] HoaDonChiTietViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors);
+                return Json(new { success = false, errors });
+            }
+
+            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(model.IdHoaDon);
+            if (hoaDonChiTietList == null || !hoaDonChiTietList.Any())
+            {
+                return Json(new { success = false, message = "Hóa đơn không tồn tại." });
+            }
+
+            foreach (var item in hoaDonChiTietList)
+            {
+                var updatedItem = model.SanPhamChiTiets.FirstOrDefault(x => x.IdSanPhamChiTiet == item.IdSanPhamChiTiet);
+                if (updatedItem != null)
+                {
+                    var originalQuantity = item.SoLuong; 
+
+                    item.SoLuong = updatedItem.Quantity;
+
+                    var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
+                    if (sanPhamCT == null)
+                    {
+                        return Json(new { success = false, message = "Chi tiết sản phẩm không tồn tại." });
+                    }
+
+                    double quantityChange = item.SoLuong - originalQuantity;
+                    double availableStock = sanPhamCT.SoLuong + originalQuantity;
+
+                    if (quantityChange > 0) 
+                    {
+                        if (item.SoLuong > availableStock)
+                        {
+                            return Json(new { success = false, message = "Số lượng yêu cầu vượt quá số lượng có sẵn." });
+                        }
+                        sanPhamCT.SoLuong -= quantityChange; // Deduct from stock
+                    }
+                    else if (quantityChange < 0) // Decreasing quantity
+                    {
+                        sanPhamCT.SoLuong += Math.Abs(quantityChange); // Add back to stock
+                    }
+
+                    // Calculate total amount
+                    if (sanPhamCT != null)
+                    {
+                        item.TongTien = item.SoLuong * sanPhamCT.Gia;
+                    }
+
+                    // Update product stock
+                    await _sanPhamCTService.Update(sanPhamCT);
+                }
+            }
+
+            // Update the invoice line items
+            await _hoaDonChiTietService.UpdateAsync(hoaDonChiTietList);
+
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> XacNhanThanhToan(Guid idHoaDon)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { message = "Dữ liệu không hợp lệ." });
+            }
+
+            var NVIdString = HttpContext.Session.GetString("IdNhanVien");
+
+            if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
+            {
+                return Unauthorized(new { message = "Nhân viên không tồn tại trong phiên làm việc." });
+            }
+
+            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
+            if (hoaDonChiTietList == null)
+            {
+                return NotFound(new { message = "Không tìm thấy chi tiết hóa đơn." });
+            }
+
+            double tongTienHang = 0;
+
+            foreach (var hoaDonChiTiet in hoaDonChiTietList)
+            {
+                var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
+                if (sanPhamCT != null)
+                {
+                    double thanhTien = hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia;
+                    tongTienHang += thanhTien;
+                }
+            }
+
+            var hoaDon = await _hoaDonService.GetByIdAsync(idHoaDon);
+            if (hoaDon == null)
+            {
+                return NotFound(new { message = "Hóa đơn không tồn tại." });
+            }
+
+            if (hoaDon.IdKhachHang == null || hoaDon.IdKhachHang == Guid.Empty)
+            {
+                var newCustomer = new KhachHang
+                {
+                    IdKhachHang = Guid.NewGuid(),
+                    HoTen = "Khách Lẻ",
+                    AuthProvider = "1",
+                    NgayTao = DateTime.Now,
+                    NgayCapNhat = DateTime.Now,
+                    NguoiTao = "Nhân Viên",
+                    NguoiCapNhat = "Nhân Viên",
+                    KichHoat = 1,
+                };
+
+                try
+                {
+                    await _khachHangService.AddKhachHang(newCustomer);
+                    hoaDon.IdKhachHang = newCustomer.IdKhachHang;
+                    hoaDon.NguoiNhan = newCustomer.HoTen;
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error creating customer: {ex.Message}");
+                    return StatusCode(500, new { message = "Đã xảy ra lỗi khi tạo khách hàng." });
+                }
+            }
+
+            hoaDon.TienGiam = 0;
+            hoaDon.TongTienDonHang = tongTienHang;
+            hoaDon.TongTienHoaDon = tongTienHang;
+            hoaDon.TrangThai = "Đã Thanh Toán";
+
+            try
+            {
+                await _hoaDonService.UpdateAsync(hoaDon);
+
+                var lichSu = new LichSuHoaDon
+                {
+                    IdLichSuHoaDon = Guid.NewGuid(),
+                    ThaoTac = hoaDon.TrangThai,
+                    NgayTao = DateTime.Now,
+                    NguoiThaoTac = "Nhân Viên",
+                    TrangThai = "1",
+                    IdHoaDon = hoaDon.IdHoaDon,
+                };
+
+                await _lichSuHoaDonService.AddAsync(lichSu);
+
+                return Json(new { success = true, message = "Xác nhận thanh toán thành công." });
+            }
+            catch (Exception ex)
+            {
+                // Log detailed error information related to invoice updating
+                var errorMessage = $"Error in XacNhanThanhToan: {ex.Message}\n" +
+                                   $"Stack Trace: {ex.StackTrace}";
+
+                // Include inner exception details if present
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $"\nInner Exception: {ex.InnerException.Message}\n" +
+                                    $"Inner Stack Trace: {ex.InnerException.StackTrace}";
+                }
+
+                // Output the detailed error message to the console or a logging framework
+                Console.WriteLine(errorMessage);
+
+                return StatusCode(500, new { message = "Đã xảy ra lỗi khi xác nhận thanh toán." });
+            }
         }
     }
 }

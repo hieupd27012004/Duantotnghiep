@@ -30,9 +30,9 @@ namespace AppAPI.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(HoaDonChiTiet hoaDonChiTiet)
+        public async Task UpdateAsync(List<HoaDonChiTiet> hoaDonChiTietList)
         {
-            _context.hoaDonChiTiets.Update(hoaDonChiTiet);
+            _context.hoaDonChiTiets.UpdateRange(hoaDonChiTietList);
             await _context.SaveChangesAsync();
         }
 
@@ -51,6 +51,15 @@ namespace AppAPI.Repository
             return await _context.hoaDonChiTiets
                 .Where(h => h.IdHoaDon == idHoaDon) 
                 .ToListAsync();
+        }
+
+        public async Task<double> GetTotalQuantityBySanPhamChiTietIdAsync(Guid sanPhamChiTietId, Guid hDCTId)
+        {
+            var cartDetails = await _context.hoaDonChiTiets
+               .Where(c => c.IdHoaDonChiTiet == hDCTId && c.IdSanPhamChiTiet == sanPhamChiTietId)
+               .ToListAsync();
+
+            return cartDetails.Sum(c => c.SoLuong);
         }
     }
 }

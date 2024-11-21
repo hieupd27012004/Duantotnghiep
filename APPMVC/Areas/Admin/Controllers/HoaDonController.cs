@@ -107,7 +107,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     {
                         IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
                         Quantity = hoaDonChiTiet.SoLuong,
-                        Price = hoaDonChiTiet.TongTien,
+                        Price = sanPhamCT.Gia,
                         ProductName = sanPham.TenSanPham,
                         MauSac = mauSacTenList,
                         KichCo = kichCoTenList,
@@ -165,7 +165,7 @@ namespace APPMVC.Areas.Admin.Controllers
                         IdHoaDon = viewModel.IdHoaDon
                     };
 
-                    await _hoaDonChiTietService.UpdateAsync(hoaDonChiTiet);
+                    //await _hoaDonChiTietService.UpdateAsync(hoaDonChiTiet);
                     TempData["Success"] = "Cập nhật thành công!";
                     return RedirectToAction(nameof(Index));
                 }

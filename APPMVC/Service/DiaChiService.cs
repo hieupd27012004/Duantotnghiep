@@ -36,7 +36,7 @@ namespace APPMVC.Service
 			return await _httpClient.GetFromJsonAsync<List<DiaChi>>("/api/DiaChi/GetAll");
 		}
 
-		public async Task<List<DiaChi>> GetAllAsync(Guid idKhachHang)
+		public async Task<List<DiaChi>> GetAllAsync(Guid? idKhachHang)
 		{
 			var response = await _httpClient.GetAsync($"/api/DiaChi/GetByIdKh?idKhacHang={idKhachHang}");
 			response.EnsureSuccessStatusCode();

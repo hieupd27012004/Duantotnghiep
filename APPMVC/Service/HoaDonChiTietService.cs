@@ -1,5 +1,6 @@
 ﻿using AppData.Model;
 using APPMVC.IService;
+using System.Net;
 
 namespace APPMVC.Service
 {
@@ -47,15 +48,35 @@ namespace APPMVC.Service
         public async Task<List<HoaDonChiTiet>> GetByIdHoaDonAsync(Guid idHoaDon)
         {
             var response = await _httpClient.GetAsync($"api/HoaDonChiTiet/getbyidhd?idhoadon={idHoaDon}");
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    // Xử lý trường hợp không tìm thấy
+                    return new List<HoaDonChiTiet>(); // Trả về danh sách rỗng
+                }
+                response.EnsureSuccessStatusCode(); // Ném ngoại lệ cho các lỗi khác
+            }
             return await response.Content.ReadFromJsonAsync<List<HoaDonChiTiet>>();
         }
 
         // Cập nhật chi tiết hóa đơn
-        public async Task UpdateAsync(HoaDonChiTiet hoaDonChiTiet)
+        public async Task UpdateAsync(List<HoaDonChiTiet> hoaDonChiTietList)
         {
-            var response = await _httpClient.PutAsJsonAsync("api/HoaDonChiTiet/sua", hoaDonChiTiet);
+            var response = await _httpClient.PutAsJsonAsync("api/HoaDonChiTiet/sua", hoaDonChiTietList);
             response.EnsureSuccessStatusCode();
+        }
+
+        public async Task<double> GetTotalQuantityBySanPhamChiTietIdAsync(Guid sanPhamChiTietId, Guid hDCTId)
+        {
+            var response = await _httpClient.GetAsync($"api/HoaDonChiTiet/gettotalquantity?sanPhamChiTietId={sanPhamChiTietId}&cartId={hDCTId}");
+
+            // Ensure the response is successful
+            response.EnsureSuccessStatusCode();
+
+            // Read the total quantity from the response
+            var totalQuantity = await response.Content.ReadFromJsonAsync<double>();
+            return totalQuantity;
         }
     }
 }

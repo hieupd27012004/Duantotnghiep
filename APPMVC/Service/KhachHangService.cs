@@ -56,7 +56,7 @@ namespace APPMVC.Service
         {
             await _httpClient.PutAsJsonAsync("api/KhachHang/SuaChoKhachHang", kh);
         }
-        public async Task<bool> ChangePassword(Guid id, string newPassword, string confirmPassword)
+        public async Task<bool> ChangePassword(Guid? id, string newPassword, string confirmPassword)
         {
             var response = await _httpClient.PostAsync($"api/KhachHang/DoiMK?id={id}&newPassword={newPassword}&confirmPassword={confirmPassword}", new StringContent(JsonConvert.SerializeObject(new { newPassword }), Encoding.UTF8, "application/json"));
             return response.IsSuccessStatusCode;

@@ -75,8 +75,21 @@ namespace APPMVC.Service
 
         public async Task UpdateAsync(HoaDon hoaDon)
         {
+            // Log the HoaDon object being updated
+            Console.WriteLine(JsonConvert.SerializeObject(hoaDon));
+
+            // Send the PUT request to update the invoice
             var response = await _httpClient.PutAsJsonAsync("api/HoaDon/sua", hoaDon);
-            response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                // Log the error details for debugging
+                Console.WriteLine($"Error updating HoaDon: Status Code: {response.StatusCode}, Response: {content}");
+
+                // Throw an exception with detailed information
+                throw new Exception($"Failed to update HoaDon. Status code: {response.StatusCode}, Response: {content}");
+            }
         }
     }
 }

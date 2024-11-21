@@ -69,17 +69,15 @@ namespace APPMVC.Areas.Client.Controllers
 
                         if (hinhAnhs.Any())
                         {
-                            // Set the first image as the representative image
                             if (representativeImage.Length == 0)
                             {
                                 representativeImage = hinhAnhs.First().DataHinhAnh;
                             }
 
-                            // Add color images
                             colorImages.Add(new RepresentativeImageViewModel
                             {
                                 MauSacTen = mauSac.TenMauSac,
-                                AnhDaiDien = hinhAnhs.First().DataHinhAnh // Assuming you want the first image for each color
+                                AnhDaiDien = hinhAnhs.First().DataHinhAnh 
                             });
                         }
                     }
@@ -236,7 +234,6 @@ namespace APPMVC.Areas.Client.Controllers
                     return Json(new { success = false, message = "Insufficient quantity available." });
                 }
 
-                // Create the cart detail item
                 var gioHangChiTiet = new GioHangChiTiet
                 {
                     IdGioHangChiTiet = Guid.NewGuid(),

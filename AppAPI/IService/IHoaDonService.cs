@@ -7,7 +7,7 @@ namespace AppAPI.IService
         Task<List<HoaDon>> GetAllAsync(); 
         Task<HoaDon> GetByIdAsync(Guid id);
         Task AddAsync(HoaDon hoaDon);
-        Task UpdateAsync(HoaDon hoaDon);
+        Task<bool> UpdateAsync(HoaDon hoaDon);
         Task DeleteAsync(Guid id);
 
         Task<HoaDon> GetByOrderNumberAsync(string orderNumber);

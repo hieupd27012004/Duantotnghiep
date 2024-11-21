@@ -28,9 +28,9 @@ namespace AppAPI.Service
             await _hoaDonChiTietRepository.AddAsync(hoaDonChiTietList);
         }
 
-        public async Task UpdateAsync(HoaDonChiTiet hoaDonChiTiet)
+        public async Task UpdateAsync(List<HoaDonChiTiet> hoaDonChiTietList)
         {
-            await _hoaDonChiTietRepository.UpdateAsync(hoaDonChiTiet);
+            await _hoaDonChiTietRepository.UpdateAsync(hoaDonChiTietList);
         }
 
         public async Task DeleteAsync(Guid id)
@@ -41,6 +41,11 @@ namespace AppAPI.Service
         public async Task<List<HoaDonChiTiet>> GetByIdHoaDonAsync(Guid idHoaDon)
         {
             return await _hoaDonChiTietRepository.GetByIdHoaDonAsync(idHoaDon);
+        }
+        public async Task<double> GetTotalQuantityBySanPhamChiTietIdAsync(Guid sanPhamChiTietId, Guid hDCTId)
+        {
+            var totalQuantity = await _hoaDonChiTietRepository.GetTotalQuantityBySanPhamChiTietIdAsync(sanPhamChiTietId, hDCTId);
+            return totalQuantity;
         }
     }
 }

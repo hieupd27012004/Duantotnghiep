@@ -9,7 +9,7 @@ namespace AppData.Model
 {
 	public class KhachHang
 	{
-		public Guid IdKhachHang { get; set; }
+		public Guid? IdKhachHang { get; set; }
 		//[Required(ErrorMessage = "Không Được Để Trống")]
 		public string? HoTen { get; set; }
 		//[Required(ErrorMessage = "Không Được Để Trống")]

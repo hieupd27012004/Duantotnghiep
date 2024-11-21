@@ -38,18 +38,77 @@ namespace AppAPI.Repository
             }
             catch (DbUpdateException ex)
             {
-                // Log the detailed error
                 var innerException = ex.InnerException?.Message ?? "No inner exception";
                 throw new Exception($"An error occurred while adding the HoaDon: {innerException}", ex);
             }
         }
 
-        public async Task UpdateAsync(HoaDon hoaDon)
+        public async Task<bool> UpdateAsync(HoaDon hoaDon)
         {
-            _context.hoaDons.Update(hoaDon);
-            await _context.SaveChangesAsync();
-        }
+            if (hoaDon == null || hoaDon.IdHoaDon == Guid.Empty)
+            {
+                throw new ArgumentException("Invalid HoaDon data.");
+            }
 
+            try
+            {
+                var khachHangExists = await _context.khachHangs.AnyAsync(kh => kh.IdKhachHang == hoaDon.IdKhachHang);
+
+                if (!khachHangExists)
+                {
+                    var newKhachHang = new KhachHang
+                    {
+                        IdKhachHang = hoaDon.IdKhachHang,
+                    };
+                    _context.khachHangs.Add(newKhachHang);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Tìm hóa đơn hiện tại
+                var existingHoaDon = await _context.hoaDons.FindAsync(hoaDon.IdHoaDon);
+
+                if (existingHoaDon != null)
+                {
+                    // Cập nhật thông tin hóa đơn
+                    existingHoaDon.MaDon = hoaDon.MaDon;
+                    existingHoaDon.NguoiNhan = hoaDon.NguoiNhan;
+                    existingHoaDon.SoDienThoaiNguoiNhan = hoaDon.SoDienThoaiNguoiNhan;
+                    existingHoaDon.DiaChiGiaoHang = hoaDon.DiaChiGiaoHang;
+                    existingHoaDon.LoaiHoaDon = hoaDon.LoaiHoaDon;
+                    existingHoaDon.GhiChu = hoaDon.GhiChu;
+                    existingHoaDon.TienShip = hoaDon.TienShip;
+                    existingHoaDon.TienGiam = hoaDon.TienGiam;
+                    existingHoaDon.TongTienDonHang = hoaDon.TongTienDonHang;
+                    existingHoaDon.TongTienHoaDon = hoaDon.TongTienHoaDon;
+                    existingHoaDon.NgayTao = hoaDon.NgayTao;
+                    existingHoaDon.NguoiTao = hoaDon.NguoiTao;
+                    existingHoaDon.KichHoat = hoaDon.KichHoat;
+                    existingHoaDon.TrangThai = hoaDon.TrangThai;
+                    existingHoaDon.IdKhachHang = hoaDon.IdKhachHang; 
+                    existingHoaDon.IdNhanVien = hoaDon.IdNhanVien;
+
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+
+                return false;
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                Console.WriteLine($"Concurrency error updating HoaDon: {ex.Message}");
+                throw new Exception("Lỗi khi cập nhật hóa đơn: Dữ liệu đã thay đổi, hãy thử lại.");
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine($"Database update error: {ex.Message}");
+                throw new Exception("Lỗi khi cập nhật hóa đơn: " + ex.InnerException?.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating HoaDon: {ex.Message}");
+                throw new Exception("Đã xảy ra lỗi khi cập nhật hóa đơn.");
+            }
+        }
         public async Task DeleteAsync(Guid id)
         {
             var hoaDon = await GetByIdAsync(id);

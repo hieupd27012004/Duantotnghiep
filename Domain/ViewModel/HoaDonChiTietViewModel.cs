@@ -23,7 +23,7 @@ namespace AppData.ViewModel
 
         public Guid IdHoaDon { get; set; }
         public List<SanPhamChiTietViewModel> SanPhamChiTiets { get; set; } = new List<SanPhamChiTietViewModel>();
-        public HoaDonViewModel HoaDon { get; set; }
+        public HoaDonViewModel? HoaDon { get; set; }
 
         public List<LichSuHoaDonViewModel> LichSuHoaDons { get; set; } = new List<LichSuHoaDonViewModel>();
             
@@ -42,15 +42,17 @@ namespace AppData.ViewModel
         public class SanPhamChiTietViewModel
         {
             public Guid IdSanPhamChiTiet { get; set; }
-            public string ProductName { get; set; }
+            public string? ProductName { get; set; }
             public double Quantity { get; set; }
             public double Price { get; set; }
             public List<HinhAnh>? HinhAnhs { get; set; }
             public List<string> MauSac { get; set; } = new List<string>();
             public List<string> KichCo { get; set; } = new List<string>();
+            public Guid IdHoaDonChiTiet { get; set; }
         }
         public class HoaDonViewModel
         {
+            public Guid IdHoaDon { get; set; }
             public string MaDon { get; set; }
             public string KhachHang { get; set; }
             public string TrangThai { get; set; }
@@ -59,5 +61,7 @@ namespace AppData.ViewModel
             public string DiaChiGiaoHang { get; set; }
 
         }
+
+     
     }
 }

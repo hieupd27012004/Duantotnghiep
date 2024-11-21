@@ -71,9 +71,10 @@
                         int count = 1;
                         foreach (var invoice in sortedInvoices)
                         {
-                            <div class="product-item">
+                            <div class="product-item" onclick="viewInvoiceDetail('@invoice.IdHoaDon')">
                                 <h6>Đơn hàng @count - @invoice.MaDon</h6>
-                                <i class="fas fa-trash delete-icon" title="Xóa" onclick="deleteInvoice(@invoice.IdHoaDon)"></i>
+                                <a hidden>@invoice.IdHoaDon</a>
+                                <i class="fas fa-trash delete-icon" title="Xóa" onclick="deleteInvoice('@invoice.IdHoaDon')"></i>
                             </div>
                             count++;
                         }
@@ -87,8 +88,12 @@
 <script>
     function deleteInvoice(id) {
         if (confirm("Bạn có chắc chắn muốn xóa đơn hàng này?")) {
-            // Simulate deletion. Implement actual deletion logic here.
-            alert(`Đơn hàng ${id} đã được xóa.`);
+            alert("Đơn hàng " + id + " đã được xóa.");
         }
-        }
+    }
+
+    function viewInvoiceDetail(idHoaDon) {
+        console.log("ID Hóa Đơn:", idHoaDon); 
+        window.location.href = '@Url.Action("Edit", "BanHangTQ", new { area = "Admin" })' + '?id=' + idHoaDon;
+    }
 </script>
