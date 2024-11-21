@@ -186,9 +186,9 @@
 
             input.addEventListener('input', function () {
                 if (parseInt(this.value) < 1) {
-                    this.value = 1; // Ensure minimum quantity is 1
+                    this.value = 1; 
                 }
-                updateTotal(); // Update total on input change
+                updateTotal(); 
                 updateCartQuantity(this);
             });
         });

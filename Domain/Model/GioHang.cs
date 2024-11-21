@@ -11,7 +11,7 @@ namespace AppData.Model
 	{
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public Guid IdGioHang { get; set; }
-		public Guid IdKhachHang { get; set; }
+		public Guid? IdKhachHang { get; set; }
 
 		public virtual KhachHang? KhachHang { get; set; }
 

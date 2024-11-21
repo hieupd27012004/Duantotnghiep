@@ -50,10 +50,8 @@ namespace APPMVC.Areas.Client.Controllers
 
             var gioHangChiTiets = await _gioHangChiTietService.GetByGioHangIdAsync(idGioHang);
 
-            // Chuyển đổi chi tiết giỏ hàng sang ViewModel
             var viewModelTasks = gioHangChiTiets.Select(async item =>
             {
-                // Lấy sản phẩm từ ID sản phẩm chi tiết
                 var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
                 var hinhanh = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(item.IdSanPhamChiTiet);
                 return new GioHangChiTietViewModel

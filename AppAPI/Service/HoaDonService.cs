@@ -28,9 +28,17 @@ namespace AppAPI.Service
             await _hoaDonRepository.AddAsync(hoaDon);
         }
 
-        public async Task UpdateAsync(HoaDon hoaDon)
+        public async Task<bool> UpdateAsync(HoaDon hoaDon)
         {
-            await _hoaDonRepository.UpdateAsync(hoaDon);
+            try
+            {
+                return await _hoaDonRepository.UpdateAsync(hoaDon);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while updating the product: {ex.Message}");
+                return false; 
+            }
         }
 
         public async Task DeleteAsync(Guid id)

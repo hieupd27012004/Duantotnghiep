@@ -5,7 +5,7 @@ namespace APPMVC.IService
 	public interface IDiaChiService
 	{
 		Task<List<DiaChi>> GetAll();
-		Task<List<DiaChi>> GetAllAsync(Guid idKhachHang);
+		Task<List<DiaChi>> GetAllAsync(Guid? idKhachHang);
 		Task<DiaChi> GetByIdAsync(Guid idDiaChi);
 		Task<bool> AddAsync(DiaChi diaChi);
 		Task<bool> UpdateAsync(Guid idDiaChi, DiaChi diaChi);

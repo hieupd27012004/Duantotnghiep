@@ -72,7 +72,7 @@ namespace AppAPI.Controllers
 
         // PUT: api/HoaDonChiTiet/sua
         [HttpPut("sua")]
-        public async Task<IActionResult> Put([FromBody] HoaDonChiTiet hoaDonChiTiet)
+        public async Task<IActionResult> Put([FromBody] List<HoaDonChiTiet> hoaDonChiTietList)
         {
             if (!ModelState.IsValid)
             {
@@ -81,8 +81,8 @@ namespace AppAPI.Controllers
 
             try
             {
-                await _service.UpdateAsync(hoaDonChiTiet);
-                return Ok(hoaDonChiTiet);
+                await _service.UpdateAsync(hoaDonChiTietList);
+                return Ok(hoaDonChiTietList);
             }
             catch (Exception ex)
             {
@@ -116,6 +116,20 @@ namespace AppAPI.Controllers
                     return NotFound($"No HoaDonChiTiet found for HoaDon ID {idhoadon}.");
                 }
                 return Ok(hoaDonChiTietList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("gettotalquantity")]
+        public async Task<IActionResult> GetTotalQuantityBySanPhamChiTietId(Guid sanPhamChiTietId, Guid hDCTId)
+        {
+            try
+            {
+                var totalQuantity = await _service.GetTotalQuantityBySanPhamChiTietIdAsync(sanPhamChiTietId, hDCTId);
+                return Ok(totalQuantity);
             }
             catch (Exception ex)
             {
