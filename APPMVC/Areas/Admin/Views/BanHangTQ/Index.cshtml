@@ -1,4 +1,4 @@
-﻿@model IEnumerable<AppData.Model.HoaDon>
+﻿@model IEnumerable<AppData.ViewModel.HoaDonChiTietViewModel>
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -66,34 +66,60 @@
                     }
                     else
                     {
-                        var sortedInvoices = Model.OrderBy(invoice => int.Parse(invoice.MaDon.Substring(2))).ToList();
+                        var sortedInvoices = Model.OrderBy(invoice => int.Parse(invoice.HoaDon.MaDon.Substring(2))).ToList();
 
                         int count = 1;
                         foreach (var invoice in sortedInvoices)
                         {
                             <div class="product-item" onclick="viewInvoiceDetail('@invoice.IdHoaDon')">
-                                <h6>Đơn hàng @count - @invoice.MaDon</h6>
+                                <h6>Đơn hàng @count - @invoice.HoaDon.MaDon</h6>
                                 <a hidden>@invoice.IdHoaDon</a>
                                 <i class="fas fa-trash delete-icon" title="Xóa" onclick="deleteInvoice('@invoice.IdHoaDon')"></i>
                             </div>
                             count++;
                         }
+
+                        // Automatically show details for the first invoice
+                        <script>
+                            $(document).ready(function() {
+                                viewInvoiceDetail('@sortedInvoices.First().IdHoaDon');
+                            });
+                        </script>
                     }
                 </div>
+
+                <!-- Invoice Details Section -->
+                <div id="invoiceDetailsContainer" class="mt-4">
+                    <!-- Nội dung chi tiết hóa đơn sẽ được tải ở đây -->
+                </div>
+
             </div>
         </div>
     </div>
 </div>
+@section Scripts {
 
 <script>
-    function deleteInvoice(id) {
-        if (confirm("Bạn có chắc chắn muốn xóa đơn hàng này?")) {
-            alert("Đơn hàng " + id + " đã được xóa.");
-        }
+    function viewInvoiceDetail(idHoaDon) {
+        $.get('@Url.Action("Edit", "BanHangTQ", new { area = "Admin" })', { id: idHoaDon })
+            .done(function(data) {
+                $('#invoiceDetailsContainer').html(data);
+                // Gọi GetSanPhamChiTietList sau khi tải chi tiết hóa đơn
+                loadSanPhamChiTiet(idHoaDon);
+            })
+            .fail(function() {
+                alert("Không thể tải chi tiết hóa đơn.");
+            });
     }
 
-    function viewInvoiceDetail(idHoaDon) {
-        console.log("ID Hóa Đơn:", idHoaDon); 
-        window.location.href = '@Url.Action("Edit", "BanHangTQ", new { area = "Admin" })' + '?id=' + idHoaDon;
+    function loadSanPhamChiTiet(idHoaDon) {
+        $.get('@Url.Action("GetSanPhamChiTietList", "BanHangTQ", new { area = "Admin" })', { idHoaDon: idHoaDon })
+            .done(function(data) {
+                $('#productDetailList').html(data);
+            })
+            .fail(function() {
+                alert("Đã xảy ra lỗi khi tải danh sách sản phẩm chi tiết.");
+            });
     }
 </script>
+}

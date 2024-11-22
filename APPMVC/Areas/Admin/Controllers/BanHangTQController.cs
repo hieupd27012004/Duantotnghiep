@@ -58,15 +58,27 @@ namespace APPMVC.Areas.Admin.Controllers
         public async Task<ActionResult> Index()
         {
             var hoaDons = await _hoaDonService.GetAllAsync();
-            if (hoaDons == null)
+
+            if (hoaDons == null || !hoaDons.Any())
             {
-                return View(new List<HoaDon>());
+                return View(new List<HoaDonChiTietViewModel>());
             }
-            var filteredOrders = hoaDons.Where(hd => hd.TrangThai == "Tạo đơn hàng").ToList();
+
+            var filteredOrders = hoaDons
+                .Where(hd => hd.TrangThai == "Tạo đơn hàng")
+                .Select(hd => new HoaDonChiTietViewModel
+                {
+                    IdHoaDon = hd.IdHoaDon,
+                    HoaDon = new HoaDonChiTietViewModel.HoaDonViewModel
+                    {
+                        MaDon = hd.MaDon
+                    }
+                })
+                .Take(5)
+                .ToList();
 
             return View(filteredOrders);
         }
-
         [HttpPost]
         public async Task<IActionResult> TaoHD()
         {
@@ -186,30 +198,23 @@ namespace APPMVC.Areas.Admin.Controllers
                 return BadRequest("ID không hợp lệ.");
             }
 
-            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(id);
-
-            if (hoaDonChiTietList == null || !hoaDonChiTietList.Any())
-            {
-                hoaDonChiTietList = new List<HoaDonChiTiet>(); 
-            }
-
             var hoaDon = await _hoaDonService.GetByIdAsync(id);
             if (hoaDon == null)
             {
                 return NotFound($"Hóa đơn với ID {id} không tồn tại.");
             }
 
-            var lichSuHoaDons = await _lichSuHoaDonService.GetByIdHoaDonAsync(id);
-            //var khachhang = await _khachHangService.GetIdKhachHang(hoaDon.IdKhachHang);
+            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(id) ?? new List<HoaDonChiTiet>();
 
             var sanPhamChiTiets = new List<HoaDonChiTietViewModel.SanPhamChiTietViewModel>();
+
             foreach (var hoaDonChiTiet in hoaDonChiTietList)
             {
                 var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
-                var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(hoaDonChiTiet.IdSanPhamChiTiet);
-
                 if (sanPhamCT != null)
                 {
+                    var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(hoaDonChiTiet.IdSanPhamChiTiet);
+
                     var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
                     var mauSacTenList = mauSacList.Select(ms => ms.TenMauSac).ToList();
 
@@ -223,38 +228,26 @@ namespace APPMVC.Areas.Admin.Controllers
                         IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
                         Quantity = hoaDonChiTiet.SoLuong,
                         Price = sanPhamCT.Gia,
-                        ProductName = sanPham.TenSanPham,
+                        ProductName = sanPham?.TenSanPham,
                         MauSac = mauSacTenList,
                         KichCo = kichCoTenList,
                         HinhAnhs = hinhAnhs,
                         IdHoaDonChiTiet = hoaDonChiTiet.IdHoaDonChiTiet
-                        
                     });
                 }
             }
-            double tongTienHang = 0; 
 
-            foreach (var hoaDonChiTiet in hoaDonChiTietList)
-            {
-                var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
-                if (sanPhamCT != null)
-                {
-                    double thanhTien = hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia; 
-                    tongTienHang += thanhTien;
-                }
-            }
+            double tongTienHang = hoaDonChiTietList.Sum(hoaDonChiTiet => hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia);
+
             var viewModel = new HoaDonChiTietViewModel
             {
-
                 DonGia = tongTienHang,
                 GiamGia = hoaDon.TienGiam,
                 TongTien = tongTienHang,
-
-                HoaDon = new HoaDonViewModel
+                HoaDon = new HoaDonChiTietViewModel.HoaDonViewModel
                 {
                     IdHoaDon = hoaDon.IdHoaDon,
                     MaDon = hoaDon.MaDon,
-                    //KhachHang = khachhang.HoTen,
                     TrangThai = hoaDon.TrangThai,
                     SoDienThoaiNguoiNhan = hoaDon.SoDienThoaiNguoiNhan,
                     LoaiHoaDon = hoaDon.LoaiHoaDon,
@@ -263,7 +256,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 SanPhamChiTiets = sanPhamChiTiets 
             };
 
-            return View(viewModel);
+            return PartialView("Edit", viewModel);
         }
 
         public async Task<ActionResult> GetSanPhamChiTietList(Guid idHoaDon)
@@ -271,40 +264,41 @@ namespace APPMVC.Areas.Admin.Controllers
             try
             {
                 var sanPhamChiTietList = await _sanPhamCTService.GetSanPhamChiTiets();
+
                 var sanPhamChiTietViewModels = new List<SanPhamChiTietViewModel>();
-
-                foreach (var sanPhamCT in sanPhamChiTietList)
+                if (sanPhamChiTietList != null && sanPhamChiTietList.Any())
                 {
-                    var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(sanPhamCT.IdSanPhamChiTiet);
-
-                    var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
-                    var mauSacTenList = mauSacList.Select(ms => ms.TenMauSac).ToList();
-
-                    var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
-                    var kichCoTenList = kichCoList.Select(kc => kc.TenKichCo).ToList();
-
-                    var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
-
-                    sanPhamChiTietViewModels.Add(new SanPhamChiTietViewModel
+                    var tasks = sanPhamChiTietList.Select(async sanPhamCT =>
                     {
-                        IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
-                        Quantity = sanPhamCT.SoLuong,
-                        Price = sanPhamCT.Gia,
-                        ProductName = sanPham?.TenSanPham,
-                        MauSac = mauSacTenList,
-                        KichCo = kichCoTenList,
-                        HinhAnhs = hinhAnhs
+                        var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(sanPhamCT.IdSanPhamChiTiet);
+                        var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
+                        var mauSacTenList = mauSacList.Select(ms => ms.TenMauSac).ToList();
+
+                        var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
+                        var kichCoTenList = kichCoList.Select(kc => kc.TenKichCo).ToList();
+
+                        var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
+
+                        sanPhamChiTietViewModels.Add(new SanPhamChiTietViewModel
+                        {
+                            IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
+                            Quantity = sanPhamCT.SoLuong,
+                            Price = sanPhamCT.Gia,
+                            ProductName = sanPham?.TenSanPham,
+                            MauSac = mauSacTenList,
+                            KichCo = kichCoTenList,
+                            HinhAnhs = hinhAnhs
+                        });
                     });
+
+                    await Task.WhenAll(tasks);
                 }
 
-                var result = (SanPhamChiTiets: sanPhamChiTietViewModels, IdHoaDon: idHoaDon);
-
-                return PartialView("~/Areas/Admin/Views/BanHangTQ/ListSanPhamChiTiet.cshtml", result);
+                return PartialView("~/Areas/Admin/Views/BanHangTQ/ListSanPhamChiTiet.cshtml", (sanPhamChiTietViewModels, idHoaDon));
             }
             catch (Exception ex)
             {
-
-                Console.WriteLine($"Error in GetSanPhamChiTietList: {ex.Message}");
+                Console.WriteLine($"Error in GetSanPhamChiTietList: {ex.Message}\n{ex.StackTrace}");
                 return StatusCode(500, new { message = "Đã xảy ra lỗi khi lấy danh sách sản phẩm chi tiết." });
             }
         }
