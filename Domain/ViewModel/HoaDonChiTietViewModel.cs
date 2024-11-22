@@ -61,7 +61,9 @@ namespace AppData.ViewModel
             public string DiaChiGiaoHang { get; set; }
 
         }
+    
 
-     
+
     }
+
 }
