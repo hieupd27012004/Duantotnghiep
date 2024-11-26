@@ -20,11 +20,27 @@ namespace AppAPI.Repository
 		{
 			return await _context.diaChi.ToListAsync();
 		}
-		public async Task<List<DiaChi>> GetByIdKh(Guid idKhachHang)
-		{
-			return await _context.diaChi.Where(x => x.IdKhachHang == idKhachHang).ToListAsync();
-		}
-		public async Task<DiaChi> GetByIdAsync(Guid idDiaChi)
+        public async Task<List<DiaChi>> GetByIdKh(Guid idKhachHang)
+        {
+            if (idKhachHang == Guid.Empty)
+            {
+                throw new ArgumentException("ID khách hàng không hợp lệ.", nameof(idKhachHang));
+            }
+
+            try
+            {
+                return await _context.diaChi
+                    .Where(x => x.IdKhachHang == idKhachHang)
+                    .AsNoTracking() 
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi hoặc xử lý theo cách bạn muốn
+                throw new Exception("Có lỗi xảy ra khi lấy địa chỉ.", ex);
+            }
+        }
+        public async Task<DiaChi> GetByIdAsync(Guid idDiaChi)
 		{
 			var Getdc = _context.diaChi.Find(idDiaChi);
 			return Getdc;
@@ -137,5 +153,14 @@ namespace AppAPI.Repository
 			Console.WriteLine($"API: {result.Count} địa chỉ mặc định tìm thấy.");
 			return result.Any();
 		}
-	}
+
+        public async Task<DiaChi> GetDefaultAddressByCustomerIdAsync(Guid customerId)
+        {
+            var diaChi = await _context.diaChi
+            .Where(d => d.IdKhachHang == customerId && d.DiaChiMacDinh)
+            .FirstOrDefaultAsync();
+
+            return diaChi;
+        }
+    }
 }

@@ -66,8 +66,9 @@ builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCo
 builder.Services.AddTransient<IVoucherService, VoucherService>();
 builder.Services.AddTransient<ILichSuHoaDonService, LichSuHoaDonService>();
 builder.Services.AddTransient<ICardService, CardService>();
-
-
+builder.Services.AddTransient<ILichSuThanhToanService, LichSuThanhToanService>();
+builder.Services.AddTransient<GiaoHangNhanhService>(provider =>
+    new GiaoHangNhanhService("bcf656fe-256b-11ef-9e93-f2508e67c133", "5120262"));
 var app = builder.Build();
 
 
@@ -83,7 +84,6 @@ app.UseSession();
 
 app.UseHttpsRedirection();
 
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

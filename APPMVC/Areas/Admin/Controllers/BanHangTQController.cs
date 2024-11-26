@@ -356,28 +356,30 @@ namespace APPMVC.Areas.Admin.Controllers
                 return StatusCode(500, new { message = "Đã xảy ra lỗi khi thêm sản phẩm vào hóa đơn." });
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> UpdateInvoiceDetails([FromBody] HoaDonChiTietViewModel model)
         {
+            if (model == null || model.IdHoaDon == Guid.Empty)
+            {
+                return Json(new { success = false, message = "Dữ liệu hóa đơn không hợp lệ." });
+            }
+
+
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors);
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
                 return Json(new { success = false, errors });
             }
 
             var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(model.IdHoaDon);
-            if (hoaDonChiTietList == null || !hoaDonChiTietList.Any())
-            {
-                return Json(new { success = false, message = "Hóa đơn không tồn tại." });
-            }
 
             foreach (var item in hoaDonChiTietList)
             {
                 var updatedItem = model.SanPhamChiTiets.FirstOrDefault(x => x.IdSanPhamChiTiet == item.IdSanPhamChiTiet);
                 if (updatedItem != null)
                 {
-                    var originalQuantity = item.SoLuong; 
-
+                    var originalQuantity = item.SoLuong;
                     item.SoLuong = updatedItem.Quantity;
 
                     var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
@@ -389,7 +391,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     double quantityChange = item.SoLuong - originalQuantity;
                     double availableStock = sanPhamCT.SoLuong + originalQuantity;
 
-                    if (quantityChange > 0) 
+                    if (quantityChange > 0)
                     {
                         if (item.SoLuong > availableStock)
                         {
@@ -403,10 +405,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     }
 
                     // Calculate total amount
-                    if (sanPhamCT != null)
-                    {
-                        item.TongTien = item.SoLuong * sanPhamCT.Gia;
-                    }
+                    item.TongTien = item.SoLuong * sanPhamCT.Gia;
 
                     // Update product stock
                     await _sanPhamCTService.Update(sanPhamCT);
@@ -489,7 +488,7 @@ namespace APPMVC.Areas.Admin.Controllers
             hoaDon.TienGiam = 0;
             hoaDon.TongTienDonHang = tongTienHang;
             hoaDon.TongTienHoaDon = tongTienHang;
-            hoaDon.TrangThai = "Đã Thanh Toán";
+            hoaDon.TrangThai = "Hoàn Thành";
 
             try
             {

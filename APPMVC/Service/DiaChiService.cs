@@ -105,5 +105,32 @@ namespace APPMVC.Service
 			var content = await response.Content.ReadAsStringAsync();
 			return bool.Parse(content);
 		}
-	}
+
+        public async Task<List<DiaChi>> GetByIdKh(Guid idKhachHang)
+        {
+            var response = await _httpClient.GetAsync($"/api/DiaChi/GetByIdKh/{idKhachHang}");
+            response.EnsureSuccessStatusCode();
+            var responseBody = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<List<DiaChi>>(responseBody, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+        }
+
+        public async Task<DiaChi> GetDefaultAddressByCustomerIdAsync(Guid customerId)
+        {
+            var response = await _httpClient.GetAsync($"/api/DiaChi/GetDefaultAddress/{customerId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<DiaChi>(responseBody, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+
+            return null; 
+        }
+    }
 }

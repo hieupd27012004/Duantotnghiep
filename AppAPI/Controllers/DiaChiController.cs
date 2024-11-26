@@ -123,5 +123,22 @@ namespace AppAPI.Controllers
 				return StatusCode(500, $"Internal server error: {ex.Message}");
 			}
 		}
-	}
+        [HttpGet("GetDefaultAddress/{customerId}")]
+        public async Task<IActionResult> GetDefaultAddress(Guid customerId)
+        {
+            try
+            {
+                var diaChi = await _service.GetDefaultAddressByCustomerIdAsync(customerId);
+                if (diaChi == null)
+                {
+                    return NotFound($"Default address for customer with ID {customerId} not found.");
+                }
+                return Ok(diaChi);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+    }
 }
