@@ -59,5 +59,9 @@ namespace AppAPI.Service
 			return _repository.HasDefaultAddressAsync(customerId);
 		}
 
-	}
+        public Task<DiaChi> GetDefaultAddressByCustomerIdAsync(Guid customerId)
+        {
+			return _repository.GetDefaultAddressByCustomerIdAsync(customerId);
+        }
+    }
 }

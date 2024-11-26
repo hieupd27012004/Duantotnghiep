@@ -14,7 +14,7 @@ namespace AppAPI.Repository
             _context = context;
         }
 
-        public async Task<List<HoaDon>> GetAllAsync()  // Đổi kiểu trả về thành List<HoaDon>
+        public async Task<List<HoaDon>> GetAllAsync()  
         {
             return await _context.hoaDons.ToListAsync();
         }

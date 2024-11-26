@@ -1,5 +1,5 @@
 ﻿@using X.PagedList.Mvc.Core
-@model X.PagedList.IPagedList<AppData.Model.HoaDon>
+@model X.PagedList.IPagedList<AppData.ViewModel.HoaDonViewModell>
 
 @{
     ViewData["Title"] = "Index";
@@ -9,7 +9,7 @@
 <style>
     .table td {
         padding: 8px;
-        margin: 0; 
+        margin: 0;
     }
 
     .table {
@@ -42,11 +42,37 @@
                         <form action="GetAll" method="get" class="d-flex align-items-center">
                             <i class="bx bx-search fs-4 lh-0"></i>
                             <input type="text" name="search" class="form-control border-1 shadow-none" placeholder="Tìm kiếm theo mã đơn..." aria-label="Search..." />
+
+                            <select name="status" class="form-control ms-2" aria-label="Trạng thái">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="Chờ Xác Nhận">Chờ Xác Nhận</option>
+                                <option value="Chờ Giao Hàng">Chờ Giao Hàng</option>
+                                <option value="Đang Vận Chuyển">Đang Vận Chuyển</option>
+                                <option value="Đã Giao Hàng">Đã Giao Hàng</option>
+                                <option value="Hoàn Thành">Hoàn Thành</option>
+                                <option value="Đã Hủy">Đã Hủy</option>
+                            </select>
+
                             <button type="submit" title="Search" class="btn btn-success ms-2">Tìm</button>
                         </form>
                         <a asp-action="Create" class="btn btn-primary ms-2">Tạo mới</a>
                     </div>
                     <br>
+
+                    <div class="mb-3">
+                        @if (ViewBag.Statuses != null)
+                        {
+                            // "Show All" button
+                            <a href="@Url.Action("Index", new { status = "", page = Model.PageNumber })" class="btn btn-secondary ms-1">Hiển Thị Tất Cả</a>
+
+                            foreach (var status in ViewBag.Statuses)
+                            {
+                                var isActive = status == ViewBag.CurrentStatus ? "active" : "";
+                                <a href="@Url.Action("Index", new { status = status, page = Model.PageNumber })" class="btn btn-secondary ms-1 @isActive">@status</a>
+                            }
+                        }
+                    </div>
+
                     <div class="panel-body">
                         <table class="table">
                             <thead>
@@ -70,15 +96,15 @@
                                     {
                                         <tr style="border-bottom: 1px solid #dee2e6;">
                                             <td>@stt</td>
-                                            <td>@item.MaDon</td>
-                                            <td>@item.NguoiNhan</td> 
-                                            <td>@item.TongTienHoaDon.ToString("N0") </td>
-                                            <td>@item.NguoiNhan</td>
-                                            <td>@item.NgayTao.ToString("dd/MM/yyyy") </td>
-                                            <td>@item.LoaiHoaDon</td>
-                                            <td>@item.TrangThai </td>
+                                            <td>@item.HoaDon.MaDon</td> 
+                                            <td>@item.TotalQuantity</td> 
+                                            <td>@item.HoaDon.TongTienHoaDon.ToString("N0")</td>
+                                            <td>@item.HoaDon.NguoiNhan</td>
+                                            <td>@item.HoaDon.NgayTao.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                            <td>@item.HoaDon.LoaiHoaDon</td>
+                                            <td>@item.HoaDon.TrangThai</td>
                                             <td>
-                                                <a asp-action="Edit" asp-route-id="@item.IdHoaDon" title="Edit">
+                                                <a asp-action="Edit" asp-route-id="@item.HoaDon.IdHoaDon" title="Edit">
                                                     <i class="fa-solid fa-pen"></i>
                                                 </a>
                                             </td>
@@ -89,7 +115,7 @@
                                 else
                                 {
                                     <tr>
-                                        <td colspan="8">Không có dữ liệu để hiển thị.</td>
+                                        <td colspan="9">Không có dữ liệu để hiển thị.</td>
                                     </tr>
                                 }
                             </tbody>

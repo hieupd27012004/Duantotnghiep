@@ -1,7 +1,7 @@
 ﻿@model AppData.ViewModel.HoaDonChiTietViewModel
 
 @{
-    ViewData["Title"] = "Chi Tiết Hóa Đơn";
+    ViewData["Title"] = "Edit";
 }
 <style>
     .quantity-container {
@@ -231,7 +231,7 @@
     <script>
         $(document).ready(function () {
             $('#addProductModal').on('show.bs.modal', function () {
-                var idHoaDon = $(this).data('idhoadon'); // Lấy ID hóa đơn từ data attribute
+                var idHoaDon = $(this).data('idhoadon'); 
                 if (!idHoaDon) {
                     console.error("ID hóa đơn không hợp lệ.");
                     alert("Đã xảy ra lỗi, vui lòng thử lại.");
@@ -275,7 +275,6 @@
                 });
             });
 
-            // Function to update both the invoice total and product stock
             function updateInvoiceAndStock() {
                 const idHoaDon = '@Model.HoaDon.IdHoaDon';
                 const sanPhamChiTiets = [];
@@ -294,7 +293,6 @@
                     SanPhamChiTiets: sanPhamChiTiets
                 };
 
-                // Update both invoice total and product quantities in one request
                 fetch('/Admin/BanHangTQ/UpdateInvoiceDetails', {
                     method: 'POST',
                     headers: {

@@ -37,26 +37,35 @@
                 </div>
                 <div class="form-group">
                     <label for="so_dien_thoai">Số điện thoại</label>
-                    <input type="tel" class="form-control" id="so_dien_thoai" name="SoDienThoaiNguoiNhan" value="@Model.SoDienThoaiNguoiNhan" required />
+                    <input type="tel" class="form-control" id="so_dien_thoai" name="SoDienThoaiNguoiNhan" value="@Model.SoDienThoai" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="province">Tỉnh/Thành phố</label>
+                    <input type="text" class="form-control" id="province" name="ProvinceName" value="@Model.ProvinceName" readonly />
                 </div>
                 <div class="form-group">
-                    <label for="Dia_chi_cu_the">Địa chỉ cụ thể</label>
-                    <textarea class="form-control" id="Dia_chi_cu_the" name="DiaChiGiaoHang" rows="3" required>@Model.DiaChiGiaoHang</textarea>
+                    <label for="district">Quận/Huyện</label>
+                    <input type="text" class="form-control" id="district" name="DistrictName" value="@Model.DistrictName" readonly />
+                </div>
+                <div class="form-group">
+                    <label for="ward">Phường/Xã</label>
+                    <input type="text" class="form-control" id="ward" name="WardName" value="@Model.WardName" readonly />
                 </div>
 
                 <h4 class="my-3">Phương thức thanh toán</h4>
                 <div class="form-group">
                     <div class="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="thanh_toan_khi_nhan_hang" name="PaymentMethod" value="cash_on_delivery" class="custom-control-input" 
-                               @(Model.PaymentMethod == "cash_on_delivery" ? "checked" : "")>
+                        <input type="radio" id="thanh_toan_khi_nhan_hang" name="PaymentMethod" value="cash_on_delivery" class="custom-control-input"
+                        @(Model.PaymentMethod == "cash_on_delivery" ? "checked" : "")>
                         <label class="custom-control-label" for="thanh_toan_khi_nhan_hang">
                             <i class="fas fa-money-bill-alt"></i>
                             Thanh toán khi nhận hàng
                         </label>
                     </div>
                     <div class="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="thanh_toan_ngay" name="PaymentMethod" value="online_payment" class="custom-control-input" 
-                               @(Model.PaymentMethod == "online_payment" ? "checked" : "")>
+                        <input type="radio" id="thanh_toan_ngay" name="PaymentMethod" value="online_payment" class="custom-control-input"
+                        @(Model.PaymentMethod == "online_payment" ? "checked" : "")>
                         <label class="custom-control-label" for="thanh_toan_ngay">
                             <i class="fab fa-cc-visa"></i>
                             Thanh toán ngay
@@ -98,9 +107,24 @@
                         </table>
 
                         <div class="form-group">
-                            <label for="tong_so_tien">Tổng số tiền</label>
-                            <input type="text" class="form-control" id="tong_so_tien"
-                                   value="@Model.CartItems.Sum(i => i.Price * i.Quantity).ToString("C")" readonly />
+
+                            <div class="form-group">
+                                <label for="tong_so_tien">Tổng số tiền</label>
+                                <input type="text" class="form-control" id="tong_so_tien"
+                                       value="@Model.CartItems.Sum(i => i.Price * i.Quantity).ToString("C")" readonly />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phi_van_chuyen">Phí vận chuyển</label>
+                                <input type="text" class="form-control" id="phi_van_chuyen"
+                                       value="@Model.PhiVanChuyen.ToString("C")" readonly />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tong_tien">Tổng tiền hóa đơn</label>
+                                <input type="text" class="form-control" id="tong_tien"
+                                       value="@(Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.PhiVanChuyen).ToString(" C")" readonly />
+                            </div>
                         </div>
                     }
                     else
