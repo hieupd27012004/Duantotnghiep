@@ -16,7 +16,7 @@ namespace AppData.ViewModel
 
         public double? GiamGia { get; set; } 
 
-        public double PhiVanChuyen { get; set; }
+        public double? PhiVanChuyen { get; set; }
         public double TongTien { get; set; }
 
         public double KichHoat { get; set; }

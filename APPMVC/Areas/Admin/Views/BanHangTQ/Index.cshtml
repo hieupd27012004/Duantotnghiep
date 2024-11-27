@@ -93,7 +93,7 @@
 @section Scripts {
     <script>
         function viewInvoiceDetail(element) {
-            const idHoaDon = $(element).data('idhoadon'); // Get IdHoaDon from the clicked element
+            const idHoaDon = $(element).data('idhoadon'); 
             console.log("Fetching details for IdHoaDon:", idHoaDon);
             $.get('@Url.Action("Edit", "BanHangTQ", new { area = "Admin" })', { id: idHoaDon })
                 .done(function(data) {
