@@ -67,8 +67,16 @@ builder.Services.AddTransient<IVoucherService, VoucherService>();
 builder.Services.AddTransient<ILichSuHoaDonService, LichSuHoaDonService>();
 builder.Services.AddTransient<ICardService, CardService>();
 builder.Services.AddTransient<ILichSuThanhToanService, LichSuThanhToanService>();
+builder.Services.AddHttpClient<GiaoHangNhanhService>(client =>
+{
+    client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+});
+
 builder.Services.AddTransient<GiaoHangNhanhService>(provider =>
-    new GiaoHangNhanhService("bcf656fe-256b-11ef-9e93-f2508e67c133", "5120262"));
+{
+    var httpClient = provider.GetRequiredService<HttpClient>();
+    return new GiaoHangNhanhService(httpClient, "bcf656fe-256b-11ef-9e93-f2508e67c133", "5120262");
+});
 var app = builder.Build();
 
 
