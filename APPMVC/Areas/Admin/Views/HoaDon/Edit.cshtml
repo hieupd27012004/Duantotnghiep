@@ -154,38 +154,40 @@
         <h4 class="fw-bold py-3 mb-4">
             <span class="text-muted fw-light">Quản lý sản phẩm /</span> Chi Tiết Hóa Đơn
         </h4>
+
         <div class="row">
             <div class="col-md-12">
                 <h4>Lịch sử đơn hàng</h4>
                 <div class="timeline">
                     @if (Model.LichSuHoaDons != null && Model.LichSuHoaDons.Any())
                     {
-                        foreach (var item in Model.LichSuHoaDons)
+                        var sortedItems = Model.LichSuHoaDons.OrderBy(item => item.NgayTao);
+                        foreach (var item in sortedItems)
                         {
                             <div class="timeline-item">
                                 <div class="timeline-icon">
                                     @switch (item.ThaoTac)
                                     {
                                         case "Đã Hủy":
-                                            <img src="https://i.imgur.com/9nnc9Et.png" alt="Đã Hủy">
+                                            <i class="fas fa-times-circle" style="color: red;" title="Đã Hủy"></i>
                                             break;
                                         case "Chờ Xác Nhận":
-                                            <img src="https://i.imgur.com/9nnc9Et.png" alt="Chờ xác nhận">
+                                            <i class="fas fa-clock" style="color: orange;" title="Chờ xác nhận"></i>
                                             break;
                                         case "Chờ Giao Hàng":
-                                            <img src="https://i.imgur.com/YDG6lJV.png" alt="Chờ giao hàng">
+                                            <i class="fas fa-hourglass-half" style="color: yellow;" title="Chờ giao hàng"></i>
                                             break;
-                                        case "Đang vận chuyển":
-                                            <img src="https://i.imgur.com/u6RFPvl.png" alt="Đang vận chuyển">
+                                        case "Đang Vận Chuyển":
+                                            <i class="fas fa-truck" style="color: blue;" title="Đang vận chuyển"></i>
                                             break;
-                                        case "Đã giao hàng":
-                                            <img src="https://i.imgur.com/QiJCfpD.png" alt="Đã giao hàng">
+                                        case "Đã Giao Hàng":
+                                            <i class="fas fa-check-circle" style="color: green;" title="Đã giao hàng"></i>
                                             break;
-                                        case "Hoàn thành":
-                                            <img src="https://i.imgur.com/c8R1A8R.png" alt="Hoàn thành">
+                                        case "Hoàn Thành":
+                                            <i class="fas fa-thumbs-up" style="color: green;" title="Hoàn thành"></i>
                                             break;
                                         default:
-                                            <img src="https://i.imgur.com/9nnc9Et.png" alt="Chờ xác nhận">
+                                            <i class="fas fa-question-circle" style="color: gray;" title="Trạng thái không xác định"></i>
                                             break;
                                     }
                                 </div>
@@ -201,112 +203,150 @@
                         <div>No history available.</div>
                     }
                 </div>
-                <form asp-action="UpdateStatus" asp-route-id="@Model.IdHoaDon" method="post">
-                    <div class="form-group">
-                        <label for="newStatus">Chọn Trạng Thái Mới:</label>
-                        <select id="newStatus" name="newStatus" class="form-control">
-                            <option value="Pending">Chờ Xử Lý</option>
-                            <option value="Processing">Đang Xử Lý</option>
-                            <option value="Completed">Hoàn Thành</option>
-                            <option value="Cancelled">Đã Hủy</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Cập Nhật Trạng Thái</button>
+
+                <form asp-action="UpdateInvoiceStatus" asp-route-id="@Model.HoaDon.IdHoaDon" method="post">
+                    @if (Model.HoaDon.TrangThai == "Chờ Giao Hàng")
+                    {
+                        <button type="submit" class="btn btn-warning">Xác Nhận Giao Hàng</button>
+                    }
+                    else if (Model.HoaDon.TrangThai == "Đang Vận Chuyển")
+                    {
+                        <button type="submit" class="btn btn-success">Đánh Dấu Đã Giao Hàng</button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-primary">Cập Nhật Trạng Thái Giao Hàng</button>
+                    }
                 </form>
-                <h4>Thông tin Đơn Hàng</h4>
-                <div class="details-card">
-                    <strong>Mã Đơn:</strong> @Model.HoaDon?.MaDon<br />
-                    <strong>Khách Hàng:</strong> @Model.HoaDon?.KhachHang <br />
-                    <strong>Trạng Thái:</strong> @Model.HoaDon?.TrangThai <br />
-                    <strong>Số Điện Thoại:</strong> @Model.HoaDon?.SoDienThoaiNguoiNhan <br />
-                    <strong>Loại Hóa Đơn:</strong> @Model.HoaDon?.LoaiHoaDon<br />
-                    <strong>Địa Chỉ Giao Hàng:</strong> @Model.HoaDon?.DiaChiGiaoHang <br />
-                </div>
-
-                <h4>Danh Sách Sản Phẩm</h4>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Tên Sản Phẩm</th>
-                            <th>Số Lượng</th>
-                            <th>Giá</th>
-                            <th>Hình Ảnh</th>
-                            <th>Màu Sắc</th>
-                            <th>Kích Cỡ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.SanPhamChiTiets != null && Model.SanPhamChiTiets.Any())
-                        {
-                            foreach (var sanPham in Model.SanPhamChiTiets)
-                            {
-                                <tr>
-                                    <td>@sanPham.ProductName</td>
-                                    <td>@sanPham.Quantity</td>
-                                    <td>@sanPham.Price.ToString("N0")</td>
-                                    <td>
-                                        @if (sanPham.HinhAnhs != null && sanPham.HinhAnhs.Any())
-                                        {
-                                            var hinhAnh = sanPham.HinhAnhs.First();
-                                            var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
-                                            var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
-                                            <img src="@imageUrl" alt="Hình ảnh sản phẩm" style="width: 50px; height: auto;" />
-                                        }
-                                        else
-                                        {
-                                            <span>Không có hình ảnh</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (sanPham.MauSac != null && sanPham.MauSac.Any())
-                                        {
-                                            @string.Join(", ", sanPham.MauSac)
-                                        }
-                                        else
-                                        {
-                                            <span>Không có màu sắc</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (sanPham.KichCo != null && sanPham.KichCo.Any())
-                                        {
-                                            @string.Join(", ", sanPham.KichCo)
-                                        }
-                                        else
-                                        {
-                                            <span>Không có kích cỡ</span>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="6">Không có sản phẩm nào.</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-                <div class="details-card">
-                    <hr />
-                    <dl class="row">
-                        <dt class="col-sm-2">Tổng Tiền Hàng</dt>
-                        <dd class="col-sm-10">@Model.DonGia.ToString("N0")</dd>
-
-                        <dt class="col-sm-2">Giảm Giá</dt>
-                        <dd class="col-sm-10">@Model.GiamGia</dd>
-
-                        <dt class="col-sm-2">Phí Vận Chuyển</dt>
-                        <dd class="col-sm-10">@Model.PhiVanChuyen.ToString("N0")</dd>
-
-                        <dt class="col-sm-2">Tổng Tiền</dt>
-                        <dd class="col-sm-10">@Model.TongTien.ToString("N0")</dd>
-                    </dl>
-                </div>
-
-                <a asp-action="Index" class="btn btn-primary">Quay lại danh sách</a>
             </div>
         </div>
+
+        <h4>Thông tin Đơn Hàng</h4>
+        <div class="details-card">
+            <strong>Mã Đơn:</strong> @Model.HoaDon?.MaDon<br />
+            <strong>Khách Hàng:</strong> @Model.HoaDon?.KhachHang <br />
+            <strong>Trạng Thái:</strong> @Model.HoaDon?.TrangThai <br />
+            <strong>Số Điện Thoại:</strong> @Model.HoaDon?.SoDienThoaiNguoiNhan <br />
+            <strong>Loại Hóa Đơn:</strong> @Model.HoaDon?.LoaiHoaDon<br />
+            <strong>Địa Chỉ Giao Hàng:</strong> @Model.HoaDon?.DiaChiGiaoHang <br />
+        </div>
+
+        <h4>Lịch sử thanh toán</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ngày</th>
+                    <th>Số Tiền</th>
+                    <th>Loại Giao Dịch</th>
+                    <th>Hình Thức Thanh Toán</th>
+                    <th>Trạng Thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.LichSuThanhToans != null && Model.LichSuThanhToans.Any())
+                {
+                    foreach (var payment in Model.LichSuThanhToans)
+                    {
+                        <tr>
+                            <td>@payment.NgayThanhToan.ToString("dd-MM-yyyy HH:mm:ss")</td>
+                            <td>@payment.SoTien.ToString("N0")</td>
+                            <td>@payment.LoaiGiaoDich</td>
+                            <td>@payment.HinhThucThanhToan</td>
+                            <td>@payment.TrangThai</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4">Không có lịch sử thanh toán nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <h4>Danh Sách Sản Phẩm</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Tên Sản Phẩm</th>
+                    <th>Số Lượng</th>
+                    <th>Giá</th>
+                    <th>Hình Ảnh</th>
+                    <th>Màu Sắc</th>
+                    <th>Kích Cỡ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.SanPhamChiTiets != null && Model.SanPhamChiTiets.Any())
+                {
+                    foreach (var sanPham in Model.SanPhamChiTiets)
+                    {
+                        <tr>
+                            <td>@sanPham.ProductName</td>
+                            <td>@sanPham.Quantity</td>
+                            <td>@sanPham.Price.ToString("N0")</td>
+                            <td>
+                                @if (sanPham.HinhAnhs != null && sanPham.HinhAnhs.Any())
+                                {
+                                    var hinhAnh = sanPham.HinhAnhs.First();
+                                    var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
+                                    var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
+                                    <img src="@imageUrl" alt="Hình ảnh sản phẩm" style="width: 50px; height: auto;" />
+                                }
+                                else
+                                {
+                                    <span>Không có hình ảnh</span>
+                                }
+                            </td>
+                            <td>
+                                @if (sanPham.MauSac != null && sanPham.MauSac.Any())
+                                {
+                                    @string.Join(", ", sanPham.MauSac)
+                                }
+                                else
+                                {
+                                    <span>Không có màu sắc</span>
+                                }
+                            </td>
+                            <td>
+                                @if (sanPham.KichCo != null && sanPham.KichCo.Any())
+                                {
+                                    @string.Join(", ", sanPham.KichCo)
+                                }
+                                else
+                                {
+                                    <span>Không có kích cỡ</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6">Không có sản phẩm nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="details-card">
+            <hr />
+            <dl class="row">
+                <dt class="col-sm-2">Tổng Tiền Hàng</dt>
+                <dd class="col-sm-10">@Model.DonGia.ToString("N0")</dd>
+
+                <dt class="col-sm-2">Giảm Giá</dt>
+                <dd class="col-sm-10">@Model.GiamGia</dd>
+
+                <dt class="col-sm-2">Phí Vận Chuyển</dt>
+                <dd class="col-sm-10">@Model.PhiVanChuyen</dd>
+
+                <dt class="col-sm-2">Tổng Tiền</dt>
+                <dd class="col-sm-10">@Model.TongTien.ToString("N0")</dd>
+            </dl>
+        </div>
+
+        <a asp-action="Index" class="btn btn-primary">Quay lại danh sách</a>
     </div>
 </div>

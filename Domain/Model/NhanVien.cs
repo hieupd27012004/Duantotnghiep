@@ -40,6 +40,7 @@ namespace AppData.Model
 
 		public ICollection<HoaDon>? HoaDons { get; set; }
 
+        public ICollection<LichSuThanhToan>? lichSuThanhToans { get; set; }
         public ICollection<LichSuHoaDon>? LichSuHoaDons { get; set; }
     }
 }

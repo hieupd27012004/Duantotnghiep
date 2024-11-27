@@ -102,7 +102,8 @@ builder.Services.AddTransient<ILichSuHoaDonRepo, LichSuHoaDonRepo>();
 builder.Services.AddTransient<ILichSuHoaDonService, LichSuHoaDonService>();
 builder.Services.AddTransient<ICardRepo, CardRepo>();
 builder.Services.AddTransient<ICardService, CardService>();
-// Check time for voucher application
+builder.Services.AddTransient<ILichSuThanhToanRepo, LichSuThanhToanRepo>();
+builder.Services.AddTransient<ILichSuThanhToanService, LichSuThanhToanService>();
 builder.Services.AddHostedService<VoucherStatusUpdater>();
 builder.Services.AddSignalR();
 

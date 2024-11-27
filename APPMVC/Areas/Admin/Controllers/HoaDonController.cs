@@ -1,6 +1,7 @@
 ﻿using AppData.Model;
 using AppData.ViewModel;
 using APPMVC.IService;
+using APPMVC.Service;
 using Microsoft.AspNetCore.Mvc;
 using X.PagedList;
 using static AppData.ViewModel.HoaDonChiTietViewModel;
@@ -23,6 +24,7 @@ namespace APPMVC.Areas.Admin.Controllers
         private readonly ISanPhamChiTietMauSacService _sanPhamChiTietMauSacService;
         private readonly ISanPhamChiTietKichCoService _sanPhamChiTietKichCoService;
         private readonly IHinhAnhService _hinhAnhService;
+        private readonly ILichSuThanhToanService _lichSuThanhToanService;
 
         public HoaDonController(ISanPhamChiTietService sanPhamChiTietService, 
             ISanPhamService sanPhamService, 
@@ -35,7 +37,8 @@ namespace APPMVC.Areas.Admin.Controllers
             IKichCoService kichCoService,
             ISanPhamChiTietMauSacService sanPhamChiTietMauSacService,
             ISanPhamChiTietKichCoService sanPhamChiTietKichCoService,
-            IHinhAnhService hinhAnhService)
+            IHinhAnhService hinhAnhService,
+            ILichSuThanhToanService lichSuThanhToanService)
         {
             _sanPhamCTService = sanPhamChiTietService;
             _sanPhamService = sanPhamService;
@@ -49,20 +52,53 @@ namespace APPMVC.Areas.Admin.Controllers
             _sanPhamChiTietMauSacService = sanPhamChiTietMauSacService;
             _sanPhamChiTietKichCoService = sanPhamChiTietKichCoService;
             _hinhAnhService = hinhAnhService;
+            _lichSuThanhToanService = lichSuThanhToanService;
         }
-        public async Task<ActionResult> Index(int page = 1)
+        [HttpGet]
+        public async Task<ActionResult> Index(int page = 1, string status = null)
         {
             page = page < 1 ? 1 : page;
-            int pageSize = 5;
+            const int pageSize = 5;
 
-            List<HoaDon> hoaDons = await _hoaDonService.GetAllAsync();
+            var hoaDons = await _hoaDonService.GetAllAsync() ?? new List<HoaDon>();
 
-            if (hoaDons == null || !hoaDons.Any())
+            var filteredHoaDons = hoaDons
+                .Where(h => h.TrangThai != "Tạo đơn hàng")
+                .ToList();
+
+            if (!string.IsNullOrEmpty(status))
             {
-                return View(new List<HoaDon>());
+                filteredHoaDons = filteredHoaDons.Where(h => h.TrangThai == status).ToList();
             }
 
-            var pagedHoaDons = hoaDons.ToPagedList(page, pageSize);
+            var distinctStatuses = hoaDons
+                .Select(h => h.TrangThai)
+                .Where(s => s != "Tạo đơn hàng")
+                .Distinct()
+                .ToList();
+
+            var hoaDonViewModels = new List<AppData.ViewModel.HoaDonViewModell>();
+
+            foreach (var hoaDon in filteredHoaDons)
+            {
+                var hoaDonChiTiets = await _hoaDonChiTietService.GetByIdHoaDonAsync(hoaDon.IdHoaDon);
+                var totalQuantity = hoaDonChiTiets.Sum(d => d.SoLuong);
+
+                hoaDonViewModels.Add(new AppData.ViewModel.HoaDonViewModell
+                {
+                    HoaDon = hoaDon,
+                    TotalQuantity = totalQuantity,
+                    HoaDonChiTiets = hoaDonChiTiets
+                });
+            }
+
+            filteredHoaDons = filteredHoaDons.OrderByDescending(h => h.NgayTao).ToList();
+
+            var pagedHoaDons = hoaDonViewModels.ToPagedList(page, pageSize);
+
+            ViewBag.CurrentStatus = status;
+            ViewBag.TotalProductQuantity = hoaDonViewModels.Sum(vm => vm.TotalQuantity);
+            ViewBag.Statuses = distinctStatuses;
 
             return View(pagedHoaDons);
         }
@@ -82,7 +118,7 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             var lichSuHoaDons = await _lichSuHoaDonService.GetByIdHoaDonAsync(id);
-
+            //var lichSuThanhToans = await _lichSuThanhToanService.GetByIdHoaDonAsync(id);
             var khachhang = await _khachHangService.GetIdKhachHang(hoaDon.IdKhachHang);
 
             var sanPhamChiTiets = new List<HoaDonChiTietViewModel.SanPhamChiTietViewModel>();
@@ -120,10 +156,12 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 DonGia = hoaDon.TongTienDonHang,
                 GiamGia = hoaDon.TienGiam,
-                TongTien = hoaDon.TongTienHoaDon,
+                PhiVanChuyen = Convert.ToDouble(hoaDon.TienShip),
+                TongTien = hoaDon.TongTienDonHang + Convert.ToDouble(hoaDon.TienShip),
 
                 HoaDon = new HoaDonViewModel
                 {
+                    IdHoaDon = hoaDon.IdHoaDon,
                     MaDon = hoaDon.MaDon,
                     KhachHang = khachhang.HoTen,
                     TrangThai = hoaDon.TrangThai,
@@ -142,7 +180,18 @@ namespace APPMVC.Areas.Admin.Controllers
                     IdHoaDon = lichSu.IdHoaDon
                 }).ToList(),
 
-                SanPhamChiTiets = sanPhamChiTiets // Gán danh sách sản phẩm chi tiết vào view model
+                SanPhamChiTiets = sanPhamChiTiets,
+
+                //LichSuThanhToans = lichSuThanhToans.Select(payment => new LichSuThanhToanViewModel
+                //{
+                //    IdLichSuThanhToan = payment.IdLichSuThanhToan,
+                //    SoTien = payment.SoTien,
+                //    NgayThanhToan = payment.NgayTao,
+                //    LoaiGiaoDich = payment.LoaiGiaoDich,
+                //    HinhThucThanhToan = payment.Pttt,
+                //    TrangThai = payment.TrangThai,
+                //    IdHoaDon = payment.IdHoaDon
+                //}).ToList()
             };
 
             return View(viewModel);
@@ -178,49 +227,76 @@ namespace APPMVC.Areas.Admin.Controllers
             return View(viewModel);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateInvoiceStatus(Guid id)
+        {
+            var hoaDon = await _hoaDonService.GetByIdAsync(id);
+            if (hoaDon == null)
+            {
+                return NotFound($"Hóa đơn với ID {id} không tồn tại.");
+            }
 
-        //[HttpPost]
-        //public async Task<ActionResult> UpdateStatus(Guid id, string newStatus)
-        //{
-        //    // Validate the incoming new status
-        //    if (string.IsNullOrEmpty(newStatus))
-        //    {
-        //        ModelState.AddModelError("", "Trạng thái không hợp lệ.");
-        //        return RedirectToAction("Edit", new { id });
-        //    }
+            switch (hoaDon.TrangThai)
+            {
+                case "Chờ Xác Nhận":
+                    hoaDon.TrangThai = "Chờ Giao Hàng";
+                    await _hoaDonService.UpdateAsync(hoaDon);
 
-        //    // You might want to include logic to handle the changes according to the current status
-        //    // For example, prevent changing from "Completed" to "Cancelled"
-        //    var currentStatus = await _hoaDonService.GetCurrentStatusAsync(id);
+                    await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
+                    {
+                        IdHoaDon = hoaDon.IdHoaDon,
+                        ThaoTac = "Chờ Giao Hàng",
+                        NgayTao = DateTime.Now,
+                        NguoiThaoTac = "Nhân Viên",
+                        TrangThai = hoaDon.TrangThai
+                    });
+                    break;
 
-        //    // Implement your business logic here based on the currentStatus
-        //    switch (currentStatus)
-        //    {
-        //        case "Đã Hủy":
-        //            // Logic for already cancelled orders
-        //            break;
-        //        case "Hoàn thành":
-        //            // Logic for completed orders
-        //            if (newStatus != "Completed") // Prevent reverting back to other states
-        //            {
-        //                ModelState.AddModelError("", "Không thể thay đổi trạng thái từ 'Hoàn thành'.");
-        //                return RedirectToAction("Edit", new { id });
-        //            }
-        //            break;
-        //            // Add other cases as necessary
-        //    }
+                case "Chờ Giao Hàng":
+                    hoaDon.TrangThai = "Đang Vận Chuyển";
+                    await _hoaDonService.UpdateAsync(hoaDon);
 
-        //    // Update the status in the database
-        //    var result = await _hoaDonService.UpdateStatusAsync(id, newStatus);
-        //    if (result)
-        //    {
-        //        // Redirect to the Edit view or another relevant view
-        //        return RedirectToAction("Edit", new { id });
-        //    }
+                    await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
+                    {
+                        IdHoaDon = hoaDon.IdHoaDon,
+                        ThaoTac = "Đang Vận Chuyển",
+                        NgayTao = DateTime.Now,
+                        NguoiThaoTac = "Nhân Viên",
+                        TrangThai = hoaDon.TrangThai
+                    });
+                    break;
 
-        //    // Handle error case
-        //    ModelState.AddModelError("", "Cập nhật trạng thái không thành công.");
-        //    return RedirectToAction("Edit", new { id });
-        //}
+                case "Đang Vận Chuyển":
+                    hoaDon.TrangThai = "Đã Giao Hàng";
+                    await _hoaDonService.UpdateAsync(hoaDon);
+
+                    await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
+                    {
+                        IdHoaDon = hoaDon.IdHoaDon,
+                        ThaoTac = "Đã Giao Hàng",
+                        NgayTao = DateTime.Now,
+                        NguoiThaoTac = "Nhân Viên",
+                        TrangThai = hoaDon.TrangThai
+                    });
+                    break;
+
+                case "Đã Giao Hàng":
+                    hoaDon.TrangThai = "Hoàn Thành"; 
+                    await _hoaDonService.UpdateAsync(hoaDon);
+
+                    await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
+                    {
+                        IdHoaDon = hoaDon.IdHoaDon,
+                        ThaoTac = "Hoàn Thành",
+                        NgayTao = DateTime.Now,
+                        NguoiThaoTac = "Nhân Viên",
+                        TrangThai = hoaDon.TrangThai
+                    });
+                    break;
+            }
+
+            return RedirectToAction("Edit", new { id });
+        }
+
     }
 }

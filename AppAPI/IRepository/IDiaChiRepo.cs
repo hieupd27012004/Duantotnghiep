@@ -13,9 +13,9 @@ namespace AppAPI.IRepository
 		Task<List<Province>> GetProvincesAsync();
 		Task<List<District>> GetDistrictsAsync(int provinceId);
 		Task<List<Ward>> GetWardsAsync(int districtId);
-
-		//Check số lượng thêm cho khách hàng và địa chỉ mặc định
 		Task<int> GetAddressCountByCustomerId(Guid customerId);
 		Task<bool> HasDefaultAddressAsync(Guid customerId);
-	}
+
+        Task<DiaChi> GetDefaultAddressByCustomerIdAsync(Guid customerId);
+    }
 }

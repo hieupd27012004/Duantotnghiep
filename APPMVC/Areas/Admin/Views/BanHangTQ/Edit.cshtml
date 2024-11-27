@@ -1,8 +1,7 @@
 ﻿@model AppData.ViewModel.HoaDonChiTietViewModel
 
 @{
-    ViewData["Title"] = "Chi Tiết Hóa Đơn";
-    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Edit";
 }
 <style>
     .quantity-container {
@@ -87,16 +86,13 @@
 </style>
 
 <div class="content-wrapper">
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            <span class="text-muted fw-light">Quản lý sản phẩm /</span> Chi Tiết Sản Phẩm
-        </h4>
+        
         <h4>Danh Sách Sản Phẩm</h4>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
             Thêm Sản Phẩm
         </button>
 
-        <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true" data-idhoadon="@Model.HoaDon.IdHoaDon">    
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -201,9 +197,9 @@
                     <dt class="col-sm-6">Tổng Tiền Hàng</dt>
                     <dd class="col-sm-6">@Model.DonGia.ToString("N0")</dd>
                     <dt class="col-sm-6">Giảm Giá</dt>
-                    <dd class="col-sm-6">@Model.PhiVanChuyen.ToString("N0")</dd>
+                    <dd class="col-sm-6">@Model.PhiVanChuyen</dd>
                     <dt class="col-sm-6">Phí Vận Chuyển</dt>
-                    <dd class="col-sm-6">@Model.PhiVanChuyen.ToString("N0")</dd>
+                    <dd class="col-sm-6">@Model.PhiVanChuyen</dd>
                     <dt class="col-sm-6">Phương Thức Thanh Toán</dt>
                     <dd class="col-sm-6">
                         <div>
@@ -234,7 +230,7 @@
         <br />
         <a asp-action="Index" class="btn btn-primary">Quay lại danh sách</a>
     </div>
-</div>
+
 
 @section Scripts {
     <script>
@@ -290,7 +286,13 @@
         });
         $(document).ready(function () {
             $('#addProductModal').on('show.bs.modal', function () {
-                var idHoaDon = '@Model.HoaDon.IdHoaDon';
+                var idHoaDon = $(this).data('idhoadon'); 
+                if (!idHoaDon) {
+                    console.error("ID hóa đơn không hợp lệ.");
+                    alert("Đã xảy ra lỗi, vui lòng thử lại.");
+                    return;
+                }
+
                 $.get('@Url.Action("GetSanPhamChiTietList", "BanHangTQ", new { area = "Admin" })', { idHoaDon: idHoaDon })
                     .done(function (data) {
                         $('#productDetailList').html(data);
@@ -328,7 +330,6 @@
                 });
             });
 
-            // Hàm cập nhật thông tin hóa đơn và số lượng sản phẩm
             function updateInvoiceAndStock() {
                 const idHoaDon = '@Model.HoaDon.IdHoaDon';
                 const sanPhamChiTiets = [];
@@ -347,7 +348,6 @@
                     SanPhamChiTiets: sanPhamChiTiets
                 };
 
-                // Gửi yêu cầu cập nhật thông tin hóa đơn và số lượng sản phẩm
                 fetch('/Admin/BanHangTQ/UpdateInvoiceDetails', {
                     method: 'POST',
                     headers: {

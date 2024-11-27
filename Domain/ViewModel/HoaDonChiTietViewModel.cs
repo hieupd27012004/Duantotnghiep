@@ -16,7 +16,7 @@ namespace AppData.ViewModel
 
         public double? GiamGia { get; set; } 
 
-        public double PhiVanChuyen { get; set; }
+        public double? PhiVanChuyen { get; set; }
         public double TongTien { get; set; }
 
         public double KichHoat { get; set; }
@@ -24,7 +24,7 @@ namespace AppData.ViewModel
         public Guid IdHoaDon { get; set; }
         public List<SanPhamChiTietViewModel> SanPhamChiTiets { get; set; } = new List<SanPhamChiTietViewModel>();
         public HoaDonViewModel? HoaDon { get; set; }
-
+        public List<LichSuThanhToanViewModel> LichSuThanhToans { get; set; } = new List<LichSuThanhToanViewModel>();
         public List<LichSuHoaDonViewModel> LichSuHoaDons { get; set; } = new List<LichSuHoaDonViewModel>();
             
         public class LichSuHoaDonViewModel
@@ -62,6 +62,22 @@ namespace AppData.ViewModel
 
         }
 
-     
+        public class LichSuThanhToanViewModel
+        {
+            public Guid IdLichSuThanhToan { get; set; }
+            public double SoTien { get; set; }
+            public DateTime NgayThanhToan { get; set; }
+            public string LoaiGiaoDich { get; set; }
+            public string HinhThucThanhToan { get; set; }
+            public string TrangThai { get; set; }
+            public Guid IdHoaDon { get; set; }
+        }
+
+    }
+    public class HoaDonViewModell
+    {
+        public HoaDon HoaDon { get; set; }
+        public double TotalQuantity { get; set; }
+        public List<HoaDonChiTiet> HoaDonChiTiets { get; set; }
     }
 }

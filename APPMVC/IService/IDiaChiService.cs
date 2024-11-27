@@ -4,7 +4,8 @@ namespace APPMVC.IService
 {
 	public interface IDiaChiService
 	{
-		Task<List<DiaChi>> GetAll();
+        Task<List<DiaChi>> GetByIdKh(Guid idKhachHang);
+        Task<List<DiaChi>> GetAll();
 		Task<List<DiaChi>> GetAllAsync(Guid? idKhachHang);
 		Task<DiaChi> GetByIdAsync(Guid idDiaChi);
 		Task<bool> AddAsync(DiaChi diaChi);
@@ -17,5 +18,7 @@ namespace APPMVC.IService
 		//Check số lượng thêm cho khách hàng và địa chỉ mặc định
 		Task<int> GetAddressCountByCustomerId(Guid customerId);
 		Task<bool> HasDefaultAddressAsync(Guid customerId);
-	}
+
+        Task<DiaChi> GetDefaultAddressByCustomerIdAsync(Guid customerId);
+    }
 }

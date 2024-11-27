@@ -79,6 +79,17 @@ builder.Services.AddTransient<ICardService, CardService>();
 //Đăng ký VnPay
 builder.Services.AddSingleton<IVnPayService, VnPayService>();
 //builder.Services.AddScoped<IVnPayService, VnPayService>();
+builder.Services.AddTransient<ILichSuThanhToanService, LichSuThanhToanService>();
+builder.Services.AddHttpClient<GiaoHangNhanhService>(client =>
+{
+    client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+});
+
+builder.Services.AddTransient<GiaoHangNhanhService>(provider =>
+{
+    var httpClient = provider.GetRequiredService<HttpClient>();
+    return new GiaoHangNhanhService(httpClient, "bcf656fe-256b-11ef-9e93-f2508e67c133", "5120262");
+});
 var app = builder.Build();
 
 
@@ -98,7 +109,6 @@ app.UseSession();
 
 app.UseHttpsRedirection();
 
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
