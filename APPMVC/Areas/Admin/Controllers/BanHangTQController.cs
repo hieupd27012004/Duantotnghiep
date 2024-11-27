@@ -334,7 +334,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     return Json(new { success = false, message = "Sản phẩm không tồn tại." });
                 }
 
-                int requestedQuantity = 1;
+                int requestedQuantity = 1; // Giả định bạn có thể thay đổi số lượng này từ frontend
                 if (requestedQuantity <= 0)
                 {
                     return Json(new { success = false, message = "Số lượng phải lớn hơn 0." });
@@ -356,11 +356,14 @@ namespace APPMVC.Areas.Admin.Controllers
                     KichHoat = 1
                 };
 
+                // Thêm sản phẩm vào hóa đơn mà không trừ số lượng
                 await _hoaDonChiTietService.AddAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
 
-                sanPhamChiTiet.SoLuong -= requestedQuantity;
+                // Không trừ số lượng sản phẩm
+                // sanPhamChiTiet.SoLuong -= requestedQuantity; // Dòng này đã được bỏ
 
-                await _sanPhamCTService.Update(sanPhamChiTiet);
+                // Cập nhật sản phẩm nếu cần, hoặc bỏ qua
+                // await _sanPhamCTService.Update(sanPhamChiTiet); // Có thể bỏ nếu không cần cập nhật
 
                 var updatedProductList = await GetSanPhamChiTietList(IdHoaDon);
                 return Json(new { success = true, message = "Thêm sản phẩm thành công.", html = updatedProductList });
@@ -379,7 +382,6 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 return Json(new { success = false, message = "Dữ liệu hóa đơn không hợp lệ." });
             }
-
 
             if (!ModelState.IsValid)
             {
@@ -403,31 +405,19 @@ namespace APPMVC.Areas.Admin.Controllers
                         return Json(new { success = false, message = "Chi tiết sản phẩm không tồn tại." });
                     }
 
+                    // Tính toán sự thay đổi số lượng
                     double quantityChange = item.SoLuong - originalQuantity;
-                    double availableStock = sanPhamCT.SoLuong + originalQuantity;
 
-                    if (quantityChange > 0)
-                    {
-                        if (item.SoLuong > availableStock)
-                        {
-                            return Json(new { success = false, message = "Số lượng yêu cầu vượt quá số lượng có sẵn." });
-                        }
-                        sanPhamCT.SoLuong -= quantityChange; // Deduct from stock
-                    }
-                    else if (quantityChange < 0) // Decreasing quantity
-                    {
-                        sanPhamCT.SoLuong += Math.Abs(quantityChange); // Add back to stock
-                    }
-
-                    // Calculate total amount
+                    // Bỏ qua phần trừ số lượng
+                    // Nếu bạn muốn cập nhật tổng tiền, chỉ cần giữ lại dòng này
                     item.TongTien = item.SoLuong * sanPhamCT.Gia;
 
-                    // Update product stock
+                    // Cập nhật sản phẩm nếu cần
                     await _sanPhamCTService.Update(sanPhamCT);
                 }
             }
 
-            // Update the invoice line items
+            // Cập nhật các mục hóa đơn
             await _hoaDonChiTietService.UpdateAsync(hoaDonChiTietList);
 
             return Json(new { success = true });
@@ -461,6 +451,10 @@ namespace APPMVC.Areas.Admin.Controllers
                 {
                     double thanhTien = hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia;
                     tongTienHang += thanhTien;
+
+                    // Trừ số lượng sản phẩm trong kho
+                    sanPhamCT.SoLuong -= hoaDonChiTiet.SoLuong; // Trừ số lượng
+                    await _sanPhamCTService.Update(sanPhamCT); // Cập nhật sản phẩm
                 }
             }
 
@@ -539,7 +533,6 @@ namespace APPMVC.Areas.Admin.Controllers
                 TempData["SuccessMessage"] = "Thanh toán thành công! Bạn có muốn in hóa đơn không?";
                 TempData["FileUrl"] = fileUrl; // Lưu file URL để sử dụng trong view
                 return RedirectToAction("ShowInvoiceMessage");
-               
             }
             catch (Exception ex)
             {

@@ -52,9 +52,18 @@ namespace AppAPI.Repository
 
         public async Task<List<LichSuThanhToan>> GetByIdHoaDonAsync(Guid idHoaDon)
         {
-            return await _context.lichSuThanhToans
-               .Where(l => l.IdHoaDon == idHoaDon)
-               .ToListAsync();
+            try
+            {
+                var result = await _context.lichSuThanhToans
+                    .Where(l => l.IdHoaDon == idHoaDon)
+                    .ToListAsync();
+
+                return result ?? new List<LichSuThanhToan>();
+            }
+            catch (Exception ex)
+            {
+                return new List<LichSuThanhToan>();
+            }
         }
     }
 }

@@ -118,7 +118,7 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             var lichSuHoaDons = await _lichSuHoaDonService.GetByIdHoaDonAsync(id);
-            //var lichSuThanhToans = await _lichSuThanhToanService.GetByIdHoaDonAsync(id);
+            var lichSuThanhToans = await _lichSuThanhToanService.GetByIdHoaDonAsync(id);
             var khachhang = await _khachHangService.GetIdKhachHang(hoaDon.IdKhachHang);
 
             var sanPhamChiTiets = new List<HoaDonChiTietViewModel.SanPhamChiTietViewModel>();
@@ -182,16 +182,16 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 SanPhamChiTiets = sanPhamChiTiets,
 
-                //LichSuThanhToans = lichSuThanhToans.Select(payment => new LichSuThanhToanViewModel
-                //{
-                //    IdLichSuThanhToan = payment.IdLichSuThanhToan,
-                //    SoTien = payment.SoTien,
-                //    NgayThanhToan = payment.NgayTao,
-                //    LoaiGiaoDich = payment.LoaiGiaoDich,
-                //    HinhThucThanhToan = payment.Pttt,
-                //    TrangThai = payment.TrangThai,
-                //    IdHoaDon = payment.IdHoaDon
-                //}).ToList()
+                LichSuThanhToans = lichSuThanhToans.Select(payment => new LichSuThanhToanViewModel
+                {
+                    IdLichSuThanhToan = payment.IdLichSuThanhToan,
+                    SoTien = payment.SoTien,
+                    NgayThanhToan = payment.NgayTao,
+                    LoaiGiaoDich = payment.LoaiGiaoDich,
+                    HinhThucThanhToan = payment.Pttt,
+                    TrangThai = payment.TrangThai,
+                    IdHoaDon = payment.IdHoaDon
+                }).ToList()
             };
 
             return View(viewModel);
@@ -226,7 +226,6 @@ namespace APPMVC.Areas.Admin.Controllers
 
             return View(viewModel);
         }
-
         [HttpPost]
         public async Task<IActionResult> UpdateInvoiceStatus(Guid id)
         {
@@ -236,67 +235,128 @@ namespace APPMVC.Areas.Admin.Controllers
                 return NotFound($"Hóa đơn với ID {id} không tồn tại.");
             }
 
+            var lichSuThanhToans = await _lichSuThanhToanService.GetByIdHoaDonAsync(id);
+            bool hasPaymentHistory = lichSuThanhToans.Any();
+
             switch (hoaDon.TrangThai)
             {
                 case "Chờ Xác Nhận":
                     hoaDon.TrangThai = "Chờ Giao Hàng";
-                    await _hoaDonService.UpdateAsync(hoaDon);
-
-                    await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
-                    {
-                        IdHoaDon = hoaDon.IdHoaDon,
-                        ThaoTac = "Chờ Giao Hàng",
-                        NgayTao = DateTime.Now,
-                        NguoiThaoTac = "Nhân Viên",
-                        TrangThai = hoaDon.TrangThai
-                    });
+                    await UpdateProductQuantities(hoaDon.IdHoaDon);
                     break;
 
                 case "Chờ Giao Hàng":
                     hoaDon.TrangThai = "Đang Vận Chuyển";
-                    await _hoaDonService.UpdateAsync(hoaDon);
-
-                    await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
-                    {
-                        IdHoaDon = hoaDon.IdHoaDon,
-                        ThaoTac = "Đang Vận Chuyển",
-                        NgayTao = DateTime.Now,
-                        NguoiThaoTac = "Nhân Viên",
-                        TrangThai = hoaDon.TrangThai
-                    });
                     break;
 
                 case "Đang Vận Chuyển":
                     hoaDon.TrangThai = "Đã Giao Hàng";
-                    await _hoaDonService.UpdateAsync(hoaDon);
-
-                    await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
-                    {
-                        IdHoaDon = hoaDon.IdHoaDon,
-                        ThaoTac = "Đã Giao Hàng",
-                        NgayTao = DateTime.Now,
-                        NguoiThaoTac = "Nhân Viên",
-                        TrangThai = hoaDon.TrangThai
-                    });
                     break;
 
                 case "Đã Giao Hàng":
-                    hoaDon.TrangThai = "Hoàn Thành"; 
-                    await _hoaDonService.UpdateAsync(hoaDon);
-
-                    await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
+                    if (hasPaymentHistory)
                     {
-                        IdHoaDon = hoaDon.IdHoaDon,
-                        ThaoTac = "Hoàn Thành",
-                        NgayTao = DateTime.Now,
-                        NguoiThaoTac = "Nhân Viên",
-                        TrangThai = hoaDon.TrangThai
-                    });
+                        hoaDon.TrangThai = "Hoàn Thành"; 
+                    }
+                    else
+                    {
+                        return BadRequest("Cần xác nhận thanh toán trước khi hoàn thành hóa đơn.");
+                    }
                     break;
+                case "Đã Thanh Toán":
+                    hoaDon.TrangThai = "Hoàn Thành";
+                    break;
+
+                default:
+                    return BadRequest("Trạng thái hóa đơn không hợp lệ.");
             }
+
+
+            await _hoaDonService.UpdateAsync(hoaDon);
+
+            await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
+            {
+                IdHoaDon = hoaDon.IdHoaDon,
+                ThaoTac = hoaDon.TrangThai,
+                NgayTao = DateTime.Now,
+                NguoiThaoTac = "Nhân Viên",
+                TrangThai = hoaDon.TrangThai
+            });
 
             return RedirectToAction("Edit", new { id });
         }
+        private async Task UpdateProductQuantities(Guid idHoaDon)
+        {
+            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
+            foreach (var chiTiet in hoaDonChiTietList)
+            {
+                var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(chiTiet.IdSanPhamChiTiet);
+                if (sanPhamCT != null)
+                {
+                    sanPhamCT.SoLuong -= chiTiet.SoLuong; 
+                    await _sanPhamCTService.Update(sanPhamCT); 
+                }
+            }
+        }
+        public async Task<IActionResult> CreateLichSuThanhToan(Guid idHoaDon)
+        {
+            var hoaDon = await _hoaDonService.GetByIdAsync(idHoaDon); 
+            var lichSuThanhToanViewModel = new HoaDonChiTietViewModel
+            {
+                IdHoaDon = idHoaDon,
+                TongTien = hoaDon.TongTienDonHang 
+            };
+            return PartialView("CreateLichSuThanhToan", lichSuThanhToanViewModel);
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> CreateLichSuThanhToan(LichSuThanhToanViewModel lichSuThanhToan)
+        {
+            var TenNv = HttpContext.Session.GetString("NhanVienName");
+            var NVIdString = HttpContext.Session.GetString("IdNhanVien");
+
+            if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
+            {
+                return Unauthorized(new { message = "Nhân viên không tồn tại trong phiên làm việc." });
+            }
+            if (ModelState.IsValid)
+            {
+                var lichSuThanhToanModel = new LichSuThanhToan
+                {
+                    IdLichSuThanhToan = Guid.NewGuid(),
+                    SoTien = lichSuThanhToan.SoTien,
+                    TienThua = lichSuThanhToan.TienThua,
+                    NgayTao = DateTime.Now,
+                    LoaiGiaoDich = lichSuThanhToan.LoaiGiaoDich,
+                    Pttt = lichSuThanhToan.HinhThucThanhToan,
+                    NguoiThaoTac = TenNv,
+                    TrangThai = lichSuThanhToan.TrangThai ?? "Đã thanh toán",
+                    IdHoaDon = lichSuThanhToan.IdHoaDon,
+                    IdNhanVien = NVID
+                };
+
+                await _lichSuThanhToanService.AddAsync(lichSuThanhToanModel);
+
+                var hoaDon = await _hoaDonService.GetByIdAsync(lichSuThanhToan.IdHoaDon);
+                if (hoaDon != null)
+                {
+                    hoaDon.TrangThai = "Đã Thanh Toán"; 
+                    await _hoaDonService.UpdateAsync(hoaDon); 
+
+                    // Thêm lịch sử hóa đơn
+                    await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
+                    {
+                        IdHoaDon = hoaDon.IdHoaDon,
+                        ThaoTac = hoaDon.TrangThai,
+                        NgayTao = DateTime.Now,
+                        NguoiThaoTac = TenNv,
+                        TrangThai = hoaDon.TrangThai
+                    });
+                }
+
+                return RedirectToAction("Edit", new { id = lichSuThanhToan.IdHoaDon });
+            }
+            return PartialView("CreateLichSuThanhToan", lichSuThanhToan);
+        }
     }
 }
