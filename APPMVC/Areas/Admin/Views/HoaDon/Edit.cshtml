@@ -169,22 +169,25 @@
                                     @switch (item.ThaoTac)
                                     {
                                         case "Đã Hủy":
-                                            <i class="fas fa-times-circle" style="color: red;" title="Đã Hủy"></i>
+                                            <i class="fas fa-times-circle" style="color: darkred;" title="Đã Hủy"></i>
                                             break;
                                         case "Chờ Xác Nhận":
                                             <i class="fas fa-clock" style="color: orange;" title="Chờ xác nhận"></i>
                                             break;
                                         case "Chờ Giao Hàng":
-                                            <i class="fas fa-hourglass-half" style="color: yellow;" title="Chờ giao hàng"></i>
+                                            <i class="fas fa-hourglass-start" style="color: #ffcc00;" title="Chờ giao hàng"></i> 
                                             break;
                                         case "Đang Vận Chuyển":
-                                            <i class="fas fa-truck" style="color: blue;" title="Đang vận chuyển"></i>
+                                            <i class="fas fa-shipping-fast" style="color: #007bff;" title="Đang vận chuyển"></i> 
+                                            break;
+                                        case "Đã Thanh Toán":
+                                            <i class="fas fa-money-check-alt" style="color: green;" title="Đã thanh toán"></i>
                                             break;
                                         case "Đã Giao Hàng":
-                                            <i class="fas fa-check-circle" style="color: green;" title="Đã giao hàng"></i>
+                                            <i class="fas fa-box-open" style="color: mediumseagreen;" title="Đã giao hàng"></i>
                                             break;
                                         case "Hoàn Thành":
-                                            <i class="fas fa-thumbs-up" style="color: green;" title="Hoàn thành"></i>
+                                            <i class="fas fa-flag-checkered" style="color: forestgreen;" title="Hoàn thành"></i>
                                             break;
                                         default:
                                             <i class="fas fa-question-circle" style="color: gray;" title="Trạng thái không xác định"></i>
@@ -204,20 +207,34 @@
                     }
                 </div>
 
-                <form asp-action="UpdateInvoiceStatus" asp-route-id="@Model.HoaDon.IdHoaDon" method="post">
-                    @if (Model.HoaDon.TrangThai == "Chờ Giao Hàng")
-                    {
-                        <button type="submit" class="btn btn-warning">Xác Nhận Giao Hàng</button>
-                    }
-                    else if (Model.HoaDon.TrangThai == "Đang Vận Chuyển")
-                    {
-                        <button type="submit" class="btn btn-success">Đánh Dấu Đã Giao Hàng</button>
-                    }
-                    else
-                    {
-                        <button type="submit" class="btn btn-primary">Cập Nhật Trạng Thái Giao Hàng</button>
-                    }
-                </form>
+                @if (Model.HoaDon.TrangThai != "Hoàn Thành")
+                {
+                    <form asp-action="UpdateInvoiceStatus" asp-route-id="@Model.HoaDon.IdHoaDon" method="post">
+                        @if (Model.HoaDon.TrangThai == "Chờ Giao Hàng")
+                        {
+                            <button type="submit" class="btn btn-warning">Xác Nhận Giao Hàng</button>
+                        }
+                        else if (Model.HoaDon.TrangThai == "Đang Vận Chuyển")
+                        {
+                            <button type="submit" class="btn btn-success">Đánh Dấu Đã Giao Hàng</button>
+                        }
+                        else if (Model.HoaDon.TrangThai == "Đã Giao Hàng")
+                        {
+                            if (Model.LichSuThanhToans.Any())
+                            {
+                                <button type="submit" class="btn btn-primary">Cập Nhật Trạng Thái Giao Hàng</button>
+                            }
+                            else
+                            {
+                                <span class="text-danger">Cần xác nhận thanh toán trước khi hoàn thành hóa đơn.</span>
+                            }
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-primary">Cập Nhật Trạng Thái Giao Hàng</button>
+                        }
+                    </form>
+                }
             </div>
         </div>
 
@@ -231,7 +248,14 @@
             <strong>Địa Chỉ Giao Hàng:</strong> @Model.HoaDon?.DiaChiGiaoHang <br />
         </div>
 
-        <h4>Lịch sử thanh toán</h4>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Lịch sử thanh toán</h4>
+            @if (Model.HoaDon.TrangThai == "Đã Giao Hàng" && !Model.LichSuThanhToans.Any())
+            {
+                <a class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPaymentHistoryModal" style="margin-left: 10px;">Xác Nhận Thanh Toán</a>
+            }
+        </div>
+
         <table class="table">
             <thead>
                 <tr>
@@ -259,11 +283,12 @@
                 else
                 {
                     <tr>
-                        <td colspan="4">Không có lịch sử thanh toán nào.</td>
+                        <td colspan="5">Không có lịch sử thanh toán nào.</td>
                     </tr>
                 }
             </tbody>
         </table>
+
         <h4>Danh Sách Sản Phẩm</h4>
         <table class="table">
             <thead>
@@ -350,3 +375,78 @@
         <a asp-action="Index" class="btn btn-primary">Quay lại danh sách</a>
     </div>
 </div>
+
+<div class="modal fade" id="createPaymentHistoryModal" tabindex="-1" aria-labelledby="createPaymentHistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác Nhận Thanh Toán</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="CreateLichSuThanhToan" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label class="control-label">Tổng Tiền Hóa Đơn</label>
+                        <input type="text" class="form-control" value="@Model.TongTien" readonly id="totalAmount" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="LichSuThanhToans.FirstOrDefault().SoTien" class="control-label" style="margin-bottom:2px">Số Tiền</label>
+                        <input asp-for="LichSuThanhToans.FirstOrDefault().SoTien" class="form-control" type="text" required id="amountPaid" oninput="formatInput(this)" />
+                        <span asp-validation-for="LichSuThanhToans.FirstOrDefault().SoTien" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="LichSuThanhToans.FirstOrDefault().TienThua" class="control-label" style="margin-bottom:2px">Tiền Thừa</label>
+                        <input asp-for="LichSuThanhToans.FirstOrDefault().TienThua" class="form-control" type="text" required id="change" readonly />
+                        <span asp-validation-for="LichSuThanhToans.FirstOrDefault().TienThua" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="LichSuThanhToans.FirstOrDefault().LoaiGiaoDich" class="control-label" style="margin-bottom:2px">Loại Giao Dịch</label>
+                        <input asp-for="LichSuThanhToans.FirstOrDefault().LoaiGiaoDich" class="form-control" required />
+                        <span asp-validation-for="LichSuThanhToans.FirstOrDefault().LoaiGiaoDich" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="LichSuThanhToans.FirstOrDefault().HinhThucThanhToan" class="control-label" style="margin-bottom:2px">Hình Thức Thanh Toán</label>
+                        <input asp-for="LichSuThanhToans.FirstOrDefault().HinhThucThanhToan" class="form-control" required />
+                        <span asp-validation-for="LichSuThanhToans.FirstOrDefault().HinhThucThanhToan" class="text-danger"></span>
+                    </div>
+
+                    <input type="hidden" asp-for="IdHoaDon" value="@Model.HoaDon.IdHoaDon" />
+
+                    <div class="form-group" style="margin-top: 10px; text-align:center">
+                        <input type="submit" value="Tạo mới" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function formatInput(input) {
+         let value = input.value.replace(/[^0-9,]/g, '');
+         value = value.replace(/,/g, '.');
+
+         if (value) {
+             let parts = value.split('.');
+             parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ','); 
+             input.value = parts.join('.'); 
+         } else {
+             input.value = '';
+         }
+
+         calculateChange(); 
+     }
+
+     function calculateChange() {
+         const totalAmount = parseFloat(document.getElementById('totalAmount').value.replace(/,/g, '').replace('.', '')) || 0;
+         const amountPaid = parseFloat(document.getElementById('amountPaid').value.replace(/,/g, '').replace('.', '')) || 0;
+         const change = amountPaid - totalAmount;
+
+         document.getElementById('change').value = change >= 0 ? formatCurrency(change) : 0; // Định dạng tiền thừa
+     }
+
+     function formatCurrency(value) {
+         return value.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+     }
+</script>
