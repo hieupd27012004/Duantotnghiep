@@ -1,9 +1,17 @@
 ﻿using AppData.Model;
+using AppData.Model.Vnpay;
 using AppData.ViewModel;
 using APPMVC.IService;
+using APPMVC.Libraries;
+using APPMVC.Service.Vnpay;
+using DinkToPdf;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Threading.Tasks;
 using static AppData.ViewModel.HoaDonChiTietViewModel;
@@ -26,6 +34,8 @@ namespace APPMVC.Areas.Admin.Controllers
         private readonly ISanPhamChiTietMauSacService _sanPhamChiTietMauSacService;
         private readonly ISanPhamChiTietKichCoService _sanPhamChiTietKichCoService;
         private readonly IHinhAnhService _hinhAnhService;
+        private readonly IVnPayService _vnPayServie;
+        private readonly IConfiguration _configuration;
 
         public BanHangTQController(
             ISanPhamChiTietService sanPhamChiTietService,
@@ -39,7 +49,10 @@ namespace APPMVC.Areas.Admin.Controllers
             IKichCoService kichCoService,
             ISanPhamChiTietMauSacService sanPhamChiTietMauSacService,
             ISanPhamChiTietKichCoService sanPhamChiTietKichCoService,
-            IHinhAnhService hinhAnhService)
+            IHinhAnhService hinhAnhService,
+            IVnPayService vnPayServie,
+            IConfiguration configuration
+            )
         {
             _sanPhamCTService = sanPhamChiTietService;
             _sanPhamService = sanPhamService;
@@ -53,6 +66,8 @@ namespace APPMVC.Areas.Admin.Controllers
             _sanPhamChiTietMauSacService = sanPhamChiTietMauSacService;
             _sanPhamChiTietKichCoService = sanPhamChiTietKichCoService;
             _hinhAnhService = hinhAnhService;
+            _vnPayServie = vnPayServie;
+            _configuration = configuration;
         }
 
         public async Task<ActionResult> Index()
@@ -427,7 +442,6 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             var NVIdString = HttpContext.Session.GetString("IdNhanVien");
-
             if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
             {
                 return Unauthorized(new { message = "Nhân viên không tồn tại trong phiên làm việc." });
@@ -440,7 +454,6 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             double tongTienHang = 0;
-
             foreach (var hoaDonChiTiet in hoaDonChiTietList)
             {
                 var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
@@ -476,11 +489,10 @@ namespace APPMVC.Areas.Admin.Controllers
                     await _khachHangService.AddKhachHang(newCustomer);
                     hoaDon.IdKhachHang = newCustomer.IdKhachHang;
                     hoaDon.NguoiNhan = newCustomer.HoTen;
-
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error creating customer: {ex.Message}");
+                    // Log lỗi khi tạo khách hàng
                     return StatusCode(500, new { message = "Đã xảy ra lỗi khi tạo khách hàng." });
                 }
             }
@@ -506,26 +518,166 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 await _lichSuHoaDonService.AddAsync(lichSu);
 
-                return Json(new { success = true, message = "Xác nhận thanh toán thành công." });
+                // Tạo HTML từ mẫu hóa đơn
+                var htmlContent = await GenerateInvoiceHtmlFromTemplate(hoaDon, hoaDonChiTietList);
+
+                // Tạo PDF từ HTML
+                var pdfBytes = GeneratePdfFromHtml(htmlContent);
+
+                // Lưu file PDF vào thư mục tạm
+                var tempFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "TempFiles");
+                if (!Directory.Exists(tempFilePath))
+                {
+                    Directory.CreateDirectory(tempFilePath);
+                }
+
+                var fileName = $"HoaDon_{hoaDon.IdHoaDon}.pdf";
+                var fullPath = Path.Combine(tempFilePath, fileName);
+                await System.IO.File.WriteAllBytesAsync(fullPath, pdfBytes);
+                var fileUrl = $"/TempFiles/{fileName}";
+
+                TempData["SuccessMessage"] = "Thanh toán thành công! Bạn có muốn in hóa đơn không?";
+                TempData["FileUrl"] = fileUrl; // Lưu file URL để sử dụng trong view
+                return RedirectToAction("ShowInvoiceMessage");
+               
             }
             catch (Exception ex)
             {
-                // Log detailed error information related to invoice updating
-                var errorMessage = $"Error in XacNhanThanhToan: {ex.Message}\n" +
-                                   $"Stack Trace: {ex.StackTrace}";
-
-                // Include inner exception details if present
-                if (ex.InnerException != null)
-                {
-                    errorMessage += $"\nInner Exception: {ex.InnerException.Message}\n" +
-                                    $"Inner Stack Trace: {ex.InnerException.StackTrace}";
-                }
-
-                // Output the detailed error message to the console or a logging framework
-                Console.WriteLine(errorMessage);
-
+                // Log chi tiết lỗi trong quá trình xử lý thanh toán
                 return StatusCode(500, new { message = "Đã xảy ra lỗi khi xác nhận thanh toán." });
             }
         }
+        public IActionResult ShowInvoiceMessage()
+        {
+            return View();
+        }
+
+        private async Task<string> GenerateInvoiceHtmlFromTemplate(HoaDon hoaDon, List<HoaDonChiTiet> hoaDonChiTietList)
+        {
+            string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Areas", "Admin", "Templates", "InvoiceTemplate.html");
+
+            if (!System.IO.File.Exists(templatePath))
+            {
+                throw new FileNotFoundException($"Template file not found: {templatePath}");
+            }
+
+            string htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
+            string chiTietHoaDonHtml = "";
+
+            foreach (var chiTiet in hoaDonChiTietList)
+            {
+                var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(chiTiet.IdSanPhamChiTiet);
+                if (sanPhamCT != null)
+                {
+                    chiTietHoaDonHtml += $@"
+            <tr>
+                <td>{sanPhamCT.IdSanPham}</td>
+                <td>{chiTiet.SoLuong}</td>
+                <td>{chiTiet.DonGia:C}</td>
+                <td>{chiTiet.SoLuong * chiTiet.DonGia:C}</td>
+            </tr>";
+                }
+            }
+
+            string finalHtml = htmlTemplate
+                .Replace("{{MaDon}}", hoaDon.MaDon.ToString())
+                .Replace("{{NgayTao}}", hoaDon.NgayTao.ToString("dd/MM/yyyy"))
+                .Replace("{{ChiTietHoaDon}}", chiTietHoaDonHtml)
+                .Replace("{{TongTien}}", hoaDon.TongTienHoaDon.ToString("C"));
+
+            return finalHtml;
+        }
+
+        private byte[] GeneratePdfFromHtml(string htmlContent)
+        {
+            var converter = new SynchronizedConverter(new PdfTools());
+
+            var doc = new HtmlToPdfDocument
+            {
+                GlobalSettings = new GlobalSettings
+                {
+                    PaperSize = PaperKind.A4,
+                    Orientation = Orientation.Portrait,
+                    DPI = 300
+                }
+            };
+
+            doc.Objects.Add(new ObjectSettings
+            {
+                HtmlContent = htmlContent,
+                WebSettings = new WebSettings
+                {
+                    DefaultEncoding = "utf-8"
+                }
+            });
+
+            return converter.Convert(doc);
+        }
+        //VNPay
+        [HttpPost]
+        public async Task<IActionResult> ThanhToanVNPay(Guid idHoaDon)
+        {       
+            var hoaDonChiTietList = await  _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
+            if (hoaDonChiTietList == null)
+            {
+                return NotFound(new { message = "Không tìm thấy chi tiết hóa đơn." });
+            }
+
+            double tongTienHang = 0;
+            foreach (var hoaDonChiTiet in hoaDonChiTietList)
+            {
+                var sanPhamCT = _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
+                if (sanPhamCT != null)
+                {
+                    double thanhTien = hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia;
+                    tongTienHang += thanhTien;
+                }
+            }
+            // Lấy thông tin hóa đơn
+            var hoaDon = _hoaDonService.GetByIdAsync(idHoaDon).Result;
+            if (hoaDon == null)
+            {
+                return NotFound(new { message = "Không tìm thấy hóa đơn." });
+            }
+
+            // Tạo tham số yêu cầu thanh toán
+            var vnPay = new PaymentInformationModel()
+            {
+                Amount = tongTienHang,
+                CreatDate = DateTime.Now,
+                Description = $"Thanh Toán VnPay",
+                FullName = "Nhân Viên",
+                OrderId = new Random().Next(100, 10000)
+            };
+
+            return Redirect(_vnPayServie.CreatePaymentUrl(vnPay, HttpContext)); 
+
+        
+        }
+        public IActionResult ThanhToanLoi()
+        {
+            return View();
+        }
+        public IActionResult ThanhToanThanhCong()
+        {
+            return View();
+        }
+        [HttpGet]
+        public IActionResult ReturnVNPay()
+        {
+            var respones = _vnPayServie.PaymentExecute(Request.Query);
+            if (respones == null || respones.VnPayResponseCode != "00")
+            {
+                TempData["Message"] = $"Lỗi Thanh Toán: {respones.VnPayResponseCode }";
+                return RedirectToAction("ThanhToanLoi");
+            }
+            //
+            TempData["Message"] = $"Thanh toán VnPay Thành công";
+            return RedirectToAction("ThanhToanThanhCong");
+
+
+        }
+
     }
+
 }

@@ -215,9 +215,14 @@
                     <dd class="col-sm-6">@Model.TongTien.ToString("N0")</dd>
                 </dl>
                 <div class="text-right mt-3">
-                    <form action="@Url.Action("XacNhanThanhToan", "BanHangTQ")" method="post">
+                    <form action="@Url.Action("ThanhToanVNPay", "BanHangTQ",  new { area = "Admin" })" method="post">
                         <input type="hidden" name="idHoaDon" value="@Model.HoaDon.IdHoaDon" />
-                        <button type="submit" class="btn btn-success">Xác Nhận Thanh Toán</button>
+                        <button id="btnPayVNPay" name="payment"  class="btn btn-primary">Thanh Toán VNPay</button>
+                    </form>
+                    
+                    <form action="@Url.Action("XacNhanThanhToan", "BanHangTQ",  new { area = "Admin" })" method="post">
+                        <input type="hidden" name="idHoaDon" value="@Model.HoaDon.IdHoaDon" />
+                        <button id="confirmPaymentButton" class="btn btn-success">Xác Nhận Thanh Toán</button>
                     </form>
                 </div>
             </div>
@@ -229,6 +234,56 @@
 
 @section Scripts {
     <script>
+        function confirmPayment(idHoaDon) {
+            // Hiển thị thông báo đang xử lý
+            $("#loadingMessage").show();
+
+            $.ajax({
+                url: '/Admin/BanHangTQ/XacNhanThanhToan', // Địa chỉ API xử lý thanh toán
+                type: 'POST',
+                data: {
+                    idHoaDon: idHoaDon
+                },
+                success: function (response) {
+                    // Ẩn thông báo đang xử lý
+                    $("#loadingMessage").hide();
+
+                    if (response.success) {
+                        // Nếu thành công, thông báo người dùng và hiển thị link tải PDF
+                        alert('Thanh toán thành công! Hóa đơn đã được lưu.');
+                        window.location.href = response.fileUrl;  // Mở file PDF đã tạo
+                    } else {
+                        alert('Có lỗi xảy ra: ' + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Ẩn thông báo khi xảy ra lỗi
+                    $("#loadingMessage").hide();
+                    alert('Đã xảy ra lỗi khi xác nhận thanh toán: ' + error);
+                }
+            });
+        }
+
+        // Gọi hàm khi người dùng bấm vào nút xác nhận thanh toán
+        $(document).on('click', '#btnConfirmPayment', function () {
+            var idHoaDon = $(this).data('id');  // Lấy id hóa đơn từ dữ liệu của nút
+            confirmPayment(idHoaDon); // Gọi hàm xử lý thanh toán
+        });
+        $(document).ready(function () {
+            var idHoaDon = '@Model.HoaDon.IdHoaDon';
+            console.log("ID Hóa Đơn:", idHoaDon);  // Kiểm tra giá trị của idHoaDon
+
+            $('#addProductModal').on('show.bs.modal', function () {
+                $.get('@Url.Action("GetSanPhamChiTietList", "BanHangTQ", new { area = "Admin" })', { idHoaDon: idHoaDon })
+                    .done(function (data) {
+                        $('#productDetailList').html(data);
+                    })
+                    .fail(function (jqXHR, textStatus, errorThrown) {
+                        console.error("Error: " + textStatus, errorThrown);
+                        alert("Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.");
+                    });
+            });
+        });
         $(document).ready(function () {
             $('#addProductModal').on('show.bs.modal', function () {
                 var idHoaDon = $(this).data('idhoadon'); 
@@ -300,17 +355,20 @@
                     },
                     body: JSON.stringify(model)
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log('Cập nhật hóa đơn và số lượng thành công!');
-                    } else {
-                        console.error('Cập nhật thất bại:', data.message);
-                        alert("Cập nhật thất bại. Vui lòng thử lại.");
-                    }
-                })
-                .catch(error => console.error('Lỗi:', error));
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Cập nhật hóa đơn và số lượng thành công!');
+                        } else {
+                            console.error('Cập nhật thất bại:', data.message);
+                            alert("Cập nhật thất bại. Vui lòng thử lại.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Lỗi:', error);
+                        alert("Đã xảy ra lỗi khi cập nhật thông tin.");
+                    });
             }
-        });
+        });   
     </script>
 }
