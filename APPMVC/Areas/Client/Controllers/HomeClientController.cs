@@ -250,38 +250,39 @@ namespace APPMVC.Areas.Client.Controllers
             }
 
             var cartItems = new List<CartItemViewModel>();
-
             var diaChiKhachHang = await _diaChiService.GetDefaultAddressByCustomerIdAsync(customerId);
 
             double totalWeight = 0.0;
             double height = 50;
-            double length = 20; 
+            double length = 20;
             double width = 20;
-            int serviceTypeId = 2; 
-
+            int serviceTypeId = 2;
             double phiVanChuyen = 0.0;
-            if (diaChiKhachHang != null)
+
+            int fromDistrictId = 3440;
+            string fromWardCode = "13005";
+
+            try
             {
-                int fromDistrictId = 3440; 
-                int toDistrictId = diaChiKhachHang.DistrictId; 
-                string fromWardCode = "13005"; 
-                string toWardCode = diaChiKhachHang.WardId; 
-
-                try
+                foreach (var item in gioHangChiTiets)
                 {
-                    foreach (var item in gioHangChiTiets)
+                    var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
+                    var cartItem = new CartItemViewModel
                     {
-                        var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
-                        var cartItem = new CartItemViewModel
-                        {
-                            IdSanPhamChiTiet = item.IdSanPhamChiTiet,
-                            ProductName = sanPham?.TenSanPham ?? "Unknown Product",
-                            Quantity = item.SoLuong,
-                            Price = item.SoLuong > 0 ? item.TongTien / item.SoLuong : 0
-                        };
+                        IdSanPhamChiTiet = item.IdSanPhamChiTiet,
+                        ProductName = sanPham?.TenSanPham ?? "Unknown Product",
+                        Quantity = item.SoLuong,
+                        Price = item.SoLuong > 0 ? item.TongTien / item.SoLuong : 0
+                    };
 
-                        cartItems.Add(cartItem);
-                        totalWeight += cartItem.Quantity * 200;
+                    cartItems.Add(cartItem);
+                    totalWeight += cartItem.Quantity * 200;
+
+                    // Calculate shipping fee only if diaChiKhachHang is not null
+                    if (diaChiKhachHang != null)
+                    {
+                        int toDistrictId = diaChiKhachHang.DistrictId;
+                        string toWardCode = diaChiKhachHang.WardId;
 
                         phiVanChuyen += await _giaoHangNhanhService.CalculateShippingFee(
                             fromDistrictId,
@@ -290,19 +291,19 @@ namespace APPMVC.Areas.Client.Controllers
                             toWardCode,
                             height,
                             length,
-                            cartItem.Quantity * 200, 
+                            cartItem.Quantity * 200,
                             width,
                             serviceTypeId,
-                            cartItem.ProductName, 
-                            (int)cartItem.Quantity 
+                            cartItem.ProductName,
+                            (int)cartItem.Quantity
                         );
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Lỗi khi tính phí vận chuyển: {ex.Message}");
-                    phiVanChuyen = 0.0; 
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi tính phí vận chuyển: {ex.Message}");
+                phiVanChuyen = 0.0;
             }
 
             var thanhToanViewModel = new ThanhToanViewModel
@@ -313,7 +314,8 @@ namespace APPMVC.Areas.Client.Controllers
                 DistrictName = diaChiKhachHang?.DistrictName,
                 WardName = diaChiKhachHang?.WardName,
                 CartItems = cartItems,
-                PhiVanChuyen = phiVanChuyen 
+                PhiVanChuyen = phiVanChuyen,
+                MoTa = diaChiKhachHang?.MoTa
             };
 
             return (cartItems, thanhToanViewModel);

@@ -36,6 +36,7 @@ namespace APPMVC.Areas.Admin.Controllers
         private readonly IHinhAnhService _hinhAnhService;
         private readonly IVnPayService _vnPayServie;
         private readonly IConfiguration _configuration;
+        public readonly IDiaChiService _services;
 
         public BanHangTQController(
             ISanPhamChiTietService sanPhamChiTietService,
@@ -51,7 +52,8 @@ namespace APPMVC.Areas.Admin.Controllers
             ISanPhamChiTietKichCoService sanPhamChiTietKichCoService,
             IHinhAnhService hinhAnhService,
             IVnPayService vnPayServie,
-            IConfiguration configuration
+            IConfiguration configuration,
+            IDiaChiService services
             )
         {
             _sanPhamCTService = sanPhamChiTietService;
@@ -68,6 +70,7 @@ namespace APPMVC.Areas.Admin.Controllers
             _hinhAnhService = hinhAnhService;
             _vnPayServie = vnPayServie;
             _configuration = configuration;
+            _services = services;
         }
 
         public async Task<ActionResult> Index()
@@ -670,7 +673,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
 
         }
-
+       
     }
 
 }
