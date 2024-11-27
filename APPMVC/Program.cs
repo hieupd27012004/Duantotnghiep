@@ -4,11 +4,17 @@ using AppAPI.Service;
 using AppData;
 using APPMVC.IService;
 using APPMVC.Service;
+using DinkToPdf.Contracts;
+using DinkToPdf;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using APPMVC.Service.Vnpay;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 builder.Services.AddDbContext<AppDbcontext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -17,13 +23,14 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 10485760; // 10 MB
 });
 
+    
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian tồn tại của session
 });
 
 builder.Services.AddMemoryCache();
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -39,6 +46,9 @@ builder.Services.AddCors(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.Configure<IConfiguration>(builder.Configuration);
+
 builder.Services.AddHttpClient();
 
 //builder.Services.AddTransient<IDayGiayService, DayGiayService>();
@@ -66,12 +76,17 @@ builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCo
 builder.Services.AddTransient<IVoucherService, VoucherService>();
 builder.Services.AddTransient<ILichSuHoaDonService, LichSuHoaDonService>();
 builder.Services.AddTransient<ICardService, CardService>();
-
-
+//Đăng ký VnPay
+builder.Services.AddSingleton<IVnPayService, VnPayService>();
+//builder.Services.AddScoped<IVnPayService, VnPayService>();
 var app = builder.Build();
 
 
-
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "TempFiles")),
+    RequestPath = "/TempFiles"
+});
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
