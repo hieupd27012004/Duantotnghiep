@@ -69,12 +69,14 @@ namespace AppData.ViewModel
             public double TongTien { get; set; }
             public double SoTien { get; set; }
 
-            public double TienThua { get; set; }
+            public double? TienThua { get; set; }
             public DateTime NgayThanhToan { get; set; }
-            public string LoaiGiaoDich { get; set; }
+            public string? LoaiGiaoDich { get; set; }
+            public string? NguoiThaoTac { get; set; }
             public string HinhThucThanhToan { get; set; }
             public string? TrangThai { get; set; }
             public Guid IdHoaDon { get; set; }
+            public Guid IdNhanVien { get; set; }
         }
     }
     public class HoaDonViewModell

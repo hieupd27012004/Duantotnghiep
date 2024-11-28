@@ -57,20 +57,24 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpGet]
         public async Task<ActionResult> Index(int page = 1, string status = null)
         {
-            page = page < 1 ? 1 : page;
+            page = page < 1 ? 1 : page; // Ensure that the page number is at least 1
             const int pageSize = 5;
 
+            // Fetch all invoices
             var hoaDons = await _hoaDonService.GetAllAsync() ?? new List<HoaDon>();
 
+            // Filter out unnecessary statuses
             var filteredHoaDons = hoaDons
                 .Where(h => h.TrangThai != "Tạo đơn hàng")
                 .ToList();
 
+            // Apply status filtering if provided
             if (!string.IsNullOrEmpty(status))
             {
                 filteredHoaDons = filteredHoaDons.Where(h => h.TrangThai == status).ToList();
             }
 
+            // Fetch distinct statuses for the status filter dropdown
             var distinctStatuses = hoaDons
                 .Select(h => h.TrangThai)
                 .Where(s => s != "Tạo đơn hàng")
@@ -79,6 +83,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
             var hoaDonViewModels = new List<AppData.ViewModel.HoaDonViewModell>();
 
+            // Populate view models and calculate total quantities
             foreach (var hoaDon in filteredHoaDons)
             {
                 var hoaDonChiTiets = await _hoaDonChiTietService.GetByIdHoaDonAsync(hoaDon.IdHoaDon);
@@ -92,10 +97,15 @@ namespace APPMVC.Areas.Admin.Controllers
                 });
             }
 
-            filteredHoaDons = filteredHoaDons.OrderByDescending(h => h.NgayTao).ToList();
+            // Sort the view models by NgayTao in descending order
+            hoaDonViewModels = hoaDonViewModels
+                .OrderByDescending(vm => vm.HoaDon.NgayTao)
+                .ToList();
 
+            // Paginate the sorted list
             var pagedHoaDons = hoaDonViewModels.ToPagedList(page, pageSize);
 
+            // Set view bag properties for status filtering and total quantity
             ViewBag.CurrentStatus = status;
             ViewBag.TotalProductQuantity = hoaDonViewModels.Sum(vm => vm.TotalQuantity);
             ViewBag.Statuses = distinctStatuses;
@@ -163,7 +173,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 {
                     IdHoaDon = hoaDon.IdHoaDon,
                     MaDon = hoaDon.MaDon,
-                    KhachHang = khachhang.HoTen,
+                    KhachHang = hoaDon.NguoiNhan,
                     TrangThai = hoaDon.TrangThai,
                     SoDienThoaiNguoiNhan = hoaDon.SoDienThoaiNguoiNhan,
                     LoaiHoaDon = hoaDon.LoaiHoaDon,
@@ -188,6 +198,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     SoTien = payment.SoTien,
                     NgayThanhToan = payment.NgayTao,
                     LoaiGiaoDich = payment.LoaiGiaoDich,
+                    NguoiThaoTac = payment.NguoiThaoTac,
                     HinhThucThanhToan = payment.Pttt,
                     TrangThai = payment.TrangThai,
                     IdHoaDon = payment.IdHoaDon
@@ -298,13 +309,14 @@ namespace APPMVC.Areas.Admin.Controllers
                 }
             }
         }
+        [HttpGet]
         public async Task<IActionResult> CreateLichSuThanhToan(Guid idHoaDon)
         {
             var hoaDon = await _hoaDonService.GetByIdAsync(idHoaDon); 
             var lichSuThanhToanViewModel = new HoaDonChiTietViewModel
             {
                 IdHoaDon = idHoaDon,
-                TongTien = hoaDon.TongTienDonHang 
+                TongTien = hoaDon.TongTienDonHang,
             };
             return PartialView("CreateLichSuThanhToan", lichSuThanhToanViewModel);
         }
@@ -312,7 +324,7 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateLichSuThanhToan(LichSuThanhToanViewModel lichSuThanhToan)
         {
-            var TenNv = HttpContext.Session.GetString("NhanVienName");
+            string TenNv = HttpContext.Session.GetString("NhanVienName");
             var NVIdString = HttpContext.Session.GetString("IdNhanVien");
 
             if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
@@ -327,14 +339,14 @@ namespace APPMVC.Areas.Admin.Controllers
                     SoTien = lichSuThanhToan.SoTien,
                     TienThua = lichSuThanhToan.TienThua,
                     NgayTao = DateTime.Now,
-                    LoaiGiaoDich = lichSuThanhToan.LoaiGiaoDich,
+                    LoaiGiaoDich = "Thanh Toán",
                     Pttt = lichSuThanhToan.HinhThucThanhToan,
                     NguoiThaoTac = TenNv,
-                    TrangThai = lichSuThanhToan.TrangThai ?? "Đã thanh toán",
+                    TrangThai =  "Đã thanh toán",
                     IdHoaDon = lichSuThanhToan.IdHoaDon,
-                    IdNhanVien = NVID
+                    IdNhanVien = NVID,
                 };
-
+               
                 await _lichSuThanhToanService.AddAsync(lichSuThanhToanModel);
 
                 var hoaDon = await _hoaDonService.GetByIdAsync(lichSuThanhToan.IdHoaDon);
@@ -343,7 +355,6 @@ namespace APPMVC.Areas.Admin.Controllers
                     hoaDon.TrangThai = "Đã Thanh Toán"; 
                     await _hoaDonService.UpdateAsync(hoaDon); 
 
-                    // Thêm lịch sử hóa đơn
                     await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
                     {
                         IdHoaDon = hoaDon.IdHoaDon,
@@ -356,6 +367,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 return RedirectToAction("Edit", new { id = lichSuThanhToan.IdHoaDon });
             }
+
             return PartialView("CreateLichSuThanhToan", lichSuThanhToan);
         }
     }

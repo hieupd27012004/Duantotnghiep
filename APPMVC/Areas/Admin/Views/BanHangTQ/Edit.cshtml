@@ -192,39 +192,40 @@
                      <dd class="col-sm-8">Khách Lẻ</dd>
                 </dl>
             </div>
-            <div class="col-md-6 details-card">
-                <dl class="row">
-                    <dt class="col-sm-6">Tổng Tiền Hàng</dt>
-                    <dd class="col-sm-6">@Model.DonGia.ToString("N0")</dd>
-                    <dt class="col-sm-6">Giảm Giá</dt>
-                    <dd class="col-sm-6">@Model.PhiVanChuyen</dd>
-                    <dt class="col-sm-6">Phí Vận Chuyển</dt>
-                    <dd class="col-sm-6">@Model.PhiVanChuyen</dd>
-                    <dt class="col-sm-6">Phương Thức Thanh Toán</dt>
-                    <dd class="col-sm-6">
-                        <div>
-                            <label>
-                                <input type="radio" name="paymentMethod" value="cash" checked /> Tiền Mặt
-                            </label>
-                            <label>
-                                <input type="radio" name="paymentMethod" value="bankTransfer" /> Chuyển Khoản
-                            </label>
-                        </div>
-                    </dd>
-                    <dt class="col-sm-6">Tổng Tiền</dt>
-                    <dd class="col-sm-6">@Model.TongTien.ToString("N0")</dd>
-                </dl>
-                <div class="text-right mt-3">
-                    <form action="@Url.Action("ThanhToanVNPay", "BanHangTQ",  new { area = "Admin" })" method="post">
-                        <input type="hidden" name="idHoaDon" value="@Model.HoaDon.IdHoaDon" />
-                        <button id="btnPayVNPay" name="payment"  class="btn btn-primary">Thanh Toán VNPay</button>
-                    </form>
-                    
-                    <form action="@Url.Action("XacNhanThanhToan", "BanHangTQ",  new { area = "Admin" })" method="post">
-                        <input type="hidden" name="idHoaDon" value="@Model.HoaDon.IdHoaDon" />
-                        <button id="confirmPaymentButton" class="btn btn-success">Xác Nhận Thanh Toán</button>
-                    </form>
-                </div>
+        <div class="col-md-6 details-card">
+            <dl class="row">
+                <dt class="col-sm-6">Tổng Tiền Hàng</dt>
+                <dd class="col-sm-6">@Model.DonGia.ToString("N0")</dd>
+                <dt class="col-sm-6">Giảm Giá</dt>
+                <dd class="col-sm-6">@Model.PhiVanChuyen</dd>
+                <dt class="col-sm-6">Phí Vận Chuyển</dt>
+                <dd class="col-sm-6">@Model.PhiVanChuyen</dd>
+                <dt class="col-sm-6">Tổng Tiền</dt>
+                <dd class="col-sm-6">@Model.TongTien.ToString("N0")</dd>
+
+                <dt class="col-sm-6" id="amountGivenLabel" style="display: none;">Tiền khách đưa</dt>
+                <dd class="col-sm-6" id="amountGiven" style="display: none;">
+                    <input type="number" id="amountGivenInput" placeholder="Nhập số tiền" />
+                </dd>
+
+                <dt class="col-sm-6">Phương Thức Thanh Toán</dt>
+                <dd class="col-sm-6">
+                    <div>
+                        <label>
+                            <input type="radio" name="paymentMethod" value="cash" checked onclick="toggleAmountGiven();" /> Tiền Mặt
+                        </label>
+                        <label>
+                            <input type="radio" name="paymentMethod" value="bankTransfer" onclick="toggleAmountGiven();" /> Chuyển Khoản
+                        </label>
+                    </div>
+                </dd>
+            </dl>
+
+            <div class="text-right mt-3">
+                <form id="paymentForm" action="@Url.Action("XacNhanThanhToan", "BanHangTQ", new { area = "Admin" })" method="post">
+                    <input type="hidden" name="idHoaDon" value="@Model.HoaDon.IdHoaDon" />
+                    <button id="paymentButton" class="btn btn-success" type="button" onclick="handlePayment()">Xác Nhận Thanh Toán</button>
+                </form>
             </div>
         </div>
         <br />
@@ -234,18 +235,17 @@
 
 @section Scripts {
     <script>
+
         function confirmPayment(idHoaDon) {
-            // Hiển thị thông báo đang xử lý
             $("#loadingMessage").show();
 
             $.ajax({
-                url: '/Admin/BanHangTQ/XacNhanThanhToan', // Địa chỉ API xử lý thanh toán
+                url: '/Admin/BanHangTQ/XacNhanThanhToan', 
                 type: 'POST',
                 data: {
                     idHoaDon: idHoaDon
                 },
                 success: function (response) {
-                    // Ẩn thông báo đang xử lý
                     $("#loadingMessage").hide();
 
                     if (response.success) {
