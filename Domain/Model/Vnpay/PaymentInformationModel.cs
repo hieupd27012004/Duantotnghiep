@@ -14,6 +14,7 @@ namespace AppData.Model.Vnpay
         public string Description { get; set; }
         public string FullName { get; set; }
         public DateTime CreatDate { get; set; }
+        public Guid idHoadon { get; set; }
 
     }
 }

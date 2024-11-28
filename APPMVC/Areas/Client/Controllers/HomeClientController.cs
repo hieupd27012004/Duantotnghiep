@@ -207,12 +207,14 @@ namespace APPMVC.Areas.Client.Controllers
 
         private string GenerateOrderNumber()
         {
-            return $"DON-{DateTime.Now:yyyyMMdd}-{GetNextOrderNumber():D3}";
+            return $"HD{GetRandomOrderNumber()}";
         }
 
-        private int GetNextOrderNumber()
+        private string GetRandomOrderNumber()
         {
-            return 1;
+            Random random = new Random();
+            int orderNumber = random.Next(10000, 100000);
+            return orderNumber.ToString();
         }
 
         // Bỏ qua hàm DeductStockAsync
@@ -278,7 +280,6 @@ namespace APPMVC.Areas.Client.Controllers
                     cartItems.Add(cartItem);
                     totalWeight += cartItem.Quantity * 200;
 
-                    // Calculate shipping fee only if diaChiKhachHang is not null
                     if (diaChiKhachHang != null)
                     {
                         int toDistrictId = diaChiKhachHang.DistrictId;
