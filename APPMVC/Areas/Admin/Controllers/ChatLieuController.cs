@@ -46,7 +46,6 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Kiểm tra tính hợp lệ của dữ liệu
                 if (ModelState.ContainsKey("TenChatLieu"))
                 {
                     var error = ModelState["TenChatLieu"].Errors.FirstOrDefault();

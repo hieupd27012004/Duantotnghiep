@@ -93,13 +93,16 @@
 @section Scripts {
     <script>
         function viewInvoiceDetail(element) {
-            const idHoaDon = $(element).data('idhoadon'); // Get IdHoaDon from the clicked element
+            const idHoaDon = $(element).data('idhoadon'); 
             console.log("Fetching details for IdHoaDon:", idHoaDon);
             $.get('@Url.Action("Edit", "BanHangTQ", new { area = "Admin" })', { id: idHoaDon })
                 .done(function(data) {
                     $('#invoiceDetailsContainer').html(data);
                     console.log("Setting IdHoaDon in container:", idHoaDon);
                     loadSanPhamChiTiet(idHoaDon);
+                    bindQuantityButtons(idHoaDon); 
+                    updateInvoiceAndStock(idHoaDon);
+                            toggleAmountGiven();
                 })
                 .fail(function() {
                     alert("Không thể tải chi tiết hóa đơn.");
@@ -112,8 +115,7 @@
                 .done(function(data) {
                     $('#productDetailList').html(data);
                     console.log("Product details loaded successfully.");
-                    bindQuantityButtons(idHoaDon); // Pass IdHoaDon directly
-                    updateInvoiceAndStock(idHoaDon); // Call this with the IdHoaDon
+                  
                 })
                 .fail(function() {
                     alert("Đã xảy ra lỗi khi tải danh sách sản phẩm chi tiết.");
@@ -197,5 +199,24 @@
             })
             .catch(error => console.error('Lỗi:', error));
         }
+        function toggleAmountGiven() {
+               const cashSelected = document.querySelector('input[name="paymentMethod"]:checked').value === 'cash';
+               document.getElementById('amountGivenLabel').style.display = cashSelected ? 'block' : 'none';
+               document.getElementById('amountGiven').style.display = cashSelected ? 'block' : 'none';
+           }
+
+           function handlePayment() {
+               const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+               const form = document.getElementById('paymentForm');
+
+               if (paymentMethod === 'cash') {
+                   form.action = "@Url.Action("XacNhanThanhToan", "BanHangTQ", new { area = "Admin" })";
+               } else if (paymentMethod === 'bankTransfer') {
+                   form.action = "@Url.Action("ThanhToanVNPay", "BanHangTQ", new { area = "Admin" })";
+               }
+               form.submit();
+           }
+
+
     </script>
 }

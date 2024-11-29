@@ -126,10 +126,10 @@ namespace APPMVC.Areas.Client.Controllers
 
             if (thanhToanViewModel == null || !ModelState.IsValid)
             {
-                return View("Checkout", thanhToanViewModel); // Nếu không có địa chỉ hoặc model không hợp lệ
+                return View("Checkout", thanhToanViewModel);
             }
 
-            model.CartItems = cartItems; // Cập nhật lại danh sách cartItems
+            model.CartItems = cartItems;
 
             var customerIdString = HttpContext.Session.GetString("IdKhachHang");
             if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
@@ -175,10 +175,12 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 await _hoaDonService.AddAsync(order);
                 await _hoaDonChiTietService.AddAsync(orderDetails);
-                foreach (var detail in orderDetails)
-                {
-                    await DeductStockAsync(detail.IdSanPhamChiTiet, detail.SoLuong);
-                }
+
+                // Bỏ qua việc trừ số lượng
+                // foreach (var detail in orderDetails)
+                // {
+                //     await DeductStockAsync(detail.IdSanPhamChiTiet, detail.SoLuong);
+                // }
 
                 var lichSu = new LichSuHoaDon
                 {
@@ -205,89 +207,104 @@ namespace APPMVC.Areas.Client.Controllers
 
         private string GenerateOrderNumber()
         {
-            return $"DON-{DateTime.Now:yyyyMMdd}-{GetNextOrderNumber():D3}"; 
+            return $"HD{GetRandomOrderNumber()}";
         }
 
-        private int GetNextOrderNumber()
+        private string GetRandomOrderNumber()
         {
-            return 1; 
+            Random random = new Random();
+            int orderNumber = random.Next(10000, 100000);
+            return orderNumber.ToString();
         }
 
-        public async Task DeductStockAsync(Guid productId, double quantity)
-        {
-            var product = await _sanPhamChiTietService.GetSanPhamChiTietById(productId);
-            if (product != null && product.SoLuong >= quantity)
-            {
-                product.SoLuong -= quantity;
-                await _sanPhamChiTietService.Update(product);
-            }
-            else
-            {
-                throw new Exception("Insufficient stock to fulfill the order.");
-            }
-        }
+        // Bỏ qua hàm DeductStockAsync
+        // public async Task DeductStockAsync(Guid productId, double quantity)
+        // {
+        //     var product = await _sanPhamChiTietService.GetSanPhamChiTietById(productId);
+        //     if (product != null && product.SoLuong >= quantity)
+        //     {
+        //         product.SoLuong -= quantity;
+        //         await _sanPhamChiTietService.Update(product);
+        //     }
+        //     else
+        //     {
+        //         throw new Exception("Insufficient stock to fulfill the order.");
+        //     }
+        // }
         private async Task<(List<CartItemViewModel> cartItems, ThanhToanViewModel thanhToanViewModel)> GetCartItemsWithAddress()
         {
-            // Lấy ID khách hàng từ session
             var customerIdString = HttpContext.Session.GetString("IdKhachHang");
             if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
             {
                 return (new List<CartItemViewModel>(), null);
             }
 
-            // Lấy ID giỏ hàng
             var idGioHang = await _cardService.GetCartIdByCustomerIdAsync(customerId);
             if (idGioHang == Guid.Empty)
             {
                 return (new List<CartItemViewModel>(), null);
             }
 
-            // Lấy chi tiết giỏ hàng
             var gioHangChiTiets = await _gioHangChiTietService.GetByGioHangIdAsync(idGioHang);
             if (gioHangChiTiets == null || !gioHangChiTiets.Any())
             {
                 return (new List<CartItemViewModel>(), null);
             }
 
-            // Lấy danh sách mặt hàng trong giỏ
-            var tasks = gioHangChiTiets.Select(GetCartItemViewModelAsync);
-            var cartItems = await Task.WhenAll(tasks);
-
-            // Lấy thông tin địa chỉ của khách hàng
+            var cartItems = new List<CartItemViewModel>();
             var diaChiKhachHang = await _diaChiService.GetDefaultAddressByCustomerIdAsync(customerId);
 
-            double totalWeight = cartItems.Sum(item => item.Quantity * 500); // Giả sử mỗi sản phẩm nặng 500g
-            double height = 50; // Chiều cao
-            double length = 20; // Chiều dài
-            double width = 20; // Chiều rộng
-            int serviceTypeId = 5; // ID loại dịch vụ
-
+            double totalWeight = 0.0;
+            double height = 50;
+            double length = 20;
+            double width = 20;
+            int serviceTypeId = 2;
             double phiVanChuyen = 0.0;
-            if (diaChiKhachHang != null)
-            {
-                int fromDistrictId = 1454; // ID quận xuất phát
-                int toDistrictId = diaChiKhachHang.DistrictId; // ID quận đích
-                string fromWardCode = "21211"; // Mã phường xã xuất phát (cần thay thế bằng giá trị thực tế)
-                string toWardCode = diaChiKhachHang.WardId; // Mã phường xã đích
 
-                try
+            int fromDistrictId = 3440;
+            string fromWardCode = "13005";
+
+            try
+            {
+                foreach (var item in gioHangChiTiets)
                 {
-                    phiVanChuyen = await _giaoHangNhanhService.CalculateShippingFee(
-                        fromDistrictId,
-                        fromWardCode,
-                        toDistrictId,
-                        toWardCode,
-                        height,
-                        length,
-                        totalWeight,
-                        width,
-                        serviceTypeId);
+                    var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
+                    var cartItem = new CartItemViewModel
+                    {
+                        IdSanPhamChiTiet = item.IdSanPhamChiTiet,
+                        ProductName = sanPham?.TenSanPham ?? "Unknown Product",
+                        Quantity = item.SoLuong,
+                        Price = item.SoLuong > 0 ? item.TongTien / item.SoLuong : 0
+                    };
+
+                    cartItems.Add(cartItem);
+                    totalWeight += cartItem.Quantity * 200;
+
+                    if (diaChiKhachHang != null)
+                    {
+                        int toDistrictId = diaChiKhachHang.DistrictId;
+                        string toWardCode = diaChiKhachHang.WardId;
+
+                        phiVanChuyen += await _giaoHangNhanhService.CalculateShippingFee(
+                            fromDistrictId,
+                            fromWardCode,
+                            toDistrictId,
+                            toWardCode,
+                            height,
+                            length,
+                            cartItem.Quantity * 200,
+                            width,
+                            serviceTypeId,
+                            cartItem.ProductName,
+                            (int)cartItem.Quantity
+                        );
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Lỗi khi tính phí vận chuyển: {ex.Message}");
-                    phiVanChuyen = 0.0;
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi tính phí vận chuyển: {ex.Message}");
+                phiVanChuyen = 0.0;
             }
 
             var thanhToanViewModel = new ThanhToanViewModel
@@ -297,24 +314,12 @@ namespace APPMVC.Areas.Client.Controllers
                 ProvinceName = diaChiKhachHang?.ProvinceName,
                 DistrictName = diaChiKhachHang?.DistrictName,
                 WardName = diaChiKhachHang?.WardName,
-                CartItems = cartItems.ToList(),
-                PaymentMethod = "Credit Card",
-                PhiVanChuyen = phiVanChuyen
+                CartItems = cartItems,
+                PhiVanChuyen = phiVanChuyen,
+                MoTa = diaChiKhachHang?.MoTa
             };
 
-            return (cartItems.ToList(), thanhToanViewModel);
-        }
-
-        private async Task<CartItemViewModel> GetCartItemViewModelAsync(GioHangChiTiet item)
-        {
-            var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
-            return new CartItemViewModel
-            {
-                IdSanPhamChiTiet = item.IdSanPhamChiTiet,
-                ProductName = sanPham?.TenSanPham ?? "Unknown Product",
-                Quantity = item.SoLuong,
-                Price = item.SoLuong > 0 ? item.TongTien / item.SoLuong : 0
-            };
+            return (cartItems, thanhToanViewModel);
         }
 
     }

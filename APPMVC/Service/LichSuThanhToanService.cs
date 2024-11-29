@@ -63,6 +63,12 @@ namespace APPMVC.Service
         public async Task<List<LichSuThanhToan>> GetByIdHoaDonAsync(Guid idHoaDon)
         {
             var response = await _httpClient.GetAsync($"api/LichSuThanhToan/getbyidhoadon?idHoaDon={idHoaDon}");
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return new List<LichSuThanhToan>();
+            }
+
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<List<LichSuThanhToan>>();
         }
