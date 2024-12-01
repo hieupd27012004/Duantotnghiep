@@ -116,6 +116,13 @@ namespace AppAPI.Repository
             //Hợp lệ trả về kh
             return kh;  
         }
-        
+
+        public async Task<KhachHang?> GetCustomerByPhoneOrEmailAsync(string phoneOrEmail)
+        {
+            var customer = await _context.khachHangs
+                .FirstOrDefaultAsync(kh => kh.Email == phoneOrEmail || kh.SoDienThoai == phoneOrEmail);
+
+            return customer;
+        }
     }
 }

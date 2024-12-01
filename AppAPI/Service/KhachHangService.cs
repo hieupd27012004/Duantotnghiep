@@ -59,5 +59,9 @@ namespace AppAPI.Service
             return await _repo.ResetPass(email, newPassword);
         }
 
+        public async Task<KhachHang?> GetCustomerByPhoneOrEmailAsync(string phoneOrEmail)
+        {
+            return await _repo.GetCustomerByPhoneOrEmailAsync(phoneOrEmail);
+        }
     }
 }

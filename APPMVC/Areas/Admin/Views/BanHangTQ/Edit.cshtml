@@ -83,6 +83,14 @@
     .btn {
         margin-top: 20px;
     }
+
+    #customerSearch {
+        height: calc(2.25rem + 2px); /* Match the button height */
+    }
+
+    #btnAddCustomer {
+        height: calc(2.25rem + 2px); /* Match the input height */
+    }
 </style>
 
 <div class="content-wrapper">
@@ -179,27 +187,57 @@
             </tbody>
         </table>
         <br />
-        <div class="d-flex justify-content-between align-items-center">
-            <h4>Khách Hàng</h4>
-            <button class="btn btn-primary" id="btnAddCustomer">Thêm Khách Hàng</button>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Khách Hàng</h4>
+        <div class="d-flex align-items-center">
+            <input type="text" id="customerSearch" class="form-control me-2" placeholder="Tìm kiếm theo SDT hoặc Email" style="width: 250px; margin-top:19px" />
+            <button class="btn btn-secondary ms-2" id="btnSearchCustomer">Tìm Kiếm</button>
+            <button class="btn btn-primary ms-2" id="btnAddCustomer">Thêm Khách Hàng</button>
         </div>
-        <hr />
-        <div class="row">
-            <div class="col-md-6">
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <dl class="row" id="customerDetails">
+                <dt class="col-sm-4">Tên Khách Hàng</dt>
+                <dd class="col-sm-8" id="customerName">Khách Lẻ</dd>
+            </dl>
+            <div id="customerInfo" style="display: none;">
                 <dl class="row">
-                    <dt class="col-sm-4">Tên Khách Hàng</dt>
-@*                     <dd class="col-sm-8">@Model.CustomerName</dd> *@
-                     <dd class="col-sm-8">Khách Lẻ</dd>
+                    <dt class="col-sm-4">Người Nhận</dt>
+                    <dd class="col-sm-8" id="nguoiNhan"></dd>
+
+                    <dt class="col-sm-4">Số Điện Thoại</dt>
+                    <dd class="col-sm-8" id="soDienThoai"></dd>
+
+                    <dt class="col-sm-4">Tỉnh/Thành phố</dt>
+                    <dd class="col-sm-8" id="provinceName"></dd>
+
+                    <dt class="col-sm-4">Quận/Huyện</dt>
+                    <dd class="col-sm-8" id="districtName"></dd>
+
+                    <dt class="col-sm-4">Phường/Xã</dt>
+                    <dd class="col-sm-8" id="wardName"></dd>
+
+                    <dt class="col-sm-4">Địa Chỉ Giao Hàng</dt>
+                    <dd class="col-sm-8" id="moTa"></dd>
                 </dl>
             </div>
+        </div>
         <div class="col-md-6 details-card">
             <dl class="row">
+                <dt class="col-sm-6"></dt>
+                <dd class="col-sm-6">
+                    <label>
+                        <input type="checkbox" id="deliveryToggle" /> Giao Hàng
+                    </label>
+                </dd>
                 <dt class="col-sm-6">Tổng Tiền Hàng</dt>
                 <dd class="col-sm-6">@Model.DonGia.ToString("N0")</dd>
                 <dt class="col-sm-6">Giảm Giá</dt>
-                <dd class="col-sm-6">@Model.PhiVanChuyen</dd>
-                <dt class="col-sm-6">Phí Vận Chuyển</dt>
-                <dd class="col-sm-6">@Model.PhiVanChuyen</dd>
+                <dd class="col-sm-6">@Model.GiamGia</dd>
+                <dt class="col-sm-6" id="shippingFeeLabel" style="display: none;">Phí Vận Chuyển</dt>
+                <dd class="col-sm-6" id="shippingFee" style="display: none;">@Model.PhiVanChuyen</dd>
                 <dt class="col-sm-6">Tổng Tiền</dt>
                 <dd class="col-sm-6">@Model.TongTien.ToString("N0")</dd>
 
@@ -224,6 +262,7 @@
             <div class="text-right mt-3">
                 <form id="paymentForm" action="@Url.Action("XacNhanThanhToan", "BanHangTQ", new { area = "Admin" })" method="post">
                     <input type="hidden" name="idHoaDon" value="@Model.HoaDon.IdHoaDon" />
+                    <input type="hidden" id="customerId" name="idKhachHang" />
                     <button id="paymentButton" class="btn btn-success" type="button" onclick="handlePayment()">Xác Nhận Thanh Toán</button>
                 </form>
             </div>
@@ -249,9 +288,8 @@
                     $("#loadingMessage").hide();
 
                     if (response.success) {
-                        // Nếu thành công, thông báo người dùng và hiển thị link tải PDF
                         alert('Thanh toán thành công! Hóa đơn đã được lưu.');
-                        window.location.href = response.fileUrl;  // Mở file PDF đã tạo
+                        window.location.href = response.fileUrl; 
                     } else {
                         alert('Có lỗi xảy ra: ' + response.message);
                     }
@@ -264,111 +302,6 @@
             });
         }
 
-        // Gọi hàm khi người dùng bấm vào nút xác nhận thanh toán
-        $(document).on('click', '#btnConfirmPayment', function () {
-            var idHoaDon = $(this).data('id');  // Lấy id hóa đơn từ dữ liệu của nút
-            confirmPayment(idHoaDon); // Gọi hàm xử lý thanh toán
-        });
-        $(document).ready(function () {
-            var idHoaDon = '@Model.HoaDon.IdHoaDon';
-            console.log("ID Hóa Đơn:", idHoaDon);  // Kiểm tra giá trị của idHoaDon
-
-            $('#addProductModal').on('show.bs.modal', function () {
-                $.get('@Url.Action("GetSanPhamChiTietList", "BanHangTQ", new { area = "Admin" })', { idHoaDon: idHoaDon })
-                    .done(function (data) {
-                        $('#productDetailList').html(data);
-                    })
-                    .fail(function (jqXHR, textStatus, errorThrown) {
-                        console.error("Error: " + textStatus, errorThrown);
-                        alert("Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.");
-                    });
-            });
-        });
-        $(document).ready(function () {
-            $('#addProductModal').on('show.bs.modal', function () {
-                var idHoaDon = $(this).data('idhoadon'); 
-                if (!idHoaDon) {
-                    console.error("ID hóa đơn không hợp lệ.");
-                    alert("Đã xảy ra lỗi, vui lòng thử lại.");
-                    return;
-                }
-
-                $.get('@Url.Action("GetSanPhamChiTietList", "BanHangTQ", new { area = "Admin" })', { idHoaDon: idHoaDon })
-                    .done(function (data) {
-                        $('#productDetailList').html(data);
-                    })
-                    .fail(function (jqXHR, textStatus, errorThrown) {
-                        console.error("Error: " + textStatus, errorThrown);
-                        alert("Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại.");
-                    });
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const decreaseButtons = document.querySelectorAll('.decrease');
-            const increaseButtons = document.querySelectorAll('.increase');
-
-            decreaseButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const input = this.nextElementSibling;
-                    let currentValue = parseInt(input.value);
-                    if (currentValue > 1) {
-                        input.value = currentValue - 1;
-                        updateInvoiceAndStock();
-                    } else {
-                        alert("Số lượng phải lớn hơn 0.");
-                    }
-                });
-            });
-
-            increaseButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const input = this.previousElementSibling;
-                    let currentValue = parseInt(input.value);
-                    input.value = currentValue + 1;
-                    updateInvoiceAndStock();
-                });
-            });
-
-            function updateInvoiceAndStock() {
-                const idHoaDon = '@Model.HoaDon.IdHoaDon';
-                const sanPhamChiTiets = [];
-
-                document.querySelectorAll('.quantity-amount').forEach(input => {
-                    const hoaDonChiTietId = input.getAttribute('data-id');
-                    const quantity = parseInt(input.value);
-                    sanPhamChiTiets.push({
-                        IdSanPhamChiTiet: hoaDonChiTietId,
-                        Quantity: quantity
-                    });
-                });
-
-                const model = {
-                    IdHoaDon: idHoaDon,
-                    SanPhamChiTiets: sanPhamChiTiets
-                };
-
-                fetch('/Admin/BanHangTQ/UpdateInvoiceDetails', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(model)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            console.log('Cập nhật hóa đơn và số lượng thành công!');
-                        } else {
-                            console.error('Cập nhật thất bại:', data.message);
-                            alert("Cập nhật thất bại. Vui lòng thử lại.");
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Lỗi:', error);
-                        alert("Đã xảy ra lỗi khi cập nhật thông tin.");
-                    });
-            }
-        });   
+  
     </script>
 }

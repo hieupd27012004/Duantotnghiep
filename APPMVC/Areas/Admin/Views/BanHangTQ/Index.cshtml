@@ -90,19 +90,22 @@
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script>
         function viewInvoiceDetail(element) {
-            const idHoaDon = $(element).data('idhoadon'); 
+            const idHoaDon = $(element).data('idhoadon');
             console.log("Fetching details for IdHoaDon:", idHoaDon);
             $.get('@Url.Action("Edit", "BanHangTQ", new { area = "Admin" })', { id: idHoaDon })
                 .done(function(data) {
                     $('#invoiceDetailsContainer').html(data);
                     console.log("Setting IdHoaDon in container:", idHoaDon);
+                    bindSearchButton();
+                    document.getElementById("deliveryToggle").addEventListener('change', toggleDeliveryDetails);
+                    toggleAmountGiven();
                     loadSanPhamChiTiet(idHoaDon);
-                    bindQuantityButtons(idHoaDon); 
+                    bindQuantityButtons(idHoaDon);
                     updateInvoiceAndStock(idHoaDon);
-                            toggleAmountGiven();
                 })
                 .fail(function() {
                     alert("Không thể tải chi tiết hóa đơn.");
@@ -115,7 +118,6 @@
                 .done(function(data) {
                     $('#productDetailList').html(data);
                     console.log("Product details loaded successfully.");
-                  
                 })
                 .fail(function() {
                     alert("Đã xảy ra lỗi khi tải danh sách sản phẩm chi tiết.");
@@ -199,24 +201,122 @@
             })
             .catch(error => console.error('Lỗi:', error));
         }
+
         function toggleAmountGiven() {
-               const cashSelected = document.querySelector('input[name="paymentMethod"]:checked').value === 'cash';
-               document.getElementById('amountGivenLabel').style.display = cashSelected ? 'block' : 'none';
-               document.getElementById('amountGiven').style.display = cashSelected ? 'block' : 'none';
-           }
+            const cashSelected = document.querySelector('input[name="paymentMethod"]:checked').value === 'cash';
+            document.getElementById('amountGivenLabel').style.display = cashSelected ? 'block' : 'none';
+            document.getElementById('amountGiven').style.display = cashSelected ? 'block' : 'none';
+        }
 
-           function handlePayment() {
-               const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-               const form = document.getElementById('paymentForm');
+            function handlePayment() {
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const form = document.getElementById('paymentForm');
 
-               if (paymentMethod === 'cash') {
-                   form.action = "@Url.Action("XacNhanThanhToan", "BanHangTQ", new { area = "Admin" })";
-               } else if (paymentMethod === 'bankTransfer') {
-                   form.action = "@Url.Action("ThanhToanVNPay", "BanHangTQ", new { area = "Admin" })";
-               }
-               form.submit();
-           }
+            // Set the action based on the selected payment method
+            if (paymentMethod === 'cash') {
+                form.action = "@Url.Action("XacNhanThanhToan", "BanHangTQ", new { area = "Admin" })";
+            } else if (paymentMethod === 'bankTransfer') {
+                form.action = "@Url.Action("ThanhToanVNPay", "BanHangTQ", new { area = "Admin" })";
+            }
 
+            // Ensure the customer ID is set in the hidden input before submitting
+            const customerId = document.getElementById('customerId').value; // Get the customer ID
+            if (customerId) {
+                // Set the hidden input for idKhachHang
+                const idKhachHangInput = document.createElement('input');
+                idKhachHangInput.type = 'hidden';
+                idKhachHangInput.name = 'idKhachHang'; // Ensure this matches your model binding
+                idKhachHangInput.value = customerId;
+                form.appendChild(idKhachHangInput);
+            }
+
+            // Submit the form
+            form.submit();
+        }
+        function bindSearchButton() {
+            const searchButton = document.getElementById('btnSearchCustomer');
+
+            if (!searchButton) {
+                console.error('Button with ID "btnSearchCustomer" not found.');
+                return;
+            }
+
+            searchButton.addEventListener('click', async function() {
+                const searchValue = document.getElementById('customerSearch').value.trim();
+
+                if (!searchValue) {
+                    alert('Vui lòng nhập số điện thoại hoặc email.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('@Url.Action("SearchCustomer", "BanHangTQ", new { area = "Admin" })?search=' + encodeURIComponent(searchValue));
+
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch data.');
+                    }
+
+                    const result = await response.json();
+
+                    if (result.idKhachHang) {
+                        document.getElementById('customerName').innerText = result.customerName || 'Khách Lẻ';
+                        document.getElementById('nguoiNhan').innerText = result.nguoiNhan || 'Không có';
+                        document.getElementById('soDienThoai').innerText = result.soDienThoai || 'Không có';
+                        document.getElementById('provinceName').innerText = result.provinceName || 'Không có';
+                        document.getElementById('districtName').innerText = result.districtName || 'Không có';
+                        document.getElementById('wardName').innerText = result.wardName || 'Không có';
+                        document.getElementById('moTa').innerText = result.moTa || 'Không có';
+                        document.getElementById('customerId').value = result.idKhachHang;
+
+                        // Show the customer info section only if delivery is checked
+                        toggleDeliveryDetails();
+                    } else {
+                        alert('Không tìm thấy khách hàng.');
+                        resetCustomerDetails();
+                    }
+                } catch (error) {
+                    console.error('Error occurred:', error);
+                    alert('Đã xảy ra lỗi khi tìm kiếm khách hàng.');
+                    resetCustomerDetails();
+                }
+            });
+        }
+
+        function resetCustomerDetails() {
+            document.getElementById('customerName').innerText = 'Khách Lẻ';
+            document.getElementById('customerId').value = '';
+            document.getElementById('nguoiNhan').innerText = 'Không có';
+            document.getElementById('soDienThoai').innerText = 'Không có';
+            document.getElementById('provinceName').innerText = 'Không có';
+            document.getElementById('districtName').innerText = 'Không có';
+            document.getElementById('wardName').innerText = 'Không có';
+            document.getElementById('moTa').innerText = 'Không có';
+            document.getElementById('customerInfo').style.display = 'none'; // Hide customer info
+        }
+
+        function toggleDeliveryDetails() {
+            const deliveryCheckbox = document.getElementById("deliveryToggle");
+            const customerInfo = document.getElementById("customerInfo");
+            const shippingFeeLabel = document.getElementById("shippingFeeLabel");
+            const shippingFee = document.getElementById("shippingFee");
+
+            // Show or hide delivery details based on checkbox state
+            if (deliveryCheckbox.checked) {
+                customerInfo.style.display = "block"; // Show customer info if delivery is checked
+                shippingFeeLabel.style.display = "block";
+                shippingFee.style.display = "block";
+            } else {
+                customerInfo.style.display = "none"; // Hide customer info if delivery is unchecked
+                shippingFeeLabel.style.display = "none";
+                shippingFee.style.display = "none";
+            }
+        }
+
+        // Initial setup to hide customer info on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('customerInfo').style.display = 'none'; // Initially hide customer info
+            document.getElementById("deliveryToggle").addEventListener('change', toggleDeliveryDetails);
+        });
 
     </script>
 }

@@ -425,8 +425,9 @@ namespace APPMVC.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> XacNhanThanhToan(Guid idHoaDon)
+        public async Task<IActionResult> XacNhanThanhToan(Guid idHoaDon, Guid? idKhachHang)
         {
+            Console.WriteLine($"idKhachHang: {idKhachHang}");
             if (!ModelState.IsValid)
             {
                 return BadRequest(new { message = "Dữ liệu không hợp lệ." });
@@ -453,9 +454,8 @@ namespace APPMVC.Areas.Admin.Controllers
                     double thanhTien = hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia;
                     tongTienHang += thanhTien;
 
-                    // Trừ số lượng sản phẩm trong kho
-                    sanPhamCT.SoLuong -= hoaDonChiTiet.SoLuong; // Trừ số lượng
-                    await _sanPhamCTService.Update(sanPhamCT); // Cập nhật sản phẩm
+                    sanPhamCT.SoLuong -= hoaDonChiTiet.SoLuong; 
+                    await _sanPhamCTService.Update(sanPhamCT);
                 }
             }
 
@@ -465,7 +465,16 @@ namespace APPMVC.Areas.Admin.Controllers
                 return NotFound(new { message = "Hóa đơn không tồn tại." });
             }
 
-            if (hoaDon.IdKhachHang == null || hoaDon.IdKhachHang == Guid.Empty)
+            if (idKhachHang.HasValue && idKhachHang.Value != Guid.Empty)
+            {
+                hoaDon.IdKhachHang = idKhachHang.Value;
+                var customer = await _khachHangService.GetIdKhachHang(hoaDon.IdKhachHang);
+                if (customer != null)
+                {
+                    hoaDon.NguoiNhan = customer.HoTen; 
+                }
+            }
+            else
             {
                 var newCustomer = new KhachHang
                 {
@@ -528,13 +537,10 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 await _lichSuThanhToanService.AddAsync(lichSuThanhToan);
 
-                // Tạo HTML từ mẫu hóa đơn
                 var htmlContent = await GenerateInvoiceHtmlFromTemplate(hoaDon, hoaDonChiTietList);
 
-                // Tạo PDF từ HTML
                 var pdfBytes = GeneratePdfFromHtml(htmlContent);
 
-                // Lưu file PDF vào thư mục tạm
                 var tempFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "TempFiles");
                 if (!Directory.Exists(tempFilePath))
                 {
@@ -547,12 +553,11 @@ namespace APPMVC.Areas.Admin.Controllers
                 var fileUrl = $"/TempFiles/{fileName}";
 
                 TempData["SuccessMessage"] = "Thanh toán thành công! Bạn có muốn in hóa đơn không?";
-                TempData["FileUrl"] = fileUrl; // Lưu file URL để sử dụng trong view
+                TempData["FileUrl"] = fileUrl;
                 return RedirectToAction("ShowInvoiceMessage");
             }
             catch (Exception ex)
             {
-                // Log chi tiết lỗi trong quá trình xử lý thanh toán
                 return StatusCode(500, new { message = "Đã xảy ra lỗi khi xác nhận thanh toán." });
             }
         }
@@ -815,6 +820,45 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             return NotFound(new { message = "Không tìm thấy hóa đơn." });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SearchCustomer(string search)
+        {
+            if (string.IsNullOrWhiteSpace(search))
+            {
+                return BadRequest("Invalid search criteria.");
+            }
+
+            var customer = await _khachHangService.GetCustomerByPhoneOrEmailAsync(search);
+
+            if (customer == null)
+            {
+                return Ok(new
+                {
+                    customerName = (string)null,
+                    idKhachHang = (Guid?)null,
+                    nguoiNhan = (string)null,
+                    soDienThoai = (string)null,
+                    provinceName = (string)null,
+                    districtName = (string)null,
+                    wardName = (string)null,
+                    moTa = (string)null
+                });
+            }
+            var diaChiKhachHang = await _services.GetDefaultAddressByCustomerIdAsync(customer.IdKhachHang);
+
+            return Ok(new
+            {
+                customerName = customer.HoTen,
+                idKhachHang = customer.IdKhachHang,
+                nguoiNhan = diaChiKhachHang?.HoTen,
+                soDienThoai = diaChiKhachHang?.SoDienThoai,
+                provinceName = diaChiKhachHang?.ProvinceName,
+                districtName = diaChiKhachHang?.DistrictName,
+                wardName = diaChiKhachHang?.WardName,
+                moTa = diaChiKhachHang?.MoTa
+            });
         }
     }
 

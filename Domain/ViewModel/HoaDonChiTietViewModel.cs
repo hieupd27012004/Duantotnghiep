@@ -26,7 +26,24 @@ namespace AppData.ViewModel
         public HoaDonViewModel? HoaDon { get; set; }
         public List<LichSuThanhToanViewModel> LichSuThanhToans { get; set; } = new List<LichSuThanhToanViewModel>();
         public List<LichSuHoaDonViewModel> LichSuHoaDons { get; set; } = new List<LichSuHoaDonViewModel>();
-            
+
+        public string? NguoiNhan { get; set; }
+
+        [RegularExpression(@"^(\+84|0)[3|5|7|8|9][0-9]{8}$", ErrorMessage = "Không Đúng Định Dạng")]
+        [StringLength(10, MinimumLength = 10, ErrorMessage = "Phải Đủ 10 Số")]
+        public string? SoDienThoai { get; set; }
+
+        public string? ProvinceName { get; set; }
+        public int? ProvinceId { get; set; }
+
+        public string? DistrictName { get; set; }
+
+        public int? DistrictId { get; set; }
+        public string? WardName { get; set; }
+
+        public string? WardId { get; set; }
+        public string? MoTa { get; set; }
+
         public class LichSuHoaDonViewModel
         {
             public Guid IdLichSuHoaDon { get; set; }
@@ -36,6 +53,8 @@ namespace AppData.ViewModel
 
             public string NguoiThaoTac { get; set; }
             public string TrangThai { get; set; }
+
+            public string? GhiChu { get; set; }
 
             public Guid IdHoaDon { get; set; }
         }

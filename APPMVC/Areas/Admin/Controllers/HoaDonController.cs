@@ -187,7 +187,8 @@ namespace APPMVC.Areas.Admin.Controllers
                     NgayTao = lichSu.NgayTao,
                     NguoiThaoTac = lichSu.NguoiThaoTac,
                     TrangThai = lichSu.TrangThai,
-                    IdHoaDon = lichSu.IdHoaDon
+                    IdHoaDon = lichSu.IdHoaDon,
+                    GhiChu = lichSu.GhiChu,
                 }).ToList(),
 
                 SanPhamChiTiets = sanPhamChiTiets,
@@ -238,7 +239,7 @@ namespace APPMVC.Areas.Admin.Controllers
             return View(viewModel);
         }
         [HttpPost]
-        public async Task<IActionResult> UpdateInvoiceStatus(Guid id)
+        public async Task<IActionResult> UpdateInvoiceStatus(Guid id, string actionType, string reason)
         {
             var hoaDon = await _hoaDonService.GetByIdAsync(id);
             if (hoaDon == null)
@@ -246,55 +247,132 @@ namespace APPMVC.Areas.Admin.Controllers
                 return NotFound($"Hóa đơn với ID {id} không tồn tại.");
             }
 
-            var lichSuThanhToans = await _lichSuThanhToanService.GetByIdHoaDonAsync(id);
-            bool hasPaymentHistory = lichSuThanhToans.Any();
+            var lichSu = await _lichSuHoaDonService.GetByIdHoaDonAsync(id);
+            bool hasPaymentHistory = lichSu.Any();
+            string previousState = hoaDon.TrangThai;
 
             switch (hoaDon.TrangThai)
             {
                 case "Chờ Xác Nhận":
-                    hoaDon.TrangThai = "Chờ Giao Hàng";
-                    await UpdateProductQuantities(hoaDon.IdHoaDon);
+                    if (actionType == "huy" && hoaDon.TrangThai != "Đã Hủy")
+                    {
+                        hoaDon.TrangThai = "Đã Hủy";
+                        await UpdateProductQuantities2(hoaDon.IdHoaDon);
+                    }
+                    else if (hoaDon.TrangThai != "Đã Giao Hàng")
+                    {
+                        hoaDon.TrangThai = "Chờ Giao Hàng";
+                        await UpdateProductQuantities(hoaDon.IdHoaDon);
+                    }
                     break;
 
                 case "Chờ Giao Hàng":
-                    hoaDon.TrangThai = "Đang Vận Chuyển";
+                    if (actionType == "huy" && hoaDon.TrangThai != "Đã Hủy")
+                    {
+                        hoaDon.TrangThai = "Đã Hủy";
+                        await UpdateProductQuantities2(hoaDon.IdHoaDon);
+                    }
+                    else if (actionType == "quayLai")
+                    {
+                        return await RevertInvoiceStatus(id, reason);
+                    }
+                    else
+                    {
+                        hoaDon.TrangThai = "Đang Vận Chuyển";
+                    }
                     break;
 
                 case "Đang Vận Chuyển":
-                    hoaDon.TrangThai = "Đã Giao Hàng";
+                    if (actionType == "quayLai")
+                    {
+                        return await RevertInvoiceStatus(id, reason);
+                    }
+                    else
+                    {
+                        hoaDon.TrangThai = "Đã Giao Hàng";
+                    }
                     break;
 
                 case "Đã Giao Hàng":
-                    if (hasPaymentHistory)
+                    if (actionType == "quayLai")
                     {
-                        hoaDon.TrangThai = "Hoàn Thành"; 
+                        return await RevertInvoiceStatus(id, reason);
+                    }
+                    else if (hasPaymentHistory)
+                    {
+                        hoaDon.TrangThai = "Hoàn Thành";
                     }
                     else
                     {
                         return BadRequest("Cần xác nhận thanh toán trước khi hoàn thành hóa đơn.");
                     }
                     break;
+
                 case "Đã Thanh Toán":
-                    hoaDon.TrangThai = "Hoàn Thành";
+                    if (actionType == "quayLai")
+                    {
+                        return await RevertInvoiceStatus(id, reason);
+                    }
+                    else
+                    {
+                        hoaDon.TrangThai = "Hoàn Thành";
+                    }
                     break;
 
                 default:
                     return BadRequest("Trạng thái hóa đơn không hợp lệ.");
             }
 
+            if (hoaDon.TrangThai != previousState)
+            {
+                await LogHistory(hoaDon, hoaDon.TrangThai, reason);
+            }
+
+            await _hoaDonService.UpdateAsync(hoaDon);
+            return RedirectToAction("Edit", new { id });
+        }
+
+        private async Task<IActionResult> RevertInvoiceStatus(Guid id, string reason)
+        {
+            var hoaDon = await _hoaDonService.GetByIdAsync(id);
+            if (hoaDon == null)
+            {
+                return NotFound($"Hóa đơn với ID {id} không tồn tại.");
+            }
+
+            var lichSu = await _lichSuHoaDonService.GetByIdHoaDonAsync(id);
+            if (lichSu == null || lichSu.Count < 2)
+            {
+                return BadRequest("Không có lịch sử trạng thái trước đó để quay lại.");
+            }
+
+            var previousState = lichSu[lichSu.Count - 2].ThaoTac;
+
+            hoaDon.TrangThai = previousState;
+
+            if (previousState == "Chờ Xác Nhận")
+            {
+                await UpdateProductQuantities2(hoaDon.IdHoaDon);
+            }
+
+            await LogHistory(hoaDon, $"{previousState}", reason);
 
             await _hoaDonService.UpdateAsync(hoaDon);
 
+            return RedirectToAction("Edit", new { id });
+        }
+
+        private async Task LogHistory(HoaDon hoaDon, string thaoTac, string reason)
+        {
             await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
             {
                 IdHoaDon = hoaDon.IdHoaDon,
-                ThaoTac = hoaDon.TrangThai,
+                ThaoTac = thaoTac,
                 NgayTao = DateTime.Now,
                 NguoiThaoTac = "Nhân Viên",
-                TrangThai = hoaDon.TrangThai
+                TrangThai = hoaDon.TrangThai,
+                GhiChu = reason 
             });
-
-            return RedirectToAction("Edit", new { id });
         }
         private async Task UpdateProductQuantities(Guid idHoaDon)
         {
@@ -306,6 +384,19 @@ namespace APPMVC.Areas.Admin.Controllers
                 {
                     sanPhamCT.SoLuong -= chiTiet.SoLuong; 
                     await _sanPhamCTService.Update(sanPhamCT); 
+                }
+            }
+        }
+        private async Task UpdateProductQuantities2(Guid idHoaDon)
+        {
+            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
+            foreach (var chiTiet in hoaDonChiTietList)
+            {
+                var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(chiTiet.IdSanPhamChiTiet);
+                if (sanPhamCT != null)
+                {
+                    sanPhamCT.SoLuong += chiTiet.SoLuong;
+                    await _sanPhamCTService.Update(sanPhamCT);
                 }
             }
         }
