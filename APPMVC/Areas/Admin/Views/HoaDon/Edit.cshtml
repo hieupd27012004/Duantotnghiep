@@ -175,10 +175,10 @@
                                             <i class="fas fa-clock" style="color: orange;" title="Chờ xác nhận"></i>
                                             break;
                                         case "Chờ Giao Hàng":
-                                            <i class="fas fa-hourglass-start" style="color: #ffcc00;" title="Chờ giao hàng"></i> 
+                                            <i class="fas fa-hourglass-start" style="color: #ffcc00;" title="Chờ giao hàng"></i>
                                             break;
                                         case "Đang Vận Chuyển":
-                                            <i class="fas fa-shipping-fast" style="color: #007bff;" title="Đang vận chuyển"></i> 
+                                            <i class="fas fa-shipping-fast" style="color: #007bff;" title="Đang vận chuyển"></i>
                                             break;
                                         case "Đã Thanh Toán":
                                             <i class="fas fa-money-check-alt" style="color: green;" title="Đã thanh toán"></i>
@@ -207,36 +207,50 @@
                     }
                 </div>
 
-                @if (Model.HoaDon.TrangThai != "Hoàn Thành")
+                @if (Model.HoaDon.TrangThai != "Hoàn Thành" && Model.HoaDon.TrangThai != "Đã Hủy")
                 {
-                    <form asp-action="UpdateInvoiceStatus" asp-route-id="@Model.HoaDon.IdHoaDon" method="post">
-                        @if (Model.HoaDon.TrangThai == "Chờ Giao Hàng")
-                        {
-                            <button type="submit" class="btn btn-warning">Xác Nhận Giao Hàng</button>
-                        }
-                        else if (Model.HoaDon.TrangThai == "Đang Vận Chuyển")
-                        {
-                            <button type="submit" class="btn btn-success">Xác Nhận Lấy Hàng</button>
-                        }
-                        else if (Model.HoaDon.TrangThai == "Đã Giao Hàng")
-                        {
-                            if (Model.LichSuThanhToans.Any())
+                    <form asp-action="UpdateInvoiceStatus" asp-route-id="@Model.HoaDon.IdHoaDon" method="post" onsubmit="return confirmAction();">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                @if (Model.HoaDon.TrangThai == "Chờ Giao Hàng")
+                                {
+                                    <button type="submit" class="btn btn-warning">Xác Nhận Giao Hàng</button>
+                                    <button type="submit" name="actionType" value="huy" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn hủy hóa đơn này không?');">Hủy</button>
+                                }
+                                else if (Model.HoaDon.TrangThai == "Đang Vận Chuyển")
+                                {
+                                    <button type="submit" class="btn btn-success">Xác Nhận Lấy Hàng</button>
+                                }
+                                else if (Model.HoaDon.TrangThai == "Đã Giao Hàng")
+                                {
+                                    if (Model.LichSuThanhToans.Any())
+                                    {
+                                        <button type="submit" class="btn btn-primary">Cập Nhật Trạng Thái Giao Hàng</button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger">Cần xác nhận thanh toán trước khi hoàn thành hóa đơn.</span>
+                                    }
+                                }
+                                else if (Model.HoaDon.TrangThai == "Chờ Xác Nhận")
+                                {
+                                    <button type="submit" class="btn btn-primary">Xác Nhận Đơn Hàng</button>
+                                    <button type="submit" name="actionType" value="huy" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn hủy hóa đơn này không?');">Hủy</button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-primary">Hoàn Thành</button>
+                                }
+                            </div>
+
+                            @* Remove the revert button for "Chờ Xác Nhận" status *@
+                            @if (Model.HoaDon.TrangThai != "Chờ Xác Nhận")
                             {
-                                <button type="submit" class="btn btn-primary">Cập Nhật Trạng Thái Giao Hàng</button>
+                                <div>
+                                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#reasonModal">Quay Lại Trạng Thái Trước</button>
+                                </div>
                             }
-                            else
-                            {
-                                <span class="text-danger">Cần xác nhận thanh toán trước khi hoàn thành hóa đơn.</span>
-                            }
-                        }
-                        else if (Model.HoaDon.TrangThai == "Chờ Xác Nhận")
-                        {
-                            <button type="submit" class="btn btn-primary">Xác Nhận Đơn Hàng</button>
-                        }
-                        else
-                        {
-                            <button type="submit" class="btn btn-primary">Hoàn Thành</button>
-                        }
+                        </div>
                     </form>
                 }
             </div>
@@ -430,7 +444,29 @@
         </div>
     </div>
 </div>
-
+<div class="modal fade" id="reasonModal" tabindex="-1" aria-labelledby="reasonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reasonModalLabel">Nhập Lý Do</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="UpdateInvoiceStatus" asp-route-id="@Model.HoaDon.IdHoaDon" method="post">
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Lý Do</label>
+                        <input type="text" class="form-control" id="reason" name="reason" required placeholder="Nhập lý do" />
+                    </div>
+                    <input type="hidden" name="actionType" value="quayLai" />
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Xác Nhận Quay Lại</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>                   
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     function formatInput(input) {
         let value = input.value.replace(/[^0-9,]/g, '');
@@ -453,5 +489,8 @@
         const change = amountPaid - totalAmount;
 
         document.getElementById('change').value = change >= 0 ? change.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '0';
+    }
+    function confirmAction() {
+        return confirm("Bạn có chắc chắn muốn thực hiện hành động này?");
     }
 </script>

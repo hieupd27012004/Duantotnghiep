@@ -117,7 +117,7 @@ namespace APPMVC.Service
             });
         }
 
-        public async Task<DiaChi> GetDefaultAddressByCustomerIdAsync(Guid customerId)
+        public async Task<DiaChi> GetDefaultAddressByCustomerIdAsync(Guid? customerId)
         {
             var response = await _httpClient.GetAsync($"/api/DiaChi/GetDefaultAddress/{customerId}");
 
