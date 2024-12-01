@@ -19,6 +19,6 @@ namespace APPMVC.IService
 		Task<int> GetAddressCountByCustomerId(Guid customerId);
 		Task<bool> HasDefaultAddressAsync(Guid customerId);
 
-        Task<DiaChi> GetDefaultAddressByCustomerIdAsync(Guid customerId);
+        Task<DiaChi> GetDefaultAddressByCustomerIdAsync(Guid? customerId);
     }
 }

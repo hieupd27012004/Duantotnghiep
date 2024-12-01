@@ -13,6 +13,8 @@ namespace AppData.Model
         public Guid IdLichSuThanhToan { get; set; }
         [Required(ErrorMessage = "Không Được Để Trống")]
         public double SoTien { get; set; }
+
+        public double? TienThua { get; set; }
         [DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         //[Range(typeof(DateTime), "1/1/2020", "12/31/2025", ErrorMessage = "Không Trong Thời Gian Cho Phép")]
@@ -28,7 +30,7 @@ namespace AppData.Model
         public string NguoiThaoTac { get; set; }
         [Required(ErrorMessage = "Không Được Để Trống")]
         public string TrangThai { get; set; }
-        public string GhiChu { get; set; }
+        public string? GhiChu { get; set; }
 
         public Guid IdHoaDon { get; set; }
 

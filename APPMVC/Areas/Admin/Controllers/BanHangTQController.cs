@@ -36,6 +36,8 @@ namespace APPMVC.Areas.Admin.Controllers
         private readonly IHinhAnhService _hinhAnhService;
         private readonly IVnPayService _vnPayServie;
         private readonly IConfiguration _configuration;
+        private readonly IDiaChiService _services;
+        private readonly ILichSuThanhToanService _lichSuThanhToanService;
 
         public BanHangTQController(
             ISanPhamChiTietService sanPhamChiTietService,
@@ -51,7 +53,9 @@ namespace APPMVC.Areas.Admin.Controllers
             ISanPhamChiTietKichCoService sanPhamChiTietKichCoService,
             IHinhAnhService hinhAnhService,
             IVnPayService vnPayServie,
-            IConfiguration configuration
+            IConfiguration configuration,
+            IDiaChiService services,
+            ILichSuThanhToanService lichSuThanhToanService
             )
         {
             _sanPhamCTService = sanPhamChiTietService;
@@ -68,6 +72,8 @@ namespace APPMVC.Areas.Admin.Controllers
             _hinhAnhService = hinhAnhService;
             _vnPayServie = vnPayServie;
             _configuration = configuration;
+            _services = services;
+            _lichSuThanhToanService = lichSuThanhToanService;
         }
 
         public async Task<ActionResult> Index()
@@ -334,7 +340,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     return Json(new { success = false, message = "Sản phẩm không tồn tại." });
                 }
 
-                int requestedQuantity = 1;
+                int requestedQuantity = 1; // Giả định bạn có thể thay đổi số lượng này từ frontend
                 if (requestedQuantity <= 0)
                 {
                     return Json(new { success = false, message = "Số lượng phải lớn hơn 0." });
@@ -356,11 +362,14 @@ namespace APPMVC.Areas.Admin.Controllers
                     KichHoat = 1
                 };
 
+                // Thêm sản phẩm vào hóa đơn mà không trừ số lượng
                 await _hoaDonChiTietService.AddAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
 
-                sanPhamChiTiet.SoLuong -= requestedQuantity;
+                // Không trừ số lượng sản phẩm
+                // sanPhamChiTiet.SoLuong -= requestedQuantity; // Dòng này đã được bỏ
 
-                await _sanPhamCTService.Update(sanPhamChiTiet);
+                // Cập nhật sản phẩm nếu cần, hoặc bỏ qua
+                // await _sanPhamCTService.Update(sanPhamChiTiet); // Có thể bỏ nếu không cần cập nhật
 
                 var updatedProductList = await GetSanPhamChiTietList(IdHoaDon);
                 return Json(new { success = true, message = "Thêm sản phẩm thành công.", html = updatedProductList });
@@ -379,7 +388,6 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 return Json(new { success = false, message = "Dữ liệu hóa đơn không hợp lệ." });
             }
-
 
             if (!ModelState.IsValid)
             {
@@ -404,38 +412,22 @@ namespace APPMVC.Areas.Admin.Controllers
                     }
 
                     double quantityChange = item.SoLuong - originalQuantity;
-                    double availableStock = sanPhamCT.SoLuong + originalQuantity;
 
-                    if (quantityChange > 0)
-                    {
-                        if (item.SoLuong > availableStock)
-                        {
-                            return Json(new { success = false, message = "Số lượng yêu cầu vượt quá số lượng có sẵn." });
-                        }
-                        sanPhamCT.SoLuong -= quantityChange; // Deduct from stock
-                    }
-                    else if (quantityChange < 0) // Decreasing quantity
-                    {
-                        sanPhamCT.SoLuong += Math.Abs(quantityChange); // Add back to stock
-                    }
-
-                    // Calculate total amount
                     item.TongTien = item.SoLuong * sanPhamCT.Gia;
 
-                    // Update product stock
                     await _sanPhamCTService.Update(sanPhamCT);
                 }
             }
 
-            // Update the invoice line items
             await _hoaDonChiTietService.UpdateAsync(hoaDonChiTietList);
 
             return Json(new { success = true });
         }
 
         [HttpPost]
-        public async Task<IActionResult> XacNhanThanhToan(Guid idHoaDon)
+        public async Task<IActionResult> XacNhanThanhToan(Guid idHoaDon, Guid? idKhachHang)
         {
+            Console.WriteLine($"idKhachHang: {idKhachHang}");
             if (!ModelState.IsValid)
             {
                 return BadRequest(new { message = "Dữ liệu không hợp lệ." });
@@ -461,6 +453,9 @@ namespace APPMVC.Areas.Admin.Controllers
                 {
                     double thanhTien = hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia;
                     tongTienHang += thanhTien;
+
+                    sanPhamCT.SoLuong -= hoaDonChiTiet.SoLuong; 
+                    await _sanPhamCTService.Update(sanPhamCT);
                 }
             }
 
@@ -470,7 +465,16 @@ namespace APPMVC.Areas.Admin.Controllers
                 return NotFound(new { message = "Hóa đơn không tồn tại." });
             }
 
-            if (hoaDon.IdKhachHang == null || hoaDon.IdKhachHang == Guid.Empty)
+            if (idKhachHang.HasValue && idKhachHang.Value != Guid.Empty)
+            {
+                hoaDon.IdKhachHang = idKhachHang.Value;
+                var customer = await _khachHangService.GetIdKhachHang(hoaDon.IdKhachHang);
+                if (customer != null)
+                {
+                    hoaDon.NguoiNhan = customer.HoTen; 
+                }
+            }
+            else
             {
                 var newCustomer = new KhachHang
                 {
@@ -492,7 +496,6 @@ namespace APPMVC.Areas.Admin.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // Log lỗi khi tạo khách hàng
                     return StatusCode(500, new { message = "Đã xảy ra lỗi khi tạo khách hàng." });
                 }
             }
@@ -518,13 +521,26 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 await _lichSuHoaDonService.AddAsync(lichSu);
 
-                // Tạo HTML từ mẫu hóa đơn
+                var lichSuThanhToan = new LichSuThanhToan
+                {
+                    IdLichSuThanhToan = Guid.NewGuid(),
+                    SoTien = hoaDon.TongTienHoaDon,
+                    TienThua = 0, 
+                    NgayTao = DateTime.Now,
+                    LoaiGiaoDich = "Thanh Toán",
+                    Pttt = "Tiền mặt", 
+                    NguoiThaoTac = "Nhân Viên", 
+                    TrangThai = "Đã thanh toán",
+                    IdHoaDon = hoaDon.IdHoaDon,
+                    IdNhanVien = NVID 
+                };
+
+                await _lichSuThanhToanService.AddAsync(lichSuThanhToan);
+
                 var htmlContent = await GenerateInvoiceHtmlFromTemplate(hoaDon, hoaDonChiTietList);
 
-                // Tạo PDF từ HTML
                 var pdfBytes = GeneratePdfFromHtml(htmlContent);
 
-                // Lưu file PDF vào thư mục tạm
                 var tempFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "TempFiles");
                 if (!Directory.Exists(tempFilePath))
                 {
@@ -537,13 +553,11 @@ namespace APPMVC.Areas.Admin.Controllers
                 var fileUrl = $"/TempFiles/{fileName}";
 
                 TempData["SuccessMessage"] = "Thanh toán thành công! Bạn có muốn in hóa đơn không?";
-                TempData["FileUrl"] = fileUrl; // Lưu file URL để sử dụng trong view
+                TempData["FileUrl"] = fileUrl;
                 return RedirectToAction("ShowInvoiceMessage");
-               
             }
             catch (Exception ex)
             {
-                // Log chi tiết lỗi trong quá trình xử lý thanh toán
                 return StatusCode(500, new { message = "Đã xảy ra lỗi khi xác nhận thanh toán." });
             }
         }
@@ -613,11 +627,10 @@ namespace APPMVC.Areas.Admin.Controllers
 
             return converter.Convert(doc);
         }
-        //VNPay
         [HttpPost]
         public async Task<IActionResult> ThanhToanVNPay(Guid idHoaDon)
-        {       
-            var hoaDonChiTietList = await  _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
+        {
+            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
             if (hoaDonChiTietList == null)
             {
                 return NotFound(new { message = "Không tìm thấy chi tiết hóa đơn." });
@@ -626,58 +639,227 @@ namespace APPMVC.Areas.Admin.Controllers
             double tongTienHang = 0;
             foreach (var hoaDonChiTiet in hoaDonChiTietList)
             {
-                var sanPhamCT = _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
+                var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
                 if (sanPhamCT != null)
                 {
                     double thanhTien = hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia;
                     tongTienHang += thanhTien;
                 }
             }
-            // Lấy thông tin hóa đơn
-            var hoaDon = _hoaDonService.GetByIdAsync(idHoaDon).Result;
+
+            var hoaDon = await _hoaDonService.GetByIdAsync(idHoaDon);
             if (hoaDon == null)
             {
                 return NotFound(new { message = "Không tìm thấy hóa đơn." });
             }
 
-            // Tạo tham số yêu cầu thanh toán
+            // Update invoice totals
+            hoaDon.TongTienDonHang = tongTienHang;
+            hoaDon.TongTienHoaDon = tongTienHang;
+            hoaDon.TienGiam = 0;
+
+            // Check for guest customer and create if needed
+            if (hoaDon.IdKhachHang == null || hoaDon.IdKhachHang == Guid.Empty)
+            {
+                var newCustomer = new KhachHang
+                {
+                    IdKhachHang = Guid.NewGuid(),
+                    HoTen = "Khách Lẻ",
+                    AuthProvider = "1",
+                    NgayTao = DateTime.Now,
+                    NgayCapNhat = DateTime.Now,
+                    NguoiTao = "Nhân Viên",
+                    NguoiCapNhat = "Nhân Viên",
+                    KichHoat = 1,
+                };
+
+                try
+                {
+                    await _khachHangService.AddKhachHang(newCustomer);
+                    hoaDon.IdKhachHang = newCustomer.IdKhachHang;
+                    hoaDon.NguoiNhan = newCustomer.HoTen;
+
+                    // Store customer information in TempData
+                    TempData["IdKhachHang"] = newCustomer.IdKhachHang.ToString();
+                    TempData["NguoiNhan"] = newCustomer.HoTen;
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new { message = "Đã xảy ra lỗi khi tạo khách hàng." });
+                }
+            }
+
+            // Store necessary data in TempData
+            TempData["idHoaDon"] = idHoaDon.ToString();
+            TempData["TongTienDonHang"] = tongTienHang.ToString(); // Convert to string
+            TempData["TongTienHoaDon"] = tongTienHang.ToString(); // Convert to string
+
             var vnPay = new PaymentInformationModel()
             {
                 Amount = tongTienHang,
                 CreatDate = DateTime.Now,
-                Description = $"Thanh Toán VnPay",
+                Description = "Thanh Toán VnPay",
                 FullName = "Nhân Viên",
                 OrderId = new Random().Next(100, 10000)
             };
 
-            return Redirect(_vnPayServie.CreatePaymentUrl(vnPay, HttpContext)); 
-
-        
+            return Redirect(_vnPayServie.CreatePaymentUrl(vnPay, HttpContext));
         }
+
         public IActionResult ThanhToanLoi()
         {
             return View();
         }
+
         public IActionResult ThanhToanThanhCong()
         {
             return View();
         }
         [HttpGet]
-        public IActionResult ReturnVNPay()
+        public async Task<IActionResult> ReturnVNPay()
         {
-            var respones = _vnPayServie.PaymentExecute(Request.Query);
-            if (respones == null || respones.VnPayResponseCode != "00")
+            var response = _vnPayServie.PaymentExecute(Request.Query);
+            if (response == null || response.VnPayResponseCode != "00")
             {
-                TempData["Message"] = $"Lỗi Thanh Toán: {respones.VnPayResponseCode }";
+                TempData["Message"] = $"Lỗi Thanh Toán: {response.VnPayResponseCode}";
                 return RedirectToAction("ThanhToanLoi");
             }
-            //
-            TempData["Message"] = $"Thanh toán VnPay Thành công";
-            return RedirectToAction("ThanhToanThanhCong");
+
+            // Retrieve idHoaDon from TempData
+            if (TempData.TryGetValue("idHoaDon", out var idHoaDonValue) && Guid.TryParse(idHoaDonValue.ToString(), out Guid idHoaDon))
+            {
+                var hoaDon = await _hoaDonService.GetByIdAsync(idHoaDon);
+                if (hoaDon == null)
+                {
+                    return NotFound(new { message = "Không tìm thấy hóa đơn." });
+                }
+
+                // Retrieve totals from TempData and convert back to double
+                if (TempData.TryGetValue("TongTienDonHang", out var tongTienDonHangValue) &&
+                    double.TryParse(tongTienDonHangValue.ToString(), out double tongTienDonHang))
+                {
+                    hoaDon.TongTienDonHang = tongTienDonHang;
+                }
+
+                if (TempData.TryGetValue("TongTienHoaDon", out var tongTienHoaDonValue) &&
+                    double.TryParse(tongTienHoaDonValue.ToString(), out double tongTienHoaDon))
+                {
+                    hoaDon.TongTienHoaDon = tongTienHoaDon;
+                }
+
+                // Retrieve customer information from TempData
+                if (TempData.TryGetValue("IdKhachHang", out var idKhachHangValue) &&
+                    Guid.TryParse(idKhachHangValue.ToString(), out Guid idKhachHang))
+                {
+                    hoaDon.IdKhachHang = idKhachHang;
+                }
+
+                if (TempData.TryGetValue("NguoiNhan", out var nguoiNhanValue))
+                {
+                    hoaDon.NguoiNhan = nguoiNhanValue.ToString();
+                }
 
 
+                hoaDon.TienGiam = 0;
+                hoaDon.TrangThai = "Hoàn Thành";
+                await _hoaDonService.UpdateAsync(hoaDon);
+
+                var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
+                foreach (var chiTiet in hoaDonChiTietList)
+                {
+                    var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(chiTiet.IdSanPhamChiTiet);
+                    if (sanPhamCT != null)
+                    {
+                        sanPhamCT.SoLuong -= chiTiet.SoLuong; 
+                        await _sanPhamCTService.Update(sanPhamCT); 
+                    }
+                }
+
+                // Create a new history entry for the invoice
+                var lichSu = new LichSuHoaDon
+                {
+                    IdLichSuHoaDon = Guid.NewGuid(),
+                    ThaoTac = hoaDon.TrangThai,
+                    NgayTao = DateTime.Now,
+                    NguoiThaoTac = "Nhân Viên",
+                    TrangThai = "1",
+                    IdHoaDon = hoaDon.IdHoaDon,
+                };
+
+                await _lichSuHoaDonService.AddAsync(lichSu);
+
+                // Directly create a payment history entry
+                var TenNv = HttpContext.Session.GetString("NhanVienName");
+                var NVIdString = HttpContext.Session.GetString("IdNhanVien");
+
+                if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
+                {
+                    // Handle unauthorized access or log the issue
+                    TempData["Message"] = "Nhân viên không tồn tại trong phiên làm việc.";
+                    return RedirectToAction("ThanhToanLoi");
+                }
+
+                var lichSuThanhToan = new LichSuThanhToan
+                {
+                    IdLichSuThanhToan = Guid.NewGuid(),
+                    SoTien = hoaDon.TongTienHoaDon,
+                    TienThua = 0, 
+                    NgayTao = DateTime.Now,
+                    LoaiGiaoDich = "Thanh Toán VnPay",
+                    Pttt = "VnPay",
+                    NguoiThaoTac = TenNv,
+                    TrangThai = "Đã thanh toán",
+                    IdHoaDon = hoaDon.IdHoaDon,
+                    IdNhanVien = NVID
+                };
+
+                await _lichSuThanhToanService.AddAsync(lichSuThanhToan);
+
+                TempData["Message"] = "Thanh toán VnPay Thành công";
+                return RedirectToAction("ThanhToanThanhCong");
+            }
+
+            return NotFound(new { message = "Không tìm thấy hóa đơn." });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> SearchCustomer(string search)
+        {
+            if (string.IsNullOrWhiteSpace(search))
+            {
+                return BadRequest("Invalid search criteria.");
+            }
+
+            var customer = await _khachHangService.GetCustomerByPhoneOrEmailAsync(search);
+
+            if (customer == null)
+            {
+                return Ok(new
+                {
+                    customerName = (string)null,
+                    idKhachHang = (Guid?)null,
+                    nguoiNhan = (string)null,
+                    soDienThoai = (string)null,
+                    provinceName = (string)null,
+                    districtName = (string)null,
+                    wardName = (string)null,
+                    moTa = (string)null
+                });
+            }
+            var diaChiKhachHang = await _services.GetDefaultAddressByCustomerIdAsync(customer.IdKhachHang);
+
+            return Ok(new
+            {
+                customerName = customer.HoTen,
+                idKhachHang = customer.IdKhachHang,
+                nguoiNhan = diaChiKhachHang?.HoTen,
+                soDienThoai = diaChiKhachHang?.SoDienThoai,
+                provinceName = diaChiKhachHang?.ProvinceName,
+                districtName = diaChiKhachHang?.DistrictName,
+                wardName = diaChiKhachHang?.WardName,
+                moTa = diaChiKhachHang?.MoTa
+            });
+        }
     }
 
 }

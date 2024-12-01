@@ -13,7 +13,8 @@ namespace AppAPI.IService
         Task<bool> ResetPass(string email, string newPassword);
         Task<KhachHang> GetByEmail(string email);
         Task<KhachHang?> Login(string email, string password);   
-        Task DeleteKhachHang(Guid id);  
-      
+        Task DeleteKhachHang(Guid id);
+        Task<KhachHang?> GetCustomerByPhoneOrEmailAsync(string phoneOrEmail);
+
     }
 }
