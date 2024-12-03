@@ -26,6 +26,8 @@ namespace AppData.ViewModel
         public string? WardId { get; set; }
         public string? MoTa { get; set; }
 
+        public string? DiaChiCuThe { get; set; }
+
         public List<CartItemViewModel> CartItems { get; set; } = new List<CartItemViewModel>();
 
         public string PaymentMethod { get; set; }

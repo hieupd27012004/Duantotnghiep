@@ -114,6 +114,7 @@ namespace APPMVC.Areas.Client.Controllers
                 return RedirectToAction("Index");
             }
 
+            ViewBag.Provinces = await _diaChiService.GetProvincesAsync();
             thanhToanViewModel.CartItems = cartItems; 
             return View(thanhToanViewModel);
         }
@@ -141,6 +142,7 @@ namespace APPMVC.Areas.Client.Controllers
             double totalDonHang = cartItems.Sum(item => item.Price * item.Quantity);
             double totalHoaDon = totalDonHang;
             string diaChiGiaoHang = $"{thanhToanViewModel.ProvinceName}, {thanhToanViewModel.DistrictName}, {thanhToanViewModel.WardName}";
+            string diaChiCT = thanhToanViewModel.DiaChiCuThe;
             var order = new HoaDon
             {
                 IdHoaDon = Guid.NewGuid(),
@@ -318,12 +320,202 @@ namespace APPMVC.Areas.Client.Controllers
                 ProvinceName = diaChiKhachHang?.ProvinceName,
                 DistrictName = diaChiKhachHang?.DistrictName,
                 WardName = diaChiKhachHang?.WardName,
+                DiaChiCuThe = diaChiKhachHang?.MoTa,
+               
                 CartItems = cartItems,
                 PhiVanChuyen = phiVanChuyen 
             };
 
             return (cartItems, thanhToanViewModel);
         }
+        //Địa Chỉ
+        public IActionResult GetAddressById(Guid id)
+        {
+            var diaChi = _diaChiService.GetByIdAsync(id);
+            if (diaChi == null)
+            {
+                return NotFound();
+            }
+            return Json(diaChi); // Trả về dữ liệu dưới dạng JSON
+        }
+        //Lấy Danh sách
+        public async Task<IActionResult> GetUserAddresses()
+        {
+            var IdKhachHang = HttpContext.Session.GetString("IdKhachHang");
+            if (string.IsNullOrEmpty(IdKhachHang))
+            {
+                return RedirectToAction("Login", "KhachHang");
+            }
+            var id = Guid.Parse(IdKhachHang);
+            var diaChiList = await _diaChiService.GetAllAsync(id);
+            return PartialView("ListDiaChi", diaChiList);
+        }
+        //Sửa địa chỉ
+        [HttpGet]
+        public async Task<IActionResult> EditDC(Guid id)
+        {
+            var diaChi = await _diaChiService.GetByIdAsync(id);
+            await LoadDropDowns(diaChi);
+            if (diaChi == null) return NotFound();    
+            await LoadDropDowns(diaChi);
+            return View(diaChi);
+        }
+        [HttpPost]
+        public async Task<IActionResult> EditDC(Guid IdDiaChi, DiaChi dc)
+        {
+            if (dc.WardId == null)
+            {
+                ModelState.AddModelError("WardId", "Vui lòng chọn phường/xã.");
+                await LoadDropDowns(dc);  // Tải lại các dropdown
+                return View(dc);  // Trả về lại view với thông báo lỗi
+            }
+            if (IdDiaChi == Guid.Empty)
+            {
+                ModelState.AddModelError("", "ID địa chỉ không hợp lệ.");
+                await LoadDropDowns(dc);
+                return View(dc);
+            }
 
+
+            if (!ModelState.IsValid)
+            {
+                await LoadDropDowns(dc);
+                return View(dc);
+            }
+            var IdKhachHang = HttpContext.Session.GetString("IdKhachHang");
+            var id = Guid.Parse(IdKhachHang);
+            id = dc.IdKhachHang;
+            bool success = await _diaChiService.UpdateAsync(IdDiaChi, dc);
+            if (success)
+            {
+                return RedirectToAction("Checkout");
+            }
+
+            await LoadDropDowns(dc);
+            return View(dc);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetDistricts(int provinceId)
+        {
+            if (provinceId == 0)
+            {
+                return Json(new { error = "Invalid provinceId" });
+            }
+            var districts = await _diaChiService.GetDistrictsAsync(provinceId);
+            if (districts == null || districts.Count == 0)
+            {
+                return Json(new { error = "No districts found" });
+            }
+            var districtList = districts.Select(d => new { DistrictId = d.DistrictId, DistrictName = d.DistrictName }).ToList();
+            return Json(districtList);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Create()
+        {
+            var IdKhachHang = HttpContext.Session.GetString("IdKhachHang");
+            if (string.IsNullOrEmpty(IdKhachHang))
+            {
+                return RedirectToAction("Login", "Account");  // Nếu chưa đăng nhập, chuyển hướng đến trang login
+            }
+            ViewBag.Provinces = await _diaChiService.GetProvincesAsync();
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> Create(DiaChi dc)
+        {
+
+            var IdKhachHang = HttpContext.Session.GetString("IdKhachHang");
+            var id = Guid.Parse(IdKhachHang);
+            int addressCount = await _diaChiService.GetAddressCountByCustomerId(id);
+            if (addressCount >= 3)
+            {
+                ModelState.AddModelError("", "Khách hàng này đã có tối đa 3 địa chỉ.");
+                ViewBag.Provinces = await _diaChiService.GetProvincesAsync();
+                await LoadDropDownsCreate(dc);
+                return View(dc);
+            }
+            // Kiểm tra địa chỉ mặc định           
+            //if (dc.DiaChiMacDinh)
+            //{
+            //	bool check = await _services.HasDefaultAddressAsync(id);
+            //	if (check)
+            //	{
+            //		ModelState.AddModelError("", "Khách hàng này đã có một địa chỉ mặc định.");
+            //                 ViewBag.Provinces = await _services.GetProvincesAsync();
+            //                 await LoadDropDownsCreate(dc);
+            //		return View(dc);
+            //	}
+            //}
+            if (!ModelState.IsValid)
+            {
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($"Error: {error.ErrorMessage}");  // In lỗi ra console
+                }
+                ViewBag.Provinces = await _diaChiService.GetProvincesAsync();
+                await LoadDropDownsCreate(dc);
+                return View(dc);
+            }
+            if (string.IsNullOrEmpty(IdKhachHang))
+            {
+                return RedirectToAction("Login", "KhachHang");  // Nếu chưa đăng nhập, chuyển hướng đến trang login
+            }
+            dc.IdKhachHang = id;
+            //Nếu tất cả ok thì thêm =))
+            bool success = await _diaChiService.AddAsync(dc);
+            if (success)
+            {
+                return RedirectToAction("Checkout");
+            }
+            await LoadDropDowns(dc);
+            return View(dc);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetWards(int districtId)
+        {
+            var wards = await _diaChiService.GetWardsAsync(districtId);
+            var wardList = wards.Select(w => new {
+                WardId = w.WardId.ToString(),
+                WardName = w.WardName
+            }).ToList();
+
+            return Json(wardList);
+        }
+        private async Task LoadDropDowns(DiaChi dc)
+        {
+            // Lấy danh sách tỉnh từ DB
+            ViewBag.Provinces = await _diaChiService.GetProvincesAsync();
+
+            // Nếu ProvinceId có giá trị hợp lệ, lấy danh sách các quận theo ProvinceId
+            if (dc != null && dc.ProvinceId > 0)
+            {
+                ViewBag.Districts = await _diaChiService.GetDistrictsAsync(dc.ProvinceId);
+            }
+            else
+            {
+                ViewBag.Districts = new List<District>(); // Danh sách trống nếu dc không có ProvinceId
+            }
+
+            // Nếu DistrictId có giá trị hợp lệ, lấy danh sách các phường theo DistrictId
+            if (dc != null && dc.DistrictId > 0)
+            {
+                ViewBag.Wards = await _diaChiService.GetWardsAsync(dc.DistrictId);
+            }
+            else
+            {
+                ViewBag.Wards = new List<Ward>(); // Danh sách trống nếu dc không có DistrictId
+            }
+        }
+        public async Task LoadDropDownsCreate(DiaChi dc)
+        {
+            ViewBag.Districts = dc.ProvinceId != null
+                ? await _diaChiService.GetDistrictsAsync(dc.ProvinceId)
+                : new List<District>(); // Danh sách trống nếu chưa chọn tỉnh
+
+            ViewBag.Wards = dc.DistrictId != null
+                ? await _diaChiService.GetWardsAsync(dc.DistrictId)
+                : new List<Ward>(); // Danh sách trống nếu chưa chọn quận
+        }
     }
 }

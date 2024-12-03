@@ -25,34 +25,132 @@
     .custom-control-input:checked ~ .custom-control-label {
         color: #007bff;
     }
+
+    .xBNaac {
+        background-image: repeating-linear-gradient(45deg, #6fa6d6, #6fa6d6 33px, transparent 0, transparent 41px, #f18d9b 0, #f18d9b 74px, transparent 0, transparent 82px);
+        background-position-x: -30px;
+        background-size: 116px 3px;
+        height: 3px;
+        width: 100%;
+    }
+
+    .font-extra-bold {
+        font-weight: 700; 
+    }
 </style>
 <div class="container">
     <div class="row">
         <div class="col-md-8">
-            <h2 class="my-4">Thông tin giao hàng</h2>
+            <h2 class="my-4">Thông Tin Giao Hàng</h2>
+            <div class="card">               
+                <div class="xBNaac "></div>
+                <h5 class="ms-3 my-3">Thông Tin Người Nhận</h5>
+                <div class="d-flex">
+                    <div class="d-flex justify-content-center">
+                        <p class="font-extra-bold h6 text-black ms-3 mb-3" id="Dia_chi_12" name="NguoiNhan">@Model.NguoiNhan</p>
+                        <p class="font-extra-bold h6 text-black ms-2 mb-3" id="so_dien_thoai" name="SoDienThoaiNguoiNhan">@Model.SoDienThoai</p>
+                        <p class="font-weight-bold h6 text-black ms-2 mb-3" id="diaChiCuThe" name="diaChiCuThe">@Model.DiaChiCuThe </p>
+                        <a href="javascript:void(0);" class="menu-link ms-5" data-bs-toggle="modal" data-bs-target="#addressListModal" onclick="loadUserAddresses()">
+                            <i class="menu-icon tf-icons bx bx-map"></i>
+                            <div data-i18n="Address">Thay Đổi</div>
+                        </a>
+                    </div>
+                    
+                </div>
+            </div>
+         
+
+            <div class="modal fade" id="addressListModal" tabindex="-1" aria-labelledby="addressListModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addressListModalLabel">Danh Sách Địa Chỉ</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="addressList">
+                                <!-- Danh sách địa chỉ sẽ được tải ở đây -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h3 class="my-4">Địa Giao Hàng</h3>
+            <div class="card">     
+                <div class="ms-3">
+                    <div class="d-flex mb-4 mt-4" >
+                        <div class="form-group mb-1 me-5">
+                            <label>Họ tên</label>
+                            <input class="form-control" asp-for="NguoiNhan" readonly />
+                            <span asp-validation-for="NguoiNhan"></span>
+                        </div>
+
+                        <div class="form-group mb-1 ms-5">
+                            <label>Số điện thoại</label>
+                            <input class="form-control" asp-for="SoDienThoai" readonly />
+                            <span asp-validation-for="SoDienThoai"></span>
+                        </div>
+                    </div>
+                   
+                    <div class="d-flex mt-5 mb-2">
+                        <div class="form-group mb-1 me-5">
+                            <label>Tỉnh/Thành phố</label>
+                            @* <select id="ProvinceId" asp-for="ProvinceId" class="form-control" asp-items="@(new SelectList(ViewBag.Provinces, "ProvinceId", "ProvinceName"))">
+                                <option value="">Chọn tỉnh/thành phố</option>
+                            </select>
+                            <input type="hidden" id="ProvinceName" name="ProvinceName" asp-for="ProvinceName" /> *@
+                            <input type="text" class="form-control" id="province" name="ProvinceName" value="@Model.ProvinceName " readonly/>
+
+                        </div>
+                        <div class="form-group mb-3 ms-5 me-5">
+                            <label>Quận/Huyện</label>
+                            @* <select id="DistrictId" class="form-control" asp-for="DistrictId">
+                                <option value="">Chọn quận/huyện</option>
+                            </select>
+                            <input type="hidden" id="DistrictName" name="DistrictName" asp-for="DistrictName" /> *@
+                            <input type="text" class="form-control" id="district" name="DistrictName" value="@Model.DistrictName" readonly/>
+                        </div>
+                        <div class="form-group mb-3 ms-4">
+                            <label>Phường/Xã</label>
+                           @*  <select id="WardId" asp-for="WardId" class="form-control">
+                                <option value="">Chọn phường/xã</option>
+                            </select>
+                            <input type="hidden" id="WardName" name="WardName" asp-for="WardName" /> *@
+                            <input type="text" class="form-control" id="ward" name="WardName" value="@Model.WardName" readonly />
+                        </div>                       
+                    </div>  
+                    
+                </div>              
+            </div>
             <form asp-action="ProcessCheckout" method="post">
-                <div class="form-group">
+                <div class="form-group" hidden>
                     <label for="Dia_chi_12">Họ và tên</label>
-                    <input type="text" class="form-control" id="Dia_chi_12" name="NguoiNhan" value="@Model.NguoiNhan" required />
+                    <input type="text" class="form-control" id="Dia_chi_12" name="NguoiNhan" value="@Model.NguoiNhan" required hidden />
                 </div>
-                <div class="form-group">
+                <div class="form-group" hidden>
                     <label for="so_dien_thoai">Số điện thoại</label>
-                    <input type="tel" class="form-control" id="so_dien_thoai" name="SoDienThoaiNguoiNhan" value="@Model.SoDienThoai" required />
-                </div>
-
-                <div class="form-group">
-                    <label for="province">Tỉnh/Thành phố</label>
-                    <input type="text" class="form-control" id="province" name="ProvinceName" value="@Model.ProvinceName" readonly />
+                    <input type="tel" class="form-control" id="so_dien_thoai" name="SoDienThoaiNguoiNhan" value="@Model.SoDienThoai" required hidden />
                 </div>
                 <div class="form-group">
+                    <label for="province" hidden>Tỉnh/Thành phố</label>
+                    <input type="text" class="form-control" id="province" name="ProvinceName" value="@Model.ProvinceName" hidden />
+                </div>
+                <div class="form-group" hidden>
                     <label for="district">Quận/Huyện</label>
-                    <input type="text" class="form-control" id="district" name="DistrictName" value="@Model.DistrictName" readonly />
+                    <input type="text" class="form-control" id="district" name="DistrictName" value="@Model.DistrictName" readonly hidden />
                 </div>
-                <div class="form-group">
+                <div class="form-group" hidden>
                     <label for="ward">Phường/Xã</label>
-                    <input type="text" class="form-control" id="ward" name="WardName" value="@Model.WardName" readonly />
+                    <input type="text" class="form-control" id="ward" name="WardName" value="@Model.WardName" readonly hidden />
                 </div>
-
+                <div class="form-group" hidden>
+                    <label for="diaChiCuThe">Địa Chỉ Cụ Thể/Xã</label>
+                    <input type="text" class="form-control" id="diaChiCuThe" name="diaChiCuThe" value="@Model.DiaChiCuThe" readonly hidden />
+                </div>
+                <div class="form-group" hidden>
+                    <label for="diaChiCuThe">Địa Chỉ Cụ Thể/Xã</label>
+                    <input type="text" class="form-control" id="diaChiCuThe" name="diaChiCuThe" value="@Model.DiaChiCuThe" readonly hidden />
+                </div>
                 <h4 class="my-3">Phương thức thanh toán</h4>
                 <div class="form-group">
                     <div class="custom-control custom-radio custom-control-inline">
@@ -77,6 +175,7 @@
             </form>
         </div>
 
+        
         <div class="col-md-4">
             <h2 class="my-4">Đơn hàng</h2>
             <div class="card">
@@ -136,8 +235,9 @@
         </div>
     </div>
 </div>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+   
     document.addEventListener("DOMContentLoaded", function() {
         const formatCurrency = (value) => {
             return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
@@ -147,4 +247,63 @@
         document.getElementById('phi_van_chuyen').value = formatCurrency(parseFloat(document.getElementById('phi_van_chuyen').value));
         document.getElementById('tong_tien').value = formatCurrency(parseFloat(document.getElementById('tong_tien').value));
     });
+    //Địa Chỉ
+    
+    $("#ProvinceId").change(function () {
+        var provinceId = $(this).val();
+        console.log("ProvinceId:", provinceId);
+        $.get('/Client/HomeClient/GetDistricts', { provinceId: provinceId }, function (data) {
+            console.log(data);
+            if (Array.isArray(data)) {
+                $("#DistrictId").empty();
+                $("#DistrictId").append('<option value="">Chọn quận/huyện</option>');
+                $.each(data, function (i, item) {
+                    $("#DistrictId").append('<option value="' + item.districtId + '">' + item.districtName + '</option>');
+                });
+            } else {
+                $("#DistrictId").empty().append('<option value="">Không có quận/huyện</option>');
+            }
+            var selectedProvince = $("#ProvinceId option:selected").text();
+            $("#ProvinceName").val(selectedProvince);
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            console.error("Error: " + textStatus, errorThrown);
+            alert("Có lỗi khi tải dữ liệu quận/huyện!");
+        });
+    });
+    // Khi thay đổi Quận/Huyện, lấy danh sách Phường/Xã và gán DistrictName
+    $("#DistrictId").change(function () {
+        var districtId = $(this).val();
+        console.log("DistrictId:", districtId); // Kiểm tra districtId
+        $.get('@Url.Action("GetWards", "HomeClient", new { area = "Client" })?districtId=' + districtId, function (data) {
+            console.log(data); // Kiểm tra dữ liệu trả về
+            $("#WardId").empty().append('<option value="">Chọn phường/xã</option>');
+            $.each(data, function (i, item) {
+                console.log("WardId:", item.wardId, "WardName:", item.wardName); // Kiểm tra dữ liệu của phường/xã
+                $("#WardId").append('<option value="' + item.wardId + '">' + item.wardName + '</option>');
+            });
+
+            // Gán giá trị cho DistrictName
+            var selectedDistrict = $("#DistrictId option:selected").text();
+            $("#DistrictName").val(selectedDistrict);
+        });
+    });
+
+    // Khi thay đổi Phường/Xã, gán WardName
+    $("#WardId").change(function () {
+        var wardName = $("#WardId option:selected").text();
+        $("#WardName").val(wardName);
+    });
+    function loadUserAddresses() {
+        $.ajax({
+            url: '@Url.Action("GetUserAddresses", "HomeClient", new { area = "Client" })',
+            type: 'GET',
+            success: function (data) {
+                $('#addressList').html(data);
+            },
+            error: function () {
+                $('#addressList').html('<p>Không thể tải danh sách địa chỉ.</p>');
+            }
+        });
+    }
+
 </script>
