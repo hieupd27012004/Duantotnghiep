@@ -137,7 +137,6 @@ namespace APPMVC.Areas.Admin.Controllers
 
             try
             {
-                // Kiểm tra nếu không có tổ hợp hoặc tổ hợp có số lượng <= 0
                 if (viewModel.Combinations == null || !viewModel.Combinations.Any())
                 {
                     TempData["Error"] = "Không có tổ hợp nào được chọn.";
@@ -147,11 +146,10 @@ namespace APPMVC.Areas.Admin.Controllers
                 if (viewModel.Combinations.Any(c => c.SoLuong <= 0))
                 {
                     TempData["Error"] = "Tất cả các tổ hợp phải có số lượng lớn hơn 0.";
-                    await LoadViewBags(); // Tải lại dữ liệu ViewBag nếu cần
+                    await LoadViewBags();
                     return RedirectToAction("GetAll");
                 }
 
-                // Lấy dữ liệu từ các dịch vụ liên quan
                 var chatLieuTask = _chatLieuService.GetChatLieuById(viewModel.IdChatLieu);
                 var thuongHieuTask = _thuongHieuService.GetThuongHieuById(viewModel.IdThuongHieu);
                 var danhMucTask = _danhMucService.GetDanhMucById(viewModel.IdDanhMuc);
