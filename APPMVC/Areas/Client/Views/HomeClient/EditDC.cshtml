@@ -1,0 +1,70 @@
+﻿@using Newtonsoft.Json
+@model AppData.Model.DiaChi
+
+<div class="d-flex justify-content-center mt-3">
+    <h2 class="">Sửa Địa Chỉ</h2>
+</div>
+<div class="card">
+    <div class="d-flex justify-content-center">
+        <form asp-action="EditDC" class="mt-3 mb-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group" hidden>
+                <label asp-for="IdDiaChi" class="control-label" hidden> </label>
+                <input asp-for="IdDiaChi" class="form-control" hidden />
+                <span asp-validation-for="IdDiaChi" class="text-danger" hidden></span>
+            </div>
+            <div class="form-group">
+                <h6>Họ Tên</h6>
+                <input asp-for="HoTen" class="form-control" />
+                <span asp-validation-for="HoTen" class="text-danger"></span>
+            </div>
+            <div class="form-group  mt-2">
+                <h6>Số Điện Thoại</h6>
+                <input asp-for="SoDienThoai" class="form-control" />
+                <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+            </div>
+            <div class="form-group  mt-2 mb-3">
+                <h6>Tỉnh/Thành phố</h6>
+                <select id="ProvinceId" asp-for="ProvinceId" class="form-control" asp-items="@(new SelectList(ViewBag.Provinces, "ProvinceId", "ProvinceName"))">
+                    <option value="">Chọn tỉnh/thành phố</option>
+                </select>
+                <input type="hidden" id="ProvinceName" name="ProvinceName" asp-for="ProvinceName" />
+            </div>
+            <div class="form-group  mt-2 mb-3">
+                <h6>Quận/Huyện</h6>
+                <select asp-for="DistrictId" class="form-control" asp-items="@(new SelectList(ViewBag.Districts, "DistrictId", "DistrictName", Model.DistrictId))">
+                    <option value="">Chọn Quận/Huyện</option>
+                </select>
+                <input type="hidden" id="DistrictName" name="DistrictName" asp-for="DistrictName" />
+            </div>
+
+            <div class="form-group  mt-2 mb-3">
+                <h6>Phường/Xã</h6>
+                <select asp-for="WardId" class="form-control" asp-items="@(new SelectList(ViewBag.Wards, "WardId", "WardName", Model.WardId))">
+                    <option value="">Chọn Phường/Xã</option>
+                </select>
+                <input type="hidden" id="WardName" name="WardName" asp-for="WardName" />
+            </div>
+            <div class="form-group  mt-2">
+                <h6>Địa Chỉ Cụ Thể</h6>
+                <input asp-for="MoTa" class="form-control" />
+                <span asp-validation-for="MoTa" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2 mb-3">
+                <h6 for="DiaChiMacDinh">Đặt Chỉ Mặc Định</h6>
+                <input class="form-check-input" asp-for="DiaChiMacDinh" id="DiaChiMacDinh" />             
+                <span asp-validation-for="DiaChiMacDinh" class="text-danger"></span>
+            </div>
+            <hr />
+            <div class="form-group mb-3">
+
+                <span hidden asp-validation-for="IdKhachHang" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+                <a asp-action="Checkout" class="btn btn-secondary" style="margin-left:15px;">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</div>
+

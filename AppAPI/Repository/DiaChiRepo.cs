@@ -47,6 +47,17 @@ namespace AppAPI.Repository
 		}
 		public async Task<DiaChi> AddAsync(DiaChi diaChi)
 		{
+			if (diaChi.DiaChiMacDinh)
+			{
+                var existingDefaultAddresses = await _context.diaChi
+            .Where(d => d.IdKhachHang == diaChi.IdKhachHang && d.DiaChiMacDinh)
+            .ToListAsync();
+
+                foreach (var address in existingDefaultAddresses)
+                {
+                    address.DiaChiMacDinh = false;
+                }
+            }
 			_context.diaChi.Add(diaChi);
 			await _context.SaveChangesAsync();
 			return diaChi;
@@ -68,6 +79,7 @@ namespace AppAPI.Repository
 			existingDiaChi.DistrictName = diaChi.DistrictName;
 			existingDiaChi.WardId = diaChi.WardId;
 			existingDiaChi.WardName = diaChi.WardName;
+			existingDiaChi.MoTa = diaChi.MoTa;
 			existingDiaChi.DiaChiMacDinh = diaChi.DiaChiMacDinh;
 
 			// Lưu thay đổi vào cơ sở dữ liệu

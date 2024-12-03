@@ -277,5 +277,7 @@ namespace APPMVC.Areas.Client.Controllers
 
 			return RedirectToAction("Login");
 		}
+
+        //Lấy Địa Chỉ
 	}
 }

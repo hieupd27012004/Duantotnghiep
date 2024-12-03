@@ -24,12 +24,6 @@
     </div>
 
     <div class="form-group mb-3">
-        <label>Mô Tả</label>
-        <input class="form-control" asp-for="MoTa" />
-        <span asp-validation-for="MoTa"></span>
-    </div>
-
-    <div class="form-group mb-3">
         <label>Tỉnh/Thành phố</label>
         <select id="ProvinceId" asp-for="ProvinceId" class="form-control" asp-items="@(new SelectList(ViewBag.Provinces, "ProvinceId", "ProvinceName"))">
             <option value="">Chọn tỉnh/thành phố</option>
@@ -53,13 +47,16 @@
         </select>
         <input type="hidden" id="WardName" name="WardName" asp-for="WardName" />
     </div>
-
+    <div class="form-group mb-3">
+        <label>Địa Chỉ Cụ Thể</label>
+        <input class="form-control" asp-for="MoTa" />
+        <span asp-validation-for="MoTa"></span>
+    </div>
     <div class="form-group mb-3">
         <input class="form-check-input" asp-for="DiaChiMacDinh" id="DiaChiMacDinh" class="form-control" />
         <label for="DiaChiMacDinh">Đặt làm địa chỉ mặc định</label>
         <span asp-validation-for="DiaChiMacDinh"></span>
     </div>
-
     <div class="form-group mb-3">
        
         <span hidden asp-validation-for="IdKhachHang" class="text-danger"></span>
@@ -129,17 +126,7 @@
                     alert("Khách hàng này đã có 3 địa chỉ. Không thể thêm mới.");
                 }
             });
-        });
-        // //Check địa chỉ mặc định
-        // $(document).ready(function () {
-        //     var isDefaultAddress = @Html.Raw(JsonConvert.SerializeObject(ViewBag.HasDefaultAddress));
-        //     if (isDefaultAddress) {
-        //         $('#DiaChiMacDinh').prop('disabled', true);
-        //         $('label[for="DiaChiMacDinh"]').text("Địa chỉ mặc định đã tồn tại");
-        //     }
-        // });
-        
-        
+        });              
     </script>
 
 }

@@ -56,18 +56,18 @@ namespace APPMVC.Areas.Admin.Controllers
                 ViewBag.khachHang = await _serviceKH.GetAllKhachHang();
                 return View(dc);
 			}
-			if (dc.DiaChiMacDinh)
-			{
-				bool hasDefaultAddress = await _services.HasDefaultAddressAsync(dc.IdKhachHang);
-				if (hasDefaultAddress)
-				{
-					ModelState.AddModelError("", "Khách hàng này đã có một địa chỉ mặc định.");
-                    ViewBag.Provinces = await _services.GetProvincesAsync();
-                    LoadDropDownsCreate(dc);
-                    ViewBag.khachHang = await _serviceKH.GetAllKhachHang();
-                    return View(dc);
-				}
-			}
+			//if (dc.DiaChiMacDinh)
+			//{
+			//	bool hasDefaultAddress = await _services.HasDefaultAddressAsync(dc.IdKhachHang);
+			//	if (hasDefaultAddress)
+			//	{
+			//		ModelState.AddModelError("", "Khách hàng này đã có một địa chỉ mặc định.");
+   //                 ViewBag.Provinces = await _services.GetProvincesAsync();
+   //                 LoadDropDownsCreate(dc);
+   //                 ViewBag.khachHang = await _serviceKH.GetAllKhachHang();
+   //                 return View(dc);
+			//	}
+			//}
 			if (!ModelState.IsValid)
 			{
 				foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
