@@ -191,6 +191,7 @@
         <h4>Khách Hàng</h4>
         <div class="d-flex align-items-center">
             <input type="text" id="customerSearch" class="form-control me-2" placeholder="Tìm kiếm theo SDT hoặc Email" style="width: 250px; margin-top:19px" />
+            <input type="hidden" id="invoiceId" value="@Model.HoaDon.IdHoaDon" />
             <button class="btn btn-secondary ms-2" id="btnSearchCustomer">Tìm Kiếm</button>
             <button class="btn btn-primary ms-2" id="btnAddCustomer">Thêm Khách Hàng</button>
         </div>
@@ -221,6 +222,8 @@
 
                     <dt class="col-sm-4">Địa Chỉ Giao Hàng</dt>
                     <dd class="col-sm-8" id="moTa"></dd>
+
+                    <dd class="col-sm-8" id="invoiceIdDisplay" hidden>@Model.HoaDon.IdHoaDon</dd>
                 </dl>
             </div>
         </div>
@@ -233,13 +236,13 @@
                     </label>
                 </dd>
                 <dt class="col-sm-6">Tổng Tiền Hàng</dt>
-                <dd class="col-sm-6">@Model.DonGia.ToString("N0")</dd>
+                <dd class="col-sm-6">@Model.DonGia.ToString("N0") </dd>
                 <dt class="col-sm-6">Giảm Giá</dt>
-                <dd class="col-sm-6">@Model.GiamGia</dd>
-                <dt class="col-sm-6" id="shippingFeeLabel" style="display: none;">Phí Vận Chuyển</dt>
-                <dd class="col-sm-6" id="shippingFee" style="display: none;">@Model.PhiVanChuyen</dd>
+                <dd class="col-sm-6">0</dd>
+                <dt class="col-sm-6" id="shippingFeeLabel" style="display: @(Model.PhiVanChuyen > 0 ? "block" : "none")">Phí Vận Chuyển</dt>
+                <dd class="col-sm-6" id="shippingFee">@Model.PhiVanChuyen </dd>
                 <dt class="col-sm-6">Tổng Tiền</dt>
-                <dd class="col-sm-6">@Model.TongTien.ToString("N0")</dd>
+                <dd class="col-sm-6" >@Model.TongTien.ToString("N0") </dd>
 
                 <dt class="col-sm-6" id="amountGivenLabel" style="display: none;">Tiền khách đưa</dt>
                 <dd class="col-sm-6" id="amountGiven" style="display: none;">
