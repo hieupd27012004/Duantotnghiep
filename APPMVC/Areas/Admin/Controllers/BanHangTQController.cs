@@ -38,6 +38,7 @@ namespace APPMVC.Areas.Admin.Controllers
         private readonly IConfiguration _configuration;
         private readonly IDiaChiService _services;
         private readonly ILichSuThanhToanService _lichSuThanhToanService;
+        private readonly GiaoHangNhanhService _giaoHangNhanhService;
 
         public BanHangTQController(
             ISanPhamChiTietService sanPhamChiTietService,
@@ -55,6 +56,7 @@ namespace APPMVC.Areas.Admin.Controllers
             IVnPayService vnPayServie,
             IConfiguration configuration,
             IDiaChiService services,
+            GiaoHangNhanhService giaoHangNhanhService,
             ILichSuThanhToanService lichSuThanhToanService
             )
         {
@@ -74,6 +76,7 @@ namespace APPMVC.Areas.Admin.Controllers
             _configuration = configuration;
             _services = services;
             _lichSuThanhToanService = lichSuThanhToanService;
+            _giaoHangNhanhService = giaoHangNhanhService;
         }
 
         public async Task<ActionResult> Index()
@@ -263,8 +266,9 @@ namespace APPMVC.Areas.Admin.Controllers
             var viewModel = new HoaDonChiTietViewModel
             {
                 DonGia = tongTienHang,
-                GiamGia = hoaDon.TienGiam,
-                TongTien = tongTienHang,
+                GiamGia = hoaDon.TienGiam, 
+                TongTien = tongTienHang + (hoaDon.TienShip ?? 0),
+                PhiVanChuyen = hoaDon.TienShip,
                 HoaDon = new HoaDonChiTietViewModel.HoaDonViewModel
                 {
                     IdHoaDon = hoaDon.IdHoaDon,
@@ -273,6 +277,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     SoDienThoaiNguoiNhan = hoaDon.SoDienThoaiNguoiNhan,
                     LoaiHoaDon = hoaDon.LoaiHoaDon,
                     DiaChiGiaoHang = hoaDon.DiaChiGiaoHang
+                   
                 },
                 SanPhamChiTiets = sanPhamChiTiets 
             };
@@ -501,6 +506,7 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             hoaDon.TienGiam = 0;
+
             hoaDon.TongTienDonHang = tongTienHang;
             hoaDon.TongTienHoaDon = tongTienHang;
             hoaDon.TrangThai = "Hoàn Thành";
@@ -823,15 +829,15 @@ namespace APPMVC.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SearchCustomer(string search)
+        public async Task<IActionResult> SearchCustomer(string search, Guid IdHoadon)
         {
+            // Validate the search input
             if (string.IsNullOrWhiteSpace(search))
             {
                 return BadRequest("Invalid search criteria.");
             }
 
             var customer = await _khachHangService.GetCustomerByPhoneOrEmailAsync(search);
-
             if (customer == null)
             {
                 return Ok(new
@@ -843,11 +849,73 @@ namespace APPMVC.Areas.Admin.Controllers
                     provinceName = (string)null,
                     districtName = (string)null,
                     wardName = (string)null,
-                    moTa = (string)null
+                    moTa = (string)null,
+                    idHoaDon = (Guid?)null,
+                    phiVanChuyen = 0.0
                 });
             }
-            var diaChiKhachHang = await _services.GetDefaultAddressByCustomerIdAsync(customer.IdKhachHang);
 
+            // Retrieve the default address for the customer
+            var diaChiKhachHang = await _services.GetDefaultAddressByCustomerIdAsync(customer.IdKhachHang);
+            double phiVanChuyen = 0.0;
+
+            // Retrieve invoice details based on IdHoadon
+            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(IdHoadon);
+            if (hoaDonChiTietList == null || !hoaDonChiTietList.Any())
+            {
+                return NotFound(new { message = "No invoice details found." });
+            }
+
+            // Define shipping parameters
+            double totalWeight = 0.0;
+            int fromDistrictId = 3440; // Adjust accordingly
+            string fromWardCode = "13005"; // Adjust accordingly
+            double height = 50; // Item height in cm
+            double length = 20; // Item length in cm
+            double width = 20; // Item width in cm
+            int serviceTypeId = 2; // Shipping service type
+
+            // Calculate the shipping fee
+            try
+            {
+                foreach (var hoaDonChiTiet in hoaDonChiTietList)
+                {
+                    var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
+                    if (sanPhamCT != null)
+                    {
+                        // Calculate the total weight for shipping
+                        totalWeight += hoaDonChiTiet.SoLuong * 200; // Assuming weight per item is 200 grams
+
+                        // Calculate the shipping fee if the destination address is available
+                        if (diaChiKhachHang != null)
+                        {
+                            int toDistrictId = diaChiKhachHang.DistrictId;
+                            string toWardCode = diaChiKhachHang.WardId;
+
+                            phiVanChuyen += await _giaoHangNhanhService.CalculateShippingFee(
+                                fromDistrictId,
+                                fromWardCode,
+                                toDistrictId,
+                                toWardCode,
+                                height,
+                                length,
+                                hoaDonChiTiet.SoLuong * 200, // Total weight for this item
+                                width,
+                                serviceTypeId,
+                                sanPhamCT?.NguoiTao ?? "Unknown Product",
+                                (int)hoaDonChiTiet.SoLuong
+                            );
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error calculating shipping fee: {ex.Message}");
+                phiVanChuyen = 0.0; 
+            }
+
+            // Return the customer and calculated shipping fee
             return Ok(new
             {
                 customerName = customer.HoTen,
@@ -857,7 +925,9 @@ namespace APPMVC.Areas.Admin.Controllers
                 provinceName = diaChiKhachHang?.ProvinceName,
                 districtName = diaChiKhachHang?.DistrictName,
                 wardName = diaChiKhachHang?.WardName,
-                moTa = diaChiKhachHang?.MoTa
+                moTa = diaChiKhachHang?.MoTa,
+                idHoaDon = IdHoadon,
+                phiVanChuyen
             });
         }
     }
