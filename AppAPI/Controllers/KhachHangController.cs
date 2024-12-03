@@ -141,5 +141,23 @@ namespace AppAPI.Controllers
             }
             return BadRequest(new { message = "Đổi mật khẩu thất bại." });
         }
+
+        [HttpGet("GetCustomerByPhoneOrEmail")]
+        public async Task<IActionResult> GetCustomerByPhoneOrEmail([FromQuery] string phoneOrEmail)
+        {
+            try
+            {
+                var customer = await _service.GetCustomerByPhoneOrEmailAsync(phoneOrEmail);
+                if (customer == null)
+                {
+                    return NotFound(new { message = "Không tìm thấy khách hàng." });
+                }
+                return Ok(customer);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

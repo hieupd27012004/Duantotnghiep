@@ -137,7 +137,21 @@ namespace APPMVC.Areas.Admin.Controllers
 
             try
             {
+                // Kiểm tra nếu không có tổ hợp hoặc tổ hợp có số lượng <= 0
+                if (viewModel.Combinations == null || !viewModel.Combinations.Any())
+                {
+                    TempData["Error"] = "Không có tổ hợp nào được chọn.";
+                    return View(viewModel);
+                }
 
+                if (viewModel.Combinations.Any(c => c.SoLuong <= 0))
+                {
+                    TempData["Error"] = "Tất cả các tổ hợp phải có số lượng lớn hơn 0.";
+                    await LoadViewBags(); // Tải lại dữ liệu ViewBag nếu cần
+                    return RedirectToAction("GetAll");
+                }
+
+                // Lấy dữ liệu từ các dịch vụ liên quan
                 var chatLieuTask = _chatLieuService.GetChatLieuById(viewModel.IdChatLieu);
                 var thuongHieuTask = _thuongHieuService.GetThuongHieuById(viewModel.IdThuongHieu);
                 var danhMucTask = _danhMucService.GetDanhMucById(viewModel.IdDanhMuc);
@@ -158,50 +172,38 @@ namespace APPMVC.Areas.Admin.Controllers
                 viewModel.SanPham.IdDeGiay = viewModel.SanPham.DeGiay?.IdDeGiay ?? Guid.Empty;
                 viewModel.SanPham.IdKieuDang = viewModel.SanPham.KieuDang?.IdKieuDang ?? Guid.Empty;
 
-
                 await _sanPhamService.Create(viewModel.SanPham);
                 var idSanPham = viewModel.SanPham.IdSanPham;
-
-                if (viewModel.Combinations == null || !viewModel.Combinations.Any())
-                {
-                    TempData["Error"] = "Không có tổ hợp nào được chọn.";
-                    return View(viewModel);
-                }
-
 
                 // Sử dụng HashSet để theo dõi các cặp IdKichCo và IdMauSac đã được tạo
                 var createdPairs = new HashSet<(string KichCoId, string MauSacId)>();
 
-                // Lấy số lượng cặp KichCo và MauSac
                 int totalKichCo = viewModel.SelectedKichCoIds.Count;
                 int totalMauSac = viewModel.SelectedMauSacIds.Count;
                 int totalCombinations = viewModel.Combinations.Count;
 
-                // Lặp qua từng KichCo đã chọn
+                // Lặp qua từng KichCo và MauSac
                 for (int i = 0; i < totalKichCo; i++)
                 {
                     string kichCoId = viewModel.SelectedKichCoIds[i];
 
-                    // Lặp qua từng MauSac đã chọn
                     for (int j = 0; j < totalMauSac; j++)
                     {
                         string mauSacId = viewModel.SelectedMauSacIds[j];
 
-                        // Lấy tổ hợp tương ứng (có thể lặp lại nếu không đủ tổ hợp)
                         var combination = viewModel.Combinations[(i + j) % totalCombinations];
 
                         // Kiểm tra xem cặp (KichCoId, MauSacId) đã được tạo chưa
                         var pair = (KichCoId: kichCoId, MauSacId: mauSacId);
                         if (!createdPairs.Contains(pair))
                         {
-                            // Tạo một SanPhamChiTiet mới cho từng tổ hợp, KichCo và MauSac
                             var sanPhamChiTiet = new SanPhamChiTiet
                             {
                                 IdSanPhamChiTiet = Guid.NewGuid(),
                                 IdSanPham = idSanPham,
-                                Gia = combination.Gia, // Sử dụng giá từ tổ hợp
-                                SoLuong = combination.SoLuong, // Sử dụng số lượng từ tổ hợp
-                                XuatXu = combination.XuatXu, // Sử dụng xuất xứ từ tổ hợp
+                                Gia = combination.Gia,
+                                SoLuong = combination.SoLuong,
+                                XuatXu = combination.XuatXu,
                                 GioiTinh = "Nam",
                                 NgayTao = DateTime.Now,
                                 NgayCapNhat = DateTime.Now,
@@ -210,24 +212,20 @@ namespace APPMVC.Areas.Admin.Controllers
                                 KichHoat = 1
                             };
 
-                            // Tạo SanPhamChiTiet
                             await _sanPhamCTService.Create(sanPhamChiTiet);
 
-                            // Tạo mối quan hệ giữa SanPhamChiTiet và KichCo
                             await _sanPhamChiTietKichCoService.Create(new SanPhamChiTietKichCo
                             {
                                 IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
                                 IdKichCo = Guid.Parse(kichCoId)
                             });
 
-                            // Tạo mối quan hệ giữa SanPhamChiTiet và MauSac
                             await _sanPhamChiTietMauSacService.Create(new SanPhamChiTietMauSac
                             {
                                 IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
                                 IdMauSac = Guid.Parse(mauSacId)
                             });
 
-                            // Xử lý hình ảnh
                             if (combination.Files != null && combination.Files.Count > 0)
                             {
                                 foreach (var file in combination.Files)
@@ -249,13 +247,12 @@ namespace APPMVC.Areas.Admin.Controllers
                                 }
                             }
 
-                            // Thêm cặp (KichCoId, MauSacId) vào HashSet
                             createdPairs.Add(pair);
                         }
                     }
                 }
 
-                TempData["Success"] = "Thêm mới thành công";
+                TempData["Success"] = "Thêm mới thành công.";
                 return RedirectToAction("GetAll");
             }
             catch (Exception ex)
@@ -267,6 +264,149 @@ namespace APPMVC.Areas.Admin.Controllers
             await LoadViewBags();
             return View(viewModel);
         }
+
+
+
+        //public async Task<IActionResult> Create(SanPhamViewModel viewModel)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        await LoadViewBags();
+        //        return View(viewModel);
+        //    }
+
+        //    try
+        //    {
+
+        //        var chatLieuTask = _chatLieuService.GetChatLieuById(viewModel.IdChatLieu);
+        //        var thuongHieuTask = _thuongHieuService.GetThuongHieuById(viewModel.IdThuongHieu);
+        //        var danhMucTask = _danhMucService.GetDanhMucById(viewModel.IdDanhMuc);
+        //        var deGiayTask = _deGiayService.GetDeGiayById(viewModel.IdDeGiay);
+        //        var kieuDangTask = _kieuDangService.GetKieuDangById(viewModel.IdKieuDang);
+
+        //        await Task.WhenAll(chatLieuTask, thuongHieuTask, danhMucTask, deGiayTask, kieuDangTask);
+
+        //        viewModel.SanPham.ChatLieu = await chatLieuTask;
+        //        viewModel.SanPham.ThuongHieu = await thuongHieuTask;
+        //        viewModel.SanPham.DanhMuc = await danhMucTask;
+        //        viewModel.SanPham.DeGiay = await deGiayTask;
+        //        viewModel.SanPham.KieuDang = await kieuDangTask;
+
+        //        viewModel.SanPham.IdChatLieu = viewModel.SanPham.ChatLieu?.IdChatLieu ?? Guid.Empty;
+        //        viewModel.SanPham.IdThuongHieu = viewModel.SanPham.ThuongHieu?.IdThuongHieu ?? Guid.Empty;
+        //        viewModel.SanPham.IdDanhMuc = viewModel.SanPham.DanhMuc?.IdDanhMuc ?? Guid.Empty;
+        //        viewModel.SanPham.IdDeGiay = viewModel.SanPham.DeGiay?.IdDeGiay ?? Guid.Empty;
+        //        viewModel.SanPham.IdKieuDang = viewModel.SanPham.KieuDang?.IdKieuDang ?? Guid.Empty;
+
+
+        //        await _sanPhamService.Create(viewModel.SanPham);
+        //        var idSanPham = viewModel.SanPham.IdSanPham;
+
+        //        if (viewModel.Combinations == null || !viewModel.Combinations.Any())
+        //        {
+        //            TempData["Error"] = "Không có tổ hợp nào được chọn.";
+        //            return View(viewModel);
+        //        }
+
+
+        //        // Sử dụng HashSet để theo dõi các cặp IdKichCo và IdMauSac đã được tạo
+        //        var createdPairs = new HashSet<(string KichCoId, string MauSacId)>();
+
+        //        // Lấy số lượng cặp KichCo và MauSac
+        //        int totalKichCo = viewModel.SelectedKichCoIds.Count;
+        //        int totalMauSac = viewModel.SelectedMauSacIds.Count;
+        //        int totalCombinations = viewModel.Combinations.Count;
+
+        //        // Lặp qua từng KichCo đã chọn
+        //        for (int i = 0; i < totalKichCo; i++)
+        //        {
+        //            string kichCoId = viewModel.SelectedKichCoIds[i];
+
+        //            // Lặp qua từng MauSac đã chọn
+        //            for (int j = 0; j < totalMauSac; j++)
+        //            {
+        //                string mauSacId = viewModel.SelectedMauSacIds[j];
+
+        //                // Lấy tổ hợp tương ứng (có thể lặp lại nếu không đủ tổ hợp)
+        //                var combination = viewModel.Combinations[(i + j) % totalCombinations];
+
+        //                // Kiểm tra xem cặp (KichCoId, MauSacId) đã được tạo chưa
+        //                var pair = (KichCoId: kichCoId, MauSacId: mauSacId);
+        //                if (!createdPairs.Contains(pair))
+        //                {
+        //                    // Tạo một SanPhamChiTiet mới cho từng tổ hợp, KichCo và MauSac
+        //                    var sanPhamChiTiet = new SanPhamChiTiet
+        //                    {
+        //                        IdSanPhamChiTiet = Guid.NewGuid(),
+        //                        IdSanPham = idSanPham,
+        //                        Gia = combination.Gia, // Sử dụng giá từ tổ hợp
+        //                        SoLuong = combination.SoLuong, // Sử dụng số lượng từ tổ hợp
+        //                        XuatXu = combination.XuatXu, // Sử dụng xuất xứ từ tổ hợp
+        //                        GioiTinh = "Nam",
+        //                        NgayTao = DateTime.Now,
+        //                        NgayCapNhat = DateTime.Now,
+        //                        NguoiTao = "Admin",
+        //                        NguoiCapNhat = "Admin",
+        //                        KichHoat = 1
+        //                    };
+
+        //                    // Tạo SanPhamChiTiet
+        //                    await _sanPhamCTService.Create(sanPhamChiTiet);
+
+        //                    // Tạo mối quan hệ giữa SanPhamChiTiet và KichCo
+        //                    await _sanPhamChiTietKichCoService.Create(new SanPhamChiTietKichCo
+        //                    {
+        //                        IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+        //                        IdKichCo = Guid.Parse(kichCoId)
+        //                    });
+
+        //                    // Tạo mối quan hệ giữa SanPhamChiTiet và MauSac
+        //                    await _sanPhamChiTietMauSacService.Create(new SanPhamChiTietMauSac
+        //                    {
+        //                        IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+        //                        IdMauSac = Guid.Parse(mauSacId)
+        //                    });
+
+        //                    // Xử lý hình ảnh
+        //                    if (combination.Files != null && combination.Files.Count > 0)
+        //                    {
+        //                        foreach (var file in combination.Files)
+        //                        {
+        //                            if (file.Length > 0)
+        //                            {
+        //                                var imageData = await ConvertFileToByteArray(file);
+        //                                var hinhAnh = new HinhAnh
+        //                                {
+        //                                    IdHinhAnh = Guid.NewGuid(),
+        //                                    LoaiFileHinhAnh = file.ContentType,
+        //                                    DataHinhAnh = imageData,
+        //                                    TrangThai = 1,
+        //                                    IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet
+        //                                };
+
+        //                                await _hinhAnhService.UploadAsync(hinhAnh);
+        //                            }
+        //                        }
+        //                    }
+
+        //                    // Thêm cặp (KichCoId, MauSacId) vào HashSet
+        //                    createdPairs.Add(pair);
+        //                }
+        //            }
+        //        }
+
+        //        TempData["Success"] = "Thêm mới thành công";
+        //        return RedirectToAction("GetAll");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Error: {ex.Message}");
+        //        TempData["Error"] = "Thêm mới thất bại: " + ex.Message;
+        //    }
+
+        //    await LoadViewBags();
+        //    return View(viewModel);
+        //}
 
         private async Task<byte[]> ConvertFileToByteArray(IFormFile file)
         {

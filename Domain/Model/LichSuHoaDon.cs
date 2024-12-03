@@ -21,6 +21,8 @@ namespace AppData.Model
 		public string NguoiThaoTac { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		public string TrangThai { get; set; }
+
+		public string? GhiChu { get; set; }
 		public Guid IdHoaDon { get; set; }
 
         public Guid? IdNhanVien { get; set; }
