@@ -4,7 +4,7 @@ namespace APPMVC.IService
 {
     public interface ISanPhamService
     {
-        Task<List<SanPham>> GetSanPhams(string? name);
+        Task<List<SanPham>> GetSanPhams(string? name = null);
         Task<SanPham?> GetSanPhamById(Guid id);
         Task Create(SanPham sanPham);
         Task Update(SanPham sanPham);
