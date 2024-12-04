@@ -57,7 +57,6 @@ namespace AppAPI.Repository
                     throw new ValidationException("Validation failed for the voucher.");
                 }
 
-                // Map DTO to Entity
                 var voucher = new Voucher
                 {
                     VoucherId = Guid.NewGuid(), 
