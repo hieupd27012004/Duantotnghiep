@@ -74,7 +74,6 @@ namespace APPMVC.Areas.Admin.Controllers
                 SanPhams = await GetProducts(),
                 NgayBatDau = DateTime.Now,
                 NgayKetThuc = DateTime.Now.AddHours(1),
-
             };
 
             return View(model);
@@ -96,7 +95,7 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 var promotion = model.Promotion;
                 promotion.NgayBatDau = model.NgayBatDau;
-                promotion.NgayKetThuc = model.NgayKetThuc;
+                promotion.NgayKetThuc = model.Promotion.NgayKetThuc; 
                 promotion.IdPromotion = Guid.NewGuid();
                 promotion.NgayTao = DateTime.Now;
 

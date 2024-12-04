@@ -19,12 +19,14 @@ namespace APPMVC.Areas.Admin.Controllers
         private readonly IVoucherService _voucherService;
         private readonly IKhachHangService _khachHangService;
         private readonly ILogger<VoucherController> _logger;
+        private readonly ILichSuSuDungVoucherService _lichSuSuDungVoucherService;
 
-        public VoucherController(IVoucherService voucherService, IKhachHangService khachHangService, ILogger<VoucherController> logger)
+        public VoucherController(IVoucherService voucherService, IKhachHangService khachHangService, ILogger<VoucherController> logger, ILichSuSuDungVoucherService lichSuSuDungVoucherService)
         {
             _voucherService = voucherService ?? throw new ArgumentNullException(nameof(voucherService));
             _khachHangService = khachHangService;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _lichSuSuDungVoucherService = lichSuSuDungVoucherService;
         }
 
         // GET: Admin/Voucher
@@ -88,7 +90,7 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 _logger.LogInformation("Starting to create voucher.");
 
-                // Check if any customer IDs are selected
+                // Check for selected customer IDs
                 if (selectedKhachHangIds == null || selectedKhachHangIds.Length == 0)
                 {
                     _logger.LogWarning("No customer IDs selected.");
@@ -115,11 +117,33 @@ namespace APPMVC.Areas.Admin.Controllers
                 // Log voucher information before sending the request
                 _logger.LogInformation($"Creating voucher with details: {JsonConvert.SerializeObject(voucher)}");
 
-                var result = await _voucherService.CreateAsync(voucher, selectedKhachHangGuidIds);
+                // Convert Voucher to VoucherDto
+                var voucherDto = new VoucherDto
+                {
+                    VoucherId = Guid.NewGuid(), // Generate new ID
+                    MaVoucher = voucher.MaVoucher,
+                    MoTaVoucher = voucher.MoTaVoucher,
+                    LoaiGiamGia = voucher.LoaiGiamGia,
+                    GiaTriGiam = voucher.GiaTriGiam,
+                    GiaTriDonHangToiThieu = voucher.GiaTriDonHangToiThieu,
+                    SoTienToiDa = voucher.SoTienToiDa,
+                    NgayBatDau = voucher.NgayBatDau,
+                    NgayKetThuc = voucher.NgayKetThuc,
+                    TongSoLuongVoucher = voucher.TongSoLuongVoucher,
+                    SoLuongVoucherConLai = voucher.SoLuongVoucherConLai,
+                    TrangThai = voucher.TrangThai,
+                    NgayTao = DateTime.UtcNow,
+                    NguoiTao = voucher.NguoiTao,
+                    NgayUpdate = null,
+                    NguoiUpdate = null
+                };
+
+                // Call the service to create the voucher
+                var result = await _voucherService.CreateAsync(voucherDto, selectedKhachHangGuidIds);
 
                 if (result)
                 {
-                    _logger.LogInformation($"Successfully created voucher with ID: {voucher.VoucherId}");
+                    _logger.LogInformation($"Successfully created voucher with ID: {voucherDto.VoucherId}");
                     TempData["SuccessMessage"] = "Voucher created successfully.";
                     return RedirectToAction(nameof(Index));
                 }
@@ -136,7 +160,6 @@ namespace APPMVC.Areas.Admin.Controllers
             }
         }
 
-        // Phương thức để load danh sách khách hàng và trả về view
         private async Task<IActionResult> LoadKhachHangAndReturnView(Voucher voucher)
         {
             var khachHangs = await _khachHangService.GetAllKhachHang();

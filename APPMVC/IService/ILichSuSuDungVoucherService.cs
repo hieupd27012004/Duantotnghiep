@@ -1,9 +1,6 @@
 ﻿using AppData.Model;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace AppAPI.IService
+namespace APPMVC.IService
 {
     public interface ILichSuSuDungVoucherService
     {

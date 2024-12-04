@@ -26,7 +26,7 @@ namespace AppAPI.Controllers
         }
 
         [HttpPost("CreateVoucher")]
-        public async Task<IActionResult> CreateVoucher([FromBody] Voucher voucher, [FromQuery] List<Guid> selectedKhachHangIds)
+        public async Task<IActionResult> CreateVoucher([FromBody] VoucherDto voucher, [FromQuery] List<Guid> selectedKhachHangIds)
         {
             try
             {
