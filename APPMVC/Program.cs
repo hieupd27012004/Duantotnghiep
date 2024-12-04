@@ -80,6 +80,7 @@ builder.Services.AddTransient<ICardService, CardService>();
 builder.Services.AddSingleton<IVnPayService, VnPayService>();
 //builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.AddTransient<ILichSuThanhToanService, LichSuThanhToanService>();
+builder.Services.AddTransient<ILichSuSuDungVoucherService, LichSuSuDungVoucherService>();
 builder.Services.AddHttpClient<GiaoHangNhanhService>(client =>
 {
     client.DefaultRequestHeaders.Add("Content-Type", "application/json");

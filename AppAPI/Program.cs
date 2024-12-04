@@ -104,6 +104,8 @@ builder.Services.AddTransient<ICardRepo, CardRepo>();
 builder.Services.AddTransient<ICardService, CardService>();
 builder.Services.AddTransient<ILichSuThanhToanRepo, LichSuThanhToanRepo>();
 builder.Services.AddTransient<ILichSuThanhToanService, LichSuThanhToanService>();
+builder.Services.AddTransient<ILichSuSuDungVoucherRepo, LichSuSuDungVoucherRepo>();
+builder.Services.AddTransient<ILichSuSuDungVoucherService, LichSuSuDungVoucherService>();
 builder.Services.AddHostedService<VoucherStatusUpdater>();
 builder.Services.AddSignalR();
 

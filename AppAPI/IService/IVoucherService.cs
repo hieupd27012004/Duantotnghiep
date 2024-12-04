@@ -1,4 +1,5 @@
-﻿using AppData.Model;
+﻿using AppAPI.IRepository;
+using AppData.Model;
 
 namespace AppAPI.IService
 {
@@ -6,7 +7,7 @@ namespace AppAPI.IService
     {
         Task<List<Voucher>> GetVouchersAsync();
         Task<Voucher> GetVoucherByIdAsync(Guid id);
-        Task<bool> CreateAsync(Voucher voucher, List<Guid> selectedKhachHangIds);
+        Task<bool> CreateAsync(VoucherDto voucher, List<Guid> selectedKhachHangIds);
         Task<bool> UpdateAsync(Voucher voucher);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> AddLichSuSuDungVoucherAsync(LichSuSuDungVoucher lichSuSuDungVoucher);

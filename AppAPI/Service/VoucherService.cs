@@ -39,7 +39,7 @@ namespace AppAPI.Service
             }
         }
 
-        public async Task<bool> CreateAsync(Voucher voucher, List<Guid> selectedKhachHangIds)
+        public async Task<bool> CreateAsync(VoucherDto voucher, List<Guid> selectedKhachHangIds)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace AppAPI.Service
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in CreateAsync method.");
-                throw; // Rethrow to handle in upper layers
+                throw;
             }
         }
         public async Task<bool> DeleteAsync(Guid id)
