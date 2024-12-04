@@ -71,12 +71,14 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             var model = new PromotionViewModel
             {
-                SanPhams = await GetProducts() ,
+                Promotion = new Promotion
+                {
+                    NgayKetThuc = DateTime.Now.AddHours(1)
+                },
+                SanPhams = await GetProducts(),
                 NgayBatDau = DateTime.Now,
                 NgayKetThuc = DateTime.Now.AddHours(1),
-
             };
-            
             return View(model);
         }
 
@@ -87,7 +89,12 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                model.SanPhams = await GetProducts(); 
+                var errors = ModelState.Values.SelectMany(v => v.Errors);
+                foreach (var error in errors)
+                {
+                    _logger.LogError(error.ErrorMessage);
+                }
+                model.SanPhams = await GetProducts();
                 return View(model);
             }
 
@@ -95,13 +102,12 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 var promotion = model.Promotion;
                 promotion.NgayBatDau = model.NgayBatDau;
-                promotion.NgayKetThuc = model.NgayKetThuc;
+                promotion.NgayKetThuc = model.Promotion.NgayKetThuc; 
                 promotion.IdPromotion = Guid.NewGuid();
                 promotion.NgayTao = DateTime.Now;
 
                 promotion.PromotionSanPhamChiTiets = new List<PromotionSanPhamChiTiet>();
 
-  
                 foreach (var idSanPhamChiTiet in model.SelectedSanPhamChiTietIds)
                 {
                     promotion.PromotionSanPhamChiTiets.Add(new PromotionSanPhamChiTiet
@@ -116,7 +122,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 {
                     _logger.LogInformation($"Successfully created promotion with Id: {promotion.IdPromotion}");
                     TempData["SuccessMessage"] = "Promotion created successfully.";
-                    return RedirectToAction(nameof(Index)); // Redirect to Index action
+                    return RedirectToAction(nameof(Index));
                 }
                 else
                 {
