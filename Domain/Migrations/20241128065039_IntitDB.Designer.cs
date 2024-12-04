@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
-    [Migration("20241127082728_duan")]
-    partial class duan
+    [Migration("20241128065039_IntitDB")]
+    partial class IntitDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -58,30 +58,30 @@ namespace AppData.Migrations
                     b.HasData(
                         new
                         {
-                            IdChatLieu = new Guid("06b2ed1d-9e0e-4e4b-9daf-36af73a051d6"),
+                            IdChatLieu = new Guid("2ee75245-7d50-41f5-a64c-de77d3bc4cca"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 402, DateTimeKind.Local).AddTicks(4298),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 402, DateTimeKind.Local).AddTicks(4306),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(3383),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(3393),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenChatLieu = "Vải Cotton"
                         },
                         new
                         {
-                            IdChatLieu = new Guid("9a659270-c25e-404b-b00d-088f43d472dd"),
+                            IdChatLieu = new Guid("05725cfc-ffc0-497f-ad95-cb193296066a"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 402, DateTimeKind.Local).AddTicks(4308),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 402, DateTimeKind.Local).AddTicks(4308),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(3395),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(3395),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenChatLieu = "Da thật"
                         },
                         new
                         {
-                            IdChatLieu = new Guid("e3f61042-4753-4cb0-81c0-5333f7c456a8"),
+                            IdChatLieu = new Guid("89355c0b-e9f5-4cf8-9a7e-66e83ef78e44"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 402, DateTimeKind.Local).AddTicks(4310),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 402, DateTimeKind.Local).AddTicks(4310),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(3396),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(3397),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenChatLieu = "Vải Polyester"
@@ -109,25 +109,25 @@ namespace AppData.Migrations
                     b.HasData(
                         new
                         {
-                            IdChucVu = new Guid("ad416571-4370-4ca8-8ec7-aa46cee70c87"),
+                            IdChucVu = new Guid("101193d7-a61f-4943-9b4f-9e0e639d433e"),
                             Code = "QL",
                             TenChucVu = "Quản lý"
                         },
                         new
                         {
-                            IdChucVu = new Guid("210dd7c6-beed-4fa1-9e86-99fc99d18da8"),
+                            IdChucVu = new Guid("2341a9ed-4724-4c15-afcf-7246a828f75e"),
                             Code = "NV",
                             TenChucVu = "Nhân viên"
                         },
                         new
                         {
-                            IdChucVu = new Guid("35c2348a-a60b-4d6c-b804-4b1f387240f2"),
+                            IdChucVu = new Guid("1b5dfa91-648a-40de-a1a9-21f489405f85"),
                             Code = "KT",
                             TenChucVu = "Kế toán"
                         },
                         new
                         {
-                            IdChucVu = new Guid("b4dd1a8e-bf2d-4997-bb77-f3ff99977028"),
+                            IdChucVu = new Guid("ff6f52b0-3b52-494c-ad35-8eb3c23424ba"),
                             Code = "KK",
                             TenChucVu = "Thủ kho"
                         });
@@ -167,30 +167,30 @@ namespace AppData.Migrations
                     b.HasData(
                         new
                         {
-                            IdDanhMuc = new Guid("0086709f-ccc9-4cc6-b810-d08dc3589702"),
+                            IdDanhMuc = new Guid("41ea825c-9741-4d4b-98f3-6e33a20a728d"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 402, DateTimeKind.Local).AddTicks(9317),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 402, DateTimeKind.Local).AddTicks(9314),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(7417),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(7415),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenDanhMuc = "Giày Thể Thao"
                         },
                         new
                         {
-                            IdDanhMuc = new Guid("419909c3-1192-434b-8482-f562380bce49"),
+                            IdDanhMuc = new Guid("8f999600-25a2-4934-811d-a052e8be5d04"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 402, DateTimeKind.Local).AddTicks(9320),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 402, DateTimeKind.Local).AddTicks(9319),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(7420),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(7419),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenDanhMuc = "Giày Da"
                         },
                         new
                         {
-                            IdDanhMuc = new Guid("279fd89d-0d1b-4aab-a794-475ca805963d"),
+                            IdDanhMuc = new Guid("401d57ec-a32b-4603-bedd-b07868dace5b"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 402, DateTimeKind.Local).AddTicks(9322),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 402, DateTimeKind.Local).AddTicks(9321),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(7421),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(7421),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenDanhMuc = "Giày Cao Gót"
@@ -231,7 +231,7 @@ namespace AppData.Migrations
                     b.HasData(
                         new
                         {
-                            IdDeGiay = new Guid("a63e3458-115d-4bfe-9809-01842e588a47"),
+                            IdDeGiay = new Guid("0c983aec-592f-439a-a233-5f7a7b81db32"),
                             KichHoat = 1,
                             NgayCapNhat = new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NgayTao = new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -241,7 +241,7 @@ namespace AppData.Migrations
                         },
                         new
                         {
-                            IdDeGiay = new Guid("341e28da-d266-47d0-aca5-05f39d270fd6"),
+                            IdDeGiay = new Guid("a6259c09-77ef-4dd6-9ef0-1555f212d845"),
                             KichHoat = 1,
                             NgayCapNhat = new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NgayTao = new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -251,7 +251,7 @@ namespace AppData.Migrations
                         },
                         new
                         {
-                            IdDeGiay = new Guid("e2b04da5-d6a5-445a-ba74-bee7c8466f63"),
+                            IdDeGiay = new Guid("cec1db46-8391-479b-8360-883789ac1531"),
                             KichHoat = 1,
                             NgayCapNhat = new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NgayTao = new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -589,30 +589,30 @@ namespace AppData.Migrations
                     b.HasData(
                         new
                         {
-                            IdKichCo = new Guid("f6542c85-f11c-4aaa-bf48-f896ff5ea5b2"),
+                            IdKichCo = new Guid("323dc806-88b8-4292-9a9f-6add9b281481"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 407, DateTimeKind.Local).AddTicks(6234),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 407, DateTimeKind.Local).AddTicks(6237),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(6088),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(6090),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenKichCo = "Size 37"
                         },
                         new
                         {
-                            IdKichCo = new Guid("005ace0d-b4bf-4e7e-a71f-ae0c27fb76e8"),
+                            IdKichCo = new Guid("0b733932-6a92-4303-b251-37a432ce9fcd"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 407, DateTimeKind.Local).AddTicks(6239),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 407, DateTimeKind.Local).AddTicks(6240),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(6092),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(6092),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenKichCo = "Size 38"
                         },
                         new
                         {
-                            IdKichCo = new Guid("c93721e2-e063-442c-9eef-3b8ba6e00e53"),
+                            IdKichCo = new Guid("9700b261-f5d4-47da-bdb6-92609598341a"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 407, DateTimeKind.Local).AddTicks(6241),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 407, DateTimeKind.Local).AddTicks(6241),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(6093),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(6094),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenKichCo = "Size 39"
@@ -653,30 +653,30 @@ namespace AppData.Migrations
                     b.HasData(
                         new
                         {
-                            IdKieuDang = new Guid("d6d6abad-ba04-486d-92a1-ff1166c3fd3a"),
+                            IdKieuDang = new Guid("d3d96d6f-f5fa-433f-9afd-640eddc8b30f"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 407, DateTimeKind.Local).AddTicks(8930),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 407, DateTimeKind.Local).AddTicks(8927),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(8254),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(8252),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenKieuDang = "Thể Thao"
                         },
                         new
                         {
-                            IdKieuDang = new Guid("b54ecf9b-41f3-4a9c-9033-fdc608c340fc"),
+                            IdKieuDang = new Guid("e4a556c5-067f-4a65-98b2-c74e1366126e"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 407, DateTimeKind.Local).AddTicks(8932),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 407, DateTimeKind.Local).AddTicks(8931),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(8256),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(8256),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenKieuDang = "Cổ Điển"
                         },
                         new
                         {
-                            IdKieuDang = new Guid("f8b00238-f8fb-4f16-9fa0-f53759a763fc"),
+                            IdKieuDang = new Guid("b5c8e70e-a145-4f40-9b87-c98ee2d31329"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 407, DateTimeKind.Local).AddTicks(8934),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 407, DateTimeKind.Local).AddTicks(8933),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(8258),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(8257),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenKieuDang = "Hiện Đại"
@@ -727,21 +727,25 @@ namespace AppData.Migrations
                     b.Property<Guid>("IdKhachHang")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("IdHoaDon")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("IdLichSuVoucher")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdOrder")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("NgaySuDungVoucher")
+                    b.Property<DateTime?>("NgaySuDungVoucher")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("TrangThaiVoucher")
+                        .HasColumnType("int");
 
                     b.HasKey("IdVoucher", "IdKhachHang");
 
                     b.HasIndex("IdKhachHang");
 
-                    b.HasIndex("IdVoucher", "IdKhachHang", "IdOrder")
-                        .IsUnique();
+                    b.HasIndex("IdVoucher", "IdKhachHang", "IdHoaDon")
+                        .IsUnique()
+                        .HasFilter("[IdHoaDon] IS NOT NULL");
 
                     b.ToTable("LichSuSuDungVouchers");
                 });
@@ -829,30 +833,30 @@ namespace AppData.Migrations
                     b.HasData(
                         new
                         {
-                            IdMauSac = new Guid("9b7b08f7-7a00-41d5-9845-4da7f0b9257e"),
+                            IdMauSac = new Guid("be55659f-c5b7-4bd9-a618-aa2d6ad9c012"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 409, DateTimeKind.Local).AddTicks(970),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 409, DateTimeKind.Local).AddTicks(973),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 426, DateTimeKind.Local).AddTicks(9187),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 426, DateTimeKind.Local).AddTicks(9189),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenMauSac = "Red"
                         },
                         new
                         {
-                            IdMauSac = new Guid("c2d75ecc-f6f9-4314-9bf1-3acb3fa5ff63"),
+                            IdMauSac = new Guid("85d9e93a-1d92-4c53-8b4a-d44793f78d99"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 409, DateTimeKind.Local).AddTicks(984),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 409, DateTimeKind.Local).AddTicks(984),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 426, DateTimeKind.Local).AddTicks(9197),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 426, DateTimeKind.Local).AddTicks(9198),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenMauSac = "Green"
                         },
                         new
                         {
-                            IdMauSac = new Guid("88336497-6524-4f6c-b614-c329f6e51494"),
+                            IdMauSac = new Guid("a2931c0e-f7a7-4e0e-a0f5-d1c8e1de511c"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 409, DateTimeKind.Local).AddTicks(986),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 409, DateTimeKind.Local).AddTicks(986),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 426, DateTimeKind.Local).AddTicks(9199),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 426, DateTimeKind.Local).AddTicks(9199),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenMauSac = "Blue"
@@ -1147,30 +1151,30 @@ namespace AppData.Migrations
                     b.HasData(
                         new
                         {
-                            IdThuongHieu = new Guid("1386cc13-b500-4e4e-a2dd-67700531d3a5"),
+                            IdThuongHieu = new Guid("40845aae-2dce-4834-9055-fe63022e84e2"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 412, DateTimeKind.Local).AddTicks(6781),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 412, DateTimeKind.Local).AddTicks(6778),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 432, DateTimeKind.Local).AddTicks(2245),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 432, DateTimeKind.Local).AddTicks(2240),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenThuongHieu = "Nike"
                         },
                         new
                         {
-                            IdThuongHieu = new Guid("aacd5bbf-1a58-40a8-b5db-a65ac8ccb93b"),
+                            IdThuongHieu = new Guid("378c7c0a-a1c8-41dc-99a2-03e48cedc3e3"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 412, DateTimeKind.Local).AddTicks(6784),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 412, DateTimeKind.Local).AddTicks(6783),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 432, DateTimeKind.Local).AddTicks(2247),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 432, DateTimeKind.Local).AddTicks(2247),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenThuongHieu = "Adidas"
                         },
                         new
                         {
-                            IdThuongHieu = new Guid("3c664bd5-7528-4e32-9e56-d253e7f9233c"),
+                            IdThuongHieu = new Guid("b753da81-34fc-4553-91fd-ff11af7f6608"),
                             KichHoat = 1,
-                            NgayCapNhat = new DateTime(2024, 11, 27, 15, 27, 28, 412, DateTimeKind.Local).AddTicks(6786),
-                            NgayTao = new DateTime(2024, 11, 27, 15, 27, 28, 412, DateTimeKind.Local).AddTicks(6785),
+                            NgayCapNhat = new DateTime(2024, 11, 28, 13, 50, 39, 432, DateTimeKind.Local).AddTicks(2249),
+                            NgayTao = new DateTime(2024, 11, 28, 13, 50, 39, 432, DateTimeKind.Local).AddTicks(2249),
                             NguoiCapNhat = "Admin",
                             NguoiTao = "Admin",
                             TenThuongHieu = "Puma"
