@@ -12,7 +12,7 @@ namespace APPMVC.Service
             _httpClient.BaseAddress = new Uri("https://localhost:7198");
         }
 
-        public async Task<bool> CreateAsync(Voucher voucher, List<Guid> selectedKhachHangIds)
+        public async Task<bool> CreateAsync(VoucherDto voucher, List<Guid> selectedKhachHangIds)
         {
             try
             {

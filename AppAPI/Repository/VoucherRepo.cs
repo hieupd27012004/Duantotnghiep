@@ -2,6 +2,7 @@
 using AppData;
 using AppData.Model;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace AppAPI.Repository
 {
@@ -32,52 +33,69 @@ namespace AppAPI.Repository
             return await _context.vouchers.FindAsync(id);
         }
 
-        public async Task<bool> CreateAsync(Voucher voucher, List<Guid> selectedKhachHangIds)
+        public async Task<bool> CreateAsync(VoucherDto voucherDto, List<Guid> selectedKhachHangIds)
         {
             try
             {
                 _logger.LogInformation("Starting to add voucher to database.");
 
-                if (voucher == null)
+                if (voucherDto == null)
                 {
-                    _logger.LogWarning("Voucher is null.");
-                    throw new ArgumentNullException(nameof(voucher));
+                    _logger.LogWarning("VoucherDto is null.");
+                    throw new ArgumentNullException(nameof(voucherDto));
                 }
 
-                // Kiểm tra các thuộc tính của voucher
-                if (string.IsNullOrEmpty(voucher.MaVoucher))
+                // Validate voucher properties using Data Annotations
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(voucherDto);
+                if (!Validator.TryValidateObject(voucherDto, validationContext, validationResults, true))
                 {
-                    _logger.LogWarning("MaVoucher is required.");
-                    throw new ArgumentException("MaVoucher is required");
+                    foreach (var validationResult in validationResults)
+                    {
+                        _logger.LogWarning(validationResult.ErrorMessage);
+                    }
+                    throw new ValidationException("Validation failed for the voucher.");
                 }
 
-                if (voucher.NgayBatDau >= voucher.NgayKetThuc)
+                // Map DTO to Entity
+                var voucher = new Voucher
                 {
-                    _logger.LogWarning("NgayBatDau must be before NgayKetThuc.");
-                    throw new ArgumentException("NgayBatDau must be before NgayKetThuc");
-                }
+                    VoucherId = Guid.NewGuid(), 
+                    MaVoucher = voucherDto.MaVoucher,
+                    MoTaVoucher = voucherDto.MoTaVoucher,
+                    LoaiGiamGia = voucherDto.LoaiGiamGia,
+                    GiaTriGiam = voucherDto.GiaTriGiam,
+                    GiaTriDonHangToiThieu = voucherDto.GiaTriDonHangToiThieu,
+                    SoTienToiDa = voucherDto.SoTienToiDa,
+                    NgayBatDau = voucherDto.NgayBatDau,
+                    NgayKetThuc = voucherDto.NgayKetThuc,
+                    TongSoLuongVoucher = voucherDto.TongSoLuongVoucher,
+                    SoLuongVoucherConLai = voucherDto.SoLuongVoucherConLai,
+                    TrangThai = voucherDto.TrangThai,
+                    NgayTao = DateTime.UtcNow,
+                    NguoiTao = voucherDto.NguoiTao,
+                    NgayUpdate = null,
+                    NguoiUpdate = null
+                };
 
                 // Save the voucher to the database
                 _context.vouchers.Add(voucher);
-                var result = await _context.SaveChangesAsync();
+                var saveResult = await _context.SaveChangesAsync();
 
-                if (result > 0)
+                if (saveResult > 0)
                 {
                     _logger.LogInformation("Voucher saved successfully.");
-                    foreach (var khachHangId in selectedKhachHangIds)
+
+                    // Handle customer IDs for voucher usage history
+                    if (selectedKhachHangIds != null && selectedKhachHangIds.Any())
                     {
-                        var lichSuSuDung = new LichSuSuDungVoucher
-                        {
-                            IdKhachHang = khachHangId,
-                            IdVoucher = voucher.VoucherId,
-                            TrangThaiVoucher = 1
-                        };
-                        _context.LichSuSuDungVouchers.Add(lichSuSuDung);
+                        await AddVoucherUsageHistoriesAsync(voucher.VoucherId, selectedKhachHangIds);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("No customer IDs selected for voucher usage history.");
                     }
 
-                    // Lưu lịch sử sử dụng voucher
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation($"Successfully added voucher with ID: {voucher.VoucherId}");
                     return true;
                 }
 
@@ -87,7 +105,37 @@ namespace AppAPI.Repository
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in CreateAsync method in VoucherRepo.");
+                if (ex.InnerException != null)
+                {
+                    _logger.LogError(ex.InnerException, "Inner exception details.");
+                }
                 throw; // Rethrow to handle in upper layers
+            }
+        }
+
+        private async Task AddVoucherUsageHistoriesAsync(Guid voucherId, List<Guid> selectedKhachHangIds)
+        {
+            foreach (var khachHangId in selectedKhachHangIds)
+            {
+                var lichSuSuDung = new LichSuSuDungVoucher
+                {
+                    IdLichSuVoucher = Guid.NewGuid(),
+                    IdKhachHang = khachHangId,
+                    IdVoucher = voucherId,
+                    TrangThaiVoucher = 1
+                };
+
+                _context.LichSuSuDungVouchers.Add(lichSuSuDung);
+            }
+
+            var historyResult = await _context.SaveChangesAsync();
+            if (historyResult > 0)
+            {
+                _logger.LogInformation($"Successfully added voucher usage history for Voucher ID: {voucherId}");
+            }
+            else
+            {
+                _logger.LogWarning("Failed to save voucher usage history.");
             }
         }
         public async Task<bool> UpdateAsync(Voucher voucher)
