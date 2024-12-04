@@ -15,5 +15,7 @@ namespace APPMVC.IService
         Task<bool> ResetPassword(string email, string newPassword, string confirmPassword);
         Task<bool> SendVerificationCode(string email);
         Task<string> GetVerificationCodeFromRedisAsync(string email);
+
+        Task<KhachHang?> GetCustomerByPhoneOrEmailAsync(string phoneOrEmail);
     }
 }

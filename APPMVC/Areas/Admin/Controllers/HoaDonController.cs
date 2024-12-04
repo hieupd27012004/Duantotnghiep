@@ -57,20 +57,24 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpGet]
         public async Task<ActionResult> Index(int page = 1, string status = null)
         {
-            page = page < 1 ? 1 : page;
+            page = page < 1 ? 1 : page; // Ensure that the page number is at least 1
             const int pageSize = 5;
 
+            // Fetch all invoices
             var hoaDons = await _hoaDonService.GetAllAsync() ?? new List<HoaDon>();
 
+            // Filter out unnecessary statuses
             var filteredHoaDons = hoaDons
                 .Where(h => h.TrangThai != "Tạo đơn hàng")
                 .ToList();
 
+            // Apply status filtering if provided
             if (!string.IsNullOrEmpty(status))
             {
                 filteredHoaDons = filteredHoaDons.Where(h => h.TrangThai == status).ToList();
             }
 
+            // Fetch distinct statuses for the status filter dropdown
             var distinctStatuses = hoaDons
                 .Select(h => h.TrangThai)
                 .Where(s => s != "Tạo đơn hàng")
@@ -79,6 +83,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
             var hoaDonViewModels = new List<AppData.ViewModel.HoaDonViewModell>();
 
+            // Populate view models and calculate total quantities
             foreach (var hoaDon in filteredHoaDons)
             {
                 var hoaDonChiTiets = await _hoaDonChiTietService.GetByIdHoaDonAsync(hoaDon.IdHoaDon);
@@ -92,10 +97,15 @@ namespace APPMVC.Areas.Admin.Controllers
                 });
             }
 
-            filteredHoaDons = filteredHoaDons.OrderByDescending(h => h.NgayTao).ToList();
+            // Sort the view models by NgayTao in descending order
+            hoaDonViewModels = hoaDonViewModels
+                .OrderByDescending(vm => vm.HoaDon.NgayTao)
+                .ToList();
 
+            // Paginate the sorted list
             var pagedHoaDons = hoaDonViewModels.ToPagedList(page, pageSize);
 
+            // Set view bag properties for status filtering and total quantity
             ViewBag.CurrentStatus = status;
             ViewBag.TotalProductQuantity = hoaDonViewModels.Sum(vm => vm.TotalQuantity);
             ViewBag.Statuses = distinctStatuses;
@@ -163,7 +173,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 {
                     IdHoaDon = hoaDon.IdHoaDon,
                     MaDon = hoaDon.MaDon,
-                    KhachHang = khachhang.HoTen,
+                    KhachHang = hoaDon.NguoiNhan,
                     TrangThai = hoaDon.TrangThai,
                     SoDienThoaiNguoiNhan = hoaDon.SoDienThoaiNguoiNhan,
                     LoaiHoaDon = hoaDon.LoaiHoaDon,
@@ -177,7 +187,8 @@ namespace APPMVC.Areas.Admin.Controllers
                     NgayTao = lichSu.NgayTao,
                     NguoiThaoTac = lichSu.NguoiThaoTac,
                     TrangThai = lichSu.TrangThai,
-                    IdHoaDon = lichSu.IdHoaDon
+                    IdHoaDon = lichSu.IdHoaDon,
+                    GhiChu = lichSu.GhiChu,
                 }).ToList(),
 
                 SanPhamChiTiets = sanPhamChiTiets,
@@ -188,6 +199,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     SoTien = payment.SoTien,
                     NgayThanhToan = payment.NgayTao,
                     LoaiGiaoDich = payment.LoaiGiaoDich,
+                    NguoiThaoTac = payment.NguoiThaoTac,
                     HinhThucThanhToan = payment.Pttt,
                     TrangThai = payment.TrangThai,
                     IdHoaDon = payment.IdHoaDon
@@ -227,7 +239,7 @@ namespace APPMVC.Areas.Admin.Controllers
             return View(viewModel);
         }
         [HttpPost]
-        public async Task<IActionResult> UpdateInvoiceStatus(Guid id)
+        public async Task<IActionResult> UpdateInvoiceStatus(Guid id, string actionType, string reason)
         {
             var hoaDon = await _hoaDonService.GetByIdAsync(id);
             if (hoaDon == null)
@@ -235,55 +247,132 @@ namespace APPMVC.Areas.Admin.Controllers
                 return NotFound($"Hóa đơn với ID {id} không tồn tại.");
             }
 
-            var lichSuThanhToans = await _lichSuThanhToanService.GetByIdHoaDonAsync(id);
-            bool hasPaymentHistory = lichSuThanhToans.Any();
+            var lichSu = await _lichSuHoaDonService.GetByIdHoaDonAsync(id);
+            bool hasPaymentHistory = lichSu.Any();
+            string previousState = hoaDon.TrangThai;
 
             switch (hoaDon.TrangThai)
             {
                 case "Chờ Xác Nhận":
-                    hoaDon.TrangThai = "Chờ Giao Hàng";
-                    await UpdateProductQuantities(hoaDon.IdHoaDon);
+                    if (actionType == "huy" && hoaDon.TrangThai != "Đã Hủy")
+                    {
+                        hoaDon.TrangThai = "Đã Hủy";
+                        await UpdateProductQuantities2(hoaDon.IdHoaDon);
+                    }
+                    else if (hoaDon.TrangThai != "Đã Giao Hàng")
+                    {
+                        hoaDon.TrangThai = "Chờ Giao Hàng";
+                        await UpdateProductQuantities(hoaDon.IdHoaDon);
+                    }
                     break;
 
                 case "Chờ Giao Hàng":
-                    hoaDon.TrangThai = "Đang Vận Chuyển";
+                    if (actionType == "huy" && hoaDon.TrangThai != "Đã Hủy")
+                    {
+                        hoaDon.TrangThai = "Đã Hủy";
+                        await UpdateProductQuantities2(hoaDon.IdHoaDon);
+                    }
+                    else if (actionType == "quayLai")
+                    {
+                        return await RevertInvoiceStatus(id, reason);
+                    }
+                    else
+                    {
+                        hoaDon.TrangThai = "Đang Vận Chuyển";
+                    }
                     break;
 
                 case "Đang Vận Chuyển":
-                    hoaDon.TrangThai = "Đã Giao Hàng";
+                    if (actionType == "quayLai")
+                    {
+                        return await RevertInvoiceStatus(id, reason);
+                    }
+                    else
+                    {
+                        hoaDon.TrangThai = "Đã Giao Hàng";
+                    }
                     break;
 
                 case "Đã Giao Hàng":
-                    if (hasPaymentHistory)
+                    if (actionType == "quayLai")
                     {
-                        hoaDon.TrangThai = "Hoàn Thành"; 
+                        return await RevertInvoiceStatus(id, reason);
+                    }
+                    else if (hasPaymentHistory)
+                    {
+                        hoaDon.TrangThai = "Hoàn Thành";
                     }
                     else
                     {
                         return BadRequest("Cần xác nhận thanh toán trước khi hoàn thành hóa đơn.");
                     }
                     break;
+
                 case "Đã Thanh Toán":
-                    hoaDon.TrangThai = "Hoàn Thành";
+                    if (actionType == "quayLai")
+                    {
+                        return await RevertInvoiceStatus(id, reason);
+                    }
+                    else
+                    {
+                        hoaDon.TrangThai = "Hoàn Thành";
+                    }
                     break;
 
                 default:
                     return BadRequest("Trạng thái hóa đơn không hợp lệ.");
             }
 
+            if (hoaDon.TrangThai != previousState)
+            {
+                await LogHistory(hoaDon, hoaDon.TrangThai, reason);
+            }
+
+            await _hoaDonService.UpdateAsync(hoaDon);
+            return RedirectToAction("Edit", new { id });
+        }
+
+        private async Task<IActionResult> RevertInvoiceStatus(Guid id, string reason)
+        {
+            var hoaDon = await _hoaDonService.GetByIdAsync(id);
+            if (hoaDon == null)
+            {
+                return NotFound($"Hóa đơn với ID {id} không tồn tại.");
+            }
+
+            var lichSu = await _lichSuHoaDonService.GetByIdHoaDonAsync(id);
+            if (lichSu == null || lichSu.Count < 2)
+            {
+                return BadRequest("Không có lịch sử trạng thái trước đó để quay lại.");
+            }
+
+            var previousState = lichSu[lichSu.Count - 2].ThaoTac;
+
+            hoaDon.TrangThai = previousState;
+
+            if (previousState == "Chờ Xác Nhận")
+            {
+                await UpdateProductQuantities2(hoaDon.IdHoaDon);
+            }
+
+            await LogHistory(hoaDon, $"{previousState}", reason);
 
             await _hoaDonService.UpdateAsync(hoaDon);
 
+            return RedirectToAction("Edit", new { id });
+        }
+
+        private async Task LogHistory(HoaDon hoaDon, string thaoTac, string reason)
+        {
             await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
             {
                 IdHoaDon = hoaDon.IdHoaDon,
-                ThaoTac = hoaDon.TrangThai,
+                ThaoTac = thaoTac,
                 NgayTao = DateTime.Now,
                 NguoiThaoTac = "Nhân Viên",
-                TrangThai = hoaDon.TrangThai
+                TrangThai = hoaDon.TrangThai,
+                GhiChu = reason 
             });
-
-            return RedirectToAction("Edit", new { id });
         }
         private async Task UpdateProductQuantities(Guid idHoaDon)
         {
@@ -298,13 +387,27 @@ namespace APPMVC.Areas.Admin.Controllers
                 }
             }
         }
+        private async Task UpdateProductQuantities2(Guid idHoaDon)
+        {
+            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
+            foreach (var chiTiet in hoaDonChiTietList)
+            {
+                var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(chiTiet.IdSanPhamChiTiet);
+                if (sanPhamCT != null)
+                {
+                    sanPhamCT.SoLuong += chiTiet.SoLuong;
+                    await _sanPhamCTService.Update(sanPhamCT);
+                }
+            }
+        }
+        [HttpGet]
         public async Task<IActionResult> CreateLichSuThanhToan(Guid idHoaDon)
         {
             var hoaDon = await _hoaDonService.GetByIdAsync(idHoaDon); 
             var lichSuThanhToanViewModel = new HoaDonChiTietViewModel
             {
                 IdHoaDon = idHoaDon,
-                TongTien = hoaDon.TongTienDonHang 
+                TongTien = hoaDon.TongTienDonHang,
             };
             return PartialView("CreateLichSuThanhToan", lichSuThanhToanViewModel);
         }
@@ -312,7 +415,7 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateLichSuThanhToan(LichSuThanhToanViewModel lichSuThanhToan)
         {
-            var TenNv = HttpContext.Session.GetString("NhanVienName");
+            string TenNv = HttpContext.Session.GetString("NhanVienName");
             var NVIdString = HttpContext.Session.GetString("IdNhanVien");
 
             if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
@@ -327,14 +430,14 @@ namespace APPMVC.Areas.Admin.Controllers
                     SoTien = lichSuThanhToan.SoTien,
                     TienThua = lichSuThanhToan.TienThua,
                     NgayTao = DateTime.Now,
-                    LoaiGiaoDich = lichSuThanhToan.LoaiGiaoDich,
+                    LoaiGiaoDich = "Thanh Toán",
                     Pttt = lichSuThanhToan.HinhThucThanhToan,
                     NguoiThaoTac = TenNv,
-                    TrangThai = lichSuThanhToan.TrangThai ?? "Đã thanh toán",
+                    TrangThai =  "Đã thanh toán",
                     IdHoaDon = lichSuThanhToan.IdHoaDon,
-                    IdNhanVien = NVID
+                    IdNhanVien = NVID,
                 };
-
+               
                 await _lichSuThanhToanService.AddAsync(lichSuThanhToanModel);
 
                 var hoaDon = await _hoaDonService.GetByIdAsync(lichSuThanhToan.IdHoaDon);
@@ -343,7 +446,6 @@ namespace APPMVC.Areas.Admin.Controllers
                     hoaDon.TrangThai = "Đã Thanh Toán"; 
                     await _hoaDonService.UpdateAsync(hoaDon); 
 
-                    // Thêm lịch sử hóa đơn
                     await _lichSuHoaDonService.AddAsync(new LichSuHoaDon
                     {
                         IdHoaDon = hoaDon.IdHoaDon,
@@ -356,6 +458,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 return RedirectToAction("Edit", new { id = lichSuThanhToan.IdHoaDon });
             }
+
             return PartialView("CreateLichSuThanhToan", lichSuThanhToan);
         }
     }

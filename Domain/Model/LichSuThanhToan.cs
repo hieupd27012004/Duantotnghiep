@@ -14,7 +14,7 @@ namespace AppData.Model
         [Required(ErrorMessage = "Không Được Để Trống")]
         public double SoTien { get; set; }
 
-        public double TienThua { get; set; }
+        public double? TienThua { get; set; }
         [DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         //[Range(typeof(DateTime), "1/1/2020", "12/31/2025", ErrorMessage = "Không Trong Thời Gian Cho Phép")]

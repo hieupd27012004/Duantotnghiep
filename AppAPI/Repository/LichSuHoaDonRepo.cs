@@ -49,7 +49,8 @@ namespace AppAPI.Repository
         public async Task<List<LichSuHoaDon>> GetByIdHoaDonAsync(Guid idHoaDon)
         {
             return await _context.lichSuHoaDons
-               .Where(l => l.IdHoaDon == idHoaDon) 
+               .Where(l => l.IdHoaDon == idHoaDon)
+               .OrderBy(ls => ls.NgayTao)
                .ToListAsync();
         }
     }

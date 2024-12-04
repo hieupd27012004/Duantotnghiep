@@ -53,17 +53,17 @@ namespace APPMVC.Areas.Client.Controllers
 				return View(dc);
 			}
 			// Kiểm tra địa chỉ mặc định           
-			if (dc.DiaChiMacDinh)
-			{
-				bool check = await _services.HasDefaultAddressAsync(id);
-				if (check)
-				{
-					ModelState.AddModelError("", "Khách hàng này đã có một địa chỉ mặc định.");
-                    ViewBag.Provinces = await _services.GetProvincesAsync();
-                    await LoadDropDownsCreate(dc);
-					return View(dc);
-				}
-			}
+			//if (dc.DiaChiMacDinh)
+			//{
+			//	bool check = await _services.HasDefaultAddressAsync(id);
+			//	if (check)
+			//	{
+			//		ModelState.AddModelError("", "Khách hàng này đã có một địa chỉ mặc định.");
+   //                 ViewBag.Provinces = await _services.GetProvincesAsync();
+   //                 await LoadDropDownsCreate(dc);
+			//		return View(dc);
+			//	}
+			//}
 			if (!ModelState.IsValid)
 			{
 				foreach (var error in ModelState.Values.SelectMany(v => v.Errors))

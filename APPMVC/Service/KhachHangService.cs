@@ -101,5 +101,15 @@ namespace APPMVC.Service
             return null;
         }
 
+        public async Task<KhachHang?> GetCustomerByPhoneOrEmailAsync(string phoneOrEmail)
+        {
+            var response = await _httpClient.GetAsync($"/api/KhachHang/GetCustomerByPhoneOrEmail?phoneOrEmail={Uri.EscapeDataString(phoneOrEmail)}");
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<KhachHang>(responseContent);
+            }
+            return null; 
+        }
     }
 }
