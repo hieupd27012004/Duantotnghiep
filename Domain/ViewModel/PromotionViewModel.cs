@@ -14,7 +14,7 @@ namespace AppData.ViewModel
         public List<SanPhamChiTietViewModel> SanPhamChiTiets { get; set; } = new List<SanPhamChiTietViewModel>();
         public List<SanPhamViewModel> SanPhams { get; set; } = new List<SanPhamViewModel>();
         public List<Guid>? SelectedSanPhamChiTietIds { get; set; }
-        public DateTime NgayBatDau { get; set; } = DateTime.Now;
+        public DateTime NgayBatDau { get; set; }
 
         public DateTime NgayKetThuc { get; set; }
 

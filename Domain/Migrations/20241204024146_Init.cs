@@ -5,11 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AppData.Migrations
 {
-<<<<<<<< HEAD:Domain/Migrations/20241128065039_IntitDB.cs
-    public partial class IntitDB : Migration
-========
-    public partial class LOngkh : Migration
->>>>>>>> 6396ebc8d755dc55b83d1ee256adb2d3b3b8d10b:Domain/Migrations/20241127032749_LOngkh.cs
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -480,6 +476,7 @@ namespace AppData.Migrations
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NguoiThaoTac = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TrangThai = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GhiChu = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IdHoaDon = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdNhanVien = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
@@ -506,12 +503,13 @@ namespace AppData.Migrations
                 {
                     IdLichSuThanhToan = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SoTien = table.Column<double>(type: "float", nullable: false),
+                    TienThua = table.Column<double>(type: "float", nullable: true),
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LoaiGiaoDich = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Pttt = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NguoiThaoTac = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TrangThai = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    GhiChu = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GhiChu = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IdHoaDon = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdNhanVien = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
@@ -688,15 +686,9 @@ namespace AppData.Migrations
                 columns: new[] { "IdChatLieu", "KichHoat", "NgayCapNhat", "NgayTao", "NguoiCapNhat", "NguoiTao", "TenChatLieu" },
                 values: new object[,]
                 {
-<<<<<<<< HEAD:Domain/Migrations/20241128065039_IntitDB.cs
-                    { new Guid("05725cfc-ffc0-497f-ad95-cb193296066a"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(3395), new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(3395), "Admin", "Admin", "Da thật" },
-                    { new Guid("2ee75245-7d50-41f5-a64c-de77d3bc4cca"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(3383), new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(3393), "Admin", "Admin", "Vải Cotton" },
-                    { new Guid("89355c0b-e9f5-4cf8-9a7e-66e83ef78e44"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(3396), new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(3397), "Admin", "Admin", "Vải Polyester" }
-========
-                    { new Guid("36053e29-f25d-4290-a3e0-2f9588e494cf"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 239, DateTimeKind.Local).AddTicks(5903), new DateTime(2024, 11, 27, 10, 27, 49, 239, DateTimeKind.Local).AddTicks(5903), "Admin", "Admin", "Da thật" },
-                    { new Guid("6ae04cce-4d64-4024-9136-0002b1592d40"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 239, DateTimeKind.Local).AddTicks(5886), new DateTime(2024, 11, 27, 10, 27, 49, 239, DateTimeKind.Local).AddTicks(5899), "Admin", "Admin", "Vải Cotton" },
-                    { new Guid("88911e0f-a2d1-4b28-88f4-b99cb7abd252"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 239, DateTimeKind.Local).AddTicks(5905), new DateTime(2024, 11, 27, 10, 27, 49, 239, DateTimeKind.Local).AddTicks(5905), "Admin", "Admin", "Vải Polyester" }
->>>>>>>> 6396ebc8d755dc55b83d1ee256adb2d3b3b8d10b:Domain/Migrations/20241127032749_LOngkh.cs
+                    { new Guid("44f46d33-64d5-4137-a2ff-6efbdebde578"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 559, DateTimeKind.Local).AddTicks(5355), new DateTime(2024, 12, 4, 9, 41, 46, 559, DateTimeKind.Local).AddTicks(5355), "Admin", "Admin", "Da thật" },
+                    { new Guid("59d758f1-a209-4825-b650-86c64ce8b62e"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 559, DateTimeKind.Local).AddTicks(5328), new DateTime(2024, 12, 4, 9, 41, 46, 559, DateTimeKind.Local).AddTicks(5352), "Admin", "Admin", "Vải Cotton" },
+                    { new Guid("a87b988b-2404-4edb-861d-62057c7836a9"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 559, DateTimeKind.Local).AddTicks(5356), new DateTime(2024, 12, 4, 9, 41, 46, 559, DateTimeKind.Local).AddTicks(5357), "Admin", "Admin", "Vải Polyester" }
                 });
 
             migrationBuilder.InsertData(
@@ -704,17 +696,10 @@ namespace AppData.Migrations
                 columns: new[] { "IdChucVu", "Code", "TenChucVu" },
                 values: new object[,]
                 {
-<<<<<<<< HEAD:Domain/Migrations/20241128065039_IntitDB.cs
-                    { new Guid("101193d7-a61f-4943-9b4f-9e0e639d433e"), "QL", "Quản lý" },
-                    { new Guid("1b5dfa91-648a-40de-a1a9-21f489405f85"), "KT", "Kế toán" },
-                    { new Guid("2341a9ed-4724-4c15-afcf-7246a828f75e"), "NV", "Nhân viên" },
-                    { new Guid("ff6f52b0-3b52-494c-ad35-8eb3c23424ba"), "KK", "Thủ kho" }
-========
-                    { new Guid("0708cda7-053c-4e58-9ebb-03753463657c"), "KK", "Thủ kho" },
-                    { new Guid("1fdbb063-e119-4fbc-aac5-a235670cd929"), "QL", "Quản lý" },
-                    { new Guid("48d62013-3419-4e6b-b37e-d06729c7fac7"), "KT", "Kế toán" },
-                    { new Guid("7ae68739-bc14-4525-af76-a6191cc7d7c1"), "NV", "Nhân viên" }
->>>>>>>> 6396ebc8d755dc55b83d1ee256adb2d3b3b8d10b:Domain/Migrations/20241127032749_LOngkh.cs
+                    { new Guid("05917e02-f8a3-411f-b0db-9b496f9893b0"), "KT", "Kế toán" },
+                    { new Guid("15bdb994-ed84-4f7a-9673-3e454f00a92b"), "NV", "Nhân viên" },
+                    { new Guid("247b34a1-18c8-4f66-a299-062c08f66146"), "QL", "Quản lý" },
+                    { new Guid("b71f734f-2255-444c-91ad-6b3ef797d50c"), "KK", "Thủ kho" }
                 });
 
             migrationBuilder.InsertData(
@@ -722,15 +707,9 @@ namespace AppData.Migrations
                 columns: new[] { "IdDanhMuc", "KichHoat", "NgayCapNhat", "NgayTao", "NguoiCapNhat", "NguoiTao", "TenDanhMuc" },
                 values: new object[,]
                 {
-<<<<<<<< HEAD:Domain/Migrations/20241128065039_IntitDB.cs
-                    { new Guid("401d57ec-a32b-4603-bedd-b07868dace5b"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(7421), new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(7421), "Admin", "Admin", "Giày Cao Gót" },
-                    { new Guid("41ea825c-9741-4d4b-98f3-6e33a20a728d"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(7417), new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(7415), "Admin", "Admin", "Giày Thể Thao" },
-                    { new Guid("8f999600-25a2-4934-811d-a052e8be5d04"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(7420), new DateTime(2024, 11, 28, 13, 50, 39, 422, DateTimeKind.Local).AddTicks(7419), "Admin", "Admin", "Giày Da" }
-========
-                    { new Guid("2eaa212a-171c-48f3-8eb2-4da1e9a37180"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 240, DateTimeKind.Local).AddTicks(1054), new DateTime(2024, 11, 27, 10, 27, 49, 240, DateTimeKind.Local).AddTicks(1050), "Admin", "Admin", "Giày Thể Thao" },
-                    { new Guid("6e587ce8-4b85-4671-a2ee-5e2737ff8942"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 240, DateTimeKind.Local).AddTicks(1061), new DateTime(2024, 11, 27, 10, 27, 49, 240, DateTimeKind.Local).AddTicks(1061), "Admin", "Admin", "Giày Cao Gót" },
-                    { new Guid("ac4d8628-8070-441f-a2e6-c1c14d066a82"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 240, DateTimeKind.Local).AddTicks(1058), new DateTime(2024, 11, 27, 10, 27, 49, 240, DateTimeKind.Local).AddTicks(1058), "Admin", "Admin", "Giày Da" }
->>>>>>>> 6396ebc8d755dc55b83d1ee256adb2d3b3b8d10b:Domain/Migrations/20241127032749_LOngkh.cs
+                    { new Guid("8a940164-4cac-44f2-abcb-bff2998d2b4f"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 560, DateTimeKind.Local).AddTicks(1078), new DateTime(2024, 12, 4, 9, 41, 46, 560, DateTimeKind.Local).AddTicks(1078), "Admin", "Admin", "Giày Cao Gót" },
+                    { new Guid("aeef25fd-8e3d-4fd9-882f-0277209fb1b2"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 560, DateTimeKind.Local).AddTicks(1076), new DateTime(2024, 12, 4, 9, 41, 46, 560, DateTimeKind.Local).AddTicks(1076), "Admin", "Admin", "Giày Da" },
+                    { new Guid("bed13e69-268a-43b8-8fb0-2b6de52e8697"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 560, DateTimeKind.Local).AddTicks(1073), new DateTime(2024, 12, 4, 9, 41, 46, 560, DateTimeKind.Local).AddTicks(1068), "Admin", "Admin", "Giày Thể Thao" }
                 });
 
             migrationBuilder.InsertData(
@@ -738,15 +717,9 @@ namespace AppData.Migrations
                 columns: new[] { "IdDeGiay", "KichHoat", "NgayCapNhat", "NgayTao", "NguoiCapNhat", "NguoiTao", "TenDeGiay" },
                 values: new object[,]
                 {
-<<<<<<<< HEAD:Domain/Migrations/20241128065039_IntitDB.cs
-                    { new Guid("0c983aec-592f-439a-a233-5f7a7b81db32"), 1, new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), "Admin", "Admin", "Đế cao su" },
-                    { new Guid("a6259c09-77ef-4dd6-9ef0-1555f212d845"), 1, new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), "Admin", "Admin", "Đế nhựa" },
-                    { new Guid("cec1db46-8391-479b-8360-883789ac1531"), 1, new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), "Admin", "Admin", "Đế vải" }
-========
-                    { new Guid("0e065fbd-bb40-4cf6-abe7-3236adcf85f2"), 1, new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), "Admin", "Admin", "Đế cao su" },
-                    { new Guid("a5a0a27b-6745-4484-aa3b-5c40609ec5da"), 1, new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), "Admin", "Admin", "Đế vải" },
-                    { new Guid("c0cc1ef3-f88a-4e46-a69f-63da57749932"), 1, new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), "Admin", "Admin", "Đế nhựa" }
->>>>>>>> 6396ebc8d755dc55b83d1ee256adb2d3b3b8d10b:Domain/Migrations/20241127032749_LOngkh.cs
+                    { new Guid("079483ac-46be-454b-a12c-0126d1902469"), 1, new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), "Admin", "Admin", "Đế cao su" },
+                    { new Guid("ab57fe2f-2646-442e-b9cd-50f23a653d3d"), 1, new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), "Admin", "Admin", "Đế vải" },
+                    { new Guid("b1627887-dd30-4621-aff5-cac00df45301"), 1, new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2023, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified), "Admin", "Admin", "Đế nhựa" }
                 });
 
             migrationBuilder.InsertData(
@@ -754,15 +727,9 @@ namespace AppData.Migrations
                 columns: new[] { "IdKichCo", "KichHoat", "NgayCapNhat", "NgayTao", "NguoiCapNhat", "NguoiTao", "TenKichCo" },
                 values: new object[,]
                 {
-<<<<<<<< HEAD:Domain/Migrations/20241128065039_IntitDB.cs
-                    { new Guid("0b733932-6a92-4303-b251-37a432ce9fcd"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(6092), new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(6092), "Admin", "Admin", "Size 38" },
-                    { new Guid("323dc806-88b8-4292-9a9f-6add9b281481"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(6088), new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(6090), "Admin", "Admin", "Size 37" },
-                    { new Guid("9700b261-f5d4-47da-bdb6-92609598341a"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(6093), new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(6094), "Admin", "Admin", "Size 39" }
-========
-                    { new Guid("463b5fdc-4105-4ff8-884f-2c44c4432e7b"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 244, DateTimeKind.Local).AddTicks(7304), new DateTime(2024, 11, 27, 10, 27, 49, 244, DateTimeKind.Local).AddTicks(7314), "Admin", "Admin", "Size 37" },
-                    { new Guid("66ea4959-e4e2-49da-8818-0335f708b3ce"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 244, DateTimeKind.Local).AddTicks(7333), new DateTime(2024, 11, 27, 10, 27, 49, 244, DateTimeKind.Local).AddTicks(7333), "Admin", "Admin", "Size 38" },
-                    { new Guid("99cab6c1-9276-4bd0-aa88-a958ca0c9792"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 244, DateTimeKind.Local).AddTicks(7335), new DateTime(2024, 11, 27, 10, 27, 49, 244, DateTimeKind.Local).AddTicks(7336), "Admin", "Admin", "Size 39" }
->>>>>>>> 6396ebc8d755dc55b83d1ee256adb2d3b3b8d10b:Domain/Migrations/20241127032749_LOngkh.cs
+                    { new Guid("2ce8c1d2-a112-4c9d-a79d-8fbecfe8dd41"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 565, DateTimeKind.Local).AddTicks(1233), new DateTime(2024, 12, 4, 9, 41, 46, 565, DateTimeKind.Local).AddTicks(1243), "Admin", "Admin", "Size 37" },
+                    { new Guid("93e2df56-2c7d-4289-b183-453af55fa188"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 565, DateTimeKind.Local).AddTicks(1248), new DateTime(2024, 12, 4, 9, 41, 46, 565, DateTimeKind.Local).AddTicks(1248), "Admin", "Admin", "Size 39" },
+                    { new Guid("b1d253f8-a86c-4f8a-862e-707fa877c5fe"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 565, DateTimeKind.Local).AddTicks(1246), new DateTime(2024, 12, 4, 9, 41, 46, 565, DateTimeKind.Local).AddTicks(1247), "Admin", "Admin", "Size 38" }
                 });
 
             migrationBuilder.InsertData(
@@ -770,15 +737,9 @@ namespace AppData.Migrations
                 columns: new[] { "IdKieuDang", "KichHoat", "NgayCapNhat", "NgayTao", "NguoiCapNhat", "NguoiTao", "TenKieuDang" },
                 values: new object[,]
                 {
-<<<<<<<< HEAD:Domain/Migrations/20241128065039_IntitDB.cs
-                    { new Guid("b5c8e70e-a145-4f40-9b87-c98ee2d31329"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(8258), new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(8257), "Admin", "Admin", "Hiện Đại" },
-                    { new Guid("d3d96d6f-f5fa-433f-9afd-640eddc8b30f"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(8254), new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(8252), "Admin", "Admin", "Thể Thao" },
-                    { new Guid("e4a556c5-067f-4a65-98b2-c74e1366126e"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(8256), new DateTime(2024, 11, 28, 13, 50, 39, 425, DateTimeKind.Local).AddTicks(8256), "Admin", "Admin", "Cổ Điển" }
-========
-                    { new Guid("1e7ad7fd-5085-473f-8a36-ac48d18461d7"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 245, DateTimeKind.Local).AddTicks(203), new DateTime(2024, 11, 27, 10, 27, 49, 245, DateTimeKind.Local).AddTicks(195), "Admin", "Admin", "Thể Thao" },
-                    { new Guid("944c8a2f-15fe-40bd-ad0c-caaceb519b8a"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 245, DateTimeKind.Local).AddTicks(208), new DateTime(2024, 11, 27, 10, 27, 49, 245, DateTimeKind.Local).AddTicks(208), "Admin", "Admin", "Hiện Đại" },
-                    { new Guid("c7e52eaa-b212-4703-877e-1e24bfcee163"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 245, DateTimeKind.Local).AddTicks(206), new DateTime(2024, 11, 27, 10, 27, 49, 245, DateTimeKind.Local).AddTicks(206), "Admin", "Admin", "Cổ Điển" }
->>>>>>>> 6396ebc8d755dc55b83d1ee256adb2d3b3b8d10b:Domain/Migrations/20241127032749_LOngkh.cs
+                    { new Guid("4576e21c-c8bd-41d8-94c1-eab5639ae097"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 565, DateTimeKind.Local).AddTicks(4413), new DateTime(2024, 12, 4, 9, 41, 46, 565, DateTimeKind.Local).AddTicks(4413), "Admin", "Admin", "Cổ Điển" },
+                    { new Guid("64dfcac0-828d-4aa9-803b-4b279fe826ac"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 565, DateTimeKind.Local).AddTicks(4415), new DateTime(2024, 12, 4, 9, 41, 46, 565, DateTimeKind.Local).AddTicks(4415), "Admin", "Admin", "Hiện Đại" },
+                    { new Guid("f4d5320c-17a5-4648-9b7d-f0b5f072a3fc"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 565, DateTimeKind.Local).AddTicks(4410), new DateTime(2024, 12, 4, 9, 41, 46, 565, DateTimeKind.Local).AddTicks(4409), "Admin", "Admin", "Thể Thao" }
                 });
 
             migrationBuilder.InsertData(
@@ -786,15 +747,9 @@ namespace AppData.Migrations
                 columns: new[] { "IdMauSac", "KichHoat", "NgayCapNhat", "NgayTao", "NguoiCapNhat", "NguoiTao", "TenMauSac" },
                 values: new object[,]
                 {
-<<<<<<<< HEAD:Domain/Migrations/20241128065039_IntitDB.cs
-                    { new Guid("85d9e93a-1d92-4c53-8b4a-d44793f78d99"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 426, DateTimeKind.Local).AddTicks(9197), new DateTime(2024, 11, 28, 13, 50, 39, 426, DateTimeKind.Local).AddTicks(9198), "Admin", "Admin", "Green" },
-                    { new Guid("a2931c0e-f7a7-4e0e-a0f5-d1c8e1de511c"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 426, DateTimeKind.Local).AddTicks(9199), new DateTime(2024, 11, 28, 13, 50, 39, 426, DateTimeKind.Local).AddTicks(9199), "Admin", "Admin", "Blue" },
-                    { new Guid("be55659f-c5b7-4bd9-a618-aa2d6ad9c012"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 426, DateTimeKind.Local).AddTicks(9187), new DateTime(2024, 11, 28, 13, 50, 39, 426, DateTimeKind.Local).AddTicks(9189), "Admin", "Admin", "Red" }
-========
-                    { new Guid("4c97445a-f03a-4dc0-9452-bef87b3ef359"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 246, DateTimeKind.Local).AddTicks(3944), new DateTime(2024, 11, 27, 10, 27, 49, 246, DateTimeKind.Local).AddTicks(3945), "Admin", "Admin", "Green" },
-                    { new Guid("72009072-24c9-4788-840e-46bc6dadee91"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 246, DateTimeKind.Local).AddTicks(3946), new DateTime(2024, 11, 27, 10, 27, 49, 246, DateTimeKind.Local).AddTicks(3947), "Admin", "Admin", "Blue" },
-                    { new Guid("73c08014-b282-4f19-ab8b-f7e3691e5dec"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 246, DateTimeKind.Local).AddTicks(3928), new DateTime(2024, 11, 27, 10, 27, 49, 246, DateTimeKind.Local).AddTicks(3939), "Admin", "Admin", "Red" }
->>>>>>>> 6396ebc8d755dc55b83d1ee256adb2d3b3b8d10b:Domain/Migrations/20241127032749_LOngkh.cs
+                    { new Guid("9dca26d2-49c3-402c-9613-c55bd8c56096"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 567, DateTimeKind.Local).AddTicks(3198), new DateTime(2024, 12, 4, 9, 41, 46, 567, DateTimeKind.Local).AddTicks(3209), "Admin", "Admin", "Red" },
+                    { new Guid("a540a178-43cc-4bac-aeb2-acb97c6ce6fb"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 567, DateTimeKind.Local).AddTicks(3215), new DateTime(2024, 12, 4, 9, 41, 46, 567, DateTimeKind.Local).AddTicks(3215), "Admin", "Admin", "Blue" },
+                    { new Guid("e1ce05ba-5790-4d07-8a0a-820a62776ec6"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 567, DateTimeKind.Local).AddTicks(3212), new DateTime(2024, 12, 4, 9, 41, 46, 567, DateTimeKind.Local).AddTicks(3213), "Admin", "Admin", "Green" }
                 });
 
             migrationBuilder.InsertData(
@@ -802,15 +757,9 @@ namespace AppData.Migrations
                 columns: new[] { "IdThuongHieu", "KichHoat", "NgayCapNhat", "NgayTao", "NguoiCapNhat", "NguoiTao", "TenThuongHieu" },
                 values: new object[,]
                 {
-<<<<<<<< HEAD:Domain/Migrations/20241128065039_IntitDB.cs
-                    { new Guid("378c7c0a-a1c8-41dc-99a2-03e48cedc3e3"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 432, DateTimeKind.Local).AddTicks(2247), new DateTime(2024, 11, 28, 13, 50, 39, 432, DateTimeKind.Local).AddTicks(2247), "Admin", "Admin", "Adidas" },
-                    { new Guid("40845aae-2dce-4834-9055-fe63022e84e2"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 432, DateTimeKind.Local).AddTicks(2245), new DateTime(2024, 11, 28, 13, 50, 39, 432, DateTimeKind.Local).AddTicks(2240), "Admin", "Admin", "Nike" },
-                    { new Guid("b753da81-34fc-4553-91fd-ff11af7f6608"), 1, new DateTime(2024, 11, 28, 13, 50, 39, 432, DateTimeKind.Local).AddTicks(2249), new DateTime(2024, 11, 28, 13, 50, 39, 432, DateTimeKind.Local).AddTicks(2249), "Admin", "Admin", "Puma" }
-========
-                    { new Guid("5dd3324b-45b2-43ca-a48d-dd1f73689125"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 251, DateTimeKind.Local).AddTicks(69), new DateTime(2024, 11, 27, 10, 27, 49, 251, DateTimeKind.Local).AddTicks(69), "Admin", "Admin", "Puma" },
-                    { new Guid("ba410433-ad2e-4e29-a017-ea614638df91"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 251, DateTimeKind.Local).AddTicks(67), new DateTime(2024, 11, 27, 10, 27, 49, 251, DateTimeKind.Local).AddTicks(67), "Admin", "Admin", "Adidas" },
-                    { new Guid("d7b67149-3deb-4bd9-b8d5-4d8481466d78"), 1, new DateTime(2024, 11, 27, 10, 27, 49, 251, DateTimeKind.Local).AddTicks(64), new DateTime(2024, 11, 27, 10, 27, 49, 251, DateTimeKind.Local).AddTicks(37), "Admin", "Admin", "Nike" }
->>>>>>>> 6396ebc8d755dc55b83d1ee256adb2d3b3b8d10b:Domain/Migrations/20241127032749_LOngkh.cs
+                    { new Guid("84286e06-86db-45f8-af10-7b5da1344d3b"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 577, DateTimeKind.Local).AddTicks(5682), new DateTime(2024, 12, 4, 9, 41, 46, 577, DateTimeKind.Local).AddTicks(5676), "Admin", "Admin", "Nike" },
+                    { new Guid("a19de7f9-f7b8-4d8a-abbf-cfde82bd2b98"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 577, DateTimeKind.Local).AddTicks(5709), new DateTime(2024, 12, 4, 9, 41, 46, 577, DateTimeKind.Local).AddTicks(5708), "Admin", "Admin", "Puma" },
+                    { new Guid("f5c527a4-e745-4e14-9f95-4edba5656e5b"), 1, new DateTime(2024, 12, 4, 9, 41, 46, 577, DateTimeKind.Local).AddTicks(5685), new DateTime(2024, 12, 4, 9, 41, 46, 577, DateTimeKind.Local).AddTicks(5685), "Admin", "Admin", "Adidas" }
                 });
 
             migrationBuilder.CreateIndex(

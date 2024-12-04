@@ -4,6 +4,15 @@
     ViewData["Title"] = "Create Promotion";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
+
+@* Hiển thị thông báo *@
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @Html.Raw(TempData["ErrorMessage"])
+    </div>
+}
+
 <style>
     .input-group {
         display: flex;
@@ -44,16 +53,17 @@
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="Promotion.NgayBatDau" class="control-label">Ngày Bắt Đầu</label>
-                    <input asp-for="Promotion.NgayBatDau" class="form-control" type="datetime-local" value="@Model.NgayBatDau.ToString("yyyy-MM-ddTHH:mm")" />
-                    <span asp-validation-for="Promotion.NgayBatDau" class="text-danger"></span>
+                    <label asp-for="NgayBatDau" class="control-label">Ngày Bắt Đầu</label>
+                    <input asp-for="NgayBatDau" class="form-control" type="datetime-local" value="@Model.NgayBatDau.ToString("yyyy-MM-ddTHH:mm")" />
+                    <span asp-validation-for="NgayBatDau" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="Promotion.NgayKetThuc" class="control-label">Ngày Kết Thúc</label>
-                    <input asp-for="Promotion.NgayKetThuc" class="form-control" type="datetime-local" value="@Model.NgayKetThuc.ToString("yyyy-MM-ddTHH:mm")" />
-                    <span asp-validation-for="Promotion.NgayKetThuc" class="text-danger"></span>
+                    <label asp-for="NgayKetThuc" class="control-label">Ngày Kết Thúc</label>
+                    <input asp-for="NgayKetThuc" class="form-control" type="datetime-local" value="@Model.NgayKetThuc.ToString("yyyy-MM-ddTHH:mm")" onchange="validateEndDate()" />
+                    <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
                 </div>
+
 
                 <div class="form-group">
                     <label asp-for="Promotion.TrangThai" class="control-label">Trạng Thái</label>
@@ -219,5 +229,17 @@
                 phanTramGiamInput.value = null; 
             }
         }
+        function validateEndDate() {
+        var startDateInput = document.querySelector('input[name="Promotion.NgayBatDau"]');
+        var endDateInput = document.querySelector('input[name="Promotion.NgayKetThuc"]');
+
+        var startDate = new Date(startDateInput.value);
+        var endDate = new Date(endDateInput.value);
+
+        if (endDate <= startDate) {
+            alert("Ngày Kết Thúc phải sau Ngày Bắt Đầu.");
+            endDateInput.value = ""; // Reset the end date field
+        }
+    }
     </script>
 }
