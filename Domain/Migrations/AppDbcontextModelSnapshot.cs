@@ -725,21 +725,25 @@ namespace AppData.Migrations
                     b.Property<Guid>("IdKhachHang")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("IdHoaDon")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("IdLichSuVoucher")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdOrder")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("NgaySuDungVoucher")
+                    b.Property<DateTime?>("NgaySuDungVoucher")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("TrangThaiVoucher")
+                        .HasColumnType("int");
 
                     b.HasKey("IdVoucher", "IdKhachHang");
 
                     b.HasIndex("IdKhachHang");
 
-                    b.HasIndex("IdVoucher", "IdKhachHang", "IdOrder")
-                        .IsUnique();
+                    b.HasIndex("IdVoucher", "IdKhachHang", "IdHoaDon")
+                        .IsUnique()
+                        .HasFilter("[IdHoaDon] IS NOT NULL");
 
                     b.ToTable("LichSuSuDungVouchers");
                 });

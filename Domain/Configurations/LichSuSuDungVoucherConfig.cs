@@ -9,7 +9,7 @@ namespace AppData.Configurations
         public void Configure(EntityTypeBuilder<LichSuSuDungVoucher> builder)
         {
             builder.HasKey(lsv => new { lsv.IdVoucher, lsv.IdKhachHang });
-            builder.HasIndex(p => new { p.IdVoucher, p.IdKhachHang, p.IdOrder })
+            builder.HasIndex(p => new { p.IdVoucher, p.IdKhachHang, p.IdHoaDon })
             .IsUnique();
 
             builder.HasOne(lsv => lsv.Voucher)

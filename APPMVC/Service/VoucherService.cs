@@ -12,15 +12,21 @@ namespace APPMVC.Service
             _httpClient.BaseAddress = new Uri("https://localhost:7198");
         }
 
-        public async Task<bool> CreateAsync(Voucher voucher)
+        public async Task<bool> CreateAsync(Voucher voucher, List<Guid> selectedKhachHangIds)
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/Voucher/CreateVoucher", voucher);
+                var response = await _httpClient.PostAsJsonAsync("api/Voucher/CreateVoucher?selectedKhachHangIds=" + string.Join("&selectedKhachHangIds=", selectedKhachHangIds), voucher);
+                var content = await response.Content.ReadAsStringAsync();
 
                 // Log response
-                var content = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"Create Response: Status: {response.StatusCode}, Content: {content}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    // Log details when unsuccessful
+                    Console.WriteLine($"Failed to create voucher. Status: {response.StatusCode}, Content: {content}");
+                }
 
                 return response.IsSuccessStatusCode;
             }
@@ -115,6 +121,41 @@ namespace APPMVC.Service
             {
                 Console.WriteLine($"Error in VoucherService.UpdateAsync: {ex.Message}");
                 return false;
+            }
+        }
+        public async Task<bool> AddLichSuSuDungVoucherAsync(LichSuSuDungVoucher lichSuSuDungVoucher)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("api/Voucher/AddLichSuSuDungVoucher", lichSuSuDungVoucher);
+
+                // Log response
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Create Response: Status: {response.StatusCode}, Content: {content}");
+
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in CreateAsync: {ex.Message}");
+                return false;
+            }
+        }
+        public async Task<List<KhachHang>> GetKhachHangDaNhanVoucherAsync(Guid voucherId)
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<KhachHang>>("api/Voucher/GetKHDaNhanVoucher") ?? new List<KhachHang>();
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"HTTP request error when getting kh: {ex.Message}");
+                return new List<KhachHang>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error when getting kh: {ex.Message}");
+                return new List<KhachHang>();
             }
         }
     }
