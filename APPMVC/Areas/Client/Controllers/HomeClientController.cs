@@ -209,7 +209,7 @@ namespace APPMVC.Areas.Client.Controllers
 
         private string GenerateOrderNumber()
         {
-            return $"HD{GetRandomOrderNumber()}";
+            return $"DON{GetRandomOrderNumber()}";
         }
 
         private string GetRandomOrderNumber()
