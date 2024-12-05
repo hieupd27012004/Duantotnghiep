@@ -116,33 +116,34 @@
             </div>
         </div>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Tên Sản Phẩm</th>
-                    <th>Số Lượng</th>
-                    <th>Giá</th>
-                    <th>Hình Ảnh</th>
-                    <th>Màu Sắc</th>
-                    <th>Kích Cỡ</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.SanPhamChiTiets != null && Model.SanPhamChiTiets.Any())
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tên Sản Phẩm</th>
+                <th>Số Lượng</th>
+                <th>Giá</th>
+                <th>Hình Ảnh</th>
+                <th>Màu Sắc</th>
+                <th>Kích Cỡ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.SanPhamChiTiets != null && Model.SanPhamChiTiets.Any())
+            {
+                foreach (var sanPham in Model.SanPhamChiTiets)
                 {
-                    foreach (var sanPham in Model.SanPhamChiTiets)
-                    {
-                        <tr>
-                            <td>@sanPham.ProductName</td>
-                            <td>
-                                <div class="quantity-container">
-                                    <button class="btn btn-outline-secondary decrease" type="button" aria-label="Decrease Quantity" data-id="@sanPham.IdSanPhamChiTiet">−</button>
-                                    <input type="number" name="quantities[@sanPham.IdSanPhamChiTiet]" class="form-control quantity-amount" value="@sanPham.Quantity" min="1" aria-label="Quantity" data-id="@sanPham.IdSanPhamChiTiet" />
-                                    <button class="btn btn-outline-secondary increase" type="button" aria-label="Increase Quantity" data-id="@sanPham.IdSanPhamChiTiet">+</button>
-                                </div>
-                            </td>
-                            <td>@sanPham.Price.ToString("N0")</td>
-                            <td>
+                    <tr>
+                        <td>@sanPham.ProductName</td>
+                        <td>
+                            <div class="quantity-container">
+                                <button class="btn btn-outline-secondary decrease" type="button" aria-label="Decrease Quantity" data-id="@sanPham.IdSanPhamChiTiet">−</button>
+                                <input type="number" name="quantities[@sanPham.IdSanPhamChiTiet]" class="form-control quantity-amount" value="@sanPham.Quantity" min="1" aria-label="Quantity" data-id="@sanPham.IdSanPhamChiTiet" />
+                                <button class="btn btn-outline-secondary increase" type="button" aria-label="Increase Quantity" data-id="@sanPham.IdSanPhamChiTiet">+</button>
+                            </div>
+                        </td>
+                        <td>@sanPham.Price.ToString("N0")</td>
+                        <td>
+                            <div style="position: relative;">
                                 @if (sanPham.HinhAnhs != null && sanPham.HinhAnhs.Any())
                                 {
                                     var hinhAnh = sanPham.HinhAnhs.First();
@@ -154,38 +155,46 @@
                                 {
                                     <span>Không có hình ảnh</span>
                                 }
-                            </td>
-                            <td>
-                                @if (sanPham.MauSac != null && sanPham.MauSac.Any())
+
+                                @if (sanPham.PhanTramGiam.HasValue)
                                 {
-                                    @string.Join(", ", sanPham.MauSac)
+                                    <span style="position: absolute; top: 0; right: 0; color: red; font-weight: bold;">
+                                        Giảm @sanPham.PhanTramGiam % 
+                                    </span>
                                 }
-                                else
-                                {
-                                    <span>Không có màu sắc</span>
-                                }
-                            </td>
-                            <td>
-                                @if (sanPham.KichCo != null && sanPham.KichCo.Any())
-                                {
-                                    @string.Join(", ", sanPham.KichCo)
-                                }
-                                else
-                                {
-                                    <span>Không có kích cỡ</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="6">Không có sản phẩm nào.</td>
+                            </div>
+                        </td>
+                        <td>
+                            @if (sanPham.MauSac != null && sanPham.MauSac.Any())
+                            {
+                                @string.Join(", ", sanPham.MauSac)
+                            }
+                            else
+                            {
+                                <span>Không có màu sắc</span>
+                            }
+                        </td>
+                        <td>
+                            @if (sanPham.KichCo != null && sanPham.KichCo.Any())
+                            {
+                                @string.Join(", ", sanPham.KichCo)
+                            }
+                            else
+                            {
+                                <span>Không có kích cỡ</span>
+                            }
+                        </td>
                     </tr>
                 }
-            </tbody>
-        </table>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6">Không có sản phẩm nào.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
         <br />
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Khách Hàng</h4>

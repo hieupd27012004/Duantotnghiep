@@ -67,6 +67,8 @@ namespace AppData.ViewModel
             public List<HinhAnh>? HinhAnhs { get; set; }
             public List<string> MauSac { get; set; } = new List<string>();
             public List<string> KichCo { get; set; } = new List<string>();
+            public double? GiaDaGiam { get; set; }
+            public double? PhanTramGiam { get; set; }
             public Guid IdHoaDonChiTiet { get; set; }
         }
         public class HoaDonViewModel

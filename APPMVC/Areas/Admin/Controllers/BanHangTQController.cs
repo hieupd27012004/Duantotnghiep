@@ -229,7 +229,6 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(id) ?? new List<HoaDonChiTiet>();
-
             var sanPhamChiTiets = new List<HoaDonChiTietViewModel.SanPhamChiTietViewModel>();
 
             foreach (var hoaDonChiTiet in hoaDonChiTietList)
@@ -247,16 +246,29 @@ namespace APPMVC.Areas.Admin.Controllers
 
                     var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
 
+                    var gia = sanPhamCT.Gia;
+                    var giaDaGiam = sanPhamCT.GiaGiam; 
+                    double? phanTramGiam = null;
+
+                    if (giaDaGiam.HasValue && giaDaGiam < gia)
+                    {
+                        phanTramGiam = Math.Round(((gia - giaDaGiam.Value) / gia) * 100, 2); 
+                        gia = giaDaGiam.Value; 
+                    }
+
+
                     sanPhamChiTiets.Add(new HoaDonChiTietViewModel.SanPhamChiTietViewModel
                     {
                         IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
                         Quantity = hoaDonChiTiet.SoLuong,
-                        Price = sanPhamCT.Gia,
+                        Price = gia,
                         ProductName = sanPham?.TenSanPham,
                         MauSac = mauSacTenList,
                         KichCo = kichCoTenList,
                         HinhAnhs = hinhAnhs,
-                        IdHoaDonChiTiet = hoaDonChiTiet.IdHoaDonChiTiet
+                        IdHoaDonChiTiet = hoaDonChiTiet.IdHoaDonChiTiet,
+                        GiaDaGiam = giaDaGiam,
+                        PhanTramGiam = phanTramGiam
                     });
                 }
             }
@@ -266,7 +278,7 @@ namespace APPMVC.Areas.Admin.Controllers
             var viewModel = new HoaDonChiTietViewModel
             {
                 DonGia = tongTienHang,
-                GiamGia = hoaDon.TienGiam, 
+                GiamGia = hoaDon.TienGiam,
                 TongTien = tongTienHang + (hoaDon.TienShip ?? 0),
                 PhiVanChuyen = hoaDon.TienShip,
                 HoaDon = new HoaDonChiTietViewModel.HoaDonViewModel
@@ -277,9 +289,8 @@ namespace APPMVC.Areas.Admin.Controllers
                     SoDienThoaiNguoiNhan = hoaDon.SoDienThoaiNguoiNhan,
                     LoaiHoaDon = hoaDon.LoaiHoaDon,
                     DiaChiGiaoHang = hoaDon.DiaChiGiaoHang
-                   
                 },
-                SanPhamChiTiets = sanPhamChiTiets 
+                SanPhamChiTiets = sanPhamChiTiets
             };
 
             return PartialView("Edit", viewModel);
@@ -305,15 +316,27 @@ namespace APPMVC.Areas.Admin.Controllers
 
                         var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
 
+                        var gia = sanPhamCT.Gia;
+                        var giaDaGiam = sanPhamCT?.GiaGiam; 
+                        double? phanTramGiam = null;
+
+                        if (giaDaGiam.HasValue && giaDaGiam < gia)
+                        {
+                            phanTramGiam = Math.Round(((gia - giaDaGiam.Value) / gia) * 100, 2);
+                            gia = giaDaGiam.Value;
+                        }
+
                         sanPhamChiTietViewModels.Add(new SanPhamChiTietViewModel
                         {
                             IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
                             Quantity = sanPhamCT.SoLuong,
-                            Price = sanPhamCT.Gia,
+                            Price = gia,
                             ProductName = sanPham?.TenSanPham,
                             MauSac = mauSacTenList,
                             KichCo = kichCoTenList,
-                            HinhAnhs = hinhAnhs
+                            HinhAnhs = hinhAnhs,
+                            GiaDaGiam = giaDaGiam,
+                            PhanTramGiam = phanTramGiam 
                         });
                     });
 
@@ -345,7 +368,16 @@ namespace APPMVC.Areas.Admin.Controllers
                     return Json(new { success = false, message = "Sản phẩm không tồn tại." });
                 }
 
-                int requestedQuantity = 1; // Giả định bạn có thể thay đổi số lượng này từ frontend
+
+                var giaDaGiam = sanPhamChiTiet.GiaGiam;
+                var gia = sanPhamChiTiet.Gia;
+
+                if (giaDaGiam.HasValue && giaDaGiam < gia)
+                {
+                    gia = giaDaGiam.Value;
+                }
+
+                int requestedQuantity = 1; 
                 if (requestedQuantity <= 0)
                 {
                     return Json(new { success = false, message = "Số lượng phải lớn hơn 0." });
@@ -361,20 +393,14 @@ namespace APPMVC.Areas.Admin.Controllers
                     IdHoaDonChiTiet = Guid.NewGuid(),
                     IdHoaDon = IdHoaDon,
                     IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
-                    DonGia = sanPhamChiTiet.Gia,
+                    DonGia = gia,
                     SoLuong = requestedQuantity,
-                    TongTien = sanPhamChiTiet.Gia * requestedQuantity,
+                    TongTien = gia * requestedQuantity,
                     KichHoat = 1
                 };
 
-                // Thêm sản phẩm vào hóa đơn mà không trừ số lượng
+
                 await _hoaDonChiTietService.AddAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
-
-                // Không trừ số lượng sản phẩm
-                // sanPhamChiTiet.SoLuong -= requestedQuantity; // Dòng này đã được bỏ
-
-                // Cập nhật sản phẩm nếu cần, hoặc bỏ qua
-                // await _sanPhamCTService.Update(sanPhamChiTiet); // Có thể bỏ nếu không cần cập nhật
 
                 var updatedProductList = await GetSanPhamChiTietList(IdHoaDon);
                 return Json(new { success = true, message = "Thêm sản phẩm thành công.", html = updatedProductList });
@@ -385,7 +411,6 @@ namespace APPMVC.Areas.Admin.Controllers
                 return StatusCode(500, new { message = "Đã xảy ra lỗi khi thêm sản phẩm vào hóa đơn." });
             }
         }
-
         [HttpPost]
         public async Task<IActionResult> UpdateInvoiceDetails([FromBody] HoaDonChiTietViewModel model)
         {

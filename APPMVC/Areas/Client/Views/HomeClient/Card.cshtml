@@ -80,7 +80,16 @@
                                         var hinhAnh = item.HinhAnhs.First();
                                         var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
                                         var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
-                                        <img src="@imageUrl" alt="Image" class="img-fluid" />
+
+                                        <div style="position: relative;">
+                                            <img src="@imageUrl" alt="Image" class="img-fluid" />
+                                            @if (item.PhanTramGiam.HasValue)
+                                            {
+                                                <div class="discount-badge" style="position: absolute; top: 10px; right: 10px; background-color: red; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold;">
+                                                    Giảm @item.PhanTramGiam%!
+                                                </div>
+                                            }
+                                        </div>
                                     }
                                     else
                                     {

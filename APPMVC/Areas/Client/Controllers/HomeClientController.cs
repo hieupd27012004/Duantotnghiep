@@ -75,6 +75,18 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
                 var hinhanh = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(item.IdSanPhamChiTiet);
+                var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
+
+                var gia = sanPhamChiTiet?.Gia;
+                var giaDaGiam = sanPhamChiTiet?.GiaGiam;
+                double? phanTramGiam = null;
+
+                // Kiểm tra và tính phần trăm giảm giá
+                if (gia.HasValue && giaDaGiam.HasValue && giaDaGiam < gia)
+                {
+                    phanTramGiam = Math.Round(((gia.Value - giaDaGiam.Value) / gia.Value) * 100, 2);
+                }
+
                 return new GioHangChiTietViewModel
                 {
                     IdGioHangChiTiet = item.IdGioHangChiTiet,
@@ -82,7 +94,9 @@ namespace APPMVC.Areas.Client.Controllers
                     TenSanPham = sanPham?.TenSanPham ?? "Unknown Product",
                     DonGia = item.SoLuong > 0 ? item.TongTien / item.SoLuong : 0,
                     SoLuong = item.SoLuong,
-                    TongTien = item.TongTien
+                    TongTien = item.TongTien,
+                    GiaDaGiam = giaDaGiam,
+                    PhanTramGiam = phanTramGiam
                 };
             });
 
