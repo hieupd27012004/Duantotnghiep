@@ -9,6 +9,7 @@ using AppData;
 using AppData.Model;
 using APPMVC.IService;
 using System.Net.WebSockets;
+using Newtonsoft.Json;
 
 namespace APPMVC.Areas.Admin.Controllers
 {
@@ -16,12 +17,16 @@ namespace APPMVC.Areas.Admin.Controllers
     public class VoucherController : Controller
     {
         private readonly IVoucherService _voucherService;
+        private readonly IKhachHangService _khachHangService;
         private readonly ILogger<VoucherController> _logger;
+        private readonly ILichSuSuDungVoucherService _lichSuSuDungVoucherService;
 
-        public VoucherController(IVoucherService voucherService, ILogger<VoucherController> logger)
+        public VoucherController(IVoucherService voucherService, IKhachHangService khachHangService, ILogger<VoucherController> logger, ILichSuSuDungVoucherService lichSuSuDungVoucherService)
         {
             _voucherService = voucherService ?? throw new ArgumentNullException(nameof(voucherService));
+            _khachHangService = khachHangService;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _lichSuSuDungVoucherService = lichSuSuDungVoucherService;
         }
 
         // GET: Admin/Voucher
@@ -55,6 +60,8 @@ namespace APPMVC.Areas.Admin.Controllers
                     _logger.LogWarning($"Voucher not found for Id: {id}");
                     return NotFound("Voucher not found");
                 }
+                var khachHangList = await _voucherService.GetKhachHangDaNhanVoucherAsync(id);
+                ViewBag.KhachHangList = khachHangList;
                 return View(voucher);
             }
             catch (Exception ex)
@@ -65,8 +72,10 @@ namespace APPMVC.Areas.Admin.Controllers
         }
 
         // GET: Admin/Voucher/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            ViewBag.KhachHang = await _khachHangService.GetAllKhachHang(); 
+
             return View();
         }
 
@@ -75,61 +84,87 @@ namespace APPMVC.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Voucher voucher)
+        public async Task<IActionResult> Create(Voucher voucher, string[] selectedKhachHangIds)
         {
             try
             {
-                if (ModelState.IsValid)
+                _logger.LogInformation("Starting to create voucher.");
+
+                // Check for selected customer IDs
+                if (selectedKhachHangIds == null || selectedKhachHangIds.Length == 0)
                 {
-                    // Set các giá trị mặc định
-                    voucher.VoucherId = Guid.NewGuid();
-                    voucher.NgayTao = DateTime.Now;
-                    voucher.NguoiTao = "Admin";
-                    voucher.SoLuongVoucherConLai = voucher.TongSoLuongVoucher;
-                    if (voucher.NgayBatDau < voucher.NgayTao)
-                    {
-                        ModelState.AddModelError("NgayBatDau", "Thời gian bắt đầu phải sau hoặc bằng thời gian hiện tại.");
-                        return View(voucher);
-                    }
-
-                    if (voucher.NgayKetThuc <= voucher.NgayBatDau)
-                    {
-                        ModelState.AddModelError("NgayKetThuc", "Ngày kết thúc phải sau thời gian hiện tại.");
-                        return View(voucher);
-                    }
-
-                    // Set TrangThai based on current time
-                    var currentDateTime = DateTime.Now;
-                    if (voucher.NgayBatDau > currentDateTime)
-                    {
-                        voucher.TrangThai = 1; // "Chờ kích hoạt"
-                    }
-                    else if (voucher.NgayBatDau <= currentDateTime && voucher.NgayKetThuc >= currentDateTime)
-                    {
-                        voucher.TrangThai = 2; // "Đang kích hoạt"
-                    }
-                    else
-                    {
-                        voucher.TrangThai = 0; // "Hết hạn" (if needed)
-                    }
-
-                    var result = await _voucherService.CreateAsync(voucher);
-                    if (result)
-                    {
-                        TempData["SuccessMessage"] = "Tạo voucher thành công.";
-                        return RedirectToAction(nameof(Index));
-                    }
-
-                    ModelState.AddModelError("", "Failed to create the voucher");
+                    _logger.LogWarning("No customer IDs selected.");
+                    ModelState.AddModelError("", "Please select at least one customer.");
+                    return await LoadKhachHangAndReturnView(voucher);
                 }
-                return View(voucher);
+
+                // Convert from string[] to List<Guid>
+                List<Guid> selectedKhachHangGuidIds = selectedKhachHangIds
+                    .Select(id => Guid.Parse(id))
+                    .ToList();
+
+                // Check ModelState
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values.SelectMany(v => v.Errors);
+                    foreach (var error in errors)
+                    {
+                        _logger.LogWarning($"ModelState Error: {error.ErrorMessage}");
+                    }
+                    return await LoadKhachHangAndReturnView(voucher);
+                }
+
+                // Log voucher information before sending the request
+                _logger.LogInformation($"Creating voucher with details: {JsonConvert.SerializeObject(voucher)}");
+
+                // Convert Voucher to VoucherDto
+                var voucherDto = new VoucherDto
+                {
+                    VoucherId = Guid.NewGuid(), // Generate new ID
+                    MaVoucher = voucher.MaVoucher,
+                    MoTaVoucher = voucher.MoTaVoucher,
+                    LoaiGiamGia = voucher.LoaiGiamGia,
+                    GiaTriGiam = voucher.GiaTriGiam,
+                    GiaTriDonHangToiThieu = voucher.GiaTriDonHangToiThieu,
+                    SoTienToiDa = voucher.SoTienToiDa,
+                    NgayBatDau = voucher.NgayBatDau,
+                    NgayKetThuc = voucher.NgayKetThuc,
+                    TongSoLuongVoucher = voucher.TongSoLuongVoucher,
+                    SoLuongVoucherConLai = voucher.SoLuongVoucherConLai,
+                    TrangThai = voucher.TrangThai,
+                    NgayTao = DateTime.UtcNow,
+                    NguoiTao = voucher.NguoiTao,
+                    NgayUpdate = null,
+                    NguoiUpdate = null
+                };
+
+                // Call the service to create the voucher
+                var result = await _voucherService.CreateAsync(voucherDto, selectedKhachHangGuidIds);
+
+                if (result)
+                {
+                    _logger.LogInformation($"Successfully created voucher with ID: {voucherDto.VoucherId}");
+                    TempData["SuccessMessage"] = "Voucher created successfully.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                _logger.LogWarning("Failed to create the voucher.");
+                ModelState.AddModelError("", "Failed to create the voucher");
+                return await LoadKhachHangAndReturnView(voucher);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in Create action");
                 ModelState.AddModelError("", $"Error: {ex.Message}");
-                return View(voucher);
+                return await LoadKhachHangAndReturnView(voucher);
             }
+        }
+
+        private async Task<IActionResult> LoadKhachHangAndReturnView(Voucher voucher)
+        {
+            var khachHangs = await _khachHangService.GetAllKhachHang();
+            ViewBag.KhachHang = khachHangs;
+            return View(voucher);
         }
 
         // GET: Admin/Voucher/Edit/5

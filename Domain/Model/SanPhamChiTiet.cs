@@ -9,7 +9,6 @@ namespace AppData.Model
 {
     public class SanPhamChiTiet
     {
-        //[Required(ErrorMessage = "Không Được Để Trống")]
         public Guid IdSanPhamChiTiet { get; set; }
         [Required(ErrorMessage = "Không Được Để Trống")]
         [RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]

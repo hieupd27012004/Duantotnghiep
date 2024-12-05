@@ -83,6 +83,8 @@ builder.Services.AddSingleton<IVnPayService, VnPayService>();
 builder.Services.AddSingleton<iVnpayClientService, VnpayServiceClient>();
 //builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.AddTransient<ILichSuThanhToanService, LichSuThanhToanService>();
+builder.Services.AddTransient<ILichSuSuDungVoucherService, LichSuSuDungVoucherService>();
+builder.Services.AddTransient<IPromotionSanPhamChiTietService, PromotionSanPhamChiTietService>();
 builder.Services.AddHttpClient<GiaoHangNhanhService>(client =>
 {
     client.DefaultRequestHeaders.Add("Content-Type", "application/json");

@@ -37,7 +37,8 @@
         <div class="col-lg-6 product-detail-info">
             <h2>@Model.TenSanPham</h2>
             <p id="product-price" class="price">
-                @(Model.Gia.HasValue ? Model.Gia.Value.ToString("N0") + " VND" : "Chưa có giá")
+                @(Model.DiscountedPrice.HasValue ? Model.DiscountedPrice.Value.ToString("N0") + " VND" :
+                    (Model.Gia.HasValue ? Model.Gia.Value.ToString("N0") + " VND" : "Chưa có giá"))
             </p>
             <p id="product-quantity" class="quantity">
                 Số lượng: @(Model.SoLuong.HasValue ? Model.SoLuong.Value.ToString() : "Không có thông tin")

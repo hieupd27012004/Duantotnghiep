@@ -23,7 +23,7 @@ namespace APPMVC.Service
             await _httpClient.DeleteAsync($"api/SanPham/Xoa?id={id}");
         }
 
-        public Task<List<SanPham>> GetSanPhams(string? name)
+        public Task<List<SanPham>> GetSanPhams(string? name = null)
         {
             var repo = _httpClient.GetFromJsonAsync<List<SanPham>>($"api/SanPham/getall?name={name}");
             return repo;

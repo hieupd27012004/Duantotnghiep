@@ -9,20 +9,23 @@
 
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-5"> <!-- Cột cho trường nhập liệu -->
         <form asp-action="Create" method="post" id="createVoucherForm">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <div class="form-group">
                 <label asp-for="MaVoucher" class="control-label">Mã Voucher</label>
                 <input asp-for="MaVoucher" class="form-control" />
                 <span asp-validation-for="MaVoucher" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="MoTaVoucher" class="control-label">Mô Tả</label>
                 <input asp-for="MoTaVoucher" class="form-control" />
                 <span asp-validation-for="MoTaVoucher" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="LoaiGiamGia" class="control-label">Loại Giảm Giá</label>
                 <select asp-for="LoaiGiamGia" class="form-control" id="LoaiGiamGia">
@@ -31,6 +34,7 @@
                 </select>
                 <span asp-validation-for="LoaiGiamGia" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="GiaTriGiam" class="control-label">Giá Trị Giảm</label>
                 <div class="input-container">
@@ -39,6 +43,7 @@
                 </div>
                 <span asp-validation-for="GiaTriGiam" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="GiaTriDonHangToiThieu" class="control-label">Giá Trị Đơn Hàng Tối Thiểu</label>
                 <div class="input-container">
@@ -47,6 +52,7 @@
                 </div>
                 <span asp-validation-for="GiaTriDonHangToiThieu" class="text-danger"></span>
             </div>
+
             <div class="form-group" id="SoTienToiDaContainer" class="hidden">
                 <label asp-for="SoTienToiDa" class="control-label">Số Tiền Giảm Tối Đa</label>
                 <div class="input-container">
@@ -55,28 +61,65 @@
                 </div>
                 <span asp-validation-for="SoTienToiDa" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="NgayBatDau" class="control-label">Ngày Bắt Đầu</label>
                 <input asp-for="NgayBatDau" class="form-control" id="NgayBatDau" />
                 <span asp-validation-for="NgayBatDau" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="NgayKetThuc" class="control-label">Ngày Kết Thúc</label>
                 <input asp-for="NgayKetThuc" class="form-control" id="NgayKetThuc" />
                 <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="TongSoLuongVoucher" class="control-label">Tổng Số Lượng Voucher</label>
                 <input asp-for="TongSoLuongVoucher" class="form-control" />
-                <span asp-validation-for="TongSoLuongVoucher " class="text-danger"></span>
+                <span asp-validation-for="TongSoLuongVoucher" class="text-danger"></span>
             </div>
 
             <input type="hidden" asp-for="NguoiTao" value="Admin" />
-            <input type="hidden" asp-for="TrangThai" value="1" /> <!-- Ho ặc giá trị trạng thái mặc định khác -->
+            <input type="hidden" asp-for="TrangThai" value="1" />
 
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Create" class ="btn btn-primary" />
             </div>
+            
+            <h3>Danh Sách Khách Hàng</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Chọn</th>
+                        <th>Tên Khách Hàng</th>
+                        <th>Số Điện Thoại</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.KhachHang != null)
+                    {
+                        @foreach (var khachHang in ViewBag.KhachHang)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="selectedKhachHangIds" value="@khachHang.IdKhachHang" />
+                                </td>
+                                <td>@khachHang.HoTen</td>
+                                <td>@khachHang.SoDienThoai</td>
+                                <td>@khachHang.Email</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4">Không có khách hàng nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </form>
     </div>
 </div>
@@ -88,30 +131,29 @@
 <script>
     $(document).ready(function () {
         var selectedValue = $('#LoaiGiamGia').val();
-        if (selectedValue == 1) {
-            $('#SoTienToiDaContainer').removeClass('hidden');
-            $('#GiaTriGiamUnit').text('%');
-        } else {
-            $('#SoTienToiDaContainer').addClass('hidden');
-            $('#GiaTriGiamUnit').text('VNĐ');
-        }
+        toggleSoTienToiDa(selectedValue);
 
         $('#LoaiGiamGia').on('change', function () {
             var selectedValue = $(this).val();
-            if (selectedValue == 1) {
-                $('#SoTienToiDaContainer').removeClass('hidden');
+            toggleSoTienToiDa(selectedValue);
+        });
+
+        function toggleSoTienToiDa(value) {
+            if (value == 1) {
+                $('#SoTienToiDaContainer').removeClass('hidden').slideDown(500);
                 $('#GiaTriGiamUnit').text('%');
-                $('#SoTienToiDaContainer').slideDown(500);
             } else {
                 $('#SoTienToiDaContainer').slideUp(500, function () {
                     $(this).addClass('hidden');
                 });
                 $('#GiaTriGiamUnit').text('VNĐ');
             }
-        });
+        }
+
         function formatNumber(n) {
             return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
+
         function removeFormatting(value) {
             return value.replace(/\./g, "");
         }
@@ -126,10 +168,18 @@
             $('#GiaTriDonHangToiThieu').val(removeFormatting($('#GiaTriDonHangToiThieu').val()));
             $('#SoTienToiDa').val(removeFormatting($('#SoTienToiDa').val()));
         });
+
+        $('form').on('submit', function () {
+            var selectedIds = $('input[name="selectedKhachHangIds"]:checked');
+            if (selectedIds.length === 0) {
+                alert("Vui lòng chọn ít nhất một khách hàng.");
+                return false; // Ngăn không cho gửi form
+            }
+        });
     });
+
     document.addEventListener("DOMContentLoaded", function () {
         var now = new Date();
-
         var gmtPlus7Offset = 7 * 60 * 60 * 1000;
         var nowInGmtPlus7 = new Date(now.getTime() + gmtPlus7Offset);
 
@@ -161,8 +211,8 @@
         transition: opacity 0.5s ease;
     }
 
-        .hidden.show {
-            display: block;
-            opacity: 1;
-        }
+    .hidden .show {
+        display: block;
+        opacity: 1;
+    }
 </style>

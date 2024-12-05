@@ -26,29 +26,27 @@ namespace AppAPI.Controllers
         }
 
         [HttpPost("CreateVoucher")]
-        public async Task<IActionResult> CreateVoucher([FromBody] Voucher voucher)
+        public async Task<IActionResult> CreateVoucher([FromBody] VoucherDto voucher, [FromQuery] List<Guid> selectedKhachHangIds)
         {
             try
             {
-                _logger.LogInformation($"Received create request for voucher: {JsonSerializer.Serialize(voucher)}");
+                // Kiểm tra thông tin voucher
+                if (voucher == null)
+                    return BadRequest("Voucher cannot be null");
 
                 // Đảm bảo ID mới
                 voucher.VoucherId = Guid.NewGuid();
-
-                // Set các giá trị mặc định
-                voucher.NgayTao = DateTime.Now;
                 if (string.IsNullOrEmpty(voucher.NguoiTao))
                     voucher.NguoiTao = "Admin";
                 voucher.SoLuongVoucherConLai = voucher.TongSoLuongVoucher;
 
-                var result = await _service.CreateAsync(voucher);
+                // Gọi phương thức CreateAsync với cả voucher và danh sách khách hàng
+                var result = await _service.CreateAsync(voucher, selectedKhachHangIds);
                 if (result)
                 {
-                    _logger.LogInformation($"Successfully created voucher with ID: {voucher.VoucherId}");
                     return Ok(voucher);
                 }
 
-                _logger.LogWarning("Failed to create voucher in service layer");
                 return BadRequest("Failed to create voucher");
             }
             catch (Exception ex)
@@ -99,7 +97,7 @@ namespace AppAPI.Controllers
         public async Task<IActionResult> DeleteVoucher(Guid id)
         {
             var voucher = await _service.GetVoucherByIdAsync(id);
-            if(voucher == null)
+            if (voucher == null)
             {
                 return NotFound("Voucher not found");
             }
@@ -115,11 +113,44 @@ namespace AppAPI.Controllers
         public async Task<IActionResult> GetVoucherById(Guid id)
         {
             var voucher = await _service.GetVoucherByIdAsync(id);
-            if(voucher == null)
+            if (voucher == null)
             {
                 return NotFound("Voucher not found.");
             }
             return Ok(voucher);
+        }
+        [HttpPost("AddLichSuSuDungVoucher")]
+        public async Task<IActionResult> AddLichSuSuDungVoucher([FromBody] LichSuSuDungVoucher lichSuSuDungVoucher)
+        {
+            try
+            {
+                if (lichSuSuDungVoucher == null)
+                {
+                    return BadRequest("LichSuSuDungVoucher cannot be null");
+                }
+
+                var result = await _service.AddLichSuSuDungVoucherAsync(lichSuSuDungVoucher);
+                if (result)
+                {
+                    return Ok("LichSuSuDungVoucher added successfully");
+                }
+                return BadRequest("Failed to add LichSuSuDungVoucher");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while adding LichSuSuDungVoucher ");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+        [HttpGet("GetKHDaNhanVoucher")]
+        public async Task<IActionResult> GetKhachHangDaNhanVoucherAsync(Guid voucherId)
+        {
+            var khachhangs = await _service.GetKhachHangDaNhanVoucherAsync(voucherId);
+            if (khachhangs == null)
+            {
+                return NotFound("Khach Hang Da Nhan Voucher not found.");
+            }
+            return Ok(khachhangs);
         }
     }
 }
