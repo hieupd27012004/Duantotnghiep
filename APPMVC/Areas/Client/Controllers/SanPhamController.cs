@@ -193,9 +193,8 @@ namespace APPMVC.Areas.Client.Controllers
 
             var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
 
-            // Lấy giá đã giảm từ chi tiết sản phẩm
             double? originalPrice = sanPhamChiTiet.Gia;
-            double? discountedPrice = sanPhamChiTiet.GiaGiam; // Lấy giá đã giảm từ cơ sở dữ liệu
+            double? discountedPrice = sanPhamChiTiet.GiaGiam;
 
             return Json(new
             {
@@ -238,25 +237,28 @@ namespace APPMVC.Areas.Client.Controllers
                 {
                     return Json(new { success = false, message = "Product not found" });
                 }
-                int requestedQuantity = 1; 
-                if (requestedQuantity <= 0) 
+
+                int requestedQuantity = 1;
+                if (requestedQuantity <= 0)
                 {
                     return Json(new { success = false, message = "Quantity must be greater than zero." });
                 }
 
-                if (requestedQuantity > sanPhamChiTiet.SoLuong) 
+                if (requestedQuantity > sanPhamChiTiet.SoLuong)
                 {
                     return Json(new { success = false, message = "Insufficient quantity available." });
                 }
+
+                var donGia = sanPhamChiTiet.GiaGiam ?? sanPhamChiTiet.Gia;
 
                 var gioHangChiTiet = new GioHangChiTiet
                 {
                     IdGioHangChiTiet = Guid.NewGuid(),
                     IdGioHang = idGioHang,
                     IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
-                    DonGia = sanPhamChiTiet.Gia,
+                    DonGia = donGia,
                     SoLuong = requestedQuantity,
-                    TongTien = sanPhamChiTiet.Gia * requestedQuantity,
+                    TongTien = donGia * requestedQuantity,
                     KichHoat = 1
                 };
 
@@ -271,6 +273,5 @@ namespace APPMVC.Areas.Client.Controllers
                 return StatusCode(500, new { message = "An error occurred while adding to the cart." });
             }
         }
-
     }
 }
