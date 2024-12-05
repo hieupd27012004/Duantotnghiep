@@ -23,6 +23,7 @@ namespace APPMVC.Areas.Client.Controllers
         private readonly ILogger<SanPhamController> _logger;
         private readonly IGioHangChiTietService _gioHangChiTietService;
         private readonly ICardService _cardService;
+        private readonly IPromotionSanPhamChiTietService _promotionSanPhamChiTietService;
         public SanPhamController(
             ISanPhamService sanPhamservice,
             ISanPhamChiTietService sanPhamCTservice,
@@ -33,7 +34,8 @@ namespace APPMVC.Areas.Client.Controllers
             ISanPhamChiTietKichCoService sanPhamChiTietKichCoService,
             IGioHangChiTietService gioHangChiTietService,
             ILogger<SanPhamController> logger,
-            ICardService cardService)
+            ICardService cardService,
+            IPromotionSanPhamChiTietService promotionSanPhamChiTietService)
         {
             _sanPhamservice = sanPhamservice;
             _sanPhamCTservice = sanPhamCTservice;
@@ -45,6 +47,7 @@ namespace APPMVC.Areas.Client.Controllers
             _gioHangChiTietService = gioHangChiTietService;
             _cardService = cardService;
             _logger = logger;
+            _promotionSanPhamChiTietService = promotionSanPhamChiTietService;
         }
 
         public async Task<IActionResult> Index(string? name)
@@ -107,34 +110,42 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 if (sanphamId == Guid.Empty)
                 {
-                    return NotFound("Mã sản phẩm không hợp lệ");
+                    return NotFound("Mã sản phẩm không hợp lệ.");
                 }
 
                 var sanPham = await _sanPhamservice.GetSanPhamById(sanphamId);
                 if (sanPham == null)
                 {
-                    return NotFound($"Không tìm thấy sản phẩm có mã {sanphamId}");
+                    return NotFound($"Không tìm thấy sản phẩm có mã {sanphamId}.");
                 }
 
                 var sanPhamChiTietList = await _sanPhamCTservice.GetSanPhamChiTietBySanPhamId(sanphamId);
                 if (sanPhamChiTietList == null || !sanPhamChiTietList.Any())
                 {
-                    return NotFound($"Không tìm thấy chi tiết sản phẩm cho {sanphamId}");
+                    return NotFound($"Không tìm thấy chi tiết sản phẩm cho mã {sanphamId}.");
                 }
 
                 var sanPhamChiTietViewModels = new List<SanPhamChiTietItemViewModel>();
-                var availableColors = new List<MauSac>();
-                var availableSizes = new List<KichCo>();
+                var availableColors = new HashSet<MauSac>();
+                var availableSizes = new HashSet<KichCo>();
 
                 foreach (var chiTiet in sanPhamChiTietList)
                 {
                     var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
-                    availableColors.AddRange(mauSacList);
+                    availableColors.UnionWith(mauSacList);
 
                     var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
-                    availableSizes.AddRange(kichCoList);
+                    availableSizes.UnionWith(kichCoList);
 
                     var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
+
+                    var activePromotion = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(chiTiet.IdSanPhamChiTiet);
+                    double? discountedPrice = chiTiet.Gia;
+
+                    if (activePromotion != null)
+                    {
+                        discountedPrice = chiTiet.Gia * (1 - (activePromotion.PhanTramGiam / 100.0));
+                    }
 
                     sanPhamChiTietViewModels.Add(new SanPhamChiTietItemViewModel
                     {
@@ -143,22 +154,26 @@ namespace APPMVC.Areas.Client.Controllers
                         MauSac = mauSacList.Select(ms => ms.TenMauSac).ToList(),
                         KichCo = kichCoList.Select(kc => kc.TenKichCo).ToList(),
                         Gia = chiTiet.Gia,
+                        GiaDaGiam = discountedPrice,
                         SoLuong = chiTiet.SoLuong,
                         XuatXu = chiTiet.XuatXu,
                     });
                 }
+
+                var firstDetail = sanPhamChiTietViewModels.FirstOrDefault();
 
                 var viewModel = new SanPhamChiTietClientViewModel
                 {
                     IdSanPham = sanphamId,
                     TenSanPham = sanPham.TenSanPham,
                     MoTa = sanPham.MoTa,
-                    Gia = sanPhamChiTietViewModels.FirstOrDefault()?.Gia,
-                    SoLuong = sanPhamChiTietViewModels.FirstOrDefault()?.SoLuong,
+                    DiscountedPrice = firstDetail?.GiaDaGiam,
+                    Gia = firstDetail?.Gia,
+                    SoLuong = firstDetail?.SoLuong,
                     SanPhamChiTietList = sanPhamChiTietViewModels,
                     HinhAnhs = sanPhamChiTietViewModels.SelectMany(d => d.HinhAnhs).Distinct().ToList(),
-                    AvailableColors = availableColors.Distinct().ToList(),
-                    AvailableSizes = availableSizes.Distinct().ToList(),
+                    AvailableColors = availableColors.ToList(),
+                    AvailableSizes = availableSizes.ToList(),
                     SelectedColorId = selectedColorId,
                     SelectedSizeId = selectedSizeId,
                 };
@@ -167,7 +182,8 @@ namespace APPMVC.Areas.Client.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "Internal server error");
+                // Log the exception if necessary
+                return StatusCode(500, "Đã xảy ra lỗi nội bộ. Vui lòng thử lại sau.");
             }
         }
         public async Task<IActionResult> GetVariant(Guid productId, Guid colorId, Guid sizeId)

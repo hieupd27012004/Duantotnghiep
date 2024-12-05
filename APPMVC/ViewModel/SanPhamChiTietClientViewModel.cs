@@ -6,8 +6,10 @@ namespace APPMVC.ViewModel
     public class SanPhamChiTietClientViewModel
     {
         public Guid IdSanPham { get; set; }
+
         public List<SanPhamChiTietItemViewModel> SanPhamChiTietList { get; set; }
         public string? TenSanPham { get; set; }
+        public double? DiscountedPrice { get; set; }
         public string? MoTa { get; set; }
         public double? Gia { get; set; }
         public double? SoLuong { get; set; }
