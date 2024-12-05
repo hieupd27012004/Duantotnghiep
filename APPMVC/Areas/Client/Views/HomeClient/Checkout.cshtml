@@ -95,27 +95,14 @@
                     <div class="d-flex mt-5 mb-2">
                         <div class="form-group mb-1 me-5">
                             <label>Tỉnh/Thành phố</label>
-                            @* <select id="ProvinceId" asp-for="ProvinceId" class="form-control" asp-items="@(new SelectList(ViewBag.Provinces, "ProvinceId", "ProvinceName"))">
-                                <option value="">Chọn tỉnh/thành phố</option>
-                            </select>
-                            <input type="hidden" id="ProvinceName" name="ProvinceName" asp-for="ProvinceName" /> *@
                             <input type="text" class="form-control" id="province" name="ProvinceName" value="@Model.ProvinceName " readonly/>
-
                         </div>
                         <div class="form-group mb-3 ms-5 me-5">
-                            <label>Quận/Huyện</label>
-                            @* <select id="DistrictId" class="form-control" asp-for="DistrictId">
-                                <option value="">Chọn quận/huyện</option>
-                            </select>
-                            <input type="hidden" id="DistrictName" name="DistrictName" asp-for="DistrictName" /> *@
+                            <label>Quận/Huyện</label>                     
                             <input type="text" class="form-control" id="district" name="DistrictName" value="@Model.DistrictName" readonly/>
                         </div>
                         <div class="form-group mb-3 ms-4">
                             <label>Phường/Xã</label>
-                           @*  <select id="WardId" asp-for="WardId" class="form-control">
-                                <option value="">Chọn phường/xã</option>
-                            </select>
-                            <input type="hidden" id="WardName" name="WardName" asp-for="WardName" /> *@
                             <input type="text" class="form-control" id="ward" name="WardName" value="@Model.WardName" readonly />
                         </div>                       
                     </div>  
@@ -151,28 +138,27 @@
                     <label for="diaChiCuThe">Địa Chỉ Cụ Thể/Xã</label>
                     <input type="text" class="form-control" id="diaChiCuThe" name="diaChiCuThe" value="@Model.DiaChiCuThe" readonly hidden />
                 </div>
-                <h4 class="my-3">Phương thức thanh toán</h4>
                 <div class="form-group">
+                    <h4 class="my-3">Phương thức thanh toán</h4>
                     <div class="custom-control custom-radio custom-control-inline">
                         <input type="radio" id="thanh_toan_khi_nhan_hang" name="PaymentMethod" value="cash_on_delivery" class="custom-control-input"
                         @(Model.PaymentMethod == "cash_on_delivery" ? "checked" : "")>
                         <label class="custom-control-label" for="thanh_toan_khi_nhan_hang">
-                            <i class="fas fa-money-bill-alt"></i>
-                            Thanh toán khi nhận hàng
+                            <i class="fas fa-money-bill-alt"></i> Thanh toán khi nhận hàng
                         </label>
                     </div>
                     <div class="custom-control custom-radio custom-control-inline">
                         <input type="radio" id="thanh_toan_ngay" name="PaymentMethod" value="online_payment" class="custom-control-input"
                         @(Model.PaymentMethod == "online_payment" ? "checked" : "")>
                         <label class="custom-control-label" for="thanh_toan_ngay">
-                            <i class="fab fa-cc-visa"></i>
-                            Thanh toán ngay
+                            <i class="fab fa-cc-visa"></i> Thanh toán ngay
                         </label>
                     </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary">Hoàn thành đặt hàng</button>
-            </form>
+
+            </form>           
         </div>
 
         
@@ -306,4 +292,12 @@
         });
     }
 
+    //Thanh Toán
+    document.querySelectorAll('input[name="PaymentMethod"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            if (this.value === 'online_payment') {
+                document.getElementById('paymentForm').submit(); // Gửi form để xử lý
+            }
+        });
+    });
 </script>
