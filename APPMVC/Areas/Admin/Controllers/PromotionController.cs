@@ -95,11 +95,11 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 var promotion = model.Promotion;
                 promotion.NgayBatDau = model.NgayBatDau;
-                promotion.NgayKetThuc = model.Promotion.NgayKetThuc; 
+                promotion.NgayKetThuc = model.NgayKetThuc; 
                 promotion.IdPromotion = Guid.NewGuid();
                 promotion.NgayTao = DateTime.Now;
 
-                // Kiểm tra tính hợp lệ của ngày
+                //Kiểm tra tính hợp lệ của ngày
                 if (promotion.NgayBatDau >= promotion.NgayKetThuc)
                 {
                     TempData["ErrorMessage"] = "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.";
