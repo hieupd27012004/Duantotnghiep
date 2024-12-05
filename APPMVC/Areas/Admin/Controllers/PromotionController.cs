@@ -95,11 +95,11 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 var promotion = model.Promotion;
                 promotion.NgayBatDau = model.NgayBatDau;
-                promotion.NgayKetThuc = model.NgayKetThuc; 
+                promotion.NgayKetThuc = model.NgayKetThuc;
                 promotion.IdPromotion = Guid.NewGuid();
                 promotion.NgayTao = DateTime.Now;
 
-                //Kiểm tra tính hợp lệ của ngày
+                // Kiểm tra tính hợp lệ của ngày
                 if (promotion.NgayBatDau >= promotion.NgayKetThuc)
                 {
                     TempData["ErrorMessage"] = "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.";
@@ -108,11 +108,9 @@ namespace APPMVC.Areas.Admin.Controllers
                 }
 
                 // Lấy danh sách khuyến mãi hiện có
-                // Đảm bảo dữ liệu được nạp đúng
                 var existingPromotions = await _promotionService.GetPromotionsAsync();
                 _logger.LogInformation($"Total existing promotions: {existingPromotions.Count}");
 
-                // Kiểm tra chi tiết sản phẩm
                 var selectedProductDetails = new List<SanPhamChiTiet>();
                 foreach (var idSanPhamChiTiet in model.SelectedSanPhamChiTietIds)
                 {
@@ -135,35 +133,18 @@ namespace APPMVC.Areas.Admin.Controllers
                     var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(idSanPhamChiTiet);
                     if (sanPhamChiTiet == null) continue;
 
-                    // Chi tiết sản phẩm
                     var productName = sanPhamChiTiet.SanPham?.TenSanPham ?? "Sản phẩm không xác định";
 
-                    // Kiểm tra xung đột khuyến mãi
                     var conflictingPromotions = existingPromotions
-                        .Where(p =>
-                            // Chỉ xét các khuyến mãi đang hoạt động và chưa hết hạn
-                            p.TrangThai == 1 &&
-                            p.PromotionSanPhamChiTiets != null &&
-                            p.PromotionSanPhamChiTiets.Any(ps => ps.IdSanPhamChiTiet == idSanPhamChiTiet) &&
-
-                    // Bắt đầu của khuyến mãi mới nằm trong khoảng khuyến mãi cũ
-                    (promotion.NgayBatDau >= p.NgayBatDau && promotion.NgayBatDau <= p.NgayKetThuc) ||
-                                // Kết thúc của khuyến mãi mới nằm trong khoảng khuyến mãi cũ
-                                (promotion.NgayKetThuc >= p.NgayBatDau && promotion.NgayKetThuc <= p.NgayKetThuc) ||
-                                // Khuyến mãi mới bao trùm hoàn toàn khuyến mãi cũ
-                                (promotion.NgayBatDau <= p.NgayBatDau && promotion.NgayKetThuc >= p.NgayKetThuc)
-
-                        )
+                        .Where(p => p.TrangThai == 1 &&
+                                    p.PromotionSanPhamChiTiets != null &&
+                                    p.PromotionSanPhamChiTiets.Any(ps => ps.IdSanPhamChiTiet == idSanPhamChiTiet) &&
+                                    // Kiểm tra xung đột
+                                    (promotion.NgayBatDau >= p.NgayBatDau && promotion.NgayBatDau <= p.NgayKetThuc) ||
+                                    (promotion.NgayKetThuc >= p.NgayBatDau && promotion.NgayKetThuc <= p.NgayKetThuc) ||
+                                    (promotion.NgayBatDau <= p.NgayBatDau && promotion.NgayKetThuc >= p.NgayKetThuc))
                         .ToList();
 
-                    // Log chi tiết các khuyến mãi xung đột
-                    foreach (var conflictPromotion in conflictingPromotions)
-                    {
-                        _logger.LogWarning($"Conflict found: Existing Promotion '{conflictPromotion.TenPromotion}' " +
-                            $"from {conflictPromotion.NgayBatDau} to {conflictPromotion.NgayKetThuc}");
-                    }
-
-                    // Nếu có xung đột
                     if (conflictingPromotions.Any())
                     {
                         var conflictDetails = conflictingPromotions.Select(p =>
@@ -177,7 +158,6 @@ namespace APPMVC.Areas.Admin.Controllers
                     }
                 }
 
-                // Nếu có sản phẩm bị xung đột
                 if (conflictingProductDetails.Any())
                 {
                     TempData["ErrorMessage"] = string.Join("<br/>", conflictingProductDetails);
@@ -197,6 +177,23 @@ namespace APPMVC.Areas.Admin.Controllers
                 var result = await _promotionService.CreateAsync(promotion);
                 if (result)
                 {
+                    // Cập nhật giá giảm cho từng sản phẩm chi tiết
+                    foreach (var idSanPhamChiTiet in model.SelectedSanPhamChiTietIds)
+                    {
+                        var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(idSanPhamChiTiet);
+                        if (sanPhamChiTiet != null)
+                        {
+                            double originalPrice = sanPhamChiTiet.Gia;
+                            double discountPercentage = promotion.PhanTramGiam; // Giả sử bạn có phần trăm giảm trong promotion
+
+                            // Tính giá sau giảm
+                            double discountedPrice = originalPrice * (1 - (discountPercentage / 100.0));
+
+                            sanPhamChiTiet.GiaGiam = discountedPrice; 
+                            await _sanPhamChiTietService.Update(sanPhamChiTiet);
+                        }
+                    }
+
                     TempData["SuccessMessage"] = "Tạo khuyến mãi thành công.";
                     return RedirectToAction(nameof(Index));
                 }

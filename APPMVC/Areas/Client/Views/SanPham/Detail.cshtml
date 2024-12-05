@@ -37,8 +37,21 @@
         <div class="col-lg-6 product-detail-info">
             <h2>@Model.TenSanPham</h2>
             <p id="product-price" class="price">
-                @(Model.DiscountedPrice.HasValue ? Model.DiscountedPrice.Value.ToString("N0") + " VND" :
-                    (Model.Gia.HasValue ? Model.Gia.Value.ToString("N0") + " VND" : "Chưa có giá"))
+                @if (Model.DiscountedPrice.HasValue)
+                {
+                    <div style="display: flex; align-items: center;">
+                        <span style="text-decoration: line-through; color: red; margin-right: 10px;">
+                            @Model.Gia.Value.ToString("N0") VND
+                        </span>
+                        <span>
+                            @Model.DiscountedPrice.Value.ToString("N0") VND
+                        </span>
+                    </div>
+                }
+                else
+                {
+                    @(Model.Gia.HasValue ? Model.Gia.Value.ToString("N0") + " VND" : "Chưa có giá")
+                }
             </p>
             <p id="product-quantity" class="quantity">
                 Số lượng: @(Model.SoLuong.HasValue ? Model.SoLuong.Value.ToString() : "Không có thông tin")
@@ -49,7 +62,7 @@
                 <div class="btn-group color-selector" role="group">
                     @if (Model.AvailableColors != null && Model.AvailableColors.Any())
                     {
-                        var distinctColors = Model.AvailableColors.DistinctBy(c => c.IdMauSac).ToList(); // Sử dụng DistinctBy để lọc màu trùng
+                        var distinctColors = Model.AvailableColors.DistinctBy(c => c.IdMauSac).ToList();
                         foreach (var color in distinctColors)
                         {
                             <button value="@color.IdMauSac" class="btn btn-dark color-btn @(color.IdMauSac == Model.SelectedColorId ? "active" : "")" type="button">
@@ -106,17 +119,15 @@
 </div>
 
 <script>
-        $(document).ready(function () {
+    $(document).ready(function () {
         let selectedColor = '@Model.SelectedColorId';
         let selectedSize = '@Model.SelectedSizeId';
         let sanPhamId = '@Model.IdSanPham';
 
-     // Đánh dấu màu đã chọn
         if (selectedColor) {
             $('.color-btn[value="' + selectedColor + '"]').addClass('active');
         }
 
-        // Đánh dấu kích thước đã chọn
         if (selectedSize) {
             $('.size-btn[value="' + selectedSize + '"]').addClass('active');
         }
@@ -145,10 +156,24 @@
                     data: { productId: sanPhamId, colorId: selectedColor, sizeId: selectedSize },
                     success: function (data) {
                         if (data.success) {
-                            $('#product-price').text(data.price.toLocaleString() + ' VND');
+                            // Cập nhật giá
+                            if (data.discountedPrice !== null && data.discountedPrice < data.originalPrice) {
+                                $('#product-price').html(`
+                                    <div style="display: flex; align-items: center;">
+                                        <span style="text-decoration: line-through; color: red; margin-right: 10px;">
+                                            ${data.originalPrice.toLocaleString()} VND
+                                        </span>
+                                        <span style="color: green;">
+                                            ${data.discountedPrice.toLocaleString()} VND
+                                        </span>
+                                    </div>
+                                `);
+                            } else {
+                                $('#product-price').text(data.originalPrice.toLocaleString() + ' VND');
+                            }
+
                             $('#product-quantity').text('Số lượng: ' + data.quantity);
 
-                            // Cập nhật hình ảnh
                             $('.product-detail-image').empty();
                             data.images.forEach(function (image) {
                                 var imageUrl = 'data:' + image.type + ';base64,' + image.base64;
