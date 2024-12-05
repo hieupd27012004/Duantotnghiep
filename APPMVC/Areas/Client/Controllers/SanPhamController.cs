@@ -80,7 +80,7 @@ namespace APPMVC.Areas.Client.Controllers
                             colorImages.Add(new RepresentativeImageViewModel
                             {
                                 MauSacTen = mauSac.TenMauSac,
-                                AnhDaiDien = hinhAnhs.First().DataHinhAnh 
+                                AnhDaiDien = hinhAnhs.First().DataHinhAnh
                             });
                         }
                     }
@@ -91,8 +91,9 @@ namespace APPMVC.Areas.Client.Controllers
                     IdSanPham = sanPham.IdSanPham,
                     TenSanPham = sanPham.TenSanPham,
                     SoLuongMau = colorImages.Count,
-                    GiaThapNhat = sanPhamChiTietList.Min(x => x.Gia),
-                    GiaCaoNhat = sanPhamChiTietList.Max(x => x.Gia),
+                    // Sử dụng giá đã giảm nếu có
+                    GiaThapNhat = sanPhamChiTietList.Min(x => x.GiaGiam ?? x.Gia), 
+                    GiaCaoNhat = sanPhamChiTietList.Max(x => x.GiaGiam ?? x.Gia), 
                     RepresentativeImage = representativeImage,
                     ColorImages = colorImages
                 };
@@ -139,13 +140,8 @@ namespace APPMVC.Areas.Client.Controllers
 
                     var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
 
-                    var activePromotion = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(chiTiet.IdSanPhamChiTiet);
-                    double? discountedPrice = chiTiet.Gia;
-
-                    if (activePromotion != null)
-                    {
-                        discountedPrice = chiTiet.Gia * (1 - (activePromotion.PhanTramGiam / 100.0));
-                    }
+                    // Lấy giá đã giảm từ chi tiết sản phẩm
+                    double? discountedPrice = chiTiet.GiaGiam; 
 
                     sanPhamChiTietViewModels.Add(new SanPhamChiTietItemViewModel
                     {
@@ -188,7 +184,6 @@ namespace APPMVC.Areas.Client.Controllers
         }
         public async Task<IActionResult> GetVariant(Guid productId, Guid colorId, Guid sizeId)
         {
-
             var sanPhamChiTiet = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(productId, sizeId, colorId);
 
             if (sanPhamChiTiet == null)
@@ -198,10 +193,15 @@ namespace APPMVC.Areas.Client.Controllers
 
             var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
 
+            // Lấy giá đã giảm từ chi tiết sản phẩm
+            double? originalPrice = sanPhamChiTiet.Gia;
+            double? discountedPrice = sanPhamChiTiet.GiaGiam; // Lấy giá đã giảm từ cơ sở dữ liệu
+
             return Json(new
             {
                 success = true,
-                price = sanPhamChiTiet.Gia,
+                originalPrice = originalPrice,
+                discountedPrice = discountedPrice,
                 quantity = sanPhamChiTiet.SoLuong,
                 images = hinhAnhs.Select(h => new
                 {
@@ -210,7 +210,6 @@ namespace APPMVC.Areas.Client.Controllers
                 }).ToList()
             });
         }
-
         [HttpPost]
         public async Task<IActionResult> AddToCard(Guid productId, Guid colorId, Guid sizeId)
         {
