@@ -1,6 +1,9 @@
-﻿        using AppData.Model;
+﻿using AppData.Model;
+using AppData.Model.Vnpay;
 using AppData.ViewModel;
 using APPMVC.IService;
+using APPMVC.Session;
+using APPMVC.Service.VnpayClient;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,8 +20,20 @@ namespace APPMVC.Areas.Client.Controllers
         private readonly IHoaDonChiTietService _hoaDonChiTietService;
         private readonly ILichSuHoaDonService _lichSuHoaDonService;
         private readonly IDiaChiService _diaChiService;
+        private readonly ILichSuThanhToanService _lichSuThanhToanService;
+        private readonly iVnpayClientService _vnPayService;
         private readonly GiaoHangNhanhService _giaoHangNhanhService;
-        public HomeClientController(IGioHangChiTietService gioHangChiTietService, IHinhAnhService hinhAnhService, ISanPhamChiTietService sanPhamChiTietService, ICardService cardService, IHoaDonService hoaDonService, IHoaDonChiTietService hoaDonChiTietService, ILichSuHoaDonService lichSuHoaDonService, IDiaChiService diaChiService, GiaoHangNhanhService giaoHangNhanhService)
+        public HomeClientController(IGioHangChiTietService gioHangChiTietService, 
+                                    IHinhAnhService hinhAnhService, 
+                                    ISanPhamChiTietService sanPhamChiTietService, 
+                                    ICardService cardService, IHoaDonService hoaDonService, 
+                                    IHoaDonChiTietService hoaDonChiTietService, 
+                                    ILichSuHoaDonService lichSuHoaDonService, 
+                                    IDiaChiService diaChiService, 
+                                    GiaoHangNhanhService giaoHangNhanhService, 
+                                    iVnpayClientService vnPayService,
+                                    ILichSuThanhToanService lichSuThanhToanService
+                                    )
         {
             _gioHangChiTietService = gioHangChiTietService;
             _hinhAnhService = hinhAnhService;
@@ -27,7 +42,9 @@ namespace APPMVC.Areas.Client.Controllers
             _hoaDonService = hoaDonService;
             _hoaDonChiTietService = hoaDonChiTietService;
             _lichSuHoaDonService = lichSuHoaDonService;
+            _lichSuThanhToanService = lichSuThanhToanService;
             _diaChiService = diaChiService;
+            _vnPayService = vnPayService;
             _giaoHangNhanhService = giaoHangNhanhService;
         }
         public IActionResult Index()
@@ -118,8 +135,85 @@ namespace APPMVC.Areas.Client.Controllers
             thanhToanViewModel.CartItems = cartItems; 
             return View(thanhToanViewModel);
         }
+        // Thanh Toán
+        #region ThanhToan
+        private async Task<bool> SaveOrder(List<CartItemViewModel> cartItems, ThanhToanViewModel thanhToanViewModel, Guid customerId, string giaoDich, string pttt, string trangThaiThanhToan)
+        {
+            try
+            {
+                var idGioHang = await _cardService.GetCartIdByCustomerIdAsync(customerId);
+                double totalDonHang = cartItems.Sum(item => item.Price * item.Quantity);
+                double totalHoaDon = totalDonHang;
 
+                var order = new HoaDon
+                {
+                    IdHoaDon = Guid.NewGuid(),
+                    MaDon = GenerateOrderNumber(),
+                    NguoiNhan = thanhToanViewModel.NguoiNhan,
+                    SoDienThoaiNguoiNhan = thanhToanViewModel.SoDienThoai,
+                    DiaChiGiaoHang = $"{thanhToanViewModel.ProvinceName}, {thanhToanViewModel.DistrictName}, {thanhToanViewModel.WardName}",
+                    LoaiHoaDon = "Trực tuyến",
+                    TienShip = thanhToanViewModel.PhiVanChuyen,
+                    TongTienDonHang = totalDonHang,
+                    TongTienHoaDon = totalHoaDon,
+                    NgayTao = DateTime.Now,
+                    NguoiTao = "Khách hàng",
+                    KichHoat = 1,
+                    TrangThai = "Chờ Xác Nhận",
+                    IdKhachHang = customerId,
+                    IdNhanVien = null
+                };
 
+                var orderDetails = cartItems.Select(item => new HoaDonChiTiet
+                {
+                    IdHoaDonChiTiet = Guid.NewGuid(),
+                    DonGia = item.Price,
+                    SoLuong = item.Quantity,
+                    TongTien = item.Price * item.Quantity,
+                    KichHoat = 1,
+                    IdHoaDon = order.IdHoaDon,
+                    IdSanPhamChiTiet = item.IdSanPhamChiTiet
+                }).ToList();
+
+                var lichSu = new LichSuHoaDon
+                {
+                    IdLichSuHoaDon = Guid.NewGuid(),
+                    ThaoTac = order.TrangThai,
+                    NgayTao = DateTime.Now,
+                    NguoiThaoTac = "Khách hàng",
+                    TrangThai = "1",
+                    IdHoaDon = order.IdHoaDon,
+                };
+
+                var lichSuThanhToan = new LichSuThanhToan
+                {
+                    IdLichSuThanhToan = Guid.NewGuid(),
+                    SoTien = totalHoaDon,
+                    TienThua = 0,
+                    NgayTao = DateTime.Now,
+                    LoaiGiaoDich = giaoDich,
+                    Pttt = pttt,
+                    NguoiThaoTac = "Khách hàng",
+                    TrangThai = trangThaiThanhToan,
+                    IdHoaDon = order.IdHoaDon,
+                    IdNhanVien = null
+                };
+
+                await _hoaDonService.AddAsync(order);
+                await _hoaDonChiTietService.AddAsync(orderDetails);
+                await _lichSuHoaDonService.AddAsync(lichSu);
+                await _lichSuThanhToanService.AddAsync(lichSuThanhToan);
+
+                // Xóa giỏ hàng
+                await _gioHangChiTietService.ClearCartByIdAsync(idGioHang);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         [HttpPost]
         public async Task<IActionResult> ProcessCheckout(ThanhToanViewModel model)
         {
@@ -138,74 +232,171 @@ namespace APPMVC.Areas.Client.Controllers
                 return Unauthorized(new { message = "Customer not found in session." });
             }
 
-            var idGioHang = await _cardService.GetCartIdByCustomerIdAsync(customerId);
+            //var idGioHang = await _cardService.GetCartIdByCustomerIdAsync(customerId);
+            //double totalDonHang = cartItems.Sum(item => item.Price * item.Quantity);
+            //double totalHoaDon = totalDonHang;
+            //string diaChiGiaoHang = $"{thanhToanViewModel.ProvinceName}, {thanhToanViewModel.DistrictName}, {thanhToanViewModel.WardName}";
+            //string diaChiCT = thanhToanViewModel.DiaChiCuThe;
+            //var order = new HoaDon
+            //{
+            //    IdHoaDon = Guid.NewGuid(),
+            //    MaDon = GenerateOrderNumber(),
+            //    NguoiNhan = thanhToanViewModel.NguoiNhan,
+            //    SoDienThoaiNguoiNhan = thanhToanViewModel.SoDienThoai,
+            //    DiaChiGiaoHang = diaChiGiaoHang,
+            //    LoaiHoaDon = "Trực tuyến",
+            //    TienShip = thanhToanViewModel.PhiVanChuyen,
+            //    TongTienDonHang = totalDonHang,
+            //    TongTienHoaDon = totalHoaDon,
+            //    NgayTao = DateTime.Now,
+            //    NguoiTao = "Khách hàng",
+            //    KichHoat = 1,
+            //    TrangThai = "Chờ Xác Nhận",
+            //    IdKhachHang = customerId,
+            //    IdNhanVien = null
+            //};
+
+            //var orderDetails = cartItems.Select(item => new HoaDonChiTiet
+            //{
+            //    IdHoaDonChiTiet = Guid.NewGuid(),
+            //    DonGia = item.Price,
+            //    SoLuong = item.Quantity,
+            //    TongTien = item.Price * item.Quantity,
+            //    KichHoat = 1,
+            //    IdHoaDon = order.IdHoaDon,
+            //    IdSanPhamChiTiet = item.IdSanPhamChiTiet
+            //}).ToList();
+
+            //try
+            //{
+            //    await _hoaDonService.AddAsync(order);
+            //    await _hoaDonChiTietService.AddAsync(orderDetails);
+
+            //    // Bỏ qua việc trừ số lượng
+            //    // foreach (var detail in orderDetails)
+            //    // {
+            //    //     await DeductStockAsync(detail.IdSanPhamChiTiet, detail.SoLuong);
+            //    // }
+
+            //    var lichSu = new LichSuHoaDon
+            //    {
+            //        IdLichSuHoaDon = Guid.NewGuid(),
+            //        ThaoTac = order.TrangThai,
+            //        NgayTao = DateTime.Now,
+            //        NguoiThaoTac = "Khách hàng",
+            //        TrangThai = "1",
+            //        IdHoaDon = order.IdHoaDon,
+            //    };
+
+
+            //    if (model.PaymentMethod == "cash_on_delivery")
+            //    {
+            //        var lichSuThanhToan = new LichSuThanhToan
+            //        {
+            //            IdLichSuThanhToan = Guid.NewGuid(),
+            //            SoTien = order.TongTienHoaDon,
+            //            TienThua = 0,
+            //            NgayTao = DateTime.Now,
+            //            LoaiGiaoDich = "Thanh Toán COD",
+            //            Pttt = "Tiền Mặt",
+            //            NguoiThaoTac = "Khách hàng",
+            //            TrangThai = "Chờ Thanh Toán",
+            //            IdHoaDon = order.IdHoaDon,
+            //            IdNhanVien = null
+            //        };
+            //        await _lichSuThanhToanService.AddAsync(lichSuThanhToan);
+            //        await _lichSuHoaDonService.AddAsync(lichSu);
+            //        await _gioHangChiTietService.ClearCartByIdAsync(idGioHang);
+            //        return RedirectToAction("Index", new { message = "Đặt hàng thành công!" });
+            //    }
+            //    else if (model.PaymentMethod == "online_payment")
+            //    {
+            //        var vnPay = new PaymentInformationModel()
+            //        {
+            //            Amount = totalHoaDon,
+            //            CreatDate = DateTime.Now,
+            //            Description = "Thanh Toán VnPay",
+            //            FullName = thanhToanViewModel.NguoiNhan,
+            //            OrderId = order.IdHoaDon,
+            //        };
+            //        string paymentUrl = _vnPayService.CreatePaymentUrl(vnPay, HttpContext);
+
+            //        return Redirect(paymentUrl);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    ModelState.AddModelError("", "An error occurred while processing your order. Please try again.");
+            //}
+
+            //return View("Checkout", thanhToanViewModel);
             double totalDonHang = cartItems.Sum(item => item.Price * item.Quantity);
             double totalHoaDon = totalDonHang;
-            string diaChiGiaoHang = $"{thanhToanViewModel.ProvinceName}, {thanhToanViewModel.DistrictName}, {thanhToanViewModel.WardName}";
-            string diaChiCT = thanhToanViewModel.DiaChiCuThe;
-            var order = new HoaDon
+
+            if (model.PaymentMethod == "cash_on_delivery")
             {
-                IdHoaDon = Guid.NewGuid(),
-                MaDon = GenerateOrderNumber(),
-                NguoiNhan = thanhToanViewModel.NguoiNhan,
-                SoDienThoaiNguoiNhan = thanhToanViewModel.SoDienThoai,
-                DiaChiGiaoHang = diaChiGiaoHang,
-                LoaiHoaDon = "Trực tuyến",
-                TienShip = thanhToanViewModel.PhiVanChuyen,
-                TongTienDonHang = totalDonHang,
-                TongTienHoaDon = totalHoaDon,
-                NgayTao = DateTime.Now,
-                NguoiTao = "Khách hàng",
-                KichHoat = 1,
-                TrangThai = "Chờ Xác Nhận",
-                IdKhachHang = customerId,
-                IdNhanVien = null
-            };
-
-            var orderDetails = cartItems.Select(item => new HoaDonChiTiet
-            {
-                IdHoaDonChiTiet = Guid.NewGuid(),
-                DonGia = item.Price,
-                SoLuong = item.Quantity,
-                TongTien = item.Price * item.Quantity,
-                KichHoat = 1,
-                IdHoaDon = order.IdHoaDon,
-                IdSanPhamChiTiet = item.IdSanPhamChiTiet
-            }).ToList();
-
-            try
-            {
-                await _hoaDonService.AddAsync(order);
-                await _hoaDonChiTietService.AddAsync(orderDetails);
-
-                // Bỏ qua việc trừ số lượng
-                // foreach (var detail in orderDetails)
-                // {
-                //     await DeductStockAsync(detail.IdSanPhamChiTiet, detail.SoLuong);
-                // }
-
-                var lichSu = new LichSuHoaDon
+                // Lưu hóa đơn cho COD
+                var result = await SaveOrder(cartItems, thanhToanViewModel, customerId, "Thanh Toán COD", "Tiền Mặt", "Chờ Thanh Toán");
+                if (result)
                 {
-                    IdLichSuHoaDon = Guid.NewGuid(),
-                    ThaoTac = order.TrangThai,
-                    NgayTao = DateTime.Now,
-                    NguoiThaoTac = "Khách hàng",
-                    TrangThai = "1",
-                    IdHoaDon = order.IdHoaDon,
+                    return RedirectToAction("Index", new { message = "Đặt hàng thành công!" });
+                }
+            }
+            else if (model.PaymentMethod == "online_payment")
+            {
+                // Tạo URL thanh toán VNPay
+                var vnPay = new PaymentInformationModel()
+                {
+                    Amount = totalHoaDon,
+                    CreatDate = DateTime.Now,
+                    Description = "Thanh Toán VnPay",
+                    FullName = thanhToanViewModel.NguoiNhan,
+                    OrderId = Guid.NewGuid(), // Tạo mã tạm
                 };
 
-                await _lichSuHoaDonService.AddAsync(lichSu);
-                await _gioHangChiTietService.ClearCartByIdAsync(idGioHang);
+                string paymentUrl = _vnPayService.CreatePaymentUrl(vnPay, HttpContext);
+                HttpContext.Session.SetString("TemporaryOrderId", vnPay.OrderId.ToString()); // Lưu mã tạm vào session
+                HttpContext.Session.SetObject("CartItems", cartItems); // Lưu giỏ hàng tạm thời
+                HttpContext.Session.SetObject("ThanhToanViewModel", thanhToanViewModel); // Lưu thông tin tạm thời
 
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "An error occurred while processing your order. Please try again.");
+                var modeld = HttpContext.Session.GetObject<ThanhToanViewModel>("ThanhToanViewModel");
+                return Redirect(paymentUrl);
             }
 
             return View("Checkout", thanhToanViewModel);
         }
+
+        // VnPay
+        [HttpGet]
+        public async Task<IActionResult> ReturnVNPay()
+        {
+            var response = _vnPayService.PaymentExecute(Request.Query);
+            if (response.VnPayResponseCode == "00") // Thanh toán thành công
+            {
+                var temporaryOrderId = HttpContext.Session.GetString("TemporaryOrderId");
+                var cartItems = HttpContext.Session.GetObject<List<CartItemViewModel>>("CartItems");
+                var thanhToanViewModel = HttpContext.Session.GetObject<ThanhToanViewModel>("ThanhToanViewModel");
+                var customerIdString = HttpContext.Session.GetString("IdKhachHang");
+                if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId) ||
+                cartItems == null || thanhToanViewModel == null || string.IsNullOrEmpty(temporaryOrderId))
+                {
+                    return BadRequest("Dữ liệu thanh toán không hợp lệ.");
+                }
+                var result = await SaveOrder(cartItems, thanhToanViewModel, customerId, "Thanh Toán VnPay", "VNPay", "Đã thanh toán");
+                if (result)
+                {
+                    HttpContext.Session.Remove("TemporaryOrderId");
+                    HttpContext.Session.Remove("CartItems");
+                    HttpContext.Session.Remove("ThanhToanViewModel");
+                    return RedirectToAction("Index", new { message = "Thanh toán thành công!" });
+                }
+            }
+
+            return RedirectToAction("Checkout", new { message = "Thanh toán thất bại!" });
+        }
+
+
+        #endregion
 
         private string GenerateOrderNumber()
         {
@@ -326,6 +517,7 @@ namespace APPMVC.Areas.Client.Controllers
             return (cartItems, thanhToanViewModel);
         }
         //Địa Chỉ
+        #region DiaChi
         public IActionResult GetAddressById(Guid id)
         {
             var diaChi = _diaChiService.GetByIdAsync(id);
@@ -514,5 +706,8 @@ namespace APPMVC.Areas.Client.Controllers
                 ? await _diaChiService.GetWardsAsync(dc.DistrictId)
                 : new List<Ward>(); // Danh sách trống nếu chưa chọn quận
         }
+        #endregion
+
+       
     }
 }

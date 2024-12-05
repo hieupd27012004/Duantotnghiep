@@ -706,7 +706,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 CreatDate = DateTime.Now,
                 Description = "Thanh Toán VnPay",
                 FullName = "Nhân Viên",
-                OrderId = new Random().Next(100, 10000)
+                OrderId = Guid.NewGuid(),
             };
 
             return Redirect(_vnPayServie.CreatePaymentUrl(vnPay, HttpContext));
