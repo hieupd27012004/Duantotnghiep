@@ -13,7 +13,7 @@ namespace AppData.ViewModel
         public Guid IdGioHangChiTiet { get; set; }
         public List<HinhAnh>? HinhAnhs { get; set; }
         public string TenSanPham { get; set; }
-        public double DonGia { get; set; }
+        public double? DonGia { get; set; }
         public double SoLuong { get; set; }
         public double TongTien { get; set; }
         public double? GiaDaGiam { get; set; }

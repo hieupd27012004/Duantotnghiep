@@ -13,5 +13,7 @@ namespace AppAPI.IRepository
         Task<List<HoaDonChiTiet>> GetByIdHoaDonAsync(Guid idHoaDon);
 
         Task<double> GetTotalQuantityBySanPhamChiTietIdAsync(Guid sanPhamChiTietId, Guid hDCTId);
+
+        Task<HoaDonChiTiet> GetByIdAndProduct(Guid idHoaDon, Guid idSanPhamChiTiet);
     }
 }

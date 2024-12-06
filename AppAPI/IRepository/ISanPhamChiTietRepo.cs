@@ -16,6 +16,8 @@ namespace AppAPI.IRepository
 
         Task<SanPhamDto> GetSanPhamByIdSanPhamChiTietAsync(Guid idSanPhamChiTiet);
         Task<SanPhamChiTietDto> GetByIdHoaDonChiTietAsync(Guid id);
+
+        Task<SanPhamChiTiet> GetByProductCodeAsync(string productCode);
     }
 }
 public class SanPhamDto

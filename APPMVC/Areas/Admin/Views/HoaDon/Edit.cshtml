@@ -330,7 +330,17 @@
                         <tr>
                             <td>@sanPham.ProductName</td>
                             <td>@sanPham.Quantity</td>
-                            <td>@sanPham.Price.ToString("N0")</td>
+                            <td>
+                                @if (sanPham.GiaDaGiam.HasValue && sanPham.GiaDaGiam < sanPham.Price)
+                                {
+                                    <span style="text-decoration: line-through; color: red;">@sanPham.Price.ToString("N0")</span>
+                                    <span style="color: green; font-weight: bold;">@sanPham.GiaDaGiam.Value.ToString("N0")</span>
+                                }
+                                else
+                                {
+                                    @sanPham.Price.ToString("N0")
+                                }
+                            </td>
                             <td>
                                 <div style="position: relative;">
                                     @if (sanPham.HinhAnhs != null && sanPham.HinhAnhs.Any())

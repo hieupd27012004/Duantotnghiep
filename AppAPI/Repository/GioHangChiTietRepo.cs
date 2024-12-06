@@ -72,5 +72,11 @@ namespace AppAPI.Repository
 
             return cartDetails.Sum(c => c.SoLuong);
         }
+
+        public async Task<GioHangChiTiet> GetByProductIdAndCartIdAsync(Guid sanPhamChiTietId, Guid cartId)
+        {
+            return await _context.gioHangChiTiets
+                .FirstOrDefaultAsync(x => x.IdSanPhamChiTiet == sanPhamChiTietId && x.IdGioHang == cartId);
+        }
     }
 }

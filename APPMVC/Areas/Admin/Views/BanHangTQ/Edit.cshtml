@@ -119,6 +119,7 @@
     <table class="table">
         <thead>
             <tr>
+                <th>Mã Sản Phẩm</th>
                 <th>Tên Sản Phẩm</th>
                 <th>Số Lượng</th>
                 <th>Giá</th>
@@ -133,6 +134,7 @@
                 foreach (var sanPham in Model.SanPhamChiTiets)
                 {
                     <tr>
+                        <td>@sanPham.MaSanPham</td>
                         <td>@sanPham.ProductName</td>
                         <td>
                             <div class="quantity-container">
@@ -141,7 +143,17 @@
                                 <button class="btn btn-outline-secondary increase" type="button" aria-label="Increase Quantity" data-id="@sanPham.IdSanPhamChiTiet">+</button>
                             </div>
                         </td>
-                        <td>@sanPham.Price.ToString("N0")</td>
+                        <td>
+                            @if (sanPham.GiaDaGiam.HasValue && sanPham.GiaDaGiam < sanPham.Price)
+                            {
+                                <span style="text-decoration: line-through; color: gray;">@sanPham.Price.ToString("N0")</span>
+                                <span style="color: red; font-weight: bold;"> @sanPham.GiaDaGiam.Value.ToString("N0")</span>
+                            }
+                            else
+                            {
+                                <span>@sanPham.Price.ToString("N0")</span>
+                            }
+                        </td>
                         <td>
                             <div style="position: relative;">
                                 @if (sanPham.HinhAnhs != null && sanPham.HinhAnhs.Any())

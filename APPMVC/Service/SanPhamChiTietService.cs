@@ -128,6 +128,30 @@ namespace APPMVC.Service
                 throw new HttpRequestException($"Error calling API: {response.StatusCode}. Content: {content}");
             }
         }
+
+        public async Task<SanPhamChiTiet> GetByProductCodeAsync(string productCode)
+        {
+            if (string.IsNullOrWhiteSpace(productCode))
+            {
+                throw new ArgumentException("Product code cannot be null or empty.", nameof(productCode));
+            }
+
+            var response = await _httpClient.GetAsync($"api/SanPhamChiTiet/getbyproductcode?productCode={productCode}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<SanPhamChiTiet>();
+            }
+            else if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null; // Return null if not found
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Error calling API: {response.StatusCode}. Content: {content}");
+            }
+        }
     }
 }
 // Lớp SanPham

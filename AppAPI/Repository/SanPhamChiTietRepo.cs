@@ -181,5 +181,16 @@ namespace AppAPI.Repository
 
             return sanPhamChiTietDto;
         }
+
+        public async Task<SanPhamChiTiet> GetByProductCodeAsync(string productCode)
+        {
+            if (string.IsNullOrEmpty(productCode))
+            {
+                throw new ArgumentException("Product code cannot be null or empty.", nameof(productCode));
+            }
+
+            return await _context.sanPhamChiTiets
+                .FirstOrDefaultAsync(spct => spct.MaSp == productCode);
+        }
     }
 }

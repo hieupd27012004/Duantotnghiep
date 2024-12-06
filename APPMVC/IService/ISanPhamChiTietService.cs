@@ -16,6 +16,8 @@ namespace APPMVC.IService
         Task<SanPham> GetSanPhamByIdSanPhamChiTietAsync(Guid idSanPhamChiTiet);
 
         Task<SanPhamChiTiet> GetByIdHoaDonChiTietAsync(Guid id);
+        Task<SanPhamChiTiet> GetByProductCodeAsync(string productCode);
+
     }
 
 }

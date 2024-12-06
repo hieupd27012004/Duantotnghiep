@@ -95,6 +95,33 @@ namespace APPMVC.Service
 			return await response.Content.ReadFromJsonAsync<GioHangChiTiet>();
 		}
 
+        public async Task<GioHangChiTiet> GetByProductIdAndCartIdAsync(Guid sanPhamChiTietId, Guid cartId)
+        {
+            if (sanPhamChiTietId == Guid.Empty || cartId == Guid.Empty)
+            {
+                throw new ArgumentException("Invalid product ID or cart ID.");
+            }
+
+            var requestUrl = $"api/GioHangChiTiet/getbyproductidandcartid?sanPhamChiTietId={sanPhamChiTietId}&cartId={cartId}";
+
+            var response = await _httpClient.GetAsync(requestUrl);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return null; 
+                }
+
+                throw new Exception($"Error retrieving cart item: {response.ReasonPhrase}. Content: {content}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<GioHangChiTiet>()
+                   ?? throw new Exception("Failed to deserialize response to GioHangChiTiet.");
+        }
+
         public async Task<double> GetTotalQuantityBySanPhamChiTietIdAsync(Guid sanPhamChiTietId, Guid cartId)
         {
             var response = await _httpClient.GetAsync($"api/GioHangChiTiet/gettotalquantity?sanPhamChiTietId={sanPhamChiTietId}&cartId={cartId}");

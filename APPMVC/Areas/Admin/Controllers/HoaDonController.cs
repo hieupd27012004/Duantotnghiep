@@ -154,7 +154,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     if (giaDaGiam.HasValue && giaDaGiam < giaBan)
                     {
                         phanTramGiam = Math.Round(((giaBan - giaDaGiam.Value) / giaBan) * 100, 2);
-                        giaBan = giaDaGiam.Value;
+
                     }
 
                     sanPhamChiTiets.Add(new HoaDonChiTietViewModel.SanPhamChiTietViewModel
@@ -166,6 +166,7 @@ namespace APPMVC.Areas.Admin.Controllers
                         MauSac = mauSacTenList,
                         KichCo = kichCoTenList,
                         HinhAnhs = hinhAnhs,
+                        GiaDaGiam = giaDaGiam,
                         PhanTramGiam = phanTramGiam
                     });
                 }
