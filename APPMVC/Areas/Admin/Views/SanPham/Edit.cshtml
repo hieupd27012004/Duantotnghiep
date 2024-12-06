@@ -175,6 +175,7 @@
                                 <thead>
                                     <tr>
                                         <th>Chọn</th>
+                                        <th>Mã sản phẩm</th>
                                         <th>Hình ảnh</th>
                                         <th>Màu sắc</th>
                                         <th>Kích cỡ</th>
@@ -201,6 +202,9 @@
                                                 <input type="hidden"
                                                        name="SanPhamChiTietList[@Model.SanPhamChiTietList.IndexOf(chiTiet)].Chon"
                                                        value="false" />
+                                            </td>
+                                            <td>
+                                                <span>@chiTiet.MaSanPham</span>
                                             </td>
                                             <td>
                                                 <div class="hinh-anh-list">

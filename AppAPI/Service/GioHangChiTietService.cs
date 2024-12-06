@@ -64,5 +64,10 @@ namespace AppAPI.Service
             var totalQuantity = await _repository.GetTotalQuantityBySanPhamChiTietIdAsync(sanPhamChiTietId, cartId);
             return totalQuantity;
         }
+
+        public async Task<GioHangChiTiet> GetByProductIdAndCartIdAsync(Guid sanPhamChiTietId, Guid cartId)
+        {
+            return await _repository.GetByProductIdAndCartIdAsync(sanPhamChiTietId, cartId);
+        }
     }
 }

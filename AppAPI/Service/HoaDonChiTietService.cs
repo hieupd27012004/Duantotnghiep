@@ -1,5 +1,6 @@
 ﻿using AppAPI.IRepository;
 using AppAPI.IService;
+using AppAPI.Repository;
 using AppData.Model;
 
 namespace AppAPI.Service
@@ -46,6 +47,11 @@ namespace AppAPI.Service
         {
             var totalQuantity = await _hoaDonChiTietRepository.GetTotalQuantityBySanPhamChiTietIdAsync(sanPhamChiTietId, hDCTId);
             return totalQuantity;
+        }
+
+        public async Task<HoaDonChiTiet> GetByIdAndProduct(Guid idHoaDon, Guid idSanPhamChiTiet)
+        {
+            return await _hoaDonChiTietRepository.GetByIdAndProduct(idHoaDon, idSanPhamChiTiet);
         }
     }
 }

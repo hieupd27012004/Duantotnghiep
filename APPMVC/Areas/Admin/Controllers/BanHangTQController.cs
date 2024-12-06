@@ -253,13 +253,13 @@ namespace APPMVC.Areas.Admin.Controllers
                     if (giaDaGiam.HasValue && giaDaGiam < gia)
                     {
                         phanTramGiam = Math.Round(((gia - giaDaGiam.Value) / gia) * 100, 2); 
-                        gia = giaDaGiam.Value; 
                     }
 
 
                     sanPhamChiTiets.Add(new HoaDonChiTietViewModel.SanPhamChiTietViewModel
                     {
                         IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
+                        MaSanPham = sanPhamCT.MaSp,
                         Quantity = hoaDonChiTiet.SoLuong,
                         Price = gia,
                         ProductName = sanPham?.TenSanPham,
@@ -323,12 +323,12 @@ namespace APPMVC.Areas.Admin.Controllers
                         if (giaDaGiam.HasValue && giaDaGiam < gia)
                         {
                             phanTramGiam = Math.Round(((gia - giaDaGiam.Value) / gia) * 100, 2);
-                            gia = giaDaGiam.Value;
                         }
 
                         sanPhamChiTietViewModels.Add(new SanPhamChiTietViewModel
                         {
                             IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
+                            MaSanPham = sanPhamCT.MaSp,
                             Quantity = sanPhamCT.SoLuong,
                             Price = gia,
                             ProductName = sanPham?.TenSanPham,
@@ -368,7 +368,6 @@ namespace APPMVC.Areas.Admin.Controllers
                     return Json(new { success = false, message = "Sản phẩm không tồn tại." });
                 }
 
-
                 var giaDaGiam = sanPhamChiTiet.GiaGiam;
                 var gia = sanPhamChiTiet.Gia;
 
@@ -383,6 +382,27 @@ namespace APPMVC.Areas.Admin.Controllers
                     return Json(new { success = false, message = "Số lượng phải lớn hơn 0." });
                 }
 
+                var existingChiTiet = await _hoaDonChiTietService.GetByIdAndProduct(IdHoaDon, IdSanPhamChiTiet);
+                if (existingChiTiet != null)
+                {
+                    double newQuantity = existingChiTiet.SoLuong + requestedQuantity;
+
+                    if (newQuantity > sanPhamChiTiet.SoLuong)
+                    {
+                        return Json(new { success = false, message = "Số lượng yêu cầu vượt quá số lượng có sẵn." });
+                    }
+
+                    existingChiTiet.SoLuong = newQuantity;
+                    existingChiTiet.TongTien = existingChiTiet.DonGia * newQuantity;
+
+                    // Wrap existingChiTiet in a list before passing it to UpdateAsync
+                    await _hoaDonChiTietService.UpdateAsync(new List<HoaDonChiTiet> { existingChiTiet });
+
+                    var updatedProductList = await GetSanPhamChiTietList(IdHoaDon);
+                    return Json(new { success = true, message = "Cập nhật số lượng sản phẩm thành công.", html = updatedProductList });
+                }
+
+                // If not found, create a new entry
                 if (requestedQuantity > sanPhamChiTiet.SoLuong)
                 {
                     return Json(new { success = false, message = "Số lượng yêu cầu vượt quá số lượng có sẵn." });
@@ -399,11 +419,10 @@ namespace APPMVC.Areas.Admin.Controllers
                     KichHoat = 1
                 };
 
-
                 await _hoaDonChiTietService.AddAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
 
-                var updatedProductList = await GetSanPhamChiTietList(IdHoaDon);
-                return Json(new { success = true, message = "Thêm sản phẩm thành công.", html = updatedProductList });
+                var updatedProductListAfterAdd = await GetSanPhamChiTietList(IdHoaDon);
+                return Json(new { success = true, message = "Thêm sản phẩm thành công.", html = updatedProductListAfterAdd });
             }
             catch (Exception ex)
             {

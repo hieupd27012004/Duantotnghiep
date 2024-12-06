@@ -91,7 +91,6 @@ namespace APPMVC.Areas.Client.Controllers
                     IdSanPham = sanPham.IdSanPham,
                     TenSanPham = sanPham.TenSanPham,
                     SoLuongMau = colorImages.Count,
-                    // Sử dụng giá đã giảm nếu có
                     GiaThapNhat = sanPhamChiTietList.Min(x => x.GiaGiam ?? x.Gia), 
                     GiaCaoNhat = sanPhamChiTietList.Max(x => x.GiaGiam ?? x.Gia), 
                     RepresentativeImage = representativeImage,
@@ -231,14 +230,13 @@ namespace APPMVC.Areas.Client.Controllers
                     return NotFound(new { message = "Shopping cart not found for this customer." });
                 }
 
-                // Fetch product details
                 var sanPhamChiTiet = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(productId, sizeId, colorId);
                 if (sanPhamChiTiet == null)
                 {
                     return Json(new { success = false, message = "Product not found" });
                 }
 
-                int requestedQuantity = 1;
+                int requestedQuantity = 1; 
                 if (requestedQuantity <= 0)
                 {
                     return Json(new { success = false, message = "Quantity must be greater than zero." });
@@ -247,6 +245,24 @@ namespace APPMVC.Areas.Client.Controllers
                 if (requestedQuantity > sanPhamChiTiet.SoLuong)
                 {
                     return Json(new { success = false, message = "Insufficient quantity available." });
+                }
+
+                var existingItem = await _gioHangChiTietService.GetByProductIdAndCartIdAsync(sanPhamChiTiet.IdSanPhamChiTiet, idGioHang);
+                if (existingItem != null)
+                {
+
+                    double newQuantity = existingItem.SoLuong + requestedQuantity;
+
+                    if (newQuantity > sanPhamChiTiet.SoLuong)
+                    {
+                        return Json(new { success = false, message = "Total quantity exceeds available stock." });
+                    }
+
+                    existingItem.SoLuong = newQuantity;
+                    existingItem.TongTien = existingItem.DonGia * newQuantity;
+
+                    await _gioHangChiTietService.UpdateAsync(existingItem); 
+                    return Ok(new { message = "Item quantity updated in cart successfully", existingItem });
                 }
 
                 var donGia = sanPhamChiTiet.GiaGiam ?? sanPhamChiTiet.Gia;
