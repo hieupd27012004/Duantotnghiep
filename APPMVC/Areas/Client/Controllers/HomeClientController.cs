@@ -116,17 +116,26 @@ namespace APPMVC.Areas.Client.Controllers
                     {
                         var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
 
+                        // Calculate total quantity in cart for the specific product
                         double totalQuantityInCart = await _gioHangChiTietService.GetTotalQuantityBySanPhamChiTietIdAsync(item.IdSanPhamChiTiet, item.IdGioHang);
 
+                        // Calculate available stock
                         double availableStock = sanPhamChiTiet.SoLuong + item.SoLuong - totalQuantityInCart;
 
+                        // Check if requested quantity exceeds available stock
                         if (model.Quantity > availableStock)
                         {
-                            return Json(new { success = false, message = $"Requested quantity exceeds available stock for" });
+                            return Json(new
+                            {
+                                success = false,
+                                message = $"Số lượng yêu cầu vượt quá số lượng có sẵn cho sản phẩm " +
+                                           $"Số lượng có sẵn: {availableStock}, Số lượng yêu cầu: {model.Quantity}"
+                            });
                         }
 
+                        // Update item quantity and total price
                         item.SoLuong = model.Quantity;
-                        item.TongTien = model.TongTien; 
+                        item.TongTien = model.TongTien;
                         await _gioHangChiTietService.UpdateAsync(item);
                     }
                 }
@@ -137,12 +146,14 @@ namespace APPMVC.Areas.Client.Controllers
         [HttpGet]
         public async Task<IActionResult> Checkout(List<Guid> selectedItems)
         {
-            // Kiểm tra xem danh sách selectedItems có null hoặc rỗng không
             if (selectedItems == null || !selectedItems.Any())
             {
                 TempData["ErrorMessage"] = "Vui lòng chọn ít nhất một sản phẩm để thanh toán.";
                 return RedirectToAction("Index"); // Trở về trang giỏ hàng nếu không có sản phẩm nào được chọn
             }
+
+            // Lưu selectedItems vào session
+            HttpContext.Session.SetObject("SelectedItems", selectedItems);
 
             var (cartItems, thanhToanViewModel) = await GetCartItemsWithAddress(selectedItems);
 
@@ -236,17 +247,25 @@ namespace APPMVC.Areas.Client.Controllers
         [HttpPost]
         public async Task<IActionResult> ProcessCheckout(ThanhToanViewModel model)
         {
-            // Lấy danh sách sản phẩm đã chọn từ session (nếu có)
+            // Lấy selectedItems từ session
             var selectedItems = HttpContext.Session.GetObject<List<Guid>>("SelectedItems");
+
+            // Kiểm tra xem selectedItems có hợp lệ không
+            if (selectedItems == null || !selectedItems.Any())
+            {
+                ModelState.AddModelError("", "Không có sản phẩm nào được chọn. Vui lòng quay lại giỏ hàng.");
+                return View("Checkout", model); // Quay lại trang Checkout
+            }
+
             var (cartItems, thanhToanViewModel) = await GetCartItemsWithAddress(selectedItems);
 
+            // Kiểm tra xem thanhToanViewModel có hợp lệ không
             if (thanhToanViewModel == null || !ModelState.IsValid)
             {
                 return View("Checkout", thanhToanViewModel);
             }
 
             model.CartItems = cartItems;
-
             var customerIdString = HttpContext.Session.GetString("IdKhachHang");
             if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
             {
@@ -258,7 +277,6 @@ namespace APPMVC.Areas.Client.Controllers
 
             if (model.PaymentMethod == "cash_on_delivery")
             {
-                // Lưu hóa đơn cho COD
                 var result = await SaveOrder(cartItems, thanhToanViewModel, customerId, "Thanh Toán COD", "Tiền Mặt", "Chờ Thanh Toán");
                 if (result)
                 {
@@ -267,7 +285,6 @@ namespace APPMVC.Areas.Client.Controllers
             }
             else if (model.PaymentMethod == "online_payment")
             {
-                // Tạo URL thanh toán VNPay
                 var vnPay = new PaymentInformationModel()
                 {
                     Amount = totalHoaDon,
@@ -278,15 +295,18 @@ namespace APPMVC.Areas.Client.Controllers
                 };
 
                 string paymentUrl = _vnPayService.CreatePaymentUrl(vnPay, HttpContext);
-                HttpContext.Session.SetString("TemporaryOrderId", vnPay.OrderId.ToString()); // Lưu mã tạm vào session
-                HttpContext.Session.SetObject("CartItems", cartItems); // Lưu giỏ hàng tạm thời
-                HttpContext.Session.SetObject("ThanhToanViewModel", thanhToanViewModel); // Lưu thông tin tạm thời
+
+                // Lưu thông tin tạm thời vào session
+                HttpContext.Session.SetString("TemporaryOrderId", vnPay.OrderId.ToString());
+                HttpContext.Session.SetObject("CartItems", cartItems);
+                HttpContext.Session.SetObject("ThanhToanViewModel", thanhToanViewModel);
 
                 return Redirect(paymentUrl);
             }
 
             return View("Checkout", thanhToanViewModel);
         }
+
 
         // VnPay
         [HttpGet]
@@ -316,6 +336,7 @@ namespace APPMVC.Areas.Client.Controllers
 
             return RedirectToAction("Checkout", new { message = "Thanh toán thất bại!" });
         }
+
 
 
         #endregion

@@ -139,7 +139,13 @@
                         <td>
                             <div class="quantity-container">
                                 <button class="btn btn-outline-secondary decrease" type="button" aria-label="Decrease Quantity" data-id="@sanPham.IdSanPhamChiTiet">−</button>
-                                <input type="number" name="quantities[@sanPham.IdSanPhamChiTiet]" class="form-control quantity-amount" value="@sanPham.Quantity" min="1" aria-label="Quantity" data-id="@sanPham.IdSanPhamChiTiet" />
+                                <input type="number" name="quantities[@sanPham.IdSanPhamChiTiet]"
+                                       class="form-control quantity-amount"
+                                       value="@sanPham.Quantity"
+                                       min="1"
+                                       aria-label="Quantity"
+                                       data-id="@sanPham.IdSanPhamChiTiet"
+                                       data-original-quantity="@sanPham.Quantity" />
                                 <button class="btn btn-outline-secondary increase" type="button" aria-label="Increase Quantity" data-id="@sanPham.IdSanPhamChiTiet">+</button>
                             </div>
                         </td>

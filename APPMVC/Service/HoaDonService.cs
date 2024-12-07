@@ -72,6 +72,21 @@ namespace APPMVC.Service
             }
         }
 
+        public async Task<List<HoaDon>> GetHoaDonsByCustomerIdAsync(Guid customerId)
+        {
+            var response = await _httpClient.GetAsync($"api/HoaDon/getbycustomerid?customerId={customerId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<List<HoaDon>>() ?? new List<HoaDon>();
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error retrieving HoaDons by customer ID: {content}");
+                return new List<HoaDon>(); 
+            }
+        }
 
         public async Task UpdateAsync(HoaDon hoaDon)
         {

@@ -11,5 +11,7 @@ namespace APPMVC.IService
         Task DeleteAsync(Guid id);
 
         Task<HoaDon> GetByOrderNumberAsync(string orderNumber);
+
+        Task<List<HoaDon>> GetHoaDonsByCustomerIdAsync(Guid customerId);
     }
 }

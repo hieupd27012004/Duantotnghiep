@@ -241,7 +241,9 @@
     }
 
     function handleIncrease() {
+        const input = this.closest('.input-group').querySelector('.quantity-amount');
         updateTotal();
+        updateCartQuantity(input);
     }
 
       function handleDecrease() {

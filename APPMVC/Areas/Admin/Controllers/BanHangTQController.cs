@@ -353,83 +353,6 @@ namespace APPMVC.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateSanPhamChiTiet(Guid IdSanPhamChiTiet, Guid IdHoaDon)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var sanPhamChiTiet = await _sanPhamCTService.GetSanPhamChiTietById(IdSanPhamChiTiet);
-                if (sanPhamChiTiet == null)
-                {
-                    return Json(new { success = false, message = "Sản phẩm không tồn tại." });
-                }
-
-                var giaDaGiam = sanPhamChiTiet.GiaGiam;
-                var gia = sanPhamChiTiet.Gia;
-
-                if (giaDaGiam.HasValue && giaDaGiam < gia)
-                {
-                    gia = giaDaGiam.Value;
-                }
-
-                int requestedQuantity = 1; 
-                if (requestedQuantity <= 0)
-                {
-                    return Json(new { success = false, message = "Số lượng phải lớn hơn 0." });
-                }
-
-                var existingChiTiet = await _hoaDonChiTietService.GetByIdAndProduct(IdHoaDon, IdSanPhamChiTiet);
-                if (existingChiTiet != null)
-                {
-                    double newQuantity = existingChiTiet.SoLuong + requestedQuantity;
-
-                    if (newQuantity > sanPhamChiTiet.SoLuong)
-                    {
-                        return Json(new { success = false, message = "Số lượng yêu cầu vượt quá số lượng có sẵn." });
-                    }
-
-                    existingChiTiet.SoLuong = newQuantity;
-                    existingChiTiet.TongTien = existingChiTiet.DonGia * newQuantity;
-
-                    // Wrap existingChiTiet in a list before passing it to UpdateAsync
-                    await _hoaDonChiTietService.UpdateAsync(new List<HoaDonChiTiet> { existingChiTiet });
-
-                    var updatedProductList = await GetSanPhamChiTietList(IdHoaDon);
-                    return Json(new { success = true, message = "Cập nhật số lượng sản phẩm thành công.", html = updatedProductList });
-                }
-
-                // If not found, create a new entry
-                if (requestedQuantity > sanPhamChiTiet.SoLuong)
-                {
-                    return Json(new { success = false, message = "Số lượng yêu cầu vượt quá số lượng có sẵn." });
-                }
-
-                var hoaDonChiTiet = new HoaDonChiTiet
-                {
-                    IdHoaDonChiTiet = Guid.NewGuid(),
-                    IdHoaDon = IdHoaDon,
-                    IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
-                    DonGia = gia,
-                    SoLuong = requestedQuantity,
-                    TongTien = gia * requestedQuantity,
-                    KichHoat = 1
-                };
-
-                await _hoaDonChiTietService.AddAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
-
-                var updatedProductListAfterAdd = await GetSanPhamChiTietList(IdHoaDon);
-                return Json(new { success = true, message = "Thêm sản phẩm thành công.", html = updatedProductListAfterAdd });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error in CreateSanPhamChiTiet: {ex.Message}");
-                return StatusCode(500, new { message = "Đã xảy ra lỗi khi thêm sản phẩm vào hóa đơn." });
-            }
-        }
         [HttpPost]
         public async Task<IActionResult> UpdateInvoiceDetails([FromBody] HoaDonChiTietViewModel model)
         {
@@ -445,14 +368,15 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(model.IdHoaDon);
+            var originalQuantities = new Dictionary<Guid, double>(); // Store original quantities
 
             foreach (var item in hoaDonChiTietList)
             {
                 var updatedItem = model.SanPhamChiTiets.FirstOrDefault(x => x.IdSanPhamChiTiet == item.IdSanPhamChiTiet);
                 if (updatedItem != null)
                 {
-                    var originalQuantity = item.SoLuong;
-                    item.SoLuong = updatedItem.Quantity;
+                    // Store original quantity before change
+                    originalQuantities[item.IdSanPhamChiTiet] = item.SoLuong;
 
                     var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
                     if (sanPhamCT == null)
@@ -460,19 +384,25 @@ namespace APPMVC.Areas.Admin.Controllers
                         return Json(new { success = false, message = "Chi tiết sản phẩm không tồn tại." });
                     }
 
-                    double quantityChange = item.SoLuong - originalQuantity;
+                    // Check available quantity
+                    var availableQuantity = sanPhamCT.SoLuong;
+                    if (updatedItem.Quantity > availableQuantity)
+                    {
+                        // Revert to original quantity
+                        item.SoLuong = originalQuantities[item.IdSanPhamChiTiet];
+                        await _hoaDonChiTietService.UpdateAsync(hoaDonChiTietList);
 
+                        return Json(new { success = false, message = $"Số lượng không được vượt quá {availableQuantity} cho sản phẩm ID {item.IdSanPhamChiTiet}." });
+                    }
+
+                    item.SoLuong = updatedItem.Quantity;
                     item.TongTien = item.SoLuong * sanPhamCT.Gia;
-
-                    await _sanPhamCTService.Update(sanPhamCT);
                 }
             }
 
             await _hoaDonChiTietService.UpdateAsync(hoaDonChiTietList);
-
             return Json(new { success = true });
         }
-
         [HttpPost]
         public async Task<IActionResult> XacNhanThanhToan(Guid idHoaDon, Guid? idKhachHang)
         {

@@ -106,7 +106,6 @@
                     toggleAmountGiven();
                     loadSanPhamChiTiet(idHoaDon);
                     bindQuantityButtons(idHoaDon);
-                    updateInvoiceAndStock(idHoaDon);
                 })
                 .fail(function() {
                     alert("Không thể tải chi tiết hóa đơn.");
@@ -125,10 +124,12 @@
                 });
         }
 
-        function bindQuantityButtons(idHoaDon) {
+                   function bindQuantityButtons(idHoaDon) {
             const decreaseButtons = document.querySelectorAll('.decrease');
             const increaseButtons = document.querySelectorAll('.increase');
+            const quantityInputs = document.querySelectorAll('.quantity-amount');
 
+            // Bind click events to increase and decrease buttons
             decreaseButtons.forEach(button => {
                 button.addEventListener('click', function () {
                     const input = this.nextElementSibling;
@@ -150,58 +151,71 @@
                     updateInvoiceAndStock(idHoaDon);
                 });
             });
+
+            // Add input validation for quantity inputs
+            quantityInputs.forEach(input => {
+                let originalValue = parseInt(input.value); // Store original value
+
+                input.addEventListener('input', function () {
+                    const value = parseInt(this.value);
+                    if (isNaN(value) || value < 1) {
+                        this.value = originalValue;
+                        alert("Số lượng phải là một số dương và lớn hơn 0.");
+
+                    } else {
+                        // Update the original value if input is valid
+                        originalValue = value;
+                        // Call the update function with the current idHoaDon
+                        updateInvoiceAndStock(idHoaDon);
+                    }
+                });
+            });
         }
 
-        function updateInvoiceAndStock(idHoaDon) {
-            console.log("IdHoaDon in updateInvoiceAndStock:", idHoaDon);
 
-            if (!idHoaDon) {
-                console.error("IdHoaDon is not set correctly.");
-                return;
-            }
+               async function updateInvoiceAndStock(idHoaDon) {
+            console.log("Updating invoice for IdHoaDon:", idHoaDon);
+            const sanPhamChiTiets = Array.from(document.querySelectorAll('.quantity-amount'))
+                .map(input => ({
+                    IdSanPhamChiTiet: input.getAttribute('data-id'),
+                    Quantity: parseInt(input.value),
+                    OriginalQuantity: parseInt(input.getAttribute('data-original-quantity')) // Store original quantity
+                }))
+                .filter(item => item.Quantity > 0);
 
-            const sanPhamChiTiets = [];
-            document.querySelectorAll('.quantity-amount').forEach(input => {
-                const hoaDonChiTietId = input.getAttribute('data-id');
-                const quantity = parseInt(input.value);
-                if (quantity > 0) {
-                    sanPhamChiTiets.push({
-                        IdSanPhamChiTiet: hoaDonChiTietId,
-                        Quantity: quantity
-                    });
-                }
-            });
-
-            const model = {
-                IdHoaDon: idHoaDon,
-                SanPhamChiTiets: sanPhamChiTiets,
-            };
-
+            const model = { IdHoaDon: idHoaDon, SanPhamChiTiets: sanPhamChiTiets };
             console.log("Model being sent:", JSON.stringify(model));
 
-            fetch('/Admin/BanHangTQ/UpdateInvoiceDetails', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(model)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
+            try {
+                const response = await fetch('/Admin/BanHangTQ/UpdateInvoiceDetails', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(model)
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const data = await response.json();
+                console.log('Update response:', data);
                 if (data.success) {
-                    console.log('Cập nhật hóa đơn và số lượng thành công!');
+                    console.log('Update successful!');
+                    viewInvoiceDetail(document.querySelector(`.product-item[data-idhoadon="${idHoaDon}"]`));
                 } else {
-                    console.error('Cập nhật thất bại:', data.message);
-                    alert("Cập nhật thất bại. Vui lòng thử lại.");
+                    console.error('Update failed:', data.message);
+
+                    // If update failed, revert quantities in the UI
+                    sanPhamChiTiets.forEach(item => {
+                        const input = document.querySelector(`.quantity-amount[data-id="${item.IdSanPhamChiTiet}"]`);
+                        if (input) {
+                            input.value = item.OriginalQuantity; // Revert to original quantity
+                        }
+                    });
                 }
-            })
-            .catch(error => console.error('Lỗi:', error));
+            } catch (error) {
+                console.error('Error:', error);
+            }
         }
+
 
         function toggleAmountGiven() {
             const cashSelected = document.querySelector('input[name="paymentMethod"]:checked').value === 'cash';
