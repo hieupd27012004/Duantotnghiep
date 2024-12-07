@@ -50,5 +50,10 @@ namespace AppAPI.Service
         {
             return await _hoaDonRepository.GetByOrderNumberAsync(orderNumber);
         }
+
+        public async Task<List<HoaDon>> GetHoaDonsByCustomerIdAsync(Guid customerId)
+        {
+            return await _hoaDonRepository.GetHoaDonsByCustomerIdAsync(customerId);
+        }
     }
 }
