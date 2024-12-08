@@ -136,5 +136,10 @@ namespace AppAPI.Repository
                 .Where(hoaDon => hoaDon.IdKhachHang == customerId)
                 .ToListAsync();
         }
+
+        public async Task<HoaDon> GetByMaDonAsync(string maDon)
+        {
+            return await _context.hoaDons.FirstOrDefaultAsync(h => h.MaDon == maDon);
+        }
     }
 }

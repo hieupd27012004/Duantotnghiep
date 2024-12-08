@@ -139,5 +139,22 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("getbymadan")]
+        public async Task<IActionResult> GetByMaDon(string maDon)
+        {
+            try
+            {
+                var hoaDon = await _service.GetByMaDonAsync(maDon);
+                if (hoaDon == null)
+                {
+                    return NotFound($"Hóa đơn với mã đơn {maDon} không được tìm thấy.");
+                }
+                return Ok(hoaDon);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi máy chủ nội bộ: {ex.Message}");
+            }
+        }
     }
 }

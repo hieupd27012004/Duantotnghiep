@@ -137,7 +137,7 @@
                                 </td>
                                 <td class="total-price" data-item-total="@itemTotal">@FormatCurrency(itemTotal)</td>
                                 <td>
-                                    <button type="button" formaction="/Cart/Remove/@item.IdGioHangChiTiet" class="btn btn-black btn-sm">X</button>
+                                    <button type="button" class="btn btn-black btn-sm btn-remove">X</button>
                                 </td>
                             </tr>
                         }
@@ -208,6 +208,34 @@
 </div>
 
 <script>
+        document.querySelectorAll('.btn-remove').forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+            const row = this.closest('tr');
+            const id = row.querySelector('td').textContent.trim();
+
+            // Show confirmation dialog
+            const confirmDelete = confirm("Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?");
+            if (confirmDelete) {
+                fetch(`/Client/HomeClient/Remove`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ idGioHangChiTiet: id })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        row.remove(); // Remove the item from the UI
+                        updateTotal(); // Update totals after removal
+                    } else {
+                        alert('Failed to remove item.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    });
     let previousQuantities = {};
 
     function initializeQuantityButtons() {

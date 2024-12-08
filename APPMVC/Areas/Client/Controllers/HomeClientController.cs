@@ -105,6 +105,13 @@ namespace APPMVC.Areas.Client.Controllers
             return View(viewModel);
         }
         [HttpPost]
+        public async Task<IActionResult> Remove(Guid idGioHangChiTiet)
+        {
+            await _gioHangChiTietService.DeleteAsync(idGioHangChiTiet); 
+
+            return RedirectToAction("Card");
+        }
+        [HttpPost]
         public async Task<IActionResult> UpdateQuantity([FromBody] List<UpdateQuantityViewModel>? models)
         {
             if (ModelState.IsValid && models != null)
