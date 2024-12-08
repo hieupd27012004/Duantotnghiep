@@ -172,7 +172,79 @@ namespace APPMVC.Areas.Admin.Controllers
 
             return View("Index");
         }
+        [HttpGet]
+        public IActionResult ThemKhachHang()
+        {
+            return PartialView("ThemKhachHang"); 
+        }
+        [HttpPost]
+        public async Task<IActionResult> ThemKhachHang(HoaDonChiTietViewModel.KhachHangViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return PartialView("ThemKhachHang", model);
+            }
 
+            var khachHang = new KhachHang
+            {
+                IdKhachHang = Guid.NewGuid(),
+                HoTen = model.HoTen,
+                SoDienThoai = model.SoDienThoai,
+                Email = model.Email,
+                NgayTao = DateTime.Now,
+                NgayCapNhat = DateTime.Now,
+                KichHoat = 1
+            };
+
+            try
+            {
+                await _khachHangService.AddKhachHang(khachHang);
+                return RedirectToAction("Index"); 
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Đã xảy ra lỗi khi thêm khách hàng. Vui lòng thử lại.");
+                Console.WriteLine(ex.Message);
+            }
+
+            return PartialView("ThemKhachHang", model);
+        }
+        [HttpPost]
+        public async Task<IActionResult> XoaHoaDon(Guid idHoaDon)
+        {
+            try
+            {
+                var hoaDon = await _hoaDonService.GetByIdAsync(idHoaDon);
+                if (hoaDon == null)
+                {
+                    return NotFound();
+                }
+
+                await _hoaDonService.DeleteAsync(idHoaDon);
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Đã xảy ra lỗi khi xóa đơn hàng. Vui lòng thử lại.");
+                Console.WriteLine(ex.Message);
+                return RedirectToAction("Index");
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> XoaSanPhamChiTiet(Guid idSanPhamChiTiet)
+        {
+            try
+            {
+                await _hoaDonChiTietService.DeleteAsync(idSanPhamChiTiet);
+                return RedirectToAction("Index"); // Hoặc trang mà bạn muốn chuyển hướng
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Đã xảy ra lỗi khi xóa sản phẩm. Vui lòng thử lại.");
+                Console.WriteLine(ex.Message);
+                return RedirectToAction("Index");
+            }
+        }
         private async Task<string> GenerateOrderNumberAsync()
         {
             var lastOrderNumber = await GetLastOrderNumberAsync();
@@ -353,6 +425,84 @@ namespace APPMVC.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> CreateSanPhamChiTiet(Guid IdSanPhamChiTiet, Guid IdHoaDon)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var sanPhamChiTiet = await _sanPhamCTService.GetSanPhamChiTietById(IdSanPhamChiTiet);
+                if (sanPhamChiTiet == null)
+                {
+                    return Json(new { success = false, message = "Sản phẩm không tồn tại." });
+                }
+
+                var giaDaGiam = sanPhamChiTiet.GiaGiam;
+                var gia = sanPhamChiTiet.Gia;
+
+                if (giaDaGiam.HasValue && giaDaGiam < gia)
+                {
+                    gia = giaDaGiam.Value;
+                }
+
+                int requestedQuantity = 1;
+                if (requestedQuantity <= 0)
+                {
+                    return Json(new { success = false, message = "Số lượng phải lớn hơn 0." });
+                }
+
+                var existingChiTiet = await _hoaDonChiTietService.GetByIdAndProduct(IdHoaDon, IdSanPhamChiTiet);
+                if (existingChiTiet != null)
+                {
+                    double newQuantity = existingChiTiet.SoLuong + requestedQuantity;
+
+                    if (newQuantity > sanPhamChiTiet.SoLuong)
+                    {
+                        return Json(new { success = false, message = "Số lượng yêu cầu vượt quá số lượng có sẵn." });
+                    }
+
+                    existingChiTiet.SoLuong = newQuantity;
+                    existingChiTiet.TongTien = existingChiTiet.DonGia * newQuantity;
+
+
+                    await _hoaDonChiTietService.UpdateAsync(new List<HoaDonChiTiet> { existingChiTiet });
+
+                    var updatedProductList = await GetSanPhamChiTietList(IdHoaDon);
+                    return Json(new { success = true, message = "Cập nhật số lượng sản phẩm thành công.", html = updatedProductList });
+                }
+
+                // If not found, create a new entry
+                if (requestedQuantity > sanPhamChiTiet.SoLuong)
+                {
+                    return Json(new { success = false, message = "Số lượng yêu cầu vượt quá số lượng có sẵn." });
+                }
+
+                var hoaDonChiTiet = new HoaDonChiTiet
+                {
+                    IdHoaDonChiTiet = Guid.NewGuid(),
+                    IdHoaDon = IdHoaDon,
+                    IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+                    DonGia = gia,
+                    SoLuong = requestedQuantity,
+                    TongTien = gia * requestedQuantity,
+                    KichHoat = 1
+                };
+
+                await _hoaDonChiTietService.AddAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
+
+                var updatedProductListAfterAdd = await GetSanPhamChiTietList(IdHoaDon);
+                return Json(new { success = true, message = "Thêm sản phẩm thành công.", html = updatedProductListAfterAdd });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in CreateSanPhamChiTiet: {ex.Message}");
+                return StatusCode(500, new { message = "Đã xảy ra lỗi khi thêm sản phẩm vào hóa đơn." });
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> UpdateInvoiceDetails([FromBody] HoaDonChiTietViewModel model)
         {
@@ -805,7 +955,6 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> SearchCustomer(string search, Guid IdHoadon)
         {
-            // Validate the search input
             if (string.IsNullOrWhiteSpace(search))
             {
                 return BadRequest("Invalid search criteria.");
@@ -818,90 +967,14 @@ namespace APPMVC.Areas.Admin.Controllers
                 {
                     customerName = (string)null,
                     idKhachHang = (Guid?)null,
-                    nguoiNhan = (string)null,
-                    soDienThoai = (string)null,
-                    provinceName = (string)null,
-                    districtName = (string)null,
-                    wardName = (string)null,
-                    moTa = (string)null,
-                    idHoaDon = (Guid?)null,
-                    phiVanChuyen = 0.0
+                    idHoaDon = IdHoadon
                 });
             }
-
-            // Retrieve the default address for the customer
-            var diaChiKhachHang = await _services.GetDefaultAddressByCustomerIdAsync(customer.IdKhachHang);
-            double phiVanChuyen = 0.0;
-
-            // Retrieve invoice details based on IdHoadon
-            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(IdHoadon);
-            if (hoaDonChiTietList == null || !hoaDonChiTietList.Any())
-            {
-                return NotFound(new { message = "No invoice details found." });
-            }
-
-            // Define shipping parameters
-            double totalWeight = 0.0;
-            int fromDistrictId = 3440; // Adjust accordingly
-            string fromWardCode = "13005"; // Adjust accordingly
-            double height = 50; // Item height in cm
-            double length = 20; // Item length in cm
-            double width = 20; // Item width in cm
-            int serviceTypeId = 2; // Shipping service type
-
-            // Calculate the shipping fee
-            try
-            {
-                foreach (var hoaDonChiTiet in hoaDonChiTietList)
-                {
-                    var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
-                    if (sanPhamCT != null)
-                    {
-                        // Calculate the total weight for shipping
-                        totalWeight += hoaDonChiTiet.SoLuong * 200; // Assuming weight per item is 200 grams
-
-                        // Calculate the shipping fee if the destination address is available
-                        if (diaChiKhachHang != null)
-                        {
-                            int toDistrictId = diaChiKhachHang.DistrictId;
-                            string toWardCode = diaChiKhachHang.WardId;
-
-                            phiVanChuyen += await _giaoHangNhanhService.CalculateShippingFee(
-                                fromDistrictId,
-                                fromWardCode,
-                                toDistrictId,
-                                toWardCode,
-                                height,
-                                length,
-                                hoaDonChiTiet.SoLuong * 200, // Total weight for this item
-                                width,
-                                serviceTypeId,
-                                sanPhamCT?.NguoiTao ?? "Unknown Product",
-                                (int)hoaDonChiTiet.SoLuong
-                            );
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error calculating shipping fee: {ex.Message}");
-                phiVanChuyen = 0.0; 
-            }
-
-            // Return the customer and calculated shipping fee
             return Ok(new
             {
                 customerName = customer.HoTen,
                 idKhachHang = customer.IdKhachHang,
-                nguoiNhan = diaChiKhachHang?.HoTen,
-                soDienThoai = diaChiKhachHang?.SoDienThoai,
-                provinceName = diaChiKhachHang?.ProvinceName,
-                districtName = diaChiKhachHang?.DistrictName,
-                wardName = diaChiKhachHang?.WardName,
-                moTa = diaChiKhachHang?.MoTa,
-                idHoaDon = IdHoadon,
-                phiVanChuyen
+                idHoaDon = IdHoadon
             });
         }
     }

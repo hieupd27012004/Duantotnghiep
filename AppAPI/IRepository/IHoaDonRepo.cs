@@ -11,5 +11,7 @@ namespace AppAPI.IRepository
         Task DeleteAsync(Guid id);
         Task<HoaDon> GetByOrderNumberAsync(string orderNumber);
         Task<List<HoaDon>> GetHoaDonsByCustomerIdAsync(Guid customerId);
+        Task<HoaDon> GetByMaDonAsync(string maDon);
+
     }
 }

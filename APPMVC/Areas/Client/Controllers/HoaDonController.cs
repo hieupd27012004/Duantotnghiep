@@ -53,7 +53,6 @@ namespace APPMVC.Areas.Client.Controllers
         [HttpGet]
         public async Task<ActionResult> Details(Guid id)
         {
-            // Lấy thông tin hóa đơn chi tiết dựa trên ID
             var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(id);
             if (hoaDonChiTietList == null || !hoaDonChiTietList.Any())
             {
@@ -110,7 +109,6 @@ namespace APPMVC.Areas.Client.Controllers
                 }
             }
 
-            // Tạo ViewModel cho chi tiết hóa đơn
             var viewModel = new HoaDonChiTietViewModel
             {
                 DonGia = hoaDon.TongTienDonHang,
@@ -156,6 +154,67 @@ namespace APPMVC.Areas.Client.Controllers
             };
 
             return View(viewModel); 
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetHoaDonDetails()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> GetHoaDonDetails(string maHoaDon)
+        {
+            if (string.IsNullOrEmpty(maHoaDon))
+            {
+                return BadRequest("Mã hóa đơn không được để trống.");
+            }
+
+            var hoaDon = await _hoaDonService.GetByMaDonAsync(maHoaDon);
+            if (hoaDon == null)
+            {
+                return NotFound("Không tìm thấy hóa đơn.");
+            }
+
+            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(hoaDon.IdHoaDon);
+            if (hoaDonChiTietList == null || !hoaDonChiTietList.Any())
+            {
+                return NotFound($"Không có hóa đơn chi tiết nào cho ID {hoaDon.IdHoaDon}.");
+            }
+
+            var lichSuHoaDons = await _lichSuHoaDonService.GetByIdHoaDonAsync(hoaDon.IdHoaDon);
+            var lichSuThanhToans = await _lichSuThanhToanService.GetByIdHoaDonAsync(hoaDon.IdHoaDon);
+
+            // Tạo ViewModel cho thông tin chi tiết
+            var detailViewModel = new HoaDonChiTietViewModel
+            {
+                DonGia = hoaDon.TongTienDonHang,
+                GiamGia = hoaDon.TienGiam,
+                PhiVanChuyen = Convert.ToDouble(hoaDon.TienShip),
+                TongTien = hoaDon.TongTienDonHang + Convert.ToDouble(hoaDon.TienShip),
+                HoaDon = new HoaDonViewModel
+                {
+                    IdHoaDon = hoaDon.IdHoaDon,
+                    MaDon = hoaDon.MaDon,
+                    KhachHang = hoaDon.NguoiNhan,
+                    TrangThai = hoaDon.TrangThai,
+                    SoDienThoaiNguoiNhan = hoaDon.SoDienThoaiNguoiNhan,
+                    LoaiHoaDon = hoaDon.LoaiHoaDon,
+                    DiaChiGiaoHang = hoaDon.DiaChiGiaoHang
+                },
+                LichSuHoaDons = lichSuHoaDons.Select(lichSu => new HoaDonChiTietViewModel.LichSuHoaDonViewModel
+                {
+                    IdLichSuHoaDon = lichSu.IdLichSuHoaDon,
+                    ThaoTac = lichSu.ThaoTac,
+                    NgayTao = lichSu.NgayTao,
+                    NguoiThaoTac = lichSu.NguoiThaoTac,
+                    TrangThai = lichSu.TrangThai,
+                    IdHoaDon = lichSu.IdHoaDon,
+                    GhiChu = lichSu.GhiChu,
+                }).ToList(),
+                SanPhamChiTiets = new List<HoaDonChiTietViewModel.SanPhamChiTietViewModel>()
+                // Thêm logic để lấy sản phẩm chi tiết nếu cần
+            };
+
+            return Json(detailViewModel);
         }
     }
 }
