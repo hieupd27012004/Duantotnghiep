@@ -125,5 +125,18 @@ namespace AppAPI.Service
                 return new List<KhachHang>();
             }
         }
+
+        public async Task<List<Voucher>> GetAvailableVouchersForCustomerAsync(Guid khachHangId)
+        {
+            try
+            {
+                return await _repository.GetAvailableVouchersForCustomerAsync(khachHangId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in GetAvailableVouchersForCustomerAsync: {ex.Message}");
+                return new List<Voucher>();
+            }
+        }
     }
 }

@@ -225,6 +225,57 @@
                                        value="@(Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.PhiVanChuyen)" readonly />
                             </div>
                         </div>
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h4 class="mb-0">Áp Dụng Voucher</h4>
+                            </div>
+                            <div class="card-body">
+                                @if (ViewBag.AvailableVouchers != null && ViewBag.AvailableVouchers.Count > 0)
+                                {
+                                    <div class="voucher-list">
+                                        @foreach (var voucher in ViewBag.AvailableVouchers)
+                                        {
+                                            <div class="voucher-item border mb-2 p-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input voucher-radio"
+                                                           type="radio"
+                                                           name="SelectedVoucher"
+                                                           id="voucher_@(voucher.VoucherId)"
+                                                           value="@voucher.VoucherId"
+                                                           data-type="@voucher.LoaiGiamGia"
+                                                           data-value="@voucher.GiaTriGiam"
+                                                           data-max-value="@(voucher.SoTienToiDa ?? 0)"
+                                                           data-min-order="@(voucher.GiaTriDonHangToiThieu ?? 0)">
+                                                    <label class="form-check-label w-100" for="voucher_@(voucher.VoucherId)">
+                                                        <div class="d-flex justify-content-between">
+                                                            <div>
+                                                                <strong>@voucher.MaVoucher</strong>
+                                                                <span>@voucher.MoTaVoucher</span>
+                                                            </div>
+                                                            <div>
+                                                                @if (voucher.LoaiGiamGia == 1) // Giảm theo %
+                                                                {
+                                                                    <span>Giảm @(voucher.GiaTriGiam)%</span>
+                                                                    @* Kiểm tra giá trị *@
+                                                                    @if (voucher.SoTienToiDa > 0)
+                                                                    {
+                                                                        <small class="d-block">Tối đa @(voucher.SoTienToiDa.ToString("N0"))đ</small>
+                                                                    }
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="text-muted">Không có voucher khả dụng</p>
+                                }
+                            </div>
+                        </div>
                     }
                     else
                     {
@@ -237,7 +288,6 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-   
     document.addEventListener("DOMContentLoaded", function() {
         const formatCurrency = (value) => {
             return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
@@ -305,5 +355,82 @@
             }
         });
     }
+    $(document).ready(function () {
+        // Xử lý chọn voucher
+        $('.voucher-radio').on('change', function () {
+            // Lấy thông tin voucher
+            var voucherId = $(this).val();
+            var voucherType = $(this).data('type');
+            var voucherValue = parseFloat($(this).data('value'));
+            var maxValue = parseFloat($(this).data('max-value'));
+            var minOrder = parseFloat($(this).data('min-order'));
 
+            // Debug log
+            console.log('Voucher Details:', {
+                voucherId: voucherId,
+                voucherType: voucherType,
+                voucherValue: voucherValue,
+                maxValue: maxValue,
+                minOrder: minOrder
+            });
+
+            // Lấy tổng tiền đơn hàng (loại bỏ định dạng tiền tệ)
+            var totalOrder = parseFloat($('#tong_so_tien').val().replace(/[^\d.-]/g, ''));
+            var shippingFee = parseFloat($('#phi_van_chuyen').val().replace(/[^\d.-]/g, ''));
+
+            // Debug log
+            console.log('Order Total:', totalOrder);
+            console.log('Shipping Fee:', shippingFee);
+            console.log('Minimum Order:', minOrder);
+
+            // Kiểm tra điều kiện áp dụng voucher
+            if (minOrder > 0 && totalOrder < minOrder) {
+                alert(`Voucher chỉ áp dụng cho đơn hàng từ ${minOrder.toLocaleString()}đ. Đơn hàng hiện tại: ${totalOrder.toLocaleString()}đ`);
+                $(this).prop('checked', false);
+                return;
+            }
+
+            // Tính giảm giá
+            var discountAmount = 0;
+            if (voucherType === 1) { // Giảm theo %
+                discountAmount = totalOrder * (voucherValue / 100.0);
+
+                // Kiểm tra giảm tối đa
+                if (maxValue > 0) {
+                    discountAmount = Math.min(discountAmount, maxValue);
+                }
+            } else { // Giảm cố định
+                discountAmount = voucherValue;
+            }
+
+            // Đảm bảo giảm giá không vượt quá tổng đơn hàng
+            discountAmount = Math.min(discountAmount, totalOrder);
+
+            // Cập nhật hiển thị
+            var totalAfterDiscount = totalOrder - discountAmount;
+            var totalWithShipping = totalAfterDiscount + shippingFee;
+
+            // Định dạng tiền tệ
+            function formatCurrency(value) {
+                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+            }
+
+            // Thêm dòng giảm giá vào bảng
+            $('#discount-row').remove();
+            $('#tong_tien').closest('.form-group').after(`
+                <div id="discount-row" class="form-group">
+                    <label>Giảm giá Voucher</label>
+                    <input type="text" class="form-control" value="${formatCurrency(discountAmount)}" readonly />
+                </div>
+            `);
+
+            // Cập nhật tổng tiền
+            $('#tong_tien').val(formatCurrency(totalWithShipping));
+
+            // Debug log kết quả
+            console.log('Discount Amount:', discountAmount);
+            console.log('Total After Discount:', totalAfterDiscount);
+            console.log('Total With Shipping:', totalWithShipping);
+        });
+    });
 </script>

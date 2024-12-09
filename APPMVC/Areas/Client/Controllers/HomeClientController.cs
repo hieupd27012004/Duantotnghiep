@@ -17,8 +17,9 @@ namespace APPMVC.Areas.Client.Controllers
         private readonly IHoaDonChiTietService _hoaDonChiTietService;
         private readonly ILichSuHoaDonService _lichSuHoaDonService;
         private readonly IDiaChiService _diaChiService;
+        private readonly IVoucherService _voucherService;
         private readonly GiaoHangNhanhService _giaoHangNhanhService;
-        public HomeClientController(IGioHangChiTietService gioHangChiTietService, IHinhAnhService hinhAnhService, ISanPhamChiTietService sanPhamChiTietService, ICardService cardService, IHoaDonService hoaDonService, IHoaDonChiTietService hoaDonChiTietService, ILichSuHoaDonService lichSuHoaDonService, IDiaChiService diaChiService, GiaoHangNhanhService giaoHangNhanhService)
+        public HomeClientController(IGioHangChiTietService gioHangChiTietService, IHinhAnhService hinhAnhService, ISanPhamChiTietService sanPhamChiTietService, ICardService cardService, IHoaDonService hoaDonService, IHoaDonChiTietService hoaDonChiTietService, ILichSuHoaDonService lichSuHoaDonService, IDiaChiService diaChiService, IVoucherService voucherService, GiaoHangNhanhService giaoHangNhanhService)
         {
             _gioHangChiTietService = gioHangChiTietService;
             _hinhAnhService = hinhAnhService;
@@ -28,6 +29,7 @@ namespace APPMVC.Areas.Client.Controllers
             _hoaDonChiTietService = hoaDonChiTietService;
             _lichSuHoaDonService = lichSuHoaDonService;
             _diaChiService = diaChiService;
+            _voucherService = voucherService;
             _giaoHangNhanhService = giaoHangNhanhService;
         }
         public IActionResult Index()
@@ -107,6 +109,9 @@ namespace APPMVC.Areas.Client.Controllers
         [HttpGet]
         public async Task<IActionResult> Checkout()
         {
+            var customerIdString = HttpContext.Session.GetString("IdKhachHang");
+            Console.WriteLine($"Customer ID from session: {customerIdString}");
+
             var (cartItems, thanhToanViewModel) = await GetCartItemsWithAddress();
 
             if (thanhToanViewModel == null)
@@ -114,9 +119,81 @@ namespace APPMVC.Areas.Client.Controllers
                 return RedirectToAction("Index");
             }
 
+            var availableVouchers = await GetAvailableVouchersForCustomer();
+            Console.WriteLine($"Available Vouchers Count: {availableVouchers?.Count ?? 0}");
+
+            ViewBag.AvailableVouchers = availableVouchers;
+
             ViewBag.Provinces = await _diaChiService.GetProvincesAsync();
-            thanhToanViewModel.CartItems = cartItems; 
+            thanhToanViewModel.CartItems = cartItems;
             return View(thanhToanViewModel);
+        }
+        [HttpPost]
+        public async Task<IActionResult> ApplyVoucher(Guid voucherId)
+        {
+            var customerIdString = HttpContext.Session.GetString("IdKhachHang");
+            if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
+            {
+                return Json(new { success = false, message = "Vui lòng đăng nhập" });
+            }
+
+            try
+            {
+                var (cartItems, thanhToanViewModel) = await GetCartItemsWithAddress();
+                if (thanhToanViewModel == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy thông tin giỏ hàng" });
+                }
+
+                // Lấy thông tin voucher
+                var voucher = await _voucherService.GetVoucherByIdAsync(voucherId);
+                if (voucher == null)
+                {
+                    return Json(new { success = false, message = "Voucher không tồn tại" });
+                }
+
+                // Tính tổng giá trị đơn hàng
+                double totalOrderValue = cartItems.Sum(item => item.Price * item.Quantity);
+
+                // Kiểm tra điều kiện áp dụng voucher
+                if (voucher.GiaTriDonHangToiThieu.HasValue && totalOrderValue < voucher.GiaTriDonHangToiThieu.Value)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = $"Đơn hàng phải có giá trị tối thiểu {voucher.GiaTriDonHangToiThieu.Value:N0}đ để sử dụng voucher này"
+                    });
+                }
+
+                // Tính giảm giá
+                double discountAmount = 0;
+                if (voucher.LoaiGiamGia == 1) // Giảm theo %
+                {
+                    discountAmount = totalOrderValue * (voucher.GiaTriGiam / 100.0);
+
+                    // Kiểm tra giới hạn giảm tối đa
+                    if (voucher.SoTienToiDa.HasValue)
+                    {
+                        discountAmount = Math.Min(discountAmount, voucher.SoTienToiDa.Value);
+                    }
+                }
+                else // Giảm theo số tiền cố định
+                {
+                    discountAmount = voucher.GiaTriGiam;
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Áp dụng voucher thành công",
+                    discountAmount = discountAmount,
+                    totalAfterDiscount = totalOrderValue - discountAmount
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra khi áp dụng voucher" });
+            }
         }
 
 
@@ -513,6 +590,37 @@ namespace APPMVC.Areas.Client.Controllers
             ViewBag.Wards = dc.DistrictId != null
                 ? await _diaChiService.GetWardsAsync(dc.DistrictId)
                 : new List<Ward>(); // Danh sách trống nếu chưa chọn quận
+        }
+
+        private async Task<List<Voucher>> GetAvailableVouchersForCustomer()
+        {
+            var customerIdString = HttpContext.Session.GetString("IdKhachHang");
+            Console.WriteLine($"Customer ID from session: {customerIdString}");
+
+            if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
+            {
+                Console.WriteLine("Customer ID is null or cannot be parsed");
+                return new List<Voucher>();
+            }
+
+            try
+            {
+                var vouchers = await _voucherService.GetAvailableVouchersForCustomerAsync(customerId);
+
+                Console.WriteLine($"Found {vouchers.Count} available vouchers");
+                foreach (var voucher in vouchers)
+                {
+                    Console.WriteLine($"Voucher Details: ID={voucher.VoucherId}, Code={voucher.MaVoucher}, Description={voucher.MoTaVoucher}");
+                }
+
+                return vouchers;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting available vouchers: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<Voucher>();
+            }
         }
     }
 }
