@@ -223,61 +223,7 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-   
-    document.addEventListener("DOMContentLoaded", function() {
-       const formatCurrency = (value) => {
-        return value.toLocaleString('vi-VN') + ' VND';
-    };
-
-    document.getElementById('tong_so_tien').value = formatCurrency(parseFloat(document.getElementById('tong_so_tien').value));
-    document.getElementById('phi_van_chuyen').value = formatCurrency(parseFloat(document.getElementById('phi_van_chuyen').value));
-    document.getElementById('tong_tien').value = formatCurrency(parseFloat(document.getElementById('tong_tien').value));
-    //Địa Chỉ
-    
-    $("#ProvinceId").change(function () {
-        var provinceId = $(this).val();
-        console.log("ProvinceId:", provinceId);
-        $.get('/Client/HomeClient/GetDistricts', { provinceId: provinceId }, function (data) {
-            console.log(data);
-            if (Array.isArray(data)) {
-                $("#DistrictId").empty();
-                $("#DistrictId").append('<option value="">Chọn quận/huyện</option>');
-                $.each(data, function (i, item) {
-                    $("#DistrictId").append('<option value="' + item.districtId + '">' + item.districtName + '</option>');
-                });
-            } else {
-                $("#DistrictId").empty().append('<option value="">Không có quận/huyện</option>');
-            }
-            var selectedProvince = $("#ProvinceId option:selected").text();
-            $("#ProvinceName").val(selectedProvince);
-        }).fail(function (jqXHR, textStatus, errorThrown) {
-            console.error("Error: " + textStatus, errorThrown);
-            alert("Có lỗi khi tải dữ liệu quận/huyện!");
-        });
-    });
-    // Khi thay đổi Quận/Huyện, lấy danh sách Phường/Xã và gán DistrictName
-    $("#DistrictId").change(function () {
-        var districtId = $(this).val();
-        console.log("DistrictId:", districtId); // Kiểm tra districtId
-        $.get('@Url.Action("GetWards", "HomeClient", new { area = "Client" })?districtId=' + districtId, function (data) {
-            console.log(data); // Kiểm tra dữ liệu trả về
-            $("#WardId").empty().append('<option value="">Chọn phường/xã</option>');
-            $.each(data, function (i, item) {
-                console.log("WardId:", item.wardId, "WardName:", item.wardName); // Kiểm tra dữ liệu của phường/xã
-                $("#WardId").append('<option value="' + item.wardId + '">' + item.wardName + '</option>');
-            });
-
-            // Gán giá trị cho DistrictName
-            var selectedDistrict = $("#DistrictId option:selected").text();
-            $("#DistrictName").val(selectedDistrict);
-        });
-    });
-
-    // Khi thay đổi Phường/Xã, gán WardName
-    $("#WardId").change(function () {
-        var wardName = $("#WardId option:selected").text();
-        $("#WardName").val(wardName);
-    });
+    // Function to load user addresses
     function loadUserAddresses() {
         $.ajax({
             url: '@Url.Action("GetUserAddresses", "HomeClient", new { area = "Client" })',
@@ -291,12 +237,68 @@
         });
     }
 
-    //Thanh Toán
-    document.querySelectorAll('input[name="PaymentMethod"]').forEach(radio => {
-        radio.addEventListener('change', function () {
-            if (this.value === 'online_payment') {
-                document.getElementById('paymentForm').submit(); // Gửi form để xử lý
-            }
+    document.addEventListener("DOMContentLoaded", function() {
+        // Format currency function
+        const formatCurrency = (value) => {
+            return value.toLocaleString('vi-VN') + ' VND';
+        };
+
+        // Format total amounts
+        document.getElementById('tong_so_tien').value = formatCurrency(parseFloat(document.getElementById('tong_so_tien').value));
+        document.getElementById('phi_van_chuyen').value = formatCurrency(parseFloat(document.getElementById('phi_van_chuyen').value));
+        document.getElementById('tong_tien').value = formatCurrency(parseFloat(document.getElementById('tong_tien').value));
+
+        // Load districts when province changes
+        $("#ProvinceId").change(function () {
+            var provinceId = $(this).val();
+            console.log("ProvinceId:", provinceId);
+            $.get('/Client/HomeClient/GetDistricts', { provinceId: provinceId }, function (data) {
+                console.log(data);
+                $("#DistrictId").empty().append('<option value="">Chọn quận/huyện</option>');
+                if (Array.isArray(data)) {
+                    $.each(data, function (i, item) {
+                        $("#DistrictId").append('<option value="' + item.districtId + '">' + item.districtName + '</option>');
+                    });
+                } else {
+                    $("#DistrictId").append('<option value="">Không có quận/huyện</option>');
+                }
+                var selectedProvince = $("#ProvinceId option:selected").text();
+                $("#ProvinceName").val(selectedProvince);
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.error("Error: " + textStatus, errorThrown);
+                alert("Có lỗi khi tải dữ liệu quận/huyện!");
+            });
+        });
+
+        // Load wards when district changes
+        $("#DistrictId").change(function () {
+            var districtId = $(this).val();
+            console.log("DistrictId:", districtId);
+            $.get('@Url.Action("GetWards", "HomeClient", new { area = "Client" })?districtId=' + districtId, function (data) {
+                console.log(data);
+                $("#WardId").empty().append('<option value="">Chọn phường/xã</option>');
+                $.each(data, function (i, item) {
+                    $("#WardId").append('<option value="' + item.wardId + '">' + item.wardName + '</option>');
+                });
+                // Set DistrictName
+                var selectedDistrict = $("#DistrictId option:selected").text();
+                $("#DistrictName").val(selectedDistrict);
+            });
+        });
+
+        // Set WardName when ward changes
+        $("#WardId").change(function () {
+            var wardName = $("#WardId option:selected").text();
+            $("#WardName").val(wardName);
+        });
+
+        // Payment method change event
+        document.querySelectorAll('input[name="PaymentMethod"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                if (this.value === 'online_payment') {
+                    document.getElementById('paymentForm').submit(); // Submit the form for online payment
+                }
+            });
         });
     });
 </script>

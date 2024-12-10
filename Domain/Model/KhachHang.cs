@@ -37,6 +37,8 @@ namespace AppData.Model
 		public string? NguoiCapNhat { get; set; }
 		public int KichHoat { get; set; }
 
+		//public string ? LoaiKhach { get; set; }
+
 		public virtual GioHang? GioHang { get; set; }
 		public virtual ICollection<DiaChi>? DiaChis { get; set; }
 

@@ -15,9 +15,11 @@ namespace APPMVC.Areas.Client.Controllers
         private readonly IGioHangChiTietService _gioHangChiTietService;
         private readonly IHinhAnhService _hinhAnhService;
         private readonly ISanPhamChiTietService _sanPhamChiTietService;
+        private readonly ISanPhamService _sanPhamService;
         private readonly ICardService _cardService;
         private readonly IHoaDonService _hoaDonService;
         private readonly IHoaDonChiTietService _hoaDonChiTietService;
+        private readonly IKhachHangService _khachHangService;
         private readonly ILichSuHoaDonService _lichSuHoaDonService;
         private readonly IDiaChiService _diaChiService;
         private readonly ILichSuThanhToanService _lichSuThanhToanService;
@@ -27,6 +29,8 @@ namespace APPMVC.Areas.Client.Controllers
                                     IHinhAnhService hinhAnhService, 
                                     ISanPhamChiTietService sanPhamChiTietService, 
                                     ICardService cardService, IHoaDonService hoaDonService, 
+                                    IKhachHangService khachHangService,
+                                    ISanPhamService sanPhamService,
                                     IHoaDonChiTietService hoaDonChiTietService, 
                                     ILichSuHoaDonService lichSuHoaDonService, 
                                     IDiaChiService diaChiService, 
@@ -46,6 +50,8 @@ namespace APPMVC.Areas.Client.Controllers
             _diaChiService = diaChiService;
             _vnPayService = vnPayService;
             _giaoHangNhanhService = giaoHangNhanhService;
+            _sanPhamService = sanPhamService;
+            _khachHangService = khachHangService;
         }
         public IActionResult Index()
 		{
@@ -166,7 +172,7 @@ namespace APPMVC.Areas.Client.Controllers
 
             if (thanhToanViewModel == null)
             {
-                return RedirectToAction("Index"); // Nếu không có thông tin thanh toán, trở về trang giỏ hàng
+                return RedirectToAction("Index"); 
             }
 
             ViewBag.Provinces = await _diaChiService.GetProvincesAsync();
@@ -254,19 +260,16 @@ namespace APPMVC.Areas.Client.Controllers
         [HttpPost]
         public async Task<IActionResult> ProcessCheckout(ThanhToanViewModel model)
         {
-            // Lấy selectedItems từ session
             var selectedItems = HttpContext.Session.GetObject<List<Guid>>("SelectedItems");
 
-            // Kiểm tra xem selectedItems có hợp lệ không
             if (selectedItems == null || !selectedItems.Any())
             {
                 ModelState.AddModelError("", "Không có sản phẩm nào được chọn. Vui lòng quay lại giỏ hàng.");
-                return View("Checkout", model); // Quay lại trang Checkout
+                return View("Checkout", model); 
             }
 
             var (cartItems, thanhToanViewModel) = await GetCartItemsWithAddress(selectedItems);
 
-            // Kiểm tra xem thanhToanViewModel có hợp lệ không
             if (thanhToanViewModel == null || !ModelState.IsValid)
             {
                 return View("Checkout", thanhToanViewModel);
@@ -470,18 +473,30 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 return NotFound();
             }
-            return Json(diaChi); // Trả về dữ liệu dưới dạng JSON
+            return Json(diaChi); 
         }
         //Lấy Danh sách
         public async Task<IActionResult> GetUserAddresses()
         {
-            var IdKhachHang = HttpContext.Session.GetString("IdKhachHang");
-            if (string.IsNullOrEmpty(IdKhachHang))
+            // Lấy IdKhachHang từ session
+            var idKhachHang = HttpContext.Session.GetString("IdKhachHang");
+
+            // Kiểm tra nếu IdKhachHang không tồn tại, chuyển hướng đến trang đăng nhập
+            if (string.IsNullOrEmpty(idKhachHang))
             {
                 return RedirectToAction("Login", "KhachHang");
             }
-            var id = Guid.Parse(IdKhachHang);
+
+            // Chuyển đổi IdKhachHang thành Guid
+            if (!Guid.TryParse(idKhachHang, out Guid id))
+            {
+                return BadRequest("Invalid customer ID.");
+            }
+
+            // Lấy danh sách địa chỉ của khách hàng
             var diaChiList = await _diaChiService.GetAllAsync(id);
+
+            // Trả về view partial với danh sách địa chỉ
             return PartialView("ListDiaChi", diaChiList);
         }
         //Sửa địa chỉ
@@ -653,6 +668,6 @@ namespace APPMVC.Areas.Client.Controllers
         }
         #endregion
 
-       
+     
     }
 }
