@@ -184,7 +184,7 @@
                                     <tr>
                                         <td>@item.ProductName</td>
                                         <td>@item.Quantity</td>
-                                        <td>@item.Price.ToString("C")</td>
+                                        <td>@(item.Price.ToString("N0") + " VND")</td>
                                         <td hidden>@item.IdSanPhamChiTiet</td>
                                     </tr>
                                 }
@@ -196,19 +196,19 @@
                             <div class="form-group">
                                 <label for="tong_so_tien">Tổng số tiền</label>
                                 <input type="text" class="form-control" id="tong_so_tien"
-                                       value="@(Model.CartItems.Sum(i => i.Price * i.Quantity))" readonly />
+                                       value="@(Model.CartItems.Sum(i => i.Price * i.Quantity).ToString("N0") + " VND")" readonly />
                             </div>
 
                             <div class="form-group">
                                 <label for="phi_van_chuyen">Phí vận chuyển</label>
                                 <input type="text" class="form-control" id="phi_van_chuyen"
-                                       value="@(Model.PhiVanChuyen)" readonly />
+                                       value="@(Model.PhiVanChuyen.ToString("N0") + " VND")" readonly />
                             </div>
 
                             <div class="form-group">
                                 <label for="tong_tien">Tổng tiền hóa đơn</label>
                                 <input type="text" class="form-control" id="tong_tien"
-                                       value="@(Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.PhiVanChuyen)" readonly />
+                                       value="@( (Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.PhiVanChuyen).ToString("N0") + " VND" )" readonly />
                             </div>
                         </div>
                     }
@@ -225,14 +225,13 @@
 <script>
    
     document.addEventListener("DOMContentLoaded", function() {
-        const formatCurrency = (value) => {
-            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-        };
+       const formatCurrency = (value) => {
+        return value.toLocaleString('vi-VN') + ' VND';
+    };
 
-        document.getElementById('tong_so_tien').value = formatCurrency(parseFloat(document.getElementById('tong_so_tien').value));
-        document.getElementById('phi_van_chuyen').value = formatCurrency(parseFloat(document.getElementById('phi_van_chuyen').value));
-        document.getElementById('tong_tien').value = formatCurrency(parseFloat(document.getElementById('tong_tien').value));
-    });
+    document.getElementById('tong_so_tien').value = formatCurrency(parseFloat(document.getElementById('tong_so_tien').value));
+    document.getElementById('phi_van_chuyen').value = formatCurrency(parseFloat(document.getElementById('phi_van_chuyen').value));
+    document.getElementById('tong_tien').value = formatCurrency(parseFloat(document.getElementById('tong_tien').value));
     //Địa Chỉ
     
     $("#ProvinceId").change(function () {

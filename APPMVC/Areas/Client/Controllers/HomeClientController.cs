@@ -107,7 +107,7 @@ namespace APPMVC.Areas.Client.Controllers
         [HttpPost]
         public async Task<IActionResult> Remove(Guid idGioHangChiTiet)
         {
-            await _gioHangChiTietService.DeleteAsync(idGioHangChiTiet); 
+                await _gioHangChiTietService.DeleteAsync(idGioHangChiTiet); 
 
             return RedirectToAction("Card");
         }
@@ -315,7 +315,7 @@ namespace APPMVC.Areas.Client.Controllers
         }
 
 
-        // VnPay
+        // VnPay    
         [HttpGet]
         public async Task<IActionResult> ReturnVNPay()
         {
