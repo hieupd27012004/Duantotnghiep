@@ -96,59 +96,182 @@
             <span class="text-muted fw-light">Tìm Mã Đơn</span>
         </h4>
 
-        <form id="searchForm">
+        <form id="searchForm" method="post">
             <div class="mb-3">
                 <input type="text" name="maHoaDon" class="form-control" placeholder="Nhập mã hóa đơn" required />
             </div>
             <button type="submit" class="btn btn-primary">Tìm</button>
         </form>
 
-        <div id="hoaDonDetails"></div>
+        @if (Model.HoaDon != null)
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    <h4>Lịch sử đơn hàng</h4>
+                    <div class="timeline">
+                        @if (Model.LichSuHoaDons != null && Model.LichSuHoaDons.Any())
+                        {
+                            var sortedItems = Model.LichSuHoaDons.OrderBy(item => item.NgayTao);
+                            foreach (var item in sortedItems)
+                            {
+                                <div class="timeline-item">
+                                    <div class="timeline-icon">
+                                        @switch (item.ThaoTac)
+                                        {
+                                            case "Đã Hủy":
+                                                <i class="fas fa-times-circle" style="color: darkred;" title="Đã Hủy"></i>
+                                                break;
+                                            case "Tạo Đơn Hàng":
+                                                <i class="fas fa-clock" style="color: aqua;" title="Tạo Đơn Hàng"></i>
+                                                break;
+                                            case "Chờ Xác Nhận":
+                                                <i class="fas fa-clock" style="color: orange;" title="Chờ xác nhận"></i>
+                                                break;
+                                            case "Chờ Giao Hàng":
+                                                <i class="fas fa-hourglass-start" style="color: #ffcc00;" title="Chờ giao hàng"></i>
+                                                break;
+                                            case "Đang Vận Chuyển":
+                                                <i class="fas fa-shipping-fast" style="color: #007bff;" title="Đang vận chuyển"></i>
+                                                break;
+                                            case "Đã Thanh Toán":
+                                                <i class="fas fa-money-check-alt" style="color: green;" title="Đã thanh toán"></i>
+                                                break;
+                                            case "Đã Giao Hàng":
+                                                <i class="fas fa-box-open" style="color: mediumseagreen;" title="Đã giao hàng"></i>
+                                                break;
+                                            case "Hoàn Thành":
+                                                <i class="fas fa-flag-checkered" style="color: forestgreen;" title="Hoàn thành"></i>
+                                                break;
+                                            default:
+                                                <i class="fas fa-question-circle" style="color: gray;" title="Trạng thái không xác định"></i>
+                                                break;
+                                        }
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h3>@item.ThaoTac</h3>
+                                        <p>@item.NgayTao.ToString("dd-MM-yyyy HH:mm:ss")</p>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div>No history available.</div>
+                        }
+                    </div>
+
+                    <h4>Thông tin Đơn Hàng</h4>
+                    <div class="details-card">
+                        <strong>Mã Đơn:</strong> @Model.HoaDon?.MaDon<br />
+                        <strong>Khách Hàng:</strong> @Model.HoaDon?.KhachHang<br />
+                        <strong>Trạng Thái:</strong> @Model.HoaDon?.TrangThai<br />
+                        <strong>Số Điện Thoại:</strong> @Model.HoaDon?.SoDienThoaiNguoiNhan<br />
+                        <strong>Loại Hóa Đơn:</strong> @Model.HoaDon?.LoaiHoaDon<br />
+                        <strong>Địa Chỉ Giao Hàng:</strong> @Model.HoaDon?.DiaChiGiaoHang<br />
+                    </div>
+
+                    <h4>Lịch sử thanh toán</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Ngày</th>
+                                <th>Số Tiền</th>
+                                <th>Loại Giao Dịch</th>
+                                <th>Hình Thức Thanh Toán</th>
+                                <th>Người Xác Nhận</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.LichSuThanhToans != null && Model.LichSuThanhToans.Any())
+                            {
+                                foreach (var payment in Model.LichSuThanhToans)
+                                {
+                                    <tr>
+                                        <td>@payment.NgayThanhToan.ToString("dd-MM-yyyy HH:mm:ss")</td>
+                                        <td>@payment.SoTien.ToString("N0")</td>
+                                        <td>@payment.LoaiGiaoDich</td>
+                                        <td>@payment.HinhThucThanhToan</td>
+                                        <td>@payment.NguoiThaoTac</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5">Không có lịch sử thanh toán nào.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <h4>Danh Sách Sản Phẩm</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tên Sản Phẩm</th>
+                                <th>Số Lượng</th>
+                                <th>Giá</th>
+                                <th>Hình Ảnh</th>
+                                <th>Màu Sắc</th>
+                                <th>Kích Cỡ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.SanPhamChiTiets != null && Model.SanPhamChiTiets.Any())
+                            {
+                                foreach (var sanPham in Model.SanPhamChiTiets)
+                                {
+                                    <tr>
+                                        <td>@sanPham.ProductName</td>
+                                        <td>@sanPham.Quantity</td>
+                                        <td>@sanPham.Price.ToString("N0")</td>
+                                        <td>
+                                            @if (sanPham.HinhAnhs != null && sanPham.HinhAnhs.Any())
+                                            {
+                                                var hinhAnh = sanPham.HinhAnhs.First();
+                                                var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
+                                                var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
+                                                <img src="@imageUrl" alt="Hình ảnh sản phẩm" style="width: 50px; height: auto;" />
+                                            }
+                                            else
+                                            {
+                                                <span>Không có hình ảnh</span>
+                                            }
+                                        </td>
+                                        <td>@string.Join(", ", sanPham.MauSac ?? new List<string> { "Không có màu sắc" })</td>
+                                        <td>@string.Join(", ", sanPham.KichCo ?? new List<string> { "Không có kích cỡ" })</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6">Không có sản phẩm nào.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="details-card">
+                        <hr />
+                        <dl class="row">
+                            <dt class="col-sm-2">Tổng Tiền Hàng</dt>
+                            <dd class="col-sm-10">@Model.DonGia.ToString("N0")</dd>
+
+                            <dt class="col-sm-2">Giảm Giá</dt>
+                            <dd class="col-sm-10">@Model.GiamGia</dd>
+
+                            <dt class="col-sm-2">Phí Vận Chuyển</dt>
+                            <dd class="col-sm-10">@Model.PhiVanChuyen</dd>
+
+                            <dt class="col-sm-2">Tổng Tiền</dt>
+                            <dd class="col-sm-10">@Model.TongTien.ToString("N0")</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        }
 
         <a asp-action="Index" class="btn btn-primary">Quay lại danh sách</a>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#searchForm').submit(function(event) {
-            event.preventDefault(); // Ngăn chặn việc gửi form theo cách truyền thống
-            var maHoaDon = $('input[name="maHoaDon"]').val();
-
-            $.ajax({
-                type: 'POST',
-                url: '@Url.Action("GetHoaDonDetails", "HoaDon", new { area = "Client" })', // Đảm bảo URL đúng
-                data: { maHoaDon: maHoaDon },
-                success: function(data) {
-                    // Kiểm tra nếu dữ liệu trả về có thuộc tính HoaDon
-                    if (data && data.HoaDon) {
-                        $('#hoaDonDetails').html(renderHoaDonDetails(data));
-                    } else {
-                        $('#hoaDonDetails').html('<div class="alert alert-warning">Không tìm thấy thông tin hóa đơn.</div>');
-                    }
-                },
-                error: function(xhr) {
-                    $('#hoaDonDetails').html('<div class="alert alert-danger">' + xhr.responseText + '</div>');
-                }
-            });
-        });
-
-        function renderHoaDonDetails(data) {
-            // Kiểm tra các thuộc tính cần thiết trước khi truy cập
-            if (!data.HoaDon) {
-                return '<div class="alert alert-danger">Thông tin hóa đơn không hợp lệ.</div>';
-            }
-
-            var html = `<div class="details-card">
-                            <h4>Thông tin Hóa Đơn</h4>
-                            <strong>Mã Đơn:</strong> ${data.HoaDon.MaDon || 'N/A'}<br />
-                            <strong>Khách Hàng:</strong> ${data.HoaDon.KhachHang || 'N/A'}<br />
-                            <strong>Trạng Thái:</strong> ${data.HoaDon.TrangThai || 'N/A'}<br />
-                            <strong>Số Điện Thoại:</strong> ${data.HoaDon.SoDienThoaiNguoiNhan || 'N/A'}<br />
-                            <strong>Địa Chỉ Giao Hàng:</strong> ${data.HoaDon.DiaChiGiaoHang || 'N/A'}<br />
-                            <strong>Tổng Tiền:</strong> ${data.TongTien ? data.TongTien.toLocaleString() : 'N/A'}<br />
-                        </div>`;
-            return html;
-        }
-    });
-</script>
