@@ -97,10 +97,35 @@
                 <button id="add-to-cart-btn" class="btn btn-primary" type="button">
                     Thêm vào giỏ hàng
                 </button>
+                <button id="buy-now-btn" class="btn btn-success mt-3" type="button">
+                    Mua Ngay
+                </button>
             </div>
         </div>
     </div>
 </div>
+<!-- Modal -->
+<div class="modal fade" id="quantityModal" tabindex="-1" role="dialog" aria-labelledby="quantityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quantityModalLabel">Nhập Số Lượng</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label for="quantity-input">Số lượng:</label>
+                <input type="number" id="quantity-input" class="form-control" min="1" value="1">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" id="confirm-buy-btn" class="btn btn-success">Mua Ngay</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
     $(document).ready(function () {
@@ -216,6 +241,49 @@
                 }
             });
         });
+
+        $('#buy-now-btn').click(function () {
+        if (!selectedColor || !selectedSize) {
+            alert('Vui lòng chọn màu và kích thước trước khi mua ngay.');
+            return;
+        }
+
+        // Hiển thị modal để nhập số lượng
+        $('#quantityModal').modal('show');
+    });
+
+      $('#confirm-buy-btn').click(function () {
+        let quantity = $('#quantity-input').val();
+
+        if (!quantity || quantity < 1) {
+            alert('Vui lòng nhập số lượng hợp lệ.');
+            return;
+        }
+
+        $.ajax({
+            url: '/Client/SanPham/BuyNow',
+            type: 'POST',
+            data: {
+                productId: sanPhamId,
+                colorId: selectedColor,
+                sizeId: selectedSize,
+                quantity: quantity
+            },
+            success: function (response) {
+                if (response.success) {
+                    window.location.href = response.redirectUrl; // Chuyển hướng đến URL trả về
+                } else {
+                    alert(response.message); // Hiển thị thông báo lỗi
+                }
+            },
+            error: function () {
+                alert('Có lỗi xảy ra khi mua sản phẩm. Vui lòng thử lại.');
+            }
+        });
+
+        // Đóng modal sau khi mua
+        $('#quantityModal').modal('hide');
+    });
     });
 </script>
 
@@ -269,4 +337,17 @@
     #add-to-cart-btn {
         width: 100%;
     }
+
+    #buy-now-btn {
+        width: 100%;
+        margin-top: 15px;
+        background-color: #28a745; 
+        color: white; 
+        border: none; 
+    }
+
+        #buy-now-btn:hover {
+            background-color: #218838;
+            color: white;
+        }
 </style>

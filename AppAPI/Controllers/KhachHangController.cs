@@ -159,5 +159,25 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpPost("CreateKH")]
+        public async Task<IActionResult> CreateKH([FromBody] KhachHang khachHang)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                // Gọi dịch vụ để tạo khách hàng và lấy ID
+                var customerId = await _service.CreateKHReturnId(khachHang);
+                return Ok(new { IdKhachHang = customerId });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

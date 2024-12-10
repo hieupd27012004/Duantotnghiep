@@ -7,6 +7,8 @@ using System.Net.Http.Headers;
 using Microsoft.Extensions.Logging;
 using AppData.ViewModel;
 using Microsoft.EntityFrameworkCore;
+using Castle.Core.Resource;
+using APPMVC.Session;
 
 namespace APPMVC.Areas.Client.Controllers
 {
@@ -24,6 +26,7 @@ namespace APPMVC.Areas.Client.Controllers
         private readonly IGioHangChiTietService _gioHangChiTietService;
         private readonly ICardService _cardService;
         private readonly IPromotionSanPhamChiTietService _promotionSanPhamChiTietService;
+        private readonly IKhachHangService _khachHangService;
         public SanPhamController(
             ISanPhamService sanPhamservice,
             ISanPhamChiTietService sanPhamCTservice,
@@ -35,7 +38,8 @@ namespace APPMVC.Areas.Client.Controllers
             IGioHangChiTietService gioHangChiTietService,
             ILogger<SanPhamController> logger,
             ICardService cardService,
-            IPromotionSanPhamChiTietService promotionSanPhamChiTietService)
+            IPromotionSanPhamChiTietService promotionSanPhamChiTietService,
+            IKhachHangService khachHangService)
         {
             _sanPhamservice = sanPhamservice;
             _sanPhamCTservice = sanPhamCTservice;
@@ -48,6 +52,7 @@ namespace APPMVC.Areas.Client.Controllers
             _cardService = cardService;
             _logger = logger;
             _promotionSanPhamChiTietService = promotionSanPhamChiTietService;
+            _khachHangService = khachHangService;
         }
 
         public async Task<IActionResult> Index(string? name)
@@ -236,7 +241,7 @@ namespace APPMVC.Areas.Client.Controllers
                     return Json(new { success = false, message = "Product not found" });
                 }
 
-                int requestedQuantity = 1; 
+                int requestedQuantity = 1;
                 if (requestedQuantity <= 0)
                 {
                     return Json(new { success = false, message = "Quantity must be greater than zero." });
@@ -250,7 +255,6 @@ namespace APPMVC.Areas.Client.Controllers
                 var existingItem = await _gioHangChiTietService.GetByProductIdAndCartIdAsync(sanPhamChiTiet.IdSanPhamChiTiet, idGioHang);
                 if (existingItem != null)
                 {
-
                     double newQuantity = existingItem.SoLuong + requestedQuantity;
 
                     if (newQuantity > sanPhamChiTiet.SoLuong)
@@ -261,7 +265,7 @@ namespace APPMVC.Areas.Client.Controllers
                     existingItem.SoLuong = newQuantity;
                     existingItem.TongTien = existingItem.DonGia * newQuantity;
 
-                    await _gioHangChiTietService.UpdateAsync(existingItem); 
+                    await _gioHangChiTietService.UpdateAsync(existingItem);
                     return Ok(new { message = "Item quantity updated in cart successfully", existingItem });
                 }
 
@@ -287,6 +291,59 @@ namespace APPMVC.Areas.Client.Controllers
                 // Log the exception
                 Console.WriteLine($"Error in AddToCard: {ex.Message}");
                 return StatusCode(500, new { message = "An error occurred while adding to the cart." });
+            }
+        }
+
+        public async Task<IActionResult> BuyNow(Guid productId, Guid colorId, Guid sizeId, int quantity)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                // Lấy thông tin sản phẩm chi tiết
+                var sanPham = await _sanPhamservice.GetSanPhamById(productId);
+                var sanPhamChiTiet = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(productId, sizeId, colorId);
+                if (sanPhamChiTiet == null)
+                {
+                    return Json(new { success = false, message = "Product not found" });
+                }
+
+                if (quantity <= 0)
+                {
+                    return Json(new { success = false, message = "Quantity must be greater than zero." });
+                }
+
+                if (quantity > sanPhamChiTiet.SoLuong)
+                {
+                    return Json(new { success = false, message = "Insufficient quantity available." });
+                }
+
+                // Tạo danh sách sản phẩm đã chọn
+                var cartItems = new List<CartItemViewModel>
+        {
+            new CartItemViewModel
+            {
+                IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+                ProductName = sanPham.TenSanPham,
+                Quantity = quantity,
+                Price = sanPhamChiTiet.GiaGiam ?? sanPhamChiTiet.Gia
+            }
+        };
+
+                // Lưu thông tin sản phẩm vào session
+                HttpContext.Session.SetObject("SelectedItems", cartItems);
+
+                // Trả về URL cho client để chuyển hướng
+                return Json(new { success = true, redirectUrl = "/Client/HomeClient/Checkout" });
+            }
+            catch (Exception ex)
+            {
+                // Ghi log lỗi
+                Console.WriteLine($"Error in BuyNow: {ex.Message}");
+                return StatusCode(500, new { message = "An error occurred while processing your request." });
             }
         }
     }

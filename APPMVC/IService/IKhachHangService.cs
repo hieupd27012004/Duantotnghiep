@@ -7,6 +7,7 @@ namespace APPMVC.IService
         Task<List<KhachHang>> GetAllKhachHang();
         Task<KhachHang> GetIdKhachHang(Guid? id);
         Task<KhachHang?> LoginKH(string email, string password);
+        Task<Guid?> CreateKHReturnId(KhachHang kh);
         Task AddKhachHang(KhachHang kh);
         Task UpdateKhachHang(KhachHang kh);
         Task UpdateKHThongTin(KhachHang kh);

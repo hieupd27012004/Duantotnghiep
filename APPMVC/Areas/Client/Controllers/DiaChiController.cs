@@ -33,7 +33,7 @@ namespace APPMVC.Areas.Client.Controllers
 			var IdKhachHang = HttpContext.Session.GetString("IdKhachHang");
 			if (string.IsNullOrEmpty(IdKhachHang))
 			{
-				return RedirectToAction("Login", "Account");  // Nếu chưa đăng nhập, chuyển hướng đến trang login
+				return RedirectToAction("Login", "Account");
 			}
 			ViewBag.Provinces = await _services.GetProvincesAsync();
 			return View();
