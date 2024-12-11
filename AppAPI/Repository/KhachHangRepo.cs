@@ -124,5 +124,34 @@ namespace AppAPI.Repository
 
             return customer;
         }
+
+        public async Task<Guid?> CreateKHReturnId(KhachHang kh)
+        {
+            // Tạo ID mới cho khách hàng
+            kh.IdKhachHang = Guid.NewGuid();
+
+            // Tạo giỏ hàng mới cho khách hàng
+            GioHang gioHang = new GioHang()
+            {
+                IdGioHang = Guid.NewGuid(),
+                IdKhachHang = kh.IdKhachHang,
+            };
+            kh.GioHang = gioHang;
+
+            try
+            {
+                // Thêm khách hàng vào cơ sở dữ liệu
+                _context.khachHangs.Add(kh);
+                await _context.SaveChangesAsync();
+
+                // Trả về ID khách hàng mới
+                return kh.IdKhachHang;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi tạo khách hàng: {ex.Message}");
+                throw; // Ném lại ngoại lệ để xử lý bên ngoài nếu cần
+            }
+        }
     }
 }

@@ -30,11 +30,21 @@ namespace AppData.ViewModel
 
         public List<CartItemViewModel> CartItems { get; set; } = new List<CartItemViewModel>();
 
+        public List<BuyItemViewModel> BuyItem { get; set; } = new List<BuyItemViewModel>();
+
         public string PaymentMethod { get; set; }
         public double PhiVanChuyen { get; set; }
     }
 
     public class CartItemViewModel
+    {
+        public Guid IdSanPhamChiTiet { get; set; }
+        public string ProductName { get; set; }
+        public double Quantity { get; set; }
+        public double Price { get; set; }
+
+    }
+    public class BuyItemViewModel
     {
         public Guid IdSanPhamChiTiet { get; set; }
         public string ProductName { get; set; }

@@ -63,5 +63,10 @@ namespace AppAPI.Service
         {
             return await _repo.GetCustomerByPhoneOrEmailAsync(phoneOrEmail);
         }
+
+        public async Task<Guid?> CreateKHReturnId(KhachHang kh)
+        {
+            return await _repo.CreateKHReturnId(kh);
+        }
     }
 }

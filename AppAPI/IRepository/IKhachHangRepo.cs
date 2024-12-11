@@ -6,7 +6,7 @@ namespace AppAPI.IRepository
     {
         Task<List<KhachHang>> GetAllKhachHang();
         Task<KhachHang> GetIdKhachHang(Guid id);
-
+        Task<Guid?> CreateKHReturnId(KhachHang kh);
         Task<KhachHang> CreateKH(KhachHang kh);
         Task<KhachHang> UpdateKH(KhachHang kh);
         Task<KhachHang> UpdateKHThongTin(KhachHang kh);
