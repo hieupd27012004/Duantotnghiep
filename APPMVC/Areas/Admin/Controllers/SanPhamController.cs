@@ -150,6 +150,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     return RedirectToAction("GetAll");
                 }
 
+                // Load related entities
                 var chatLieuTask = _chatLieuService.GetChatLieuById(viewModel.IdChatLieu);
                 var thuongHieuTask = _thuongHieuService.GetThuongHieuById(viewModel.IdThuongHieu);
                 var danhMucTask = _danhMucService.GetDanhMucById(viewModel.IdDanhMuc);
@@ -164,40 +165,27 @@ namespace APPMVC.Areas.Admin.Controllers
                 viewModel.SanPham.DeGiay = await deGiayTask;
                 viewModel.SanPham.KieuDang = await kieuDangTask;
 
-                viewModel.SanPham.IdChatLieu = viewModel.SanPham.ChatLieu?.IdChatLieu ?? Guid.Empty;
-                viewModel.SanPham.IdThuongHieu = viewModel.SanPham.ThuongHieu?.IdThuongHieu ?? Guid.Empty;
-                viewModel.SanPham.IdDanhMuc = viewModel.SanPham.DanhMuc?.IdDanhMuc ?? Guid.Empty;
-                viewModel.SanPham.IdDeGiay = viewModel.SanPham.DeGiay?.IdDeGiay ?? Guid.Empty;
-                viewModel.SanPham.IdKieuDang = viewModel.SanPham.KieuDang?.IdKieuDang ?? Guid.Empty;
 
                 await _sanPhamService.Create(viewModel.SanPham);
                 var idSanPham = viewModel.SanPham.IdSanPham;
 
-                // Sử dụng HashSet để theo dõi các cặp IdKichCo và IdMauSac đã được tạo
+                // HashSet to track created pairs
                 var createdPairs = new HashSet<(string KichCoId, string MauSacId)>();
 
-                int totalKichCo = viewModel.SelectedKichCoIds.Count;
-                int totalMauSac = viewModel.SelectedMauSacIds.Count;
-                int totalCombinations = viewModel.Combinations.Count;
-
-                // Lặp qua từng KichCo và MauSac
-                for (int i = 0; i < totalKichCo; i++)
+                // Iterate through sizes and colors
+                foreach (var kichCoId in viewModel.SelectedKichCoIds)
                 {
-                    string kichCoId = viewModel.SelectedKichCoIds[i];
-
-                    for (int j = 0; j < totalMauSac; j++)
+                    foreach (var mauSacId in viewModel.SelectedMauSacIds)
                     {
-                        string mauSacId = viewModel.SelectedMauSacIds[j];
-
-                        var combination = viewModel.Combinations[(i + j) % totalCombinations];
-
-                        // Kiểm tra xem cặp (KichCoId, MauSacId) đã được tạo chưa
+                        var combination = viewModel.Combinations.First(); // Adjust logic as needed
                         var pair = (KichCoId: kichCoId, MauSacId: mauSacId);
+
                         if (!createdPairs.Contains(pair))
                         {
                             var sanPhamChiTiet = new SanPhamChiTiet
                             {
                                 IdSanPhamChiTiet = Guid.NewGuid(),
+                                MaSp = await GenerateProductCodeAsync(),
                                 IdSanPham = idSanPham,
                                 Gia = combination.Gia,
                                 SoLuong = combination.SoLuong,
@@ -211,19 +199,18 @@ namespace APPMVC.Areas.Admin.Controllers
                             };
 
                             await _sanPhamCTService.Create(sanPhamChiTiet);
-
                             await _sanPhamChiTietKichCoService.Create(new SanPhamChiTietKichCo
                             {
                                 IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
                                 IdKichCo = Guid.Parse(kichCoId)
                             });
-
                             await _sanPhamChiTietMauSacService.Create(new SanPhamChiTietMauSac
                             {
                                 IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
                                 IdMauSac = Guid.Parse(mauSacId)
                             });
 
+                            // Handle image uploads
                             if (combination.Files != null && combination.Files.Count > 0)
                             {
                                 foreach (var file in combination.Files)
@@ -263,6 +250,46 @@ namespace APPMVC.Areas.Admin.Controllers
             return View(viewModel);
         }
 
+        private async Task<string> GenerateProductCodeAsync()
+        {
+            var lastProductCode = await GetLastProductCodeAsync();
+            int newProductCodeNumber = lastProductCode + 1;
+            string newProductCode = $"SP{newProductCodeNumber}";
+
+            while (await IsProductCodeExists(newProductCode))
+            {
+                newProductCodeNumber++;
+                newProductCode = $"SP{newProductCodeNumber}";
+            }
+
+            return newProductCode;
+        }
+
+        private async Task<int> GetLastProductCodeAsync()
+        {
+            var allProducts = await _sanPhamCTService.GetSanPhamChiTiets();
+            if (allProducts == null || !allProducts.Any())
+            {
+                return 0;
+            }
+
+            var productCodes = new List<int>();
+            foreach (var product in allProducts)
+            {
+                if (product.MaSp.Length > 2 && int.TryParse(product.MaSp.Substring(2), out int productCodeNumber))
+                {
+                    productCodes.Add(productCodeNumber);
+                }
+            }
+
+            return productCodes.Any() ? productCodes.Max() : 0;
+        }
+
+        private async Task<bool> IsProductCodeExists(string productCode)
+        {
+            var existingProduct = await _sanPhamCTService.GetByProductCodeAsync(productCode);
+            return existingProduct != null;
+        }
 
 
         //public async Task<IActionResult> Create(SanPhamViewModel viewModel)
@@ -447,29 +474,30 @@ namespace APPMVC.Areas.Admin.Controllers
             var chatLieu = await _chatLieuService.GetChatLieuById(sanPham.IdChatLieu);
             var kieuDang = await _kieuDangService.GetKieuDangById(sanPham.IdKieuDang);
             var deGiay = await _deGiayService.GetDeGiayById(sanPham.IdDeGiay);
-       
+
             var sanPhamChiTietViewModels = new List<SanPhamChiTietItemViewModel>();
 
             foreach (var chiTiet in sanPhamChiTietList)
             {
                 var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
-                var mauSacTenList = mauSacList.Select(ms => ms.TenMauSac).ToList(); 
+                var mauSacTenList = mauSacList.Select(ms => ms.TenMauSac).ToList();
 
                 var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
                 var kichCoTenList = kichCoList.Select(kc => kc.TenKichCo).ToList();
 
                 var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
-          
+
                 sanPhamChiTietViewModels.Add(new SanPhamChiTietItemViewModel
                 {
                     IdSanPhamChiTiet = chiTiet.IdSanPhamChiTiet,
-                    HinhAnhs = hinhAnhs, 
-                    MauSac = mauSacTenList, 
+                    HinhAnhs = hinhAnhs,
+                    MauSac = mauSacTenList,
                     KichCo = kichCoTenList,
                     Gia = chiTiet.Gia,
                     SoLuong = chiTiet.SoLuong,
                     XuatXu = chiTiet.XuatXu,
-                    Chon = false
+                    Chon = false,
+                    MaSanPham = chiTiet.MaSp 
                 });
             }
 
@@ -489,7 +517,6 @@ namespace APPMVC.Areas.Admin.Controllers
 
             return View(viewModel);
         }
-
         [HttpPost]
         public async Task<IActionResult> Edit(SanPhamChiTietViewModel viewModel)
         {

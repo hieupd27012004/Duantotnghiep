@@ -124,5 +124,22 @@ namespace AppAPI.Repository
             return await _context.hoaDons
                 .FirstOrDefaultAsync(hd => hd.MaDon == orderNumber);
         }
+
+        public async Task<List<HoaDon>> GetHoaDonsByCustomerIdAsync(Guid customerId)
+        {
+            if (customerId == Guid.Empty)
+            {
+                throw new ArgumentException("Invalid customer ID.", nameof(customerId));
+            }
+
+            return await _context.hoaDons
+                .Where(hoaDon => hoaDon.IdKhachHang == customerId)
+                .ToListAsync();
+        }
+
+        public async Task<HoaDon> GetByMaDonAsync(string maDon)
+        {
+            return await _context.hoaDons.FirstOrDefaultAsync(h => h.MaDon == maDon);
+        }
     }
 }

@@ -15,5 +15,7 @@ namespace AppAPI.IService
         Task ClearCartByIdAsync(Guid cartId);
 
 		Task<double> GetTotalQuantityBySanPhamChiTietIdAsync(Guid sanPhamChiTietId, Guid cartId);
+
+        Task<GioHangChiTiet> GetByProductIdAndCartIdAsync(Guid sanPhamChiTietId, Guid cartId);
     }
 }

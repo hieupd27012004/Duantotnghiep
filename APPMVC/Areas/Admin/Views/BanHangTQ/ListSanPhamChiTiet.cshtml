@@ -13,6 +13,17 @@
         background-color: #007bff;
         color: white;
     }
+
+    .discounted-price {
+        text-decoration: line-through;
+        color: red;
+        margin-right: 5px;
+    }
+
+    .current-price {
+        color: green;
+        font-weight: bold;
+    }
 </style>
 
 <div class="modal-body">
@@ -20,6 +31,7 @@
         <thead>
             <tr>
                 <th hidden>ID</th>
+                <th>Mã Sản Phẩm</th>
                 <th>Tên Sản Phẩm</th>
                 <th>Giá</th>
                 <th>Số Lượng</th>
@@ -36,8 +48,19 @@
                 {
                     <tr>
                         <td hidden>@item.IdSanPhamChiTiet</td>
+                        <td>@item.MaSanPham</td>
                         <td>@item.ProductName</td>
-                        <td>@item.Price</td>
+                        <td>
+                            @if (item.GiaDaGiam.HasValue && item.GiaDaGiam < item.Price)
+                            {
+                                <span class="discounted-price">@item.Price.ToString("N0")</span>
+                                <span class="current-price">@item.GiaDaGiam.Value.ToString("N0")</span>
+                            }
+                            else
+                            {
+                                @item.Price.ToString("N0")
+                            }
+                        </td>
                         <td>@item.Quantity</td>
                         <td>@string.Join(", ", item.MauSac)</td>
                         <td>@string.Join(", ", item.KichCo)</td>
@@ -47,7 +70,16 @@
                                 var hinhAnh = item.HinhAnhs.First();
                                 var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
                                 var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
-                                <img src="@imageUrl" alt="Hình ảnh sản phẩm" style="width: 50px; height: auto;" />
+
+                                <div style="position: relative;">
+                                    <img src="@imageUrl" alt="Hình ảnh sản phẩm" style="width: 50px; height: auto;" />
+                                    @if (item.PhanTramGiam.HasValue)
+                                    {
+                                        <div class="discount-badge" style="position: absolute; top: 5px; right: 5px; background-color: red; color: white; padding: 3px 5px; border-radius: 5px; font-weight: bold;">
+                                            Giảm @item.PhanTramGiam%!
+                                        </div>
+                                    }
+                                </div>
                             }
                             else
                             {

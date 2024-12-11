@@ -122,5 +122,39 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("getbycustomerid")]
+        public async Task<IActionResult> GetHoaDonsByCustomerId(Guid customerId)
+        {
+            try
+            {
+                var hoaDons = await _service.GetHoaDonsByCustomerIdAsync(customerId);
+                if (hoaDons == null || !hoaDons.Any())
+                {
+                    return NotFound($"No HoaDon found for Customer ID {customerId}.");
+                }
+                return Ok(hoaDons);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [HttpGet("getbymadan")]
+        public async Task<IActionResult> GetByMaDon(string maDon)
+        {
+            try
+            {
+                var hoaDon = await _service.GetByMaDonAsync(maDon);
+                if (hoaDon == null)
+                {
+                    return NotFound($"Hóa đơn với mã đơn {maDon} không được tìm thấy.");
+                }
+                return Ok(hoaDon);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi máy chủ nội bộ: {ex.Message}");
+            }
+        }
     }
 }

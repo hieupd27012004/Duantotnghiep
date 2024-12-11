@@ -62,5 +62,15 @@ namespace AppAPI.Service
         {
             return await _repository.GetByIdHoaDonChiTietAsync(id);
         }
+
+        public async Task<SanPhamChiTiet> GetByProductCodeAsync(string productCode)
+        {
+            if (string.IsNullOrWhiteSpace(productCode))
+            {
+                throw new ArgumentException("Product code cannot be null or empty.", nameof(productCode));
+            }
+
+            return await _repository.GetByProductCodeAsync(productCode);
+        }
     }
 }

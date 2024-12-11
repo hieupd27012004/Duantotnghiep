@@ -71,6 +71,7 @@ namespace AppAPI.Repository
                 sanPhamChitietUpdate.NguoiCapNhat = sanPhamChiTiet.NguoiCapNhat;
                 sanPhamChitietUpdate.NguoiTao = sanPhamChiTiet.NguoiTao;
                 sanPhamChitietUpdate.XuatXu = sanPhamChiTiet.XuatXu;
+                sanPhamChitietUpdate.GiaGiam = sanPhamChiTiet.GiaGiam;
                 sanPhamChitietUpdate.KichHoat = sanPhamChiTiet.KichHoat == 1 ? 1 : 0;
 
                 // Lưu thay đổi vào cơ sở dữ liệu
@@ -179,6 +180,17 @@ namespace AppAPI.Repository
             };
 
             return sanPhamChiTietDto;
+        }
+
+        public async Task<SanPhamChiTiet> GetByProductCodeAsync(string productCode)
+        {
+            if (string.IsNullOrEmpty(productCode))
+            {
+                throw new ArgumentException("Product code cannot be null or empty.", nameof(productCode));
+            }
+
+            return await _context.sanPhamChiTiets
+                .FirstOrDefaultAsync(spct => spct.MaSp == productCode);
         }
     }
 }

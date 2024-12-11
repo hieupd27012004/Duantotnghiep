@@ -32,6 +32,8 @@ namespace AppData.ViewModel
     public class SanPhamChiTietItemViewModel
     {
         public Guid IdSanPhamChiTiet { get; set; }
+        public string? MaSanPham { get; set; }
+        public double? GiaDaGiam { get; set; }
         public List<HinhAnh>? HinhAnhs { get; set; }
         public List<string> MauSac { get; set; } = new List<string>();
         public List<string> KichCo { get; set; } = new List<string>();

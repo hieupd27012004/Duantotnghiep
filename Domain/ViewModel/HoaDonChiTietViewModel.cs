@@ -61,12 +61,15 @@ namespace AppData.ViewModel
         public class SanPhamChiTietViewModel
         {
             public Guid IdSanPhamChiTiet { get; set; }
+            public string? MaSanPham { get; set; }
             public string? ProductName { get; set; }
             public double Quantity { get; set; }
             public double Price { get; set; }
             public List<HinhAnh>? HinhAnhs { get; set; }
             public List<string> MauSac { get; set; } = new List<string>();
             public List<string> KichCo { get; set; } = new List<string>();
+            public double? GiaDaGiam { get; set; }
+            public double? PhanTramGiam { get; set; }
             public Guid IdHoaDonChiTiet { get; set; }
         }
         public class HoaDonViewModel
@@ -96,6 +99,19 @@ namespace AppData.ViewModel
             public string? TrangThai { get; set; }
             public Guid IdHoaDon { get; set; }
             public Guid IdNhanVien { get; set; }
+        }
+        public class KhachHangViewModel
+        {
+            public Guid IdKhachHang { get; set; }
+
+            public string? HoTen { get; set; }
+            //[Required(ErrorMessage = "Không Được Để Trống")]
+            [RegularExpression(@"^(\+84|0)[3|5|7|8|9][0-9]{8}$", ErrorMessage = "Không Đúng Định Dạng")]
+            [StringLength(10, MinimumLength = 10, ErrorMessage = "Phải Đủ 10 Số")]
+            public string? SoDienThoai { get; set; }
+            //[Required(ErrorMessage = "Không Được Để Trống")]
+            [RegularExpression(@"^[a-zA-Z0-9._%+-]+@gmail\.com$", ErrorMessage = "Không Đúng Định Dạng")]
+            public string? Email { get; set; }
         }
     }
     public class HoaDonViewModell

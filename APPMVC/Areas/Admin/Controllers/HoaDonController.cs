@@ -139,7 +139,6 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 if (sanPhamCT != null)
                 {
-
                     var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
                     var mauSacTenList = mauSacList.Select(ms => ms.TenMauSac).ToList();
 
@@ -148,16 +147,27 @@ namespace APPMVC.Areas.Admin.Controllers
 
                     var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
 
+                    var giaBan = sanPhamCT.Gia;
+                    var giaDaGiam = sanPhamCT.GiaGiam;
+                    double? phanTramGiam = null;
+
+                    if (giaDaGiam.HasValue && giaDaGiam < giaBan)
+                    {
+                        phanTramGiam = Math.Round(((giaBan - giaDaGiam.Value) / giaBan) * 100, 2);
+
+                    }
 
                     sanPhamChiTiets.Add(new HoaDonChiTietViewModel.SanPhamChiTietViewModel
                     {
                         IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
                         Quantity = hoaDonChiTiet.SoLuong,
-                        Price = sanPhamCT.Gia,
+                        Price = giaBan,
                         ProductName = sanPham.TenSanPham,
                         MauSac = mauSacTenList,
                         KichCo = kichCoTenList,
-                        HinhAnhs = hinhAnhs 
+                        HinhAnhs = hinhAnhs,
+                        GiaDaGiam = giaDaGiam,
+                        PhanTramGiam = phanTramGiam
                     });
                 }
             }

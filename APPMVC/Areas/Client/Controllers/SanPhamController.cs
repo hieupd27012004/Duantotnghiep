@@ -23,6 +23,7 @@ namespace APPMVC.Areas.Client.Controllers
         private readonly ILogger<SanPhamController> _logger;
         private readonly IGioHangChiTietService _gioHangChiTietService;
         private readonly ICardService _cardService;
+        private readonly IPromotionSanPhamChiTietService _promotionSanPhamChiTietService;
         public SanPhamController(
             ISanPhamService sanPhamservice,
             ISanPhamChiTietService sanPhamCTservice,
@@ -33,7 +34,8 @@ namespace APPMVC.Areas.Client.Controllers
             ISanPhamChiTietKichCoService sanPhamChiTietKichCoService,
             IGioHangChiTietService gioHangChiTietService,
             ILogger<SanPhamController> logger,
-            ICardService cardService)
+            ICardService cardService,
+            IPromotionSanPhamChiTietService promotionSanPhamChiTietService)
         {
             _sanPhamservice = sanPhamservice;
             _sanPhamCTservice = sanPhamCTservice;
@@ -45,6 +47,7 @@ namespace APPMVC.Areas.Client.Controllers
             _gioHangChiTietService = gioHangChiTietService;
             _cardService = cardService;
             _logger = logger;
+            _promotionSanPhamChiTietService = promotionSanPhamChiTietService;
         }
 
         public async Task<IActionResult> Index(string? name)
@@ -77,7 +80,7 @@ namespace APPMVC.Areas.Client.Controllers
                             colorImages.Add(new RepresentativeImageViewModel
                             {
                                 MauSacTen = mauSac.TenMauSac,
-                                AnhDaiDien = hinhAnhs.First().DataHinhAnh 
+                                AnhDaiDien = hinhAnhs.First().DataHinhAnh
                             });
                         }
                     }
@@ -88,8 +91,8 @@ namespace APPMVC.Areas.Client.Controllers
                     IdSanPham = sanPham.IdSanPham,
                     TenSanPham = sanPham.TenSanPham,
                     SoLuongMau = colorImages.Count,
-                    GiaThapNhat = sanPhamChiTietList.Min(x => x.Gia),
-                    GiaCaoNhat = sanPhamChiTietList.Max(x => x.Gia),
+                    GiaThapNhat = sanPhamChiTietList.Min(x => x.GiaGiam ?? x.Gia), 
+                    GiaCaoNhat = sanPhamChiTietList.Max(x => x.GiaGiam ?? x.Gia), 
                     RepresentativeImage = representativeImage,
                     ColorImages = colorImages
                 };
@@ -107,34 +110,37 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 if (sanphamId == Guid.Empty)
                 {
-                    return NotFound("Mã sản phẩm không hợp lệ");
+                    return NotFound("Mã sản phẩm không hợp lệ.");
                 }
 
                 var sanPham = await _sanPhamservice.GetSanPhamById(sanphamId);
                 if (sanPham == null)
                 {
-                    return NotFound($"Không tìm thấy sản phẩm có mã {sanphamId}");
+                    return NotFound($"Không tìm thấy sản phẩm có mã {sanphamId}.");
                 }
 
                 var sanPhamChiTietList = await _sanPhamCTservice.GetSanPhamChiTietBySanPhamId(sanphamId);
                 if (sanPhamChiTietList == null || !sanPhamChiTietList.Any())
                 {
-                    return NotFound($"Không tìm thấy chi tiết sản phẩm cho {sanphamId}");
+                    return NotFound($"Không tìm thấy chi tiết sản phẩm cho mã {sanphamId}.");
                 }
 
                 var sanPhamChiTietViewModels = new List<SanPhamChiTietItemViewModel>();
-                var availableColors = new List<MauSac>();
-                var availableSizes = new List<KichCo>();
+                var availableColors = new HashSet<MauSac>();
+                var availableSizes = new HashSet<KichCo>();
 
                 foreach (var chiTiet in sanPhamChiTietList)
                 {
                     var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
-                    availableColors.AddRange(mauSacList);
+                    availableColors.UnionWith(mauSacList);
 
                     var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
-                    availableSizes.AddRange(kichCoList);
+                    availableSizes.UnionWith(kichCoList);
 
                     var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
+
+                    // Lấy giá đã giảm từ chi tiết sản phẩm
+                    double? discountedPrice = chiTiet.GiaGiam; 
 
                     sanPhamChiTietViewModels.Add(new SanPhamChiTietItemViewModel
                     {
@@ -143,22 +149,26 @@ namespace APPMVC.Areas.Client.Controllers
                         MauSac = mauSacList.Select(ms => ms.TenMauSac).ToList(),
                         KichCo = kichCoList.Select(kc => kc.TenKichCo).ToList(),
                         Gia = chiTiet.Gia,
+                        GiaDaGiam = discountedPrice,
                         SoLuong = chiTiet.SoLuong,
                         XuatXu = chiTiet.XuatXu,
                     });
                 }
+
+                var firstDetail = sanPhamChiTietViewModels.FirstOrDefault();
 
                 var viewModel = new SanPhamChiTietClientViewModel
                 {
                     IdSanPham = sanphamId,
                     TenSanPham = sanPham.TenSanPham,
                     MoTa = sanPham.MoTa,
-                    Gia = sanPhamChiTietViewModels.FirstOrDefault()?.Gia,
-                    SoLuong = sanPhamChiTietViewModels.FirstOrDefault()?.SoLuong,
+                    DiscountedPrice = firstDetail?.GiaDaGiam,
+                    Gia = firstDetail?.Gia,
+                    SoLuong = firstDetail?.SoLuong,
                     SanPhamChiTietList = sanPhamChiTietViewModels,
                     HinhAnhs = sanPhamChiTietViewModels.SelectMany(d => d.HinhAnhs).Distinct().ToList(),
-                    AvailableColors = availableColors.Distinct().ToList(),
-                    AvailableSizes = availableSizes.Distinct().ToList(),
+                    AvailableColors = availableColors.ToList(),
+                    AvailableSizes = availableSizes.ToList(),
                     SelectedColorId = selectedColorId,
                     SelectedSizeId = selectedSizeId,
                 };
@@ -167,12 +177,12 @@ namespace APPMVC.Areas.Client.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "Internal server error");
+                // Log the exception if necessary
+                return StatusCode(500, "Đã xảy ra lỗi nội bộ. Vui lòng thử lại sau.");
             }
         }
         public async Task<IActionResult> GetVariant(Guid productId, Guid colorId, Guid sizeId)
         {
-
             var sanPhamChiTiet = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(productId, sizeId, colorId);
 
             if (sanPhamChiTiet == null)
@@ -182,10 +192,14 @@ namespace APPMVC.Areas.Client.Controllers
 
             var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
 
+            double? originalPrice = sanPhamChiTiet.Gia;
+            double? discountedPrice = sanPhamChiTiet.GiaGiam;
+
             return Json(new
             {
                 success = true,
-                price = sanPhamChiTiet.Gia,
+                originalPrice = originalPrice,
+                discountedPrice = discountedPrice,
                 quantity = sanPhamChiTiet.SoLuong,
                 images = hinhAnhs.Select(h => new
                 {
@@ -194,7 +208,6 @@ namespace APPMVC.Areas.Client.Controllers
                 }).ToList()
             });
         }
-
         [HttpPost]
         public async Task<IActionResult> AddToCard(Guid productId, Guid colorId, Guid sizeId)
         {
@@ -217,31 +230,51 @@ namespace APPMVC.Areas.Client.Controllers
                     return NotFound(new { message = "Shopping cart not found for this customer." });
                 }
 
-                // Fetch product details
                 var sanPhamChiTiet = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(productId, sizeId, colorId);
                 if (sanPhamChiTiet == null)
                 {
                     return Json(new { success = false, message = "Product not found" });
                 }
+
                 int requestedQuantity = 1; 
-                if (requestedQuantity <= 0) 
+                if (requestedQuantity <= 0)
                 {
                     return Json(new { success = false, message = "Quantity must be greater than zero." });
                 }
 
-                if (requestedQuantity > sanPhamChiTiet.SoLuong) 
+                if (requestedQuantity > sanPhamChiTiet.SoLuong)
                 {
                     return Json(new { success = false, message = "Insufficient quantity available." });
                 }
+
+                var existingItem = await _gioHangChiTietService.GetByProductIdAndCartIdAsync(sanPhamChiTiet.IdSanPhamChiTiet, idGioHang);
+                if (existingItem != null)
+                {
+
+                    double newQuantity = existingItem.SoLuong + requestedQuantity;
+
+                    if (newQuantity > sanPhamChiTiet.SoLuong)
+                    {
+                        return Json(new { success = false, message = "Total quantity exceeds available stock." });
+                    }
+
+                    existingItem.SoLuong = newQuantity;
+                    existingItem.TongTien = existingItem.DonGia * newQuantity;
+
+                    await _gioHangChiTietService.UpdateAsync(existingItem); 
+                    return Ok(new { message = "Item quantity updated in cart successfully", existingItem });
+                }
+
+                var donGia = sanPhamChiTiet.GiaGiam ?? sanPhamChiTiet.Gia;
 
                 var gioHangChiTiet = new GioHangChiTiet
                 {
                     IdGioHangChiTiet = Guid.NewGuid(),
                     IdGioHang = idGioHang,
                     IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
-                    DonGia = sanPhamChiTiet.Gia,
+                    DonGia = donGia,
                     SoLuong = requestedQuantity,
-                    TongTien = sanPhamChiTiet.Gia * requestedQuantity,
+                    TongTien = donGia * requestedQuantity,
                     KichHoat = 1
                 };
 
@@ -256,6 +289,5 @@ namespace APPMVC.Areas.Client.Controllers
                 return StatusCode(500, new { message = "An error occurred while adding to the cart." });
             }
         }
-
     }
 }

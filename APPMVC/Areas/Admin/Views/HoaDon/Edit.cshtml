@@ -330,19 +330,38 @@
                         <tr>
                             <td>@sanPham.ProductName</td>
                             <td>@sanPham.Quantity</td>
-                            <td>@sanPham.Price.ToString("N0")</td>
                             <td>
-                                @if (sanPham.HinhAnhs != null && sanPham.HinhAnhs.Any())
+                                @if (sanPham.GiaDaGiam.HasValue && sanPham.GiaDaGiam < sanPham.Price)
                                 {
-                                    var hinhAnh = sanPham.HinhAnhs.First();
-                                    var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
-                                    var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
-                                    <img src="@imageUrl" alt="Hình ảnh sản phẩm" style="width: 50px; height: auto;" />
+                                    <span style="text-decoration: line-through; color: red;">@sanPham.Price.ToString("N0")</span>
+                                    <span style="color: green; font-weight: bold;">@sanPham.GiaDaGiam.Value.ToString("N0")</span>
                                 }
                                 else
                                 {
-                                    <span>Không có hình ảnh</span>
+                                    @sanPham.Price.ToString("N0")
                                 }
+                            </td>
+                            <td>
+                                <div style="position: relative;">
+                                    @if (sanPham.HinhAnhs != null && sanPham.HinhAnhs.Any())
+                                    {
+                                        var hinhAnh = sanPham.HinhAnhs.First();
+                                        var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
+                                        var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
+                                        <img src="@imageUrl" alt="Hình ảnh sản phẩm" style="width: 50px; height: auto;" />
+                                    }
+                                    else
+                                    {
+                                        <span>Không có hình ảnh</span>
+                                    }
+
+                                    @if (sanPham.PhanTramGiam.HasValue)
+                                    {
+                                        <span style="position: absolute; top: 0; right: 0; color: red; font-weight: bold;">
+                                            Giảm @sanPham.PhanTramGiam % 
+                                        </span>
+                                    }
+                                </div>
                             </td>
                             <td>
                                 @if (sanPham.MauSac != null && sanPham.MauSac.Any())

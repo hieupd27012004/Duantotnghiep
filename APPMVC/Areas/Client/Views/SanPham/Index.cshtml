@@ -20,10 +20,21 @@
         position: relative;
     }
 
+    .discount-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: red;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
     .product-colors {
         display: flex;
-        justify-content: center; /* Can be adjusted to 'flex-start' for left alignment */
-        margin-bottom: 10px; /* Add margin to separate from title */
+        justify-content: center;
+        margin-bottom: 10px;
     }
 
     .color-item {
@@ -71,6 +82,12 @@
                              class="img-fluid"
                              alt="@sanPham.TenSanPham"
                              data-original-image="@(sanPham.RepresentativeImage != null ? $"data:image;base64,{Convert.ToBase64String(sanPham.RepresentativeImage)}" : "/images/default-product.jpg")" />
+
+                        @if (sanPham.GiaThapNhat < sanPham.GiaCaoNhat) // Kiểm tra xem có giảm giá không
+                        {
+                            var discountPercentage = Math.Round(((Convert.ToDouble(sanPham.GiaCaoNhat) - Convert.ToDouble(sanPham.GiaThapNhat)) / Convert.ToDouble(sanPham.GiaCaoNhat)) * 100);
+                            <div class="discount-badge">Giảm @discountPercentage%!</div>
+                        }
                     </div>
                     <div class="product-info">
                         <div class="product-colors mb-2">
@@ -107,13 +124,13 @@
             colorItems.forEach(colorItem => {
                 colorItem.addEventListener('click', function () {
                     mainImage.src = 'data:image;base64,' + this.getAttribute('data-main-image');
-                    });
-                });
-
-                card.addEventListener('mouseleave', function () {
-                const originalImage = mainImage.getAttribute('data-original-image');
-                mainImage.src = originalImage;
                 });
             });
+
+            card.addEventListener('mouseleave', function () {
+                const originalImage = mainImage.getAttribute('data-original-image');
+                mainImage.src = originalImage;
+            });
         });
+    });
 </script>

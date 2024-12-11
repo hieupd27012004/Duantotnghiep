@@ -95,27 +95,14 @@
                     <div class="d-flex mt-5 mb-2">
                         <div class="form-group mb-1 me-5">
                             <label>Tỉnh/Thành phố</label>
-                            @* <select id="ProvinceId" asp-for="ProvinceId" class="form-control" asp-items="@(new SelectList(ViewBag.Provinces, "ProvinceId", "ProvinceName"))">
-                                <option value="">Chọn tỉnh/thành phố</option>
-                            </select>
-                            <input type="hidden" id="ProvinceName" name="ProvinceName" asp-for="ProvinceName" /> *@
                             <input type="text" class="form-control" id="province" name="ProvinceName" value="@Model.ProvinceName " readonly/>
-
                         </div>
                         <div class="form-group mb-3 ms-5 me-5">
-                            <label>Quận/Huyện</label>
-                            @* <select id="DistrictId" class="form-control" asp-for="DistrictId">
-                                <option value="">Chọn quận/huyện</option>
-                            </select>
-                            <input type="hidden" id="DistrictName" name="DistrictName" asp-for="DistrictName" /> *@
+                            <label>Quận/Huyện</label>                     
                             <input type="text" class="form-control" id="district" name="DistrictName" value="@Model.DistrictName" readonly/>
                         </div>
                         <div class="form-group mb-3 ms-4">
                             <label>Phường/Xã</label>
-                           @*  <select id="WardId" asp-for="WardId" class="form-control">
-                                <option value="">Chọn phường/xã</option>
-                            </select>
-                            <input type="hidden" id="WardName" name="WardName" asp-for="WardName" /> *@
                             <input type="text" class="form-control" id="ward" name="WardName" value="@Model.WardName" readonly />
                         </div>                       
                     </div>  
@@ -151,28 +138,27 @@
                     <label for="diaChiCuThe">Địa Chỉ Cụ Thể/Xã</label>
                     <input type="text" class="form-control" id="diaChiCuThe" name="diaChiCuThe" value="@Model.DiaChiCuThe" readonly hidden />
                 </div>
-                <h4 class="my-3">Phương thức thanh toán</h4>
                 <div class="form-group">
+                    <h4 class="my-3">Phương thức thanh toán</h4>
                     <div class="custom-control custom-radio custom-control-inline">
                         <input type="radio" id="thanh_toan_khi_nhan_hang" name="PaymentMethod" value="cash_on_delivery" class="custom-control-input"
                         @(Model.PaymentMethod == "cash_on_delivery" ? "checked" : "")>
                         <label class="custom-control-label" for="thanh_toan_khi_nhan_hang">
-                            <i class="fas fa-money-bill-alt"></i>
-                            Thanh toán khi nhận hàng
+                            <i class="fas fa-money-bill-alt"></i> Thanh toán khi nhận hàng
                         </label>
                     </div>
                     <div class="custom-control custom-radio custom-control-inline">
                         <input type="radio" id="thanh_toan_ngay" name="PaymentMethod" value="online_payment" class="custom-control-input"
                         @(Model.PaymentMethod == "online_payment" ? "checked" : "")>
                         <label class="custom-control-label" for="thanh_toan_ngay">
-                            <i class="fab fa-cc-visa"></i>
-                            Thanh toán ngay
+                            <i class="fab fa-cc-visa"></i> Thanh toán ngay
                         </label>
                     </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary">Hoàn thành đặt hàng</button>
-            </form>
+
+            </form>           
         </div>
 
         
@@ -250,17 +236,24 @@
                                                         <div class="d-flex justify-content-between">
                                                             <div>
                                                                 <strong>@voucher.MaVoucher</strong>
-                                                                <span>@voucher.MoTaVoucher</span>
+                                                                <p class="text-muted mb-0">@voucher.MoTaVoucher</p>
                                                             </div>
-                                                            <div>
-                                                                @if (voucher.LoaiGiamGia == 1) // Giảm theo %
+                                                            <div class="text-right">
+                                                                @if (voucher.LoaiGiamGia == 1)
                                                                 {
-                                                                    <span>Giảm @(voucher.GiaTriGiam)%</span>
-                                                                    @* Kiểm tra giá trị *@
+                                                                    <span class="badge bg-primary">Giảm @(voucher.GiaTriGiam)%</span>
                                                                     @if (voucher.SoTienToiDa > 0)
                                                                     {
-                                                                        <small class="d-block">Tối đa @(voucher.SoTienToiDa.ToString("N0"))đ</small>
+                                                                        <small class="d-block text-muted">Tối đa @(voucher.SoTienToiDa.ToString("N0"))đ</small>
                                                                     }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge bg-success">Giảm @(voucher.GiaTriGiam.ToString("N0"))đ</span>
+                                                                }
+                                                                @if (voucher.GiaTriDonHangToiThieu > 0)
+                                                                {
+                                                                    <small class="d-block text-muted">Áp dụng cho đơn hàng từ @(voucher.GiaTriDonHangToiThieu.ToString("N0"))đ</small>
                                                                 }
                                                             </div>
                                                         </div>
@@ -356,81 +349,98 @@
         });
     }
     $(document).ready(function () {
-        // Xử lý chọn voucher
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+        }
+
         $('.voucher-radio').on('change', function () {
-            // Lấy thông tin voucher
             var voucherId = $(this).val();
-            var voucherType = $(this).data('type');
-            var voucherValue = parseFloat($(this).data('value'));
-            var maxValue = parseFloat($(this).data('max-value'));
-            var minOrder = parseFloat($(this).data('min-order'));
 
-            // Debug log
-            console.log('Voucher Details:', {
-                voucherId: voucherId,
-                voucherType: voucherType,
-                voucherValue: voucherValue,
-                maxValue: maxValue,
-                minOrder: minOrder
-            });
+            $.ajax({
+                url: '@Url.Action("ApplyVoucher", "HomeClient", new { area = "Client" })',
+                type: 'POST',
+                data: { voucherId: voucherId },
+                success: function (response) {
+                    // Kiểm tra và format lại các giá trị từ response
+                    response.totalAfterDiscount = formatCurrency(response.totalAfterDiscount);
+                    response.discountAmount = formatCurrency(response.discountAmount);
 
-            // Lấy tổng tiền đơn hàng (loại bỏ định dạng tiền tệ)
-            var totalOrder = parseFloat($('#tong_so_tien').val().replace(/[^\d.-]/g, ''));
-            var shippingFee = parseFloat($('#phi_van_chuyen').val().replace(/[^\d.-]/g, ''));
+                    var shippingFeeInput = $('#phi_van_chuyen');
+                    var shippingFee = parseFloat(shippingFeeInput.val());
 
-            // Debug log
-            console.log('Order Total:', totalOrder);
-            console.log('Shipping Fee:', shippingFee);
-            console.log('Minimum Order:', minOrder);
+                    if (response.success) {
+                        // Xóa các voucher trước đó
+                        $('#discount-row').remove();
+                        $('input[name="SelectedVoucherId"]').remove();
+                        $('input[name="DiscountAmount"]').remove();
 
-            // Kiểm tra điều kiện áp dụng voucher
-            if (minOrder > 0 && totalOrder < minOrder) {
-                alert(`Voucher chỉ áp dụng cho đơn hàng từ ${minOrder.toLocaleString()}đ. Đơn hàng hiện tại: ${totalOrder.toLocaleString()}đ`);
-                $(this).prop('checked', false);
-                return;
-            }
+                        // Tính toán lại tổng tiền
+                        var totalOrderInput = $('#tong_so_tien');
+                        var totalOrder = parseFloat(totalOrderInput.val());
+                        var totalBillInput = $('#tong_tien');
 
-            // Tính giảm giá
-            var discountAmount = 0;
-            if (voucherType === 1) { // Giảm theo %
-                discountAmount = totalOrder * (voucherValue / 100.0);
+                        // Hiển thị giảm giá
+                        totalOrderInput.closest('.form-group').after(`
+                            <div id="discount-row" class="form-group">
+                                <label>Giảm giá Voucher</label>
+                                <input type="text" class="form-control" value="${response.discountAmount}" readonly />
+                            </div>
+                        `);
 
-                // Kiểm tra giảm tối đa
-                if (maxValue > 0) {
-                    discountAmount = Math.min(discountAmount, maxValue);
+                        // Cập nhật tổng tiền
+                        totalOrderInput.val(formatCurrency(totalOrder));
+                        shippingFeeInput.val(formatCurrency(shippingFee));
+                        totalBillInput.val(response.totalAfterDiscount);
+
+                        // Thêm trường ẩn để gửi thông tin voucher
+                        $('form').append(`
+                            <input type="hidden" name="SelectedVoucherId" value="${response.voucherId}" />
+                            <input type="hidden" name="DiscountAmount" value="${response.discountAmount}" />
+                        `);
+                    } else {
+                        // Reset toàn bộ voucher và giá
+                        $('#discount-row').remove();
+                        $('input[name="SelectedVoucherId"]').remove();
+                        $('input[name="DiscountAmount"]').remove();
+
+                        // Tính lại tổng tiền ban đầu
+                        var totalOrderInput = $('#tong_so_tien');
+                        var totalOrder = parseFloat(totalOrderInput.val());
+                        var totalBillInput = $('#tong_tien');
+
+                        // Bỏ chọn tất cả voucher radio
+                        $('.voucher-radio').prop('checked', false);
+
+                        // Khôi phục giá ban đầu
+                        totalOrderInput.val(formatCurrency(totalOrder));
+                        shippingFeeInput.val(formatCurrency(shippingFee));
+                        totalBillInput.val(formatCurrency(totalOrder + shippingFee));
+
+                        // Hiển thị thông báo lỗi
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    // Reset toàn bộ voucher và giá khi có lỗi
+                    $('#discount-row').remove();
+                    $('input[name="SelectedVoucherId"]').remove();
+                    $('input[name="DiscountAmount"]').remove();
+                    $('.voucher-radio').prop('checked', false);
+
+                    // Tính lại tổng tiền ban đầu
+                    var totalOrderInput = $('#tong_so_tien');
+                    var totalOrder = parseFloat(totalOrderInput.val());
+                    var shippingFeeInput = $('#phi_van_chuyen');
+                    var shippingFee = parseFloat(shippingFeeInput.val());
+                    var totalBillInput = $('#tong_tien');
+
+                    totalOrderInput.val(formatCurrency(totalOrder));
+                    shippingFeeInput.val(formatCurrency(shippingFee));
+                    totalBillInput.val(formatCurrency(totalOrder + shippingFee));
+
+                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
                 }
-            } else { // Giảm cố định
-                discountAmount = voucherValue;
-            }
-
-            // Đảm bảo giảm giá không vượt quá tổng đơn hàng
-            discountAmount = Math.min(discountAmount, totalOrder);
-
-            // Cập nhật hiển thị
-            var totalAfterDiscount = totalOrder - discountAmount;
-            var totalWithShipping = totalAfterDiscount + shippingFee;
-
-            // Định dạng tiền tệ
-            function formatCurrency(value) {
-                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-            }
-
-            // Thêm dòng giảm giá vào bảng
-            $('#discount-row').remove();
-            $('#tong_tien').closest('.form-group').after(`
-                <div id="discount-row" class="form-group">
-                    <label>Giảm giá Voucher</label>
-                    <input type="text" class="form-control" value="${formatCurrency(discountAmount)}" readonly />
-                </div>
-            `);
-
-            // Cập nhật tổng tiền
-            $('#tong_tien').val(formatCurrency(totalWithShipping));
-
-            // Debug log kết quả
-            console.log('Discount Amount:', discountAmount);
-            console.log('Total After Discount:', totalAfterDiscount);
-            console.log('Total With Shipping:', totalWithShipping);
+            });
         });
     });
 </script>

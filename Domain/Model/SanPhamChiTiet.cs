@@ -14,11 +14,13 @@ namespace AppData.Model
         [RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
         [Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
         public double Gia { get; set; }
+        public string? MaSp { get; set; }    
+
         [Required(ErrorMessage = "Không Được Để Trống")]
         [RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
         [Range(0, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
         public double SoLuong { get; set; }
-
+        public double? GiaGiam { get; set; }
         public string? CoHienThi { get; set; }
         [DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]

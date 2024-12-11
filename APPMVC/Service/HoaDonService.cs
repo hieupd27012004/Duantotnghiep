@@ -55,6 +55,27 @@ namespace APPMVC.Service
             return await response.Content.ReadFromJsonAsync<HoaDon>();
         }
 
+        public async Task<HoaDon> GetByMaDonAsync(string maDon)
+        {
+            var response = await _httpClient.GetAsync($"api/HoaDon/getbymadan?maDon={maDon}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var hoaDon = await response.Content.ReadFromJsonAsync<HoaDon>();
+                if (hoaDon == null)
+                {
+                    Console.WriteLine("Không tìm thấy hóa đơn nào với mã đơn này.");
+                }
+                return hoaDon;
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error retrieving HoaDon by MaDon: {content}");
+                return null;
+            }
+        }
+
         public async Task<HoaDon> GetByOrderNumberAsync(string orderNumber)
         {
             var response = await _httpClient.GetAsync($"api/HoaDon/getbyordernumber?orderNumber={orderNumber}");
@@ -72,6 +93,21 @@ namespace APPMVC.Service
             }
         }
 
+        public async Task<List<HoaDon>> GetHoaDonsByCustomerIdAsync(Guid customerId)
+        {
+            var response = await _httpClient.GetAsync($"api/HoaDon/getbycustomerid?customerId={customerId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<List<HoaDon>>() ?? new List<HoaDon>();
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Error retrieving HoaDons by customer ID: {content}");
+                return new List<HoaDon>(); 
+            }
+        }
 
         public async Task UpdateAsync(HoaDon hoaDon)
         {

@@ -1,6 +1,7 @@
 ﻿using AppAPI.IRepository;
 using AppAPI.IService;
 using AppData.Model;
+using Castle.Core.Resource;
 
 namespace AppAPI.Service
 {
@@ -49,6 +50,16 @@ namespace AppAPI.Service
         public async Task<HoaDon> GetByOrderNumberAsync(string orderNumber)
         {
             return await _hoaDonRepository.GetByOrderNumberAsync(orderNumber);
+        }
+
+        public async Task<List<HoaDon>> GetHoaDonsByCustomerIdAsync(Guid customerId)
+        {
+            return await _hoaDonRepository.GetHoaDonsByCustomerIdAsync(customerId);
+        }
+
+        public async Task<HoaDon> GetByMaDonAsync(string maDon)
+        {
+            return await _hoaDonRepository.GetByMaDonAsync(maDon);
         }
     }
 }

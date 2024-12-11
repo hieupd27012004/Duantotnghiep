@@ -36,9 +36,7 @@
         <!-- Thông tin sản phẩm -->
         <div class="col-lg-6 product-detail-info">
             <h2>@Model.TenSanPham</h2>
-            <p id="product-price" class="price">
-                @(Model.Gia.HasValue ? Model.Gia.Value.ToString("N0") + " VND" : "Chưa có giá")
-            </p>
+            <p id="product-price" class="price"></p> <!-- Initially empty -->
             <p id="product-quantity" class="quantity">
                 Số lượng: @(Model.SoLuong.HasValue ? Model.SoLuong.Value.ToString() : "Không có thông tin")
             </p>
@@ -48,7 +46,7 @@
                 <div class="btn-group color-selector" role="group">
                     @if (Model.AvailableColors != null && Model.AvailableColors.Any())
                     {
-                        var distinctColors = Model.AvailableColors.DistinctBy(c => c.IdMauSac).ToList(); // Sử dụng DistinctBy để lọc màu trùng
+                        var distinctColors = Model.AvailableColors.DistinctBy(c => c.IdMauSac).ToList();
                         foreach (var color in distinctColors)
                         {
                             <button value="@color.IdMauSac" class="btn btn-dark color-btn @(color.IdMauSac == Model.SelectedColorId ? "active" : "")" type="button">
@@ -105,17 +103,35 @@
 </div>
 
 <script>
-        $(document).ready(function () {
-        let selectedColor = '@Model.SelectedColorId';
-        let selectedSize = '@Model.SelectedSizeId';
+    $(document).ready(function () {
+        let selectedColor = '@Model.SelectedColorId' || '';
+        let selectedSize = '@Model.SelectedSizeId' || '';
         let sanPhamId = '@Model.IdSanPham';
 
-     // Đánh dấu màu đã chọn
+        let firstDetail = @Html.Raw(Json.Serialize(Model.SanPhamChiTietList.FirstOrDefault()));
+        let initialPriceDisplay = '';
+
+        if (firstDetail && firstDetail.DiscountedPrice < firstDetail.Gia) {
+            initialPriceDisplay = `
+                <div style="display: flex; align-items: center;">
+                    <span style="text-decoration: line-through; color: red; margin-right: 10px;">
+                        ${firstDetail.Gia.toLocaleString()} VND
+                    </span>
+                    <span style="color: green;">
+                        ${firstDetail.DiscountedPrice.toLocaleString()} VND
+                    </span>
+                </div>
+            `;
+        } else {
+            initialPriceDisplay = firstDetail.Gia ? `${firstDetail.Gia.toLocaleString()} VND` : "Chưa có giá";
+        }
+
+        $('#product-price').html(initialPriceDisplay);
+
         if (selectedColor) {
             $('.color-btn[value="' + selectedColor + '"]').addClass('active');
         }
 
-        // Đánh dấu kích thước đã chọn
         if (selectedSize) {
             $('.size-btn[value="' + selectedSize + '"]').addClass('active');
         }
@@ -124,7 +140,6 @@
             $('.color-btn').removeClass('active');
             $(this).addClass('active');
             selectedColor = $(this).val();
-            console.log("Selected Color: " + selectedColor);
             updateProductVariant();
         });
 
@@ -132,7 +147,6 @@
             $('.size-btn').removeClass('active');
             $(this).addClass('active');
             selectedSize = $(this).val();
-            console.log("Selected Size: " + selectedSize);
             updateProductVariant();
         });
 
@@ -144,15 +158,35 @@
                     data: { productId: sanPhamId, colorId: selectedColor, sizeId: selectedSize },
                     success: function (data) {
                         if (data.success) {
-                            $('#product-price').text(data.price.toLocaleString() + ' VND');
+                            let priceDisplay = '';
+                            if (data.discountedPrice !== null && data.discountedPrice < data.originalPrice) {
+                                priceDisplay = `
+                                    <div style="display: flex; align-items: center;">
+                                        <span style="text-decoration: line-through; color: red; margin-right: 10px;">
+                                            ${data.originalPrice.toLocaleString()} VND
+                                        </span>
+                                        <span style="color: green;">
+                                            ${data.discountedPrice.toLocaleString()} VND
+                                        </span>
+                                    </div>
+                                `;
+                            } else {
+                                priceDisplay = `${data.originalPrice.toLocaleString()} VND`;
+                            }
+
+                            $('#product-price').html(priceDisplay);
                             $('#product-quantity').text('Số lượng: ' + data.quantity);
 
-                            // Cập nhật hình ảnh
+                            // Update images
                             $('.product-detail-image').empty();
-                            data.images.forEach(function (image) {
-                                var imageUrl = 'data:' + image.type + ';base64,' + image.base64;
-                                $('.product-detail-image').append('<img src="' + imageUrl + '" alt="Hình ảnh sản phẩm" class="img-thumbnail" style="max-width: 200px; max-height: 200px; margin: 5px;" />');
-                            });
+                            if (data.images.length > 0) {
+                                data.images.forEach(function (image) {
+                                    var imageUrl = 'data:' + image.type + ';base64,' + image.base64;
+                                    $('.product-detail-image').append('<img src="' + imageUrl + '" alt="Hình ảnh sản phẩm" class="img-thumbnail" style="max-width: 200px; max-height: 200px; margin: 5px;" />');
+                                });
+                            } else {
+                                $('.product-detail-image').append('<span class="text-muted">Không có hình ảnh cho sản phẩm này.</span>');
+                            }
                         } else {
                             alert(data.message);
                         }

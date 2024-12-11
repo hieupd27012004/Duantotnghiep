@@ -78,5 +78,36 @@ namespace APPMVC.Service
             var totalQuantity = await response.Content.ReadFromJsonAsync<double>();
             return totalQuantity;
         }
+
+        public async Task<HoaDonChiTiet> GetByIdAndProduct(Guid idHoaDon, Guid idSanPhamChiTiet)
+        {
+            // Validate the input IDs
+            if (idHoaDon == Guid.Empty || idSanPhamChiTiet == Guid.Empty)
+            {
+                throw new ArgumentException("Invalid order ID or product detail ID.");
+            }
+
+            var requestUrl = $"api/HoaDonChiTiet/getbyidandproduct?idhoadon={idHoaDon}&idsanphamchitiet={idSanPhamChiTiet}";
+
+            var response = await _httpClient.GetAsync(requestUrl);
+
+            // Check if the response is successful
+            if (!response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return null; // Return null if not found
+                }
+
+                // Throw an exception for other status codes
+                throw new Exception($"Error retrieving order detail: {response.ReasonPhrase}. Content: {content}");
+            }
+
+            // Read and return the HoaDonChiTiet from the response
+            return await response.Content.ReadFromJsonAsync<HoaDonChiTiet>()
+                   ?? throw new Exception("Failed to deserialize response to HoaDonChiTiet.");
+        }
     }
 }

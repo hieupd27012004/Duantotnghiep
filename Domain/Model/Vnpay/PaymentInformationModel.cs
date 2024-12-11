@@ -8,7 +8,7 @@ namespace AppData.Model.Vnpay
 {
     public class PaymentInformationModel
     {
-        public int OrderId { get; set; }
+        public Guid OrderId { get; set; }
         public string OrderType { get; set; }
         public double Amount { get; set; }
         public string Description { get; set; }

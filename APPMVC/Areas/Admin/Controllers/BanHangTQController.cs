@@ -172,7 +172,79 @@ namespace APPMVC.Areas.Admin.Controllers
 
             return View("Index");
         }
+        [HttpGet]
+        public IActionResult ThemKhachHang()
+        {
+            return PartialView("ThemKhachHang"); 
+        }
+        [HttpPost]
+        public async Task<IActionResult> ThemKhachHang(HoaDonChiTietViewModel.KhachHangViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return PartialView("ThemKhachHang", model);
+            }
 
+            var khachHang = new KhachHang
+            {
+                IdKhachHang = Guid.NewGuid(),
+                HoTen = model.HoTen,
+                SoDienThoai = model.SoDienThoai,
+                Email = model.Email,
+                NgayTao = DateTime.Now,
+                NgayCapNhat = DateTime.Now,
+                KichHoat = 1
+            };
+
+            try
+            {
+                await _khachHangService.AddKhachHang(khachHang);
+                return RedirectToAction("Index"); 
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Đã xảy ra lỗi khi thêm khách hàng. Vui lòng thử lại.");
+                Console.WriteLine(ex.Message);
+            }
+
+            return PartialView("ThemKhachHang", model);
+        }
+        [HttpPost]
+        public async Task<IActionResult> XoaHoaDon(Guid idHoaDon)
+        {
+            try
+            {
+                var hoaDon = await _hoaDonService.GetByIdAsync(idHoaDon);
+                if (hoaDon == null)
+                {
+                    return NotFound();
+                }
+
+                await _hoaDonService.DeleteAsync(idHoaDon);
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Đã xảy ra lỗi khi xóa đơn hàng. Vui lòng thử lại.");
+                Console.WriteLine(ex.Message);
+                return RedirectToAction("Index");
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> XoaSanPhamChiTiet(Guid idSanPhamChiTiet)
+        {
+            try
+            {
+                await _hoaDonChiTietService.DeleteAsync(idSanPhamChiTiet);
+                return RedirectToAction("Index"); // Hoặc trang mà bạn muốn chuyển hướng
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Đã xảy ra lỗi khi xóa sản phẩm. Vui lòng thử lại.");
+                Console.WriteLine(ex.Message);
+                return RedirectToAction("Index");
+            }
+        }
         private async Task<string> GenerateOrderNumberAsync()
         {
             var lastOrderNumber = await GetLastOrderNumberAsync();
@@ -229,7 +301,6 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(id) ?? new List<HoaDonChiTiet>();
-
             var sanPhamChiTiets = new List<HoaDonChiTietViewModel.SanPhamChiTietViewModel>();
 
             foreach (var hoaDonChiTiet in hoaDonChiTietList)
@@ -247,16 +318,29 @@ namespace APPMVC.Areas.Admin.Controllers
 
                     var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
 
+                    var gia = sanPhamCT.Gia;
+                    var giaDaGiam = sanPhamCT.GiaGiam; 
+                    double? phanTramGiam = null;
+
+                    if (giaDaGiam.HasValue && giaDaGiam < gia)
+                    {
+                        phanTramGiam = Math.Round(((gia - giaDaGiam.Value) / gia) * 100, 2); 
+                    }
+
+
                     sanPhamChiTiets.Add(new HoaDonChiTietViewModel.SanPhamChiTietViewModel
                     {
                         IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
+                        MaSanPham = sanPhamCT.MaSp,
                         Quantity = hoaDonChiTiet.SoLuong,
-                        Price = sanPhamCT.Gia,
+                        Price = gia,
                         ProductName = sanPham?.TenSanPham,
                         MauSac = mauSacTenList,
                         KichCo = kichCoTenList,
                         HinhAnhs = hinhAnhs,
-                        IdHoaDonChiTiet = hoaDonChiTiet.IdHoaDonChiTiet
+                        IdHoaDonChiTiet = hoaDonChiTiet.IdHoaDonChiTiet,
+                        GiaDaGiam = giaDaGiam,
+                        PhanTramGiam = phanTramGiam
                     });
                 }
             }
@@ -266,7 +350,7 @@ namespace APPMVC.Areas.Admin.Controllers
             var viewModel = new HoaDonChiTietViewModel
             {
                 DonGia = tongTienHang,
-                GiamGia = hoaDon.TienGiam, 
+                GiamGia = hoaDon.TienGiam,
                 TongTien = tongTienHang + (hoaDon.TienShip ?? 0),
                 PhiVanChuyen = hoaDon.TienShip,
                 HoaDon = new HoaDonChiTietViewModel.HoaDonViewModel
@@ -277,9 +361,8 @@ namespace APPMVC.Areas.Admin.Controllers
                     SoDienThoaiNguoiNhan = hoaDon.SoDienThoaiNguoiNhan,
                     LoaiHoaDon = hoaDon.LoaiHoaDon,
                     DiaChiGiaoHang = hoaDon.DiaChiGiaoHang
-                   
                 },
-                SanPhamChiTiets = sanPhamChiTiets 
+                SanPhamChiTiets = sanPhamChiTiets
             };
 
             return PartialView("Edit", viewModel);
@@ -305,15 +388,27 @@ namespace APPMVC.Areas.Admin.Controllers
 
                         var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
 
+                        var gia = sanPhamCT.Gia;
+                        var giaDaGiam = sanPhamCT?.GiaGiam; 
+                        double? phanTramGiam = null;
+
+                        if (giaDaGiam.HasValue && giaDaGiam < gia)
+                        {
+                            phanTramGiam = Math.Round(((gia - giaDaGiam.Value) / gia) * 100, 2);
+                        }
+
                         sanPhamChiTietViewModels.Add(new SanPhamChiTietViewModel
                         {
                             IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
+                            MaSanPham = sanPhamCT.MaSp,
                             Quantity = sanPhamCT.SoLuong,
-                            Price = sanPhamCT.Gia,
+                            Price = gia,
                             ProductName = sanPham?.TenSanPham,
                             MauSac = mauSacTenList,
                             KichCo = kichCoTenList,
-                            HinhAnhs = hinhAnhs
+                            HinhAnhs = hinhAnhs,
+                            GiaDaGiam = giaDaGiam,
+                            PhanTramGiam = phanTramGiam 
                         });
                     });
 
@@ -345,12 +440,41 @@ namespace APPMVC.Areas.Admin.Controllers
                     return Json(new { success = false, message = "Sản phẩm không tồn tại." });
                 }
 
-                int requestedQuantity = 1; // Giả định bạn có thể thay đổi số lượng này từ frontend
+                var giaDaGiam = sanPhamChiTiet.GiaGiam;
+                var gia = sanPhamChiTiet.Gia;
+
+                if (giaDaGiam.HasValue && giaDaGiam < gia)
+                {
+                    gia = giaDaGiam.Value;
+                }
+
+                int requestedQuantity = 1;
                 if (requestedQuantity <= 0)
                 {
                     return Json(new { success = false, message = "Số lượng phải lớn hơn 0." });
                 }
 
+                var existingChiTiet = await _hoaDonChiTietService.GetByIdAndProduct(IdHoaDon, IdSanPhamChiTiet);
+                if (existingChiTiet != null)
+                {
+                    double newQuantity = existingChiTiet.SoLuong + requestedQuantity;
+
+                    if (newQuantity > sanPhamChiTiet.SoLuong)
+                    {
+                        return Json(new { success = false, message = "Số lượng yêu cầu vượt quá số lượng có sẵn." });
+                    }
+
+                    existingChiTiet.SoLuong = newQuantity;
+                    existingChiTiet.TongTien = existingChiTiet.DonGia * newQuantity;
+
+
+                    await _hoaDonChiTietService.UpdateAsync(new List<HoaDonChiTiet> { existingChiTiet });
+
+                    var updatedProductList = await GetSanPhamChiTietList(IdHoaDon);
+                    return Json(new { success = true, message = "Cập nhật số lượng sản phẩm thành công.", html = updatedProductList });
+                }
+
+                // If not found, create a new entry
                 if (requestedQuantity > sanPhamChiTiet.SoLuong)
                 {
                     return Json(new { success = false, message = "Số lượng yêu cầu vượt quá số lượng có sẵn." });
@@ -361,23 +485,16 @@ namespace APPMVC.Areas.Admin.Controllers
                     IdHoaDonChiTiet = Guid.NewGuid(),
                     IdHoaDon = IdHoaDon,
                     IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
-                    DonGia = sanPhamChiTiet.Gia,
+                    DonGia = gia,
                     SoLuong = requestedQuantity,
-                    TongTien = sanPhamChiTiet.Gia * requestedQuantity,
+                    TongTien = gia * requestedQuantity,
                     KichHoat = 1
                 };
 
-                // Thêm sản phẩm vào hóa đơn mà không trừ số lượng
                 await _hoaDonChiTietService.AddAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
 
-                // Không trừ số lượng sản phẩm
-                // sanPhamChiTiet.SoLuong -= requestedQuantity; // Dòng này đã được bỏ
-
-                // Cập nhật sản phẩm nếu cần, hoặc bỏ qua
-                // await _sanPhamCTService.Update(sanPhamChiTiet); // Có thể bỏ nếu không cần cập nhật
-
-                var updatedProductList = await GetSanPhamChiTietList(IdHoaDon);
-                return Json(new { success = true, message = "Thêm sản phẩm thành công.", html = updatedProductList });
+                var updatedProductListAfterAdd = await GetSanPhamChiTietList(IdHoaDon);
+                return Json(new { success = true, message = "Thêm sản phẩm thành công.", html = updatedProductListAfterAdd });
             }
             catch (Exception ex)
             {
@@ -401,14 +518,15 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(model.IdHoaDon);
+            var originalQuantities = new Dictionary<Guid, double>(); // Store original quantities
 
             foreach (var item in hoaDonChiTietList)
             {
                 var updatedItem = model.SanPhamChiTiets.FirstOrDefault(x => x.IdSanPhamChiTiet == item.IdSanPhamChiTiet);
                 if (updatedItem != null)
                 {
-                    var originalQuantity = item.SoLuong;
-                    item.SoLuong = updatedItem.Quantity;
+                    // Store original quantity before change
+                    originalQuantities[item.IdSanPhamChiTiet] = item.SoLuong;
 
                     var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
                     if (sanPhamCT == null)
@@ -416,19 +534,25 @@ namespace APPMVC.Areas.Admin.Controllers
                         return Json(new { success = false, message = "Chi tiết sản phẩm không tồn tại." });
                     }
 
-                    double quantityChange = item.SoLuong - originalQuantity;
+                    // Check available quantity
+                    var availableQuantity = sanPhamCT.SoLuong;
+                    if (updatedItem.Quantity > availableQuantity)
+                    {
+                        // Revert to original quantity
+                        item.SoLuong = originalQuantities[item.IdSanPhamChiTiet];
+                        await _hoaDonChiTietService.UpdateAsync(hoaDonChiTietList);
 
+                        return Json(new { success = false, message = $"Số lượng không được vượt quá {availableQuantity} cho sản phẩm ID {item.IdSanPhamChiTiet}." });
+                    }
+
+                    item.SoLuong = updatedItem.Quantity;
                     item.TongTien = item.SoLuong * sanPhamCT.Gia;
-
-                    await _sanPhamCTService.Update(sanPhamCT);
                 }
             }
 
             await _hoaDonChiTietService.UpdateAsync(hoaDonChiTietList);
-
             return Json(new { success = true });
         }
-
         [HttpPost]
         public async Task<IActionResult> XacNhanThanhToan(Guid idHoaDon, Guid? idKhachHang)
         {
@@ -706,7 +830,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 CreatDate = DateTime.Now,
                 Description = "Thanh Toán VnPay",
                 FullName = "Nhân Viên",
-                OrderId = new Random().Next(100, 10000)
+                OrderId = Guid.NewGuid(),
             };
 
             return Redirect(_vnPayServie.CreatePaymentUrl(vnPay, HttpContext));
@@ -831,7 +955,6 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> SearchCustomer(string search, Guid IdHoadon)
         {
-            // Validate the search input
             if (string.IsNullOrWhiteSpace(search))
             {
                 return BadRequest("Invalid search criteria.");
@@ -844,90 +967,14 @@ namespace APPMVC.Areas.Admin.Controllers
                 {
                     customerName = (string)null,
                     idKhachHang = (Guid?)null,
-                    nguoiNhan = (string)null,
-                    soDienThoai = (string)null,
-                    provinceName = (string)null,
-                    districtName = (string)null,
-                    wardName = (string)null,
-                    moTa = (string)null,
-                    idHoaDon = (Guid?)null,
-                    phiVanChuyen = 0.0
+                    idHoaDon = IdHoadon
                 });
             }
-
-            // Retrieve the default address for the customer
-            var diaChiKhachHang = await _services.GetDefaultAddressByCustomerIdAsync(customer.IdKhachHang);
-            double phiVanChuyen = 0.0;
-
-            // Retrieve invoice details based on IdHoadon
-            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(IdHoadon);
-            if (hoaDonChiTietList == null || !hoaDonChiTietList.Any())
-            {
-                return NotFound(new { message = "No invoice details found." });
-            }
-
-            // Define shipping parameters
-            double totalWeight = 0.0;
-            int fromDistrictId = 3440; // Adjust accordingly
-            string fromWardCode = "13005"; // Adjust accordingly
-            double height = 50; // Item height in cm
-            double length = 20; // Item length in cm
-            double width = 20; // Item width in cm
-            int serviceTypeId = 2; // Shipping service type
-
-            // Calculate the shipping fee
-            try
-            {
-                foreach (var hoaDonChiTiet in hoaDonChiTietList)
-                {
-                    var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
-                    if (sanPhamCT != null)
-                    {
-                        // Calculate the total weight for shipping
-                        totalWeight += hoaDonChiTiet.SoLuong * 200; // Assuming weight per item is 200 grams
-
-                        // Calculate the shipping fee if the destination address is available
-                        if (diaChiKhachHang != null)
-                        {
-                            int toDistrictId = diaChiKhachHang.DistrictId;
-                            string toWardCode = diaChiKhachHang.WardId;
-
-                            phiVanChuyen += await _giaoHangNhanhService.CalculateShippingFee(
-                                fromDistrictId,
-                                fromWardCode,
-                                toDistrictId,
-                                toWardCode,
-                                height,
-                                length,
-                                hoaDonChiTiet.SoLuong * 200, // Total weight for this item
-                                width,
-                                serviceTypeId,
-                                sanPhamCT?.NguoiTao ?? "Unknown Product",
-                                (int)hoaDonChiTiet.SoLuong
-                            );
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error calculating shipping fee: {ex.Message}");
-                phiVanChuyen = 0.0; 
-            }
-
-            // Return the customer and calculated shipping fee
             return Ok(new
             {
                 customerName = customer.HoTen,
                 idKhachHang = customer.IdKhachHang,
-                nguoiNhan = diaChiKhachHang?.HoTen,
-                soDienThoai = diaChiKhachHang?.SoDienThoai,
-                provinceName = diaChiKhachHang?.ProvinceName,
-                districtName = diaChiKhachHang?.DistrictName,
-                wardName = diaChiKhachHang?.WardName,
-                moTa = diaChiKhachHang?.MoTa,
-                idHoaDon = IdHoadon,
-                phiVanChuyen
+                idHoaDon = IdHoadon
             });
         }
     }

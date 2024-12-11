@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using APPMVC.Service.Vnpay;
+using APPMVC.Service.VnpayClient;
 
 
 
@@ -23,8 +24,8 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = 10485760; // 10 MB
 });
 
-    
 
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian tồn tại của session
@@ -76,11 +77,14 @@ builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCo
 builder.Services.AddTransient<IVoucherService, VoucherService>();
 builder.Services.AddTransient<ILichSuHoaDonService, LichSuHoaDonService>();
 builder.Services.AddTransient<ICardService, CardService>();
-//Đăng ký VnPay
+//Đăng ký VnPay admin
 builder.Services.AddSingleton<IVnPayService, VnPayService>();
+//VnPay Client
+builder.Services.AddSingleton<iVnpayClientService, VnpayServiceClient>();
 //builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.AddTransient<ILichSuThanhToanService, LichSuThanhToanService>();
 builder.Services.AddTransient<ILichSuSuDungVoucherService, LichSuSuDungVoucherService>();
+builder.Services.AddTransient<IPromotionSanPhamChiTietService, PromotionSanPhamChiTietService>();
 builder.Services.AddHttpClient<GiaoHangNhanhService>(client =>
 {
     client.DefaultRequestHeaders.Add("Content-Type", "application/json");
