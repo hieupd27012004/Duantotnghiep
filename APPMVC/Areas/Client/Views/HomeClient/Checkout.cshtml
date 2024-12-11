@@ -279,7 +279,6 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // Function to load user addresses
     function loadUserAddresses() {
         $.ajax({
             url: '@Url.Action("GetUserAddresses", "HomeClient", new { area = "Client" })',
@@ -293,10 +292,10 @@
         });
     }
 
-       document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function() {
         // Format currency function
         const formatCurrency = (value) => {
-            return (value).toLocaleString('vi-VN') + ' VND';
+            return value.toLocaleString('vi-VN') + ' VND';
         };
 
         // Format total amounts
@@ -307,7 +306,6 @@
         document.getElementById('tong_so_tien').value = formatCurrency(totalAmount);
         document.getElementById('phi_van_chuyen').value = formatCurrency(shippingFee);
         document.getElementById('tong_tien').value = formatCurrency(totalBill);
-
 
         // Load districts when province changes
         $("#ProvinceId").change(function () {
@@ -347,27 +345,11 @@
             });
         });
 
-    // Khi thay đổi Phường/Xã, gán WardName
-    $("#WardId").change(function () {
-        var wardName = $("#WardId option:selected").text();
-        $("#WardName").val(wardName);
-    });
-    function loadUserAddresses() {
-        $.ajax({
-            url: '@Url.Action("GetUserAddresses", "HomeClient", new { area = "Client" })',
-            type: 'GET',
-            success: function (data) {
-                $('#addressList').html(data);
-            },
-            error: function () {
-                $('#addressList').html('<p>Không thể tải danh sách địa chỉ.</p>');
-            }
+        // Khi thay đổi Phường/Xã, gán WardName
+        $("#WardId").change(function () {
+            var wardName = $("#WardId option:selected").text();
+            $("#WardName").val(wardName);
         });
-    }
-    $(document).ready(function () {
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-        }
 
         $('.voucher-radio').on('change', function () {
             var voucherId = $(this).val();
