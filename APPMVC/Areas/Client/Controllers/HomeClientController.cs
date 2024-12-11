@@ -161,18 +161,25 @@ namespace APPMVC.Areas.Client.Controllers
         {
             if (selectedItems == null || !selectedItems.Any())
             {
-                TempData["ErrorMessage"] = "Vui lòng chọn ít nhất một sản phẩm để thanh toán.";
-                return RedirectToAction("Index"); // Trở về trang giỏ hàng nếu không có sản phẩm nào được chọn
+                var buyItem = HttpContext.Session.GetObject<BuyItemViewModel>("SelectedItem");
+
+                if (buyItem == null)
+                {
+                    TempData["ErrorMessage"] = "Vui lòng chọn ít nhất một sản phẩm để thanh toán.";
+                    return RedirectToAction("Index");
+                }
+
+                selectedItems = new List<Guid> { buyItem.IdSanPhamChiTiet };
             }
 
-            // Lưu selectedItems vào session
+            // Save selectedItems into session
             HttpContext.Session.SetObject("SelectedItems", selectedItems);
 
             var (cartItems, thanhToanViewModel) = await GetCartItemsWithAddress(selectedItems);
 
             if (thanhToanViewModel == null)
             {
-                return RedirectToAction("Index"); 
+                return RedirectToAction("Index");
             }
 
             ViewBag.Provinces = await _diaChiService.GetProvincesAsync();
@@ -367,11 +374,42 @@ namespace APPMVC.Areas.Client.Controllers
         private async Task<(List<CartItemViewModel> cartItems, ThanhToanViewModel thanhToanViewModel)> GetCartItemsWithAddress(List<Guid> selectedItems)
         {
             var customerIdString = HttpContext.Session.GetString("IdKhachHang");
-            if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
+            Guid customerId;
+
+            // Check if customer ID is available
+            if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out customerId))
             {
-                return (new List<CartItemViewModel>(), null);
+                // No customer found, attempt to get BuyItem from session
+                var buyItem = HttpContext.Session.GetObject<BuyItemViewModel>("SelectedItem");
+
+                if (buyItem == null)
+                {
+                    return (new List<CartItemViewModel>(), null);
+                }
+
+                // Create a cart item from the buyItem
+                var singleCartItems = new List<CartItemViewModel>
+        {
+            new CartItemViewModel
+            {
+                IdSanPhamChiTiet = buyItem.IdSanPhamChiTiet,
+                ProductName = buyItem.ProductName,
+                Quantity = buyItem.Quantity,
+                Price = buyItem.Price
+            }
+        };
+
+                // Create a ThanhToanViewModel without customer address
+                var viewModelWithoutAddress = new ThanhToanViewModel
+                {
+                    CartItems = singleCartItems,
+                    PhiVanChuyen = 0.0 // Initialize shipping cost to 0
+                };
+
+                return (singleCartItems, viewModelWithoutAddress);
             }
 
+            // Existing logic to get cart items and address for a logged-in customer
             var idGioHang = await _cardService.GetCartIdByCustomerIdAsync(customerId);
             if (idGioHang == Guid.Empty)
             {
@@ -381,6 +419,63 @@ namespace APPMVC.Areas.Client.Controllers
             var gioHangChiTiets = await _gioHangChiTietService.GetByGioHangIdAsync(idGioHang);
             if (gioHangChiTiets == null || !gioHangChiTiets.Any())
             {
+                // Fallback to buyItem if no items are found in the cart
+                var buyItem = HttpContext.Session.GetObject<BuyItemViewModel>("SelectedItem");
+
+                if (buyItem != null)
+                {
+                    var fallbackCartItems = new List<CartItemViewModel>
+            {
+                new CartItemViewModel
+                {
+                    IdSanPhamChiTiet = buyItem.IdSanPhamChiTiet,
+                    ProductName = buyItem.ProductName,
+                    Quantity = buyItem.Quantity,
+                    Price = buyItem.Price
+                }
+            };
+
+                    var diaChiKhachHang2 = await _diaChiService.GetDefaultAddressByCustomerIdAsync(customerId);
+                    double phiVanChuyen2 = 0.0;
+
+                    if (diaChiKhachHang2 != null)
+                    {
+                        // Calculate shipping fee for the buy item
+                        int toDistrictId = diaChiKhachHang2.DistrictId; // Destination district ID
+                        string toWardCode = diaChiKhachHang2.WardId; // Destination ward code
+
+                        // Assuming constant dimensions and weight for the buy item
+                        double height2 = 50; // Example height in cm
+                        double length2 = 20; // Example length in cm
+                        double width2 = 20; // Example width in cm
+                        int serviceTypeId2 = 2; // Example service type ID
+                        int fromDistrictId2 = 3440; // Example district ID for shipping origin
+                        string fromWardCode2 = "13005"; // Example ward code for shipping origin
+
+                        phiVanChuyen2 = await _giaoHangNhanhService.CalculateShippingFee(
+                            fromDistrictId2,
+                            fromWardCode2,
+                            toDistrictId,
+                            toWardCode,
+                            height2,
+                            length2,
+                            buyItem.Quantity * 200, // Total weight in grams
+                            width2,
+                            serviceTypeId2,
+                            buyItem.ProductName,
+                            (int)buyItem.Quantity
+                        );
+                    }
+
+                    var viewModelFallback = new ThanhToanViewModel
+                    {
+                        CartItems = fallbackCartItems,
+                        PhiVanChuyen = phiVanChuyen2 // Set shipping cost
+                    };
+
+                    return (fallbackCartItems, viewModelFallback);
+                }
+
                 return (new List<CartItemViewModel>(), null);
             }
 
@@ -388,14 +483,14 @@ namespace APPMVC.Areas.Client.Controllers
             var diaChiKhachHang = await _diaChiService.GetDefaultAddressByCustomerIdAsync(customerId);
 
             double totalWeight = 0.0;
-            double height = 50;
-            double length = 20;
-            double width = 20;
-            int serviceTypeId = 2;
+            double height = 50; // Example height in cm
+            double length = 20; // Example length in cm
+            double width = 20; // Example width in cm
+            int serviceTypeId = 2; // Example service type ID
             double phiVanChuyen = 0.0;
 
-            int fromDistrictId = 3440;
-            string fromWardCode = "13005";
+            int fromDistrictId = 3440; // Example district ID for shipping origin
+            string fromWardCode = "13005"; // Example ward code for shipping origin
 
             try
             {
@@ -415,13 +510,14 @@ namespace APPMVC.Areas.Client.Controllers
                         };
 
                         cartItems.Add(cartItem);
-                        totalWeight += cartItem.Quantity * 200;
+                        totalWeight += cartItem.Quantity * 200; // Assuming each item weighs 200 grams
 
                         if (diaChiKhachHang != null)
                         {
-                            int toDistrictId = diaChiKhachHang.DistrictId;
-                            string toWardCode = diaChiKhachHang.WardId;
+                            int toDistrictId = diaChiKhachHang.DistrictId; // Destination district ID
+                            string toWardCode = diaChiKhachHang.WardId; // Destination ward code
 
+                            // Calculate shipping fee
                             phiVanChuyen += await _giaoHangNhanhService.CalculateShippingFee(
                                 fromDistrictId,
                                 fromWardCode,
@@ -429,7 +525,7 @@ namespace APPMVC.Areas.Client.Controllers
                                 toWardCode,
                                 height,
                                 length,
-                                cartItem.Quantity * 200,
+                                cartItem.Quantity * 200, // Total weight in grams
                                 width,
                                 serviceTypeId,
                                 cartItem.ProductName,
@@ -445,8 +541,46 @@ namespace APPMVC.Areas.Client.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Lỗi khi tính phí vận chuyển: {ex.Message}");
-                phiVanChuyen = 0.0; // Đặt phí vận chuyển về 0 nếu có lỗi
+                Console.WriteLine($"Error calculating shipping fee: {ex.Message}");
+                phiVanChuyen = 0.0; // Reset shipping fee on error
+            }
+
+            if (cartItems.Count == 0)
+            {
+                // If cart items are still empty, fallback to the buy item
+                var buyItem = HttpContext.Session.GetObject<BuyItemViewModel>("SelectedItem");
+                if (buyItem != null)
+                {
+                    cartItems.Add(new CartItemViewModel
+                    {
+                        IdSanPhamChiTiet = buyItem.IdSanPhamChiTiet,
+                        ProductName = buyItem.ProductName,
+                        Quantity = buyItem.Quantity,
+                        Price = buyItem.Price
+                    });
+
+                    // Get customer address for shipping calculation
+                    if (diaChiKhachHang != null)
+                    {
+                        int toDistrictId = diaChiKhachHang.DistrictId; // Destination district ID
+                        string toWardCode = diaChiKhachHang.WardId; // Destination ward code
+
+                        // Calculate shipping fee for the buy item
+                        phiVanChuyen = await _giaoHangNhanhService.CalculateShippingFee(
+                            fromDistrictId,
+                            fromWardCode,
+                            toDistrictId,
+                            toWardCode,
+                            height,
+                            length,
+                            buyItem.Quantity * 200, // Total weight in grams
+                            width,
+                            serviceTypeId,
+                            buyItem.ProductName,
+                            (int)buyItem.Quantity
+                        );
+                    }
+                }
             }
 
             var thanhToanViewModel = new ThanhToanViewModel
