@@ -1,5 +1,6 @@
 ﻿using AppData.Model;
 using APPMVC.IService;
+using System.Text.Json;
 
 namespace APPMVC.Service
 {
@@ -156,6 +157,41 @@ namespace APPMVC.Service
             {
                 Console.WriteLine($"Error when getting kh: {ex.Message}");
                 return new List<KhachHang>();
+            }
+        }
+
+        public async Task<List<Voucher>> GetAvailableVouchersForCustomerAsync(Guid khachHangId)
+        {
+            try
+            {
+                Console.WriteLine($"Requesting available vouchers for customer ID: {khachHangId}");
+
+                var response = await _httpClient.GetAsync($"api/Voucher/available/{khachHangId}");
+
+                Console.WriteLine($"Response Status: {response.StatusCode}");
+
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Response Content: {content}");
+
+                response.EnsureSuccessStatusCode();
+
+                var vouchers = await response.Content.ReadFromJsonAsync<List<Voucher>>() ?? new List<Voucher>();
+
+                Console.WriteLine($"Parsed Vouchers Count: {vouchers.Count}");
+
+                return vouchers;
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"HTTP request error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<Voucher>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"General error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                return new List<Voucher>();
             }
         }
     }

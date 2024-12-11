@@ -214,5 +214,32 @@ namespace AppAPI.Repository
                 .Select(ls => ls.KhachHang)
                 .ToListAsync();
         }
+
+        public async Task<List<Voucher>> GetAvailableVouchersForCustomerAsync(Guid khachHangId)
+        {
+            try
+            {
+                var availableVouchers = await _context.vouchers
+                    .Where(v =>
+                        v.TrangThai == 2 && // Chỉ lấy voucher có TrangThai = 2 (Đang kích hoạt)
+                        v.NgayBatDau <= DateTime.Now &&
+                        v.NgayKetThuc >= DateTime.Now &&
+                        v.SoLuongVoucherConLai > 0 &&
+                        _context.LichSuSuDungVouchers.Any(ls =>
+                            ls.IdVoucher == v.VoucherId && 
+                            ls.IdKhachHang == khachHangId &&
+                            ls.TrangThaiVoucher == 1 // Voucher đã được gán cho khách hàng
+                        )
+                    )
+                    .ToListAsync();
+
+                return availableVouchers;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error getting available vouchers: {ex.Message}");
+                return new List<Voucher>();
+            }
+        }
     }
 }
