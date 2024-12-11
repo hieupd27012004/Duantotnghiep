@@ -1,4 +1,5 @@
-﻿@model AppData.ViewModel.ThanhToanViewModel
+﻿@using System.Globalization
+@model AppData.ViewModel.ThanhToanViewModel
 @{
     ViewData["Title"] = "Checkout";
     Layout = "~/Areas/Client/Views/Shared/_LayoutClient.cshtml";
@@ -184,7 +185,7 @@
                                     <tr>
                                         <td>@item.ProductName</td>
                                         <td>@item.Quantity</td>
-                                        <td>@(item.Price.ToString("N0") + " VND")</td>
+                                        <td>@(item.Price.ToString("N0", new CultureInfo("vi-VN")) + " VND")</td>
                                         <td hidden>@item.IdSanPhamChiTiet</td>
                                     </tr>
                                 }
@@ -192,24 +193,21 @@
                         </table>
 
                         <div class="form-group">
+                            <label for="tong_so_tien">Tổng số tiền</label>
+                            <input type="text" class="form-control" id="tong_so_tien"
+                                   value="@(Model.CartItems.Sum(i => i.Price * i.Quantity).ToString("N0", new CultureInfo("vi-VN")) + " VND")" readonly />
+                        </div>
 
-                            <div class="form-group">
-                                <label for="tong_so_tien">Tổng số tiền</label>
-                                <input type="text" class="form-control" id="tong_so_tien"
-                                       value="@(Model.CartItems.Sum(i => i.Price * i.Quantity).ToString("N0") + " VND")" readonly />
-                            </div>
+                        <div class="form-group">
+                            <label for="phi_van_chuyen">Phí vận chuyển</label>
+                            <input type="text" class="form-control" id="phi_van_chuyen"
+                                   value="@(Model.PhiVanChuyen.ToString("N0", new CultureInfo("vi-VN")) + " VND")" readonly />
+                        </div>
 
-                            <div class="form-group">
-                                <label for="phi_van_chuyen">Phí vận chuyển</label>
-                                <input type="text" class="form-control" id="phi_van_chuyen"
-                                       value="@(Model.PhiVanChuyen.ToString("N0") + " VND")" readonly />
-                            </div>
-
-                            <div class="form-group">
-                                <label for="tong_tien">Tổng tiền hóa đơn</label>
-                                <input type="text" class="form-control" id="tong_tien"
-                                       value="@( (Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.PhiVanChuyen).ToString("N0") + " VND" )" readonly />
-                            </div>
+                        <div class="form-group">
+                            <label for="tong_tien">Tổng tiền hóa đơn</label>
+                            <input type="text" class="form-control" id="tong_tien"
+                                   value="@( (Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.PhiVanChuyen).ToString("N0", new CultureInfo("vi-VN")) + " VND")" readonly />
                         </div>
                     }
                     else
@@ -237,16 +235,21 @@
         });
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
+       document.addEventListener("DOMContentLoaded", function() {
         // Format currency function
         const formatCurrency = (value) => {
-            return value.toLocaleString('vi-VN') + ' VND';
+            return (value).toLocaleString('vi-VN') + ' VND';
         };
 
         // Format total amounts
-        document.getElementById('tong_so_tien').value = formatCurrency(parseFloat(document.getElementById('tong_so_tien').value));
-        document.getElementById('phi_van_chuyen').value = formatCurrency(parseFloat(document.getElementById('phi_van_chuyen').value));
-        document.getElementById('tong_tien').value = formatCurrency(parseFloat(document.getElementById('tong_tien').value));
+        const totalAmount = parseFloat(document.getElementById('tong_so_tien').value.replace(/[^0-9.-]+/g,""));
+        const shippingFee = parseFloat(document.getElementById('phi_van_chuyen').value.replace(/[^0-9.-]+/g,""));
+        const totalBill = totalAmount + shippingFee;
+
+        document.getElementById('tong_so_tien').value = formatCurrency(totalAmount);
+        document.getElementById('phi_van_chuyen').value = formatCurrency(shippingFee);
+        document.getElementById('tong_tien').value = formatCurrency(totalBill);
+
 
         // Load districts when province changes
         $("#ProvinceId").change(function () {

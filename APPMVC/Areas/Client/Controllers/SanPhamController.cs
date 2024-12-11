@@ -293,7 +293,7 @@ namespace APPMVC.Areas.Client.Controllers
                 return StatusCode(500, new { message = "An error occurred while adding to the cart." });
             }
         }
-
+        [HttpPost]
         public async Task<IActionResult> BuyNow(Guid productId, Guid colorId, Guid sizeId, int quantity)
         {
             try
@@ -303,7 +303,6 @@ namespace APPMVC.Areas.Client.Controllers
                     return BadRequest(ModelState);
                 }
 
-                // Lấy thông tin sản phẩm chi tiết
                 var sanPham = await _sanPhamservice.GetSanPhamById(productId);
                 var sanPhamChiTiet = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(productId, sizeId, colorId);
                 if (sanPhamChiTiet == null)
@@ -321,27 +320,23 @@ namespace APPMVC.Areas.Client.Controllers
                     return Json(new { success = false, message = "Insufficient quantity available." });
                 }
 
-                // Tạo danh sách sản phẩm đã chọn
-                var cartItems = new List<CartItemViewModel>
-        {
-            new CartItemViewModel
-            {
-                IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
-                ProductName = sanPham.TenSanPham,
-                Quantity = quantity,
-                Price = sanPhamChiTiet.GiaGiam ?? sanPhamChiTiet.Gia
-            }
-        };
+                var buyItem = new BuyItemViewModel
+                {
+                    IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+                    ProductName = sanPham.TenSanPham,
+                    Quantity = quantity,
+                    Price = sanPhamChiTiet.GiaGiam ?? sanPhamChiTiet.Gia
+                };
 
-                // Lưu thông tin sản phẩm vào session
-                HttpContext.Session.SetObject("SelectedItems", cartItems);
+                // Store the BuyItem in the session
+                HttpContext.Session.SetObject("SelectedItem", buyItem);
 
-                // Trả về URL cho client để chuyển hướng
+                // Return URL to redirect the client
                 return Json(new { success = true, redirectUrl = "/Client/HomeClient/Checkout" });
             }
             catch (Exception ex)
             {
-                // Ghi log lỗi
+                // Log the error
                 Console.WriteLine($"Error in BuyNow: {ex.Message}");
                 return StatusCode(500, new { message = "An error occurred while processing your request." });
             }
