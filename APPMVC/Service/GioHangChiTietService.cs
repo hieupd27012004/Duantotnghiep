@@ -95,6 +95,20 @@ namespace APPMVC.Service
 			return await response.Content.ReadFromJsonAsync<GioHangChiTiet>();
 		}
 
+        public async Task<List<GioHangChiTiet>> GetByIdsAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+            {
+                throw new ArgumentException("No IDs provided", nameof(ids));
+            }
+
+            var idsQuery = string.Join(",", ids);
+            var response = await _httpClient.GetAsync($"api/GioHangChiTiet/getbyids?ids={idsQuery}");
+
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<GioHangChiTiet>>();
+        }
+
         public async Task<GioHangChiTiet> GetByProductIdAndCartIdAsync(Guid sanPhamChiTietId, Guid cartId)
         {
             if (sanPhamChiTietId == Guid.Empty || cartId == Guid.Empty)

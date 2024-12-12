@@ -333,6 +333,7 @@ namespace APPMVC.Areas.Admin.Controllers
                         IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
                         MaSanPham = sanPhamCT.MaSp,
                         Quantity = hoaDonChiTiet.SoLuong,
+                        SoLuong = sanPhamCT.SoLuong,
                         Price = gia,
                         ProductName = sanPham?.TenSanPham,
                         MauSac = mauSacTenList,
@@ -518,7 +519,7 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(model.IdHoaDon);
-            var originalQuantities = new Dictionary<Guid, double>(); // Store original quantities
+            var originalQuantities = new Dictionary<Guid, double>(); 
 
             foreach (var item in hoaDonChiTietList)
             {
@@ -579,8 +580,15 @@ namespace APPMVC.Areas.Admin.Controllers
             foreach (var hoaDonChiTiet in hoaDonChiTietList)
             {
                 var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
+                var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(hoaDonChiTiet.IdSanPhamChiTiet);
                 if (sanPhamCT != null)
                 {
+                    if (sanPhamCT.SoLuong < hoaDonChiTiet.SoLuong)
+                    {
+                        TempData["ErrorMessage"] = $"Không đủ số lượng cho sản phẩm {sanPham.TenSanPham}.";
+                        return RedirectToAction("Index");
+                    }
+
                     double thanhTien = hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia;
                     tongTienHang += thanhTien;
 
@@ -588,6 +596,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     await _sanPhamCTService.Update(sanPhamCT);
                 }
             }
+
 
             var hoaDon = await _hoaDonService.GetByIdAsync(idHoaDon);
             if (hoaDon == null)
@@ -695,14 +704,15 @@ namespace APPMVC.Areas.Admin.Controllers
             string chiTietHoaDonHtml = "";
 
             string tenNhanVien = HttpContext.Session.GetString("NhanVienName") ?? "Nhân Viên";
-            string tenKhachHang = "Khách Lẻ"; 
+            string tenKhachHang = "Khách Lẻ"; // Default to "Khách Lẻ"
 
+            // If idKhachHang is provided, fetch the customer details
             if (idKhachHang.HasValue)
             {
                 var khachHang = await _khachHangService.GetIdKhachHang(idKhachHang.Value); 
                 if (khachHang != null)
                 {
-                    tenKhachHang = khachHang.HoTen;
+                    tenKhachHang = khachHang.HoTen; // Set customer name if found
                 }
             }
 
@@ -785,8 +795,23 @@ namespace APPMVC.Areas.Admin.Controllers
             foreach (var hoaDonChiTiet in hoaDonChiTietList)
             {
                 var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
+                var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(hoaDonChiTiet.IdSanPhamChiTiet);
                 if (sanPhamCT != null)
                 {
+                    // Check if the product is out of stock
+                    if (sanPhamCT.SoLuong == 0)
+                    {
+                        TempData["ErrorMessage"] = $"Sản phẩm {sanPham.TenSanPham} đã hết hàng.";
+                        return RedirectToAction("Index");
+                    }
+
+                    // Check if there is enough stock
+                    if (sanPhamCT.SoLuong < hoaDonChiTiet.SoLuong)
+                    {
+                        TempData["ErrorMessage"] = $"Không đủ số lượng cho sản phẩm {sanPham.TenSanPham}.";
+                        return RedirectToAction("Index");
+                    }
+
                     double thanhTien = hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia;
                     tongTienHang += thanhTien;
                 }
@@ -951,7 +976,6 @@ namespace APPMVC.Areas.Admin.Controllers
 
             return NotFound(new { message = "Không tìm thấy hóa đơn." });
         }
-
         [HttpGet]
         public async Task<IActionResult> SearchCustomer(string search, Guid IdHoadon)
         {

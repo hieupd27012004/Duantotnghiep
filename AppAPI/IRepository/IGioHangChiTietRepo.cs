@@ -17,5 +17,7 @@ namespace AppAPI.IRepository
 		Task<double> GetTotalQuantityBySanPhamChiTietIdAsync(Guid sanPhamChiTietId, Guid cartId);
 
         Task<GioHangChiTiet> GetByProductIdAndCartIdAsync(Guid sanPhamChiTietId, Guid cartId);
+
+        Task<List<GioHangChiTiet>> GetByIdsAsync(List<Guid> ids);
     }
 }

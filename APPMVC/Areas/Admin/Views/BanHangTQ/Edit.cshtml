@@ -154,20 +154,28 @@
             {
                 foreach (var sanPham in Model.SanPhamChiTiets)
                 {
-                    <tr>
+                    <tr style="@(sanPham.SoLuong == 0 ? "background-color: #d6d6d6;" : "")">
                         <td>@sanPham.MaSanPham</td>
                         <td>@sanPham.ProductName</td>
                         <td>
                             <div class="quantity-container">
-                                <button class="btn btn-outline-secondary decrease" type="button" aria-label="Decrease Quantity" data-id="@sanPham.IdSanPhamChiTiet">−</button>
-                                <input type="number" name="quantities[@sanPham.IdSanPhamChiTiet]"
-                                       class="form-control quantity-amount"
-                                       value="@sanPham.Quantity"
-                                       min="1"
-                                       aria-label="Quantity"
-                                       data-id="@sanPham.IdSanPhamChiTiet"
-                                       data-original-quantity="@sanPham.Quantity" />
-                                <button class="btn btn-outline-secondary increase" type="button" aria-label="Increase Quantity" data-id="@sanPham.IdSanPhamChiTiet">+</button>
+                                @if (sanPham.SoLuong > 0)
+                                {
+                                    <button class="btn btn-outline-secondary decrease" type="button" aria-label="Decrease Quantity" data-id="@sanPham.IdSanPhamChiTiet">−</button>
+                                    <input type="number" name="quantities[@sanPham.IdSanPhamChiTiet]"
+                                           class="form-control quantity-amount"
+                                           value="@sanPham.Quantity"
+                                           min="1"
+                                           aria-label="Quantity"
+                                           data-id="@sanPham.IdSanPhamChiTiet"
+                                           data-original-quantity="@sanPham.SoLuong" />
+                                    <button class="btn btn-outline-secondary increase" type="button" aria-label="Increase Quantity" data-id="@sanPham.IdSanPhamChiTiet">+</button>
+                                }
+                                else
+                                {
+                                    <span style="color: red;">Đã hết hàng</span>
+                                    <input type="hidden" value="0" />
+                                }
                             </div>
                         </td>
                         <td>
@@ -224,10 +232,19 @@
                             }
                         </td>
                         <td>
-                            <button class="btn btn-danger"
-                                    onclick="deleteProduct('@sanPham.IdHoaDonChiTiet', '@Model.HoaDon.IdHoaDon')">
-                                Xóa
-                            </button>
+                            @if (sanPham.Quantity > 0)
+                            {
+                                <button class="btn btn-danger"
+                                        onclick="deleteProduct('@sanPham.IdHoaDonChiTiet', '@Model.HoaDon.IdHoaDon')">
+                                    Xóa
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-danger" disabled>
+                                    Xóa
+                                </button>
+                            }
                         </td>
                     </tr>
                 }
