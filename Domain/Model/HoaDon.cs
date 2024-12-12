@@ -52,8 +52,10 @@ namespace AppData.Model
 		public Guid? IdKhachHang { get; set; }
 		public Guid? IdNhanVien { get; set; }
 
-		public virtual KhachHang? KhachHang { get; set; }
-		public virtual NhanVien? NhanVien { get; set; }
+        public Guid? IdDiaChiHoaDon { get; set; }
+        public virtual KhachHang? KhachHang { get; set; }
+        public virtual DiaChiHoaDon? DiaChiHoaDon { get; set; }
+        public virtual NhanVien? NhanVien { get; set; }
 
         public ICollection<LichSuThanhToan>? lichSuThanhToans { get; set; }
         public virtual ICollection<LichSuHoaDon>? LichSuHoaDons { get; set; }

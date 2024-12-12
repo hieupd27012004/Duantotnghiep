@@ -177,7 +177,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 DonGia = hoaDon.TongTienDonHang,
                 GiamGia = hoaDon.TienGiam,
                 PhiVanChuyen = Convert.ToDouble(hoaDon.TienShip),
-                TongTien = hoaDon.TongTienDonHang + Convert.ToDouble(hoaDon.TienShip),
+                TongTien = hoaDon.TongTienDonHang + Convert.ToDouble(hoaDon.TienShip) - Convert.ToDouble(hoaDon.TienGiam),
 
                 HoaDon = new HoaDonViewModel
                 {

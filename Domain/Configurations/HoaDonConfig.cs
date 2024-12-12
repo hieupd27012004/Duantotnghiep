@@ -23,6 +23,9 @@ namespace AppData.Configurations
 				  .WithMany(p => p.HoaDons)
 				  .HasForeignKey(p => p.IdNhanVien);
 
-		}
-	}
+            builder.HasOne(p => p.DiaChiHoaDon)
+              .WithMany(p => p.HoaDons)
+              .HasForeignKey(p => p.IdDiaChiHoaDon);
+        }
+    }
 }
