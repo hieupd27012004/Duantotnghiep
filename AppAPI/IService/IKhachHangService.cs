@@ -7,7 +7,7 @@ namespace AppAPI.IService
         Task<List<KhachHang>> GetAllKhachHang();
         Task<KhachHang> GetIdKhachHang(Guid id);
 
-        Task<KhachHang> AddKhachHang(KhachHang kh);
+        Task<KhachHangDTO> AddKhachHang(KhachHang kh);
         Task<KhachHang> UpdateKhachHang(KhachHang kh);
         Task<KhachHang> UpdateKHThongTin(KhachHang kh);
         Task<bool> ChangePassword(Guid id, string newPassword);

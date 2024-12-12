@@ -11,7 +11,7 @@ namespace AppAPI.Service
         {
             _repo = repo;
         }
-        public async Task<KhachHang> AddKhachHang(KhachHang kh)
+        public async Task<KhachHangDTO> AddKhachHang(KhachHang kh)
         {
             var existingCustomer = await _repo.GetByEmail(kh.Email);
             if (existingCustomer != null)

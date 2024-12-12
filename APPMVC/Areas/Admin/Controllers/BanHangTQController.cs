@@ -554,11 +554,10 @@ namespace APPMVC.Areas.Admin.Controllers
             return Json(new { success = true });
         }
 
-        [HttpPost]
         public async Task<IActionResult> XacNhanThanhToan(Guid idHoaDon, Guid? idKhachHang, double? soTienKhachDua)
         {
-
             Console.WriteLine($"idKhachHang: {idKhachHang}");
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(new { message = "Dữ liệu không hợp lệ." });
@@ -596,7 +595,25 @@ namespace APPMVC.Areas.Admin.Controllers
                 return NotFound(new { message = "Hóa đơn không tồn tại." });
             }
 
-            hoaDon.NguoiNhan = "Khách Lẻ";
+            // Check if idKhachHang is provided
+            if (idKhachHang.HasValue)
+            {
+                var khachHang = await _khachHangService.GetIdKhachHang(idKhachHang.Value);
+                if (khachHang != null)
+                {
+                    hoaDon.NguoiNhan = khachHang.HoTen;
+                    hoaDon.SoDienThoaiNguoiNhan = khachHang.SoDienThoai;
+                }
+                else
+                {
+                    hoaDon.NguoiNhan = "Khách Lẻ";
+                }
+            }
+            else
+            {
+                hoaDon.NguoiNhan = "Khách Lẻ";
+            }
+
             hoaDon.TienGiam = 0;
             hoaDon.TongTienDonHang = tongTienHang;
             hoaDon.TongTienHoaDon = tongTienHang;
@@ -636,7 +653,8 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 await _lichSuThanhToanService.AddAsync(lichSuThanhToan);
 
-                var htmlContent = await GenerateInvoiceHtmlFromTemplate(hoaDon, hoaDonChiTietList);
+                // Pass idKhachHang to the GenerateInvoiceHtmlFromTemplate method
+                var htmlContent = await GenerateInvoiceHtmlFromTemplate(hoaDon, hoaDonChiTietList, idKhachHang);
                 var pdfBytes = GeneratePdfFromHtml(htmlContent);
 
                 var tempFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "TempFiles");
@@ -664,7 +682,7 @@ namespace APPMVC.Areas.Admin.Controllers
             return View();
         }
 
-        private async Task<string> GenerateInvoiceHtmlFromTemplate(HoaDon hoaDon, List<HoaDonChiTiet> hoaDonChiTietList)
+        private async Task<string> GenerateInvoiceHtmlFromTemplate(HoaDon hoaDon, List<HoaDonChiTiet> hoaDonChiTietList, Guid? idKhachHang)
         {
             string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Areas", "Admin", "Templates", "InvoiceTemplate.html");
 
@@ -677,7 +695,16 @@ namespace APPMVC.Areas.Admin.Controllers
             string chiTietHoaDonHtml = "";
 
             string tenNhanVien = HttpContext.Session.GetString("NhanVienName") ?? "Nhân Viên";
-            string tenKhachHang = hoaDon.NguoiNhan; 
+            string tenKhachHang = "Khách Lẻ"; 
+
+            if (idKhachHang.HasValue)
+            {
+                var khachHang = await _khachHangService.GetIdKhachHang(idKhachHang.Value); 
+                if (khachHang != null)
+                {
+                    tenKhachHang = khachHang.HoTen;
+                }
+            }
 
             foreach (var chiTiet in hoaDonChiTietList)
             {
@@ -746,7 +773,7 @@ namespace APPMVC.Areas.Admin.Controllers
             return converter.Convert(doc);
         }
         [HttpPost]
-        public async Task<IActionResult> ThanhToanVNPay(Guid idHoaDon)
+        public async Task<IActionResult> ThanhToanVNPay(Guid idHoaDon, Guid? idKhachHang)
         {
             var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
             if (hoaDonChiTietList == null)
@@ -775,17 +802,34 @@ namespace APPMVC.Areas.Admin.Controllers
             hoaDon.TongTienHoaDon = tongTienHang;
             hoaDon.TienGiam = 0;
 
-            hoaDon.NguoiNhan = "Khách Lẻ";
+            // Retrieve customer details if idKhachHang is provided
+            if (idKhachHang.HasValue)
+            {
+                var khachHang = await _khachHangService.GetIdKhachHang(idKhachHang.Value);
+                if (khachHang != null)
+                {
+                    hoaDon.NguoiNhan = khachHang.HoTen; // Set customer name
+                }
+                else
+                {
+                    hoaDon.NguoiNhan = "Khách Lẻ"; // Default if customer not found
+                }
+            }
+            else
+            {
+                hoaDon.NguoiNhan = "Khách Lẻ"; // Default for no customer
+            }
+
             TempData["idHoaDon"] = idHoaDon.ToString();
-            TempData["TongTienDonHang"] = tongTienHang.ToString(); 
-            TempData["TongTienHoaDon"] = tongTienHang.ToString(); 
+            TempData["TongTienDonHang"] = tongTienHang.ToString();
+            TempData["TongTienHoaDon"] = tongTienHang.ToString();
 
             var vnPay = new PaymentInformationModel()
             {
                 Amount = tongTienHang,
                 CreatDate = DateTime.Now,
                 Description = "Thanh Toán VnPay",
-                FullName = "Nhân Viên",
+                FullName = hoaDon.NguoiNhan, // Use the customer name
                 OrderId = Guid.NewGuid(),
             };
 
@@ -845,7 +889,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     hoaDon.NguoiNhan = nguoiNhanValue.ToString();
                 }
 
-
+                // Set any additional fields
                 hoaDon.TienGiam = 0;
                 hoaDon.TrangThai = "Hoàn Thành";
                 await _hoaDonService.UpdateAsync(hoaDon);
@@ -856,8 +900,8 @@ namespace APPMVC.Areas.Admin.Controllers
                     var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(chiTiet.IdSanPhamChiTiet);
                     if (sanPhamCT != null)
                     {
-                        sanPhamCT.SoLuong -= chiTiet.SoLuong; 
-                        await _sanPhamCTService.Update(sanPhamCT); 
+                        sanPhamCT.SoLuong -= chiTiet.SoLuong;
+                        await _sanPhamCTService.Update(sanPhamCT);
                     }
                 }
 
@@ -889,7 +933,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 {
                     IdLichSuThanhToan = Guid.NewGuid(),
                     SoTien = hoaDon.TongTienHoaDon,
-                    TienThua = 0, 
+                    TienThua = 0,
                     NgayTao = DateTime.Now,
                     LoaiGiaoDich = "Thanh Toán VnPay",
                     Pttt = "VnPay",

@@ -12,19 +12,46 @@ namespace AppAPI.Repository
         {
             _context = new AppDbcontext();
         }
-        public async Task<KhachHang> CreateKH(KhachHang kh)
+        public async Task<KhachHangDTO> CreateKH(KhachHang kh)
         {
-            kh.IdKhachHang = Guid.NewGuid();
-            GioHang gioHang = new GioHang() 
+            // Create a new KhachHang instance
+            KhachHang newKh = new KhachHang
+            {
+                IdKhachHang = Guid.NewGuid(),
+                HoTen = kh.HoTen,
+                SoDienThoai = kh.SoDienThoai,
+                Email = kh.Email,
+                AuthProvider = "1",
+                MatKhau = kh.MatKhau,
+                NgayTao = DateTime.UtcNow,
+                NgayCapNhat = DateTime.UtcNow,
+                NguoiTao = "Client",
+                NguoiCapNhat = "Client",
+                KichHoat = 1
+            };
+
+            // Create and associate a new GioHang
+            GioHang gioHang = new GioHang()
             {
                 IdGioHang = Guid.NewGuid(),
-                IdKhachHang = kh.IdKhachHang,
+                IdKhachHang = newKh.IdKhachHang,
             };
-            kh.GioHang = gioHang;
+            newKh.GioHang = gioHang;
 
-                _context.khachHangs.Add(kh);
-                await _context.SaveChangesAsync();
-            return kh;
+            // Add the new customer to the context and save changes
+            _context.khachHangs.Add(newKh);
+            await _context.SaveChangesAsync();
+
+            // Map KhachHang to KhachHangDTO to return
+            var khachHangDto = new KhachHangDTO
+            {
+                HoTen = newKh.HoTen,
+                SoDienThoai = newKh.SoDienThoai,
+                Email = newKh.Email,
+                MatKhau = newKh.MatKhau 
+            };
+
+            return khachHangDto;
         }
 
         public async Task DeleteKH(Guid id)
