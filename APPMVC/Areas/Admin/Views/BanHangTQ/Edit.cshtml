@@ -154,12 +154,12 @@
                         <td>
                             @if (sanPham.GiaDaGiam.HasValue && sanPham.GiaDaGiam < sanPham.Price)
                             {
-                                <span style="text-decoration: line-through; color: gray;">@sanPham.Price.ToString("N0")</span>
-                                <span style="color: red; font-weight: bold;"> @sanPham.GiaDaGiam.Value.ToString("N0")</span>
+                                <span style="text-decoration: line-through; color: gray;">@sanPham.Price.ToString("#,0") VNĐ</span>
+                                <span style="color: red; font-weight: bold;">@sanPham.GiaDaGiam.Value.ToString("#,0") VNĐ</span>
                             }
                             else
                             {
-                                <span>@sanPham.Price.ToString("N0")</span>
+                                <span>@sanPham.Price.ToString("#,0") VNĐ</span>
                             }
                         </td>
                         <td>
@@ -245,15 +245,14 @@
         <div class="col-md-6 details-card">
             <dl class="row">
                 <dt class="col-sm-6">Tổng Tiền Hàng</dt>
-                <dd class="col-sm-6">@Model.DonGia.ToString("N0")</dd>
+                <dd class="col-sm-6">@Model.DonGia.ToString("#,0") VNĐ</dd>
                 <dt class="col-sm-6">Giảm Giá</dt>
-                <dd class="col-sm-6">0</dd>
+                <dd class="col-sm-6">0 VNĐ</dd>
                 <dt class="col-sm-6">Tổng Tiền</dt>
-                <dd class="col-sm-6">@Model.TongTien.ToString("N0")</dd>
-
+                <dd class="col-sm-6">@Model.TongTien.ToString("#,0") VNĐ</dd>
                 <dt class="col-sm-6" id="amountGivenLabel">Tiền khách đưa</dt>
                 <dd class="col-sm-6" id="amountGiven">
-                    <input type="number" id="amountGivenInput" placeholder="Nhập số tiền" />
+                    <input type="number" id="amountGivenInput" placeholder="Nhập số tiền" value="@Model.TienKhachDua" />
                 </dd>
 
                 <dt class="col-sm-6">Phương Thức Thanh Toán</dt>
@@ -313,33 +312,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        function confirmPayment(idHoaDon) {
-            $("#loadingMessage").show();
-
-            $.ajax({
-                url: '/Admin/BanHangTQ/XacNhanThanhToan',
-                type: 'POST',
-                data: {
-                    idHoaDon: idHoaDon
-                },
-                success: function (response) {
-                    $("#loadingMessage").hide();
-
-                    if (response.success) {
-                        alert('Thanh toán thành công! Hóa đơn đã được lưu.');
-                        window.location.href = response.fileUrl;
-                    } else {
-                        alert('Có lỗi xảy ra: ' + response.message);
-                    }
-                },
-                error: function (xhr, status, error) {
-                    $("#loadingMessage").hide();
-                    alert('Đã xảy ra lỗi khi xác nhận thanh toán: ' + error);
-                }
-            });
-        }
-    </script>
-}
