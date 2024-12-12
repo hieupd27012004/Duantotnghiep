@@ -138,24 +138,25 @@ namespace APPMVC.Service
             }
             return null; 
         }
-
-
-
-        public async Task<Guid?> CreateKHReturnId(KhachHang kh)
+        public async Task<bool> CheckSDT(string soDienThoai)
         {
-            var json = JsonConvert.SerializeObject(kh);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync("/api/KhachHang/CreateKH", content);
-
-            if (response.IsSuccessStatusCode)
+            if(string.IsNullOrEmpty(soDienThoai))
             {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<dynamic>(responseContent);
-                return (Guid?)result.IdKhachHang; // Lấy ID khách hàng từ phản hồi
+                throw new ArgumentException("Số điện thoại không được để trống");
+                
             }
+            var response = await _httpClient.GetAsync($"/api/KhachHang/CheckSDT?soDienThoai={soDienThoai}");
+            return response.IsSuccessStatusCode && bool.Parse(await response.Content.ReadAsStringAsync());
+        }
+        public async Task<bool> CheckMail (string mail)
+        {
+            if (string.IsNullOrEmpty(mail))
+            {
+                throw new ArgumentException("Gmail không được để trống");
 
-            return null; // Trả về null nếu có lỗi
+            }
+            var response = await _httpClient.GetAsync($"/api/KhachHang/CheckMail?mail={Uri.EscapeDataString(mail)}");
+            return response.IsSuccessStatusCode && bool.Parse(await response.Content.ReadAsStringAsync());
         }
     }
 }

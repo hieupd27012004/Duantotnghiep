@@ -18,5 +18,8 @@ namespace APPMVC.IService
         Task<string> GetVerificationCodeFromRedisAsync(string email);
 
         Task<KhachHang?> GetCustomerByPhoneOrEmailAsync(string phoneOrEmail);
+        //Check SDT voi Mail
+        Task<bool> CheckSDT(string soDienThoai);
+        Task<bool> CheckMail(string mail);
     }
 }

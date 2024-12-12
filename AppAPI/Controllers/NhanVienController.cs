@@ -146,6 +146,33 @@ namespace AppAPI.Controllers
                 return Ok(new { message = "Đổi Mật Khẩu Thành Công." });
             }
             return BadRequest(new { message = "Đổi mật khẩu thất bại." });
-        }       
+        }
+        //Check sdt voi email HoangLong
+        [HttpGet("CheckSDT")]
+        public async Task<IActionResult> CheckSdt(string soDienThoai)
+        {
+            try
+            {
+                var sdt = await _service.CheckSDT(soDienThoai);
+                return Ok(sdt);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi trong quá trình kiểm tra", error = ex.Message });
+            }
+        }
+        [HttpGet("CheckMail")]
+        public async Task<IActionResult> CheckMail(string mail)
+        {
+            try
+            {
+                var email = await _service.CheckMail(mail);
+                return Ok(email);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi trong quá trình kiểm tra", error = ex.Message });
+            }
+        }
     }
 }

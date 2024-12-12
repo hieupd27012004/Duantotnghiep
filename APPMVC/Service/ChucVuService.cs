@@ -28,9 +28,14 @@ namespace APPMVC.Service
             return repo;
         }
 
-        public Task GetIdChucVu(Guid id)
+        public async Task<ChucVu> GetIdChucVu(Guid id)
         {
-            throw new NotImplementedException();
+            var response = await httpClient.GetAsync($"/api/ChucVu/GetIdChucVu?id={id}");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<ChucVu>();
+            }
+            return null; // Hoặc xử lý lỗi theo cách bạn muốn
         }
 
         public Task UpdateCV(ChucVu cv)

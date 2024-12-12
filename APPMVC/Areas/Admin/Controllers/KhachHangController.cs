@@ -55,6 +55,18 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(KhachHang kh)
         {
+            var checkSdt = await _service.CheckSDT(kh.SoDienThoai);
+            if (checkSdt)
+            {
+                TempData["Error"] = "Đăng ký thất bại! Số điện thoại đã tồn tại";
+                return RedirectToAction("Index");
+            }
+            var checkEmail = await _service.CheckMail(kh.Email);
+            if (checkEmail)
+            {
+                TempData["Error"] = "Đăng ký thất bại! Email này đã tồn tại";
+                return RedirectToAction("Index");
+            }
             if (ModelState.IsValid)
             {
                 await _service.AddKhachHang(kh);

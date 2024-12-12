@@ -1,0 +1,94 @@
+﻿@model List<AppData.ViewModel.ChartDataViewModel>
+@{
+    ViewData["Title"] = "Top Sản Phẩm Bán Chạy (Biểu Đồ Tròn)";
+}
+
+<h1 class="text-center mb-4">Sản Phẩm Bán Chạy</h1>
+
+<!-- Container for form and chart -->
+<div class="d-flex justify-content-between mb-4" style="height: 400px;">
+    <!-- Form lọc dữ liệu -->
+    <form method="get" class="me-4 d-flex justify-items-center" style="flex: 1; height: 100%; padding: 15px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
+        <div class="form-group ">           
+            <div class="form-control mb-5 mt-7">
+                <label for="startDate" class="me-2">Từ ngày:</label>
+                <input type="date" id="startDate" name="startDate" value="@ViewData["StartDate"]" class="form-control" style="width: 180px;">
+            </div>
+            <div class="form-control mt-5">
+                <label for="endDate" class="me-2">Đến ngày:</label>
+                <input type="date" id="endDate" name="endDate" value="@ViewData["EndDate"]" class="form-control" style="width: 180px;">
+            </div>        
+            <button type="submit" class="btn btn-primary ms-2 mb-0">Lọc</button>
+        </div>
+    </form>
+
+    <!-- Vùng chứa biểu đồ -->
+    <div class="chart-container d-flex justify-content-center" style="flex: 2; height: 100%; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
+        <canvas id="productChart" style="width: 100%; height: 100%;"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = @Html.Raw(Json.Serialize(Model.Select(x => x.Label).ToArray()));
+    const dataValues = @Html.Raw(Json.Serialize(Model.Select(x => x.Value).ToArray()));
+    const data = {
+        labels: labels,
+        datasets: [{
+            label: 'Số lượng bán',
+            data: dataValues,
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+            ],
+            hoverOffset: 4
+        }]
+    };
+
+    // Hiển thị biểu đồ
+    const config = {
+        type: 'pie',
+        data: data,
+    };
+
+    const productChart = new Chart(
+        document.getElementById('productChart'),
+        config
+    );
+</script>
+
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h1 {
+        color: #333;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        flex: 1; 
+    }
+
+    label {
+        font-weight: bold;
+        color: #555;
+    }
+
+    .btn-primary {
+        margin-top: 10px;
+        background-color: #007bff;
+        border-color: #007bff;
+        transition: background-color 0.2s, transform 0.2s;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+            transform: scale(1.05); /* Hiệu ứng phóng to khi hover */
+        }
+</style>

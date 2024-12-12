@@ -28,6 +28,18 @@ namespace APPMVC.Areas.Client.Controllers
 
         public async Task<IActionResult> Register(KhachHang kh = null)
         {
+            var checkSdt = await _service.CheckSDT(kh.SoDienThoai);
+            if(checkSdt)
+            {
+                TempData["Error"] = "Đăng ký thất bại! Số điện thoại đã tồn tại";
+                return RedirectToAction("Login");
+            }
+            var checkEmail = await _service.CheckMail(kh.Email);
+            if(checkEmail)
+            {
+                TempData["Error"] = "Đăng ký thất bại! Email này đã tồn tại";
+                return RedirectToAction("Login");
+            }
             if (ModelState.IsValid)
             {
                 try
@@ -38,7 +50,11 @@ namespace APPMVC.Areas.Client.Controllers
                     kh.NguoiTao = "Client";
                     kh.NguoiCapNhat = "Client";
                     kh.KichHoat = 1;
+
+                   
                     await _service.AddKhachHang(kh);
+
+
 
                     // Set a success message and redirect to the Login action
                     TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay.";
@@ -55,13 +71,15 @@ namespace APPMVC.Areas.Client.Controllers
             }
             else
             {
-                // Handle model state errors
-                var allErrors = ModelState.Values.SelectMany(v => v.Errors).ToList();
-                foreach (var error in allErrors)
-                {
-                    Console.WriteLine($"Error: {error.ErrorMessage}");
-                }
-                ModelState.AddModelError("", "Có lỗi xảy ra khi điền thông tin, vui lòng kiểm tra lại.");
+                //// Handle model state errors
+                //var allErrors = ModelState.Values.SelectMany(v => v.Errors).ToList();
+                //foreach (var error in allErrors)
+                //{
+                //    Console.WriteLine($"Error: {error.ErrorMessage}");
+                //}
+                //ModelState.AddModelError("", "Có lỗi xảy ra khi điền thông tin, vui lòng kiểm tra lại.");
+                TempData["Error"] = "Đăng ký thất bại vui lòng kiểm tra lại thông tin của bạn";
+                return RedirectToAction("Login");
             }
 
             return View(kh); // Return the view with the entered data

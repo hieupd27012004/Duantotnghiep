@@ -3,6 +3,7 @@
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Client/Views/Shared/_Sanpham.cshtml";
 }
+
 <style>
     .product-card {
         background-color: #fff;
@@ -12,12 +13,24 @@
         transition: transform 0.3s ease;
     }
 
-        .product-card:hover {
-            transform: translateY(-5px);
-        }
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
 
     .product-image {
         position: relative;
+        height: 200px; /* Fixed height for uniformity */
+        overflow: hidden;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: auto;
+        object-fit: cover; /* Ensures the image covers the area */
+        position: absolute; /* Aligns the image correctly */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
 
     .discount-badge {
@@ -48,42 +61,43 @@
         transition: transform 0.3s ease;
     }
 
-        .color-item:hover {
-            transform: scale(1.2);
-        }
+    .color-item:hover {
+        transform: scale(1.2);
+    }
 
     .product-info {
-        padding: 20px;
+        padding: 15px; /* Reduced padding for a compact look */
         text-align: center;
     }
 
     .product-title {
-        font-size: 18px;
+        font-size: 16px; /* Slightly smaller font size */
         font-weight: bold;
         margin-bottom: 10px;
     }
 
     .product-price {
-        font-size: 16px;
+        font-size: 15px; /* Slightly smaller font size */
         color: #007bff;
         margin-bottom: 20px;
     }
+
+   
 </style>
 
 <div class="container">
     <div class="row">
         @foreach (var sanPham in Model)
         {
-            <div class="col-12 col-md-4 col-lg-3 mb-5">
+            <div class="col-12 col-md-4 col-lg-3 mb-4">
                 <div class="product-card">
                     <div class="product-image">
                         <img id="mainImage_@sanPham.IdSanPham"
                              src="@(sanPham.RepresentativeImage != null ? $"data:image;base64,{Convert.ToBase64String(sanPham.RepresentativeImage)}" : "/images/default-product.jpg")"
-                             class="img-fluid"
                              alt="@sanPham.TenSanPham"
                              data-original-image="@(sanPham.RepresentativeImage != null ? $"data:image;base64,{Convert.ToBase64String(sanPham.RepresentativeImage)}" : "/images/default-product.jpg")" />
 
-                        @if (sanPham.GiaThapNhat < sanPham.GiaCaoNhat) // Kiểm tra xem có giảm giá không
+                        @if (sanPham.GiaThapNhat < sanPham.GiaCaoNhat)
                         {
                             var discountPercentage = Math.Round(((Convert.ToDouble(sanPham.GiaCaoNhat) - Convert.ToDouble(sanPham.GiaThapNhat)) / Convert.ToDouble(sanPham.GiaCaoNhat)) * 100);
                             <div class="discount-badge">Giảm @discountPercentage%!</div>

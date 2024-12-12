@@ -676,26 +676,48 @@ namespace APPMVC.Areas.Admin.Controllers
             string htmlTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
             string chiTietHoaDonHtml = "";
 
+            string tenNhanVien = HttpContext.Session.GetString("NhanVienName") ?? "Nhân Viên";
+            var khachHang = await _khachHangService.GetIdKhachHang(hoaDon.IdKhachHang);
+            string tenKhachHang = khachHang?.HoTen ?? "Khách Lẻ";
+
             foreach (var chiTiet in hoaDonChiTietList)
             {
                 var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(chiTiet.IdSanPhamChiTiet);
                 if (sanPhamCT != null)
                 {
-                    chiTietHoaDonHtml += $@"
-            <tr>
-                <td>{sanPhamCT.IdSanPham}</td>
-                <td>{chiTiet.SoLuong}</td>
-                <td>{chiTiet.DonGia:C}</td>
-                <td>{chiTiet.SoLuong * chiTiet.DonGia:C}</td>
-            </tr>";
+                    var idSanPham = sanPhamCT.IdSanPham;
+                    var sanPham = await _sanPhamService.GetSanPhamById(idSanPham);
+                    if(sanPham != null)
+                    {
+                        var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
+                        string tenMauSac = mauSacList != null && mauSacList.Count > 0
+                            ? string.Join(",", mauSacList.Select(m => m.TenMauSac)) : "Không xác định";
+
+                        var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
+                        string kichCo = kichCoList != null && kichCoList.Count > 0
+                            ? string.Join(",", kichCoList.Select(m => m.TenKichCo)) : "Không xác định";
+
+                        chiTietHoaDonHtml += $@"
+                        <tr>
+                            <td>{sanPham.TenSanPham}</td>  
+                            <td>{tenMauSac}</td>
+                            <td>{kichCo}</td>
+                            <td>{chiTiet.SoLuong}</td>
+                            <td>{chiTiet.DonGia.ToString("N0")} VND</td>
+                            <td>{(chiTiet.SoLuong * chiTiet.DonGia).ToString("N0")} VND</td>
+                        </tr>";
+                    }
+            
                 }
             }
 
             string finalHtml = htmlTemplate
                 .Replace("{{MaDon}}", hoaDon.MaDon.ToString())
-                .Replace("{{NgayTao}}", hoaDon.NgayTao.ToString("dd/MM/yyyy"))
+                .Replace("{{NgayTao}}", hoaDon.NgayTao.ToString("dd/MM/yyyy HH:mm"))
+                .Replace("{{TenNhanVien}}", tenNhanVien)
+                .Replace("{{TenKhachHang}}", tenKhachHang)
                 .Replace("{{ChiTietHoaDon}}", chiTietHoaDonHtml)
-                .Replace("{{TongTien}}", hoaDon.TongTienHoaDon.ToString("C"));
+                .Replace("{{TongTien}}", hoaDon.TongTienHoaDon.ToString("N0"));
 
             return finalHtml;
         }

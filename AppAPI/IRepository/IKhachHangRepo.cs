@@ -17,6 +17,8 @@ namespace AppAPI.IRepository
         Task<KhachHang> GetBySDT(string sdT);
         Task<KhachHang?> Login(string email, string password);
         Task<KhachHang?> GetCustomerByPhoneOrEmailAsync(string phoneOrEmail);
+        Task<bool> CheckSDT(string soDienThoai);
+        Task<bool> CheckMail(string mail);
 
     }
 }

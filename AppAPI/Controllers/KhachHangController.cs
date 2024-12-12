@@ -159,24 +159,31 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
-        [HttpPost("CreateKH")]
-        public async Task<IActionResult> CreateKH([FromBody] KhachHang khachHang)
+        //Check sdt voi email HoangLong
+        [HttpGet("CheckSDT")]
+        public async Task<IActionResult> CheckSdt(string soDienThoai)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             try
             {
-                // Gọi dịch vụ để tạo khách hàng và lấy ID
-                var customerId = await _service.CreateKHReturnId(khachHang);
-                return Ok(new { IdKhachHang = customerId });
+                var sdt = await _service.CheckSDT(soDienThoai);
+                return Ok(sdt);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi trong quá trình kiểm tra", error = ex.Message });
+            }
+        }
+        [HttpGet("CheckMail")]
+        public async Task<IActionResult> CheckMail(string mail)
+        {
+            try
+            {
+                var email = await _service.CheckMail(mail);
+                return Ok(email);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new { message = "Lỗi trong quá trình kiểm tra", error = ex.Message });
             }
         }
     }
