@@ -69,12 +69,24 @@ namespace APPMVC.Service
             return await _httpClient.GetFromJsonAsync<List<KhachHang>>("/api/KhachHang/GetAllKhachHang");
         }
 
-        public Task<KhachHang> GetIdKhachHang(Guid? id)
+        public async Task<KhachHang> GetIdKhachHang(Guid? id)
         {
-            var getkh = _httpClient.GetFromJsonAsync<KhachHang>($"/api/KhachHang/GetById?id={id}");
-            return getkh;
-        }
+            if (!id.HasValue)
+            {
+                return null; // Trả về null nếu id không có giá trị
+            }
 
+            try
+            {
+                var khachHang = await _httpClient.GetFromJsonAsync<KhachHang>($"/api/KhachHang/GetById?id={id}");
+                return khachHang; // Trả về khách hàng nếu tìm thấy
+            }
+            catch (HttpRequestException)
+            {
+                // Xử lý lỗi HTTP (ví dụ: không tìm thấy)
+                return null; // Trả về null nếu có lỗi
+            }
+        }
         public async Task UpdateKhachHang(KhachHang kh)
         {
             await _httpClient.PutAsJsonAsync("api/KhachHang/Sua", kh);
