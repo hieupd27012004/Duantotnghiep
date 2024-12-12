@@ -124,5 +124,14 @@ namespace AppAPI.Repository
 
             return customer;
         }
+        //Check SDT và Email
+        public async Task<bool> CheckSDT(string soDienThoai)
+        {
+            return await _context.khachHangs.AnyAsync(x => x.SoDienThoai == soDienThoai);
+        }
+        public async Task<bool> CheckMail(string mail)
+        {
+            return await _context.khachHangs.AnyAsync(x => x.Email == mail);
+        }
     }
 }

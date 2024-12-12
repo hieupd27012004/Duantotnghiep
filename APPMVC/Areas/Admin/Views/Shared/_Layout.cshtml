@@ -24,6 +24,7 @@
 <body>
     @{
         var isLoggedIn = ViewContext.HttpContext.Session.GetString("NhanVien") != null;
+       
 
     }
 
@@ -48,6 +49,7 @@
 <script>
     function checkLogin() {
         var isLoggedIn = @Html.Raw(isLoggedIn.ToString().ToLower());
+
         if (!isLoggedIn) {
             alert('Bạn Cần Đăng Nhập Để Thực Hiện Chức Năng Này');
             return false;

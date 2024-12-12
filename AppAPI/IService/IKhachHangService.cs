@@ -15,6 +15,9 @@ namespace AppAPI.IService
         Task<KhachHang?> Login(string email, string password);   
         Task DeleteKhachHang(Guid id);
         Task<KhachHang?> GetCustomerByPhoneOrEmailAsync(string phoneOrEmail);
+        //Check
+        Task<bool> CheckSDT(string soDienThoai);
+        Task<bool> CheckMail(string mail);
 
     }
 }

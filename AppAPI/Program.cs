@@ -108,6 +108,9 @@ builder.Services.AddTransient<ILichSuSuDungVoucherRepo, LichSuSuDungVoucherRepo>
 builder.Services.AddTransient<ILichSuSuDungVoucherService, LichSuSuDungVoucherService>();
 builder.Services.AddTransient<IPromotionSanPhamChiTietRepo, PromotionSanPhamChiTietRepo>();
 builder.Services.AddTransient<IPromotionSanPhamChiTietService, PromotionSanPhamChiTietService>();
+
+builder.Services.AddTransient<IThongKeRepo, ThongKeRepo>();
+builder.Services.AddTransient<IThongKeServices, ThongKeServices>();
 builder.Services.AddHostedService<VoucherStatusUpdater>();
 builder.Services.AddSignalR();
 

@@ -114,5 +114,14 @@ namespace AppAPI.Repository
             await _context.SaveChangesAsync();
             return true;
         }
+        //Check SDT và Email
+        public async Task<bool> CheckSDT(string soDienThoai)
+        {
+            return await _context.nhanViens.AnyAsync(x => x.SoDienThoai == soDienThoai);
+        }
+        public async Task<bool> CheckMail(string mail)
+        {
+            return await _context.nhanViens.AnyAsync(x => x.Email == mail);
+        }
     }
 }

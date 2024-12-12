@@ -111,5 +111,25 @@ namespace APPMVC.Service
             }
             return null; 
         }
+        public async Task<bool> CheckSDT(string soDienThoai)
+        {
+            if(string.IsNullOrEmpty(soDienThoai))
+            {
+                throw new ArgumentException("Số điện thoại không được để trống");
+                
+            }
+            var response = await _httpClient.GetAsync($"/api/KhachHang/CheckSDT?soDienThoai={soDienThoai}");
+            return response.IsSuccessStatusCode && bool.Parse(await response.Content.ReadAsStringAsync());
+        }
+        public async Task<bool> CheckMail (string mail)
+        {
+            if (string.IsNullOrEmpty(mail))
+            {
+                throw new ArgumentException("Gmail không được để trống");
+
+            }
+            var response = await _httpClient.GetAsync($"/api/KhachHang/CheckMail?mail={Uri.EscapeDataString(mail)}");
+            return response.IsSuccessStatusCode && bool.Parse(await response.Content.ReadAsStringAsync());
+        }
     }
 }

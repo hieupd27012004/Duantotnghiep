@@ -1,0 +1,45 @@
+﻿@model AppData.ViewModel.ThongKeTheoThoiGianViewModel
+<div class="card mb-4 p-3">
+    <form method="get" action="@Url.Action("ThongKeTheoThoiGian", "ThongKe")" class="d-flex align-items-center">
+        <label for="startDate" class="me-2">Từ ngày:</label>
+        <input type="date" id="startDate" name="startDate" class="form-control me-3" value="@ViewData["StartDate"]" />
+
+        <label for="endDate" class="me-2">Đến ngày:</label>
+        <input type="date" id="endDate" name="endDate" class="form-control me-3" value="@ViewData["EndDate"]" />
+
+        <button type="submit" class="btn btn-primary">Lọc</button>
+    </form>
+</div>
+
+<div class="card mb-5">
+    <h4 class="card-header">Thống Kê Theo Khoảng Thời Gian</h4>
+    <div class="card-body">
+        @if (Model.ThongKeKhoangThoiGian == null || !Model.ThongKeKhoangThoiGian.Any())
+        {
+            <div class="alert alert-warning">
+                <strong>Thông báo:</strong> Không có dữ liệu thống kê trong khoảng thời gian đã chọn.
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model.ThongKeKhoangThoiGian)
+            {
+                <h5>Tổng Tiền: <strong>@item.TongDoanhThu.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</strong></h5>
+                <div class="d-flex justify-content-around">
+                    <div class="align-self-center d-flex flex-column align-items-center me-2">
+                        <p>Đơn Hàng</p>
+                        <strong>@item.TongDonHang</strong>
+                    </div>
+                    <div class="align-self-center d-flex flex-column align-items-center me-2">
+                        <p>Chờ Xác Nhận</p>
+                        <strong>@item.DonHangChoXacNhan</strong>
+                    </div>
+                    <div class="align-self-center d-flex flex-column align-items-center me-2">
+                        <p>Thành Công</p>
+                        <strong>@item.DonHangThanhCong</strong>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

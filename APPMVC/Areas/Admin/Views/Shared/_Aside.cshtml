@@ -56,11 +56,24 @@
 
     <ul class="menu-inner py-1">
         <!-- Dashboard -->
-        <li class="menu-item active">
-            <a href="@Url.Action("Index", "HomeAdmin", new { area = "Admin" })" class="menu-link">
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                <div data-i18n="Analytics">Thống kê</div>
+                <div data-i18n="Analytics">Thống Kê</div>
             </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="@Url.Action("ThongKeTongQuan", "ThongKe", new { area = "Admin" })" class="menu-link">                       
+                        <div data-i18n="Analytics">Thống kê tổng quan</div>
+                    </a>
+                </li>      
+                <li class="menu-item">
+                    <a href="@Url.Action("TopSellingProductsChart", "ThongKe", new { area = "Admin" })" class="menu-link">
+                        <div data-i18n="Analytics">Sản phẩm bán chạy</div>
+                    </a>
+                </li>
+            </ul>
+            
         </li>
 
 

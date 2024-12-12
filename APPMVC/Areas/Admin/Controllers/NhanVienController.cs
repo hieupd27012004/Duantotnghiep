@@ -122,7 +122,18 @@ namespace APPMVC.Areas.Admin.Controllers
                 ModelState.AddModelError("", "Vui lòng tải lên một file ảnh hợp lệ.");
                 return View(nhanVien);
             }
-
+            var checkSdt = await _service.CheckSDT(nhanVien.SoDienThoai);
+            if (checkSdt)
+            {
+                TempData["Error"] = "Đăng ký thất bại! Số điện thoại đã tồn tại";
+                return RedirectToAction("Index");
+            }
+            var checkEmail = await _service.CheckMail(nhanVien.Email);
+            if (checkEmail)
+            {
+                TempData["Error"] = "Đăng ký thất bại! Email này đã tồn tại";
+                return RedirectToAction("Index");
+            }
             // Kiểm tra tính hợp lệ của ModelState trước khi lưu dữ liệu vào cơ sở dữ liệu
             if (!ModelState.IsValid)
             {
@@ -386,16 +397,16 @@ namespace APPMVC.Areas.Admin.Controllers
 
             }
             var nhanVien = JsonConvert.DeserializeObject<NhanVien>(sessionData);
+            if (nhanVien.IdchucVu.HasValue)
+            {
+                var chucVu = await chucVuService.GetIdChucVu(nhanVien.IdchucVu.Value);
+                ViewBag.TenChucVu = chucVu?.TenChucVu ?? "Chức vụ không xác định";
+            }
+            else
+            {
+                ViewBag.TenChucVu = "Chức vụ không xác định";
+            }
 
-            //if (nhanVien.IdchucVu.HasValue)
-            //{
-            //    var tenChucVu = chucVuService.GetIdChucVu(nhanVien.IdchucVu.Value); // Sử dụng .Value để lấy giá trị
-            //    ViewBag.TenChucVu = tenChucVu;
-            //}
-            //else
-            //{
-            //    ViewBag.TenChucVu = "Chức vụ không xác định"; // Hoặc xử lý theo cách bạn muốn
-            //}
 
             return View(nhanVien);
         }

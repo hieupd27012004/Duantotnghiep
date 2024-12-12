@@ -63,5 +63,13 @@ namespace AppAPI.Service
         {
             return await _repo.GetCustomerByPhoneOrEmailAsync(phoneOrEmail);
         }
+        public async Task<bool> CheckSDT(string soDienThoai)
+        {
+            return await _repo.CheckSDT(soDienThoai);
+        }
+        public async Task<bool> CheckMail(string mail)
+        {
+            return await _repo.CheckMail(mail);
+        }
     }
 }

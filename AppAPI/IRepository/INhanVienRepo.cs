@@ -15,5 +15,8 @@ namespace AppAPI.IRepository
         Task<NhanVien> UpdateThongTin(NhanVien nv);
         Task<bool> DoiMK(Guid idNhanVien, string newPassword);
         Task<bool> ResetPass(string email, string newPassword);
+        //check
+        Task<bool> CheckSDT(string soDienThoai);
+        Task<bool> CheckMail(string mail);
     }
 }

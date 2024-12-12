@@ -77,6 +77,7 @@ builder.Services.AddTransient<ISanPhamChiTietKichCoService, SanPhamChiTietKichCo
 builder.Services.AddTransient<IVoucherService, VoucherService>();
 builder.Services.AddTransient<ILichSuHoaDonService, LichSuHoaDonService>();
 builder.Services.AddTransient<ICardService, CardService>();
+builder.Services.AddTransient<IThongKeService, ThongKeService>();
 //Đăng ký VnPay admin
 builder.Services.AddSingleton<IVnPayService, VnPayService>();
 //VnPay Client
