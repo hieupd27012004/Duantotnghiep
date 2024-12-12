@@ -553,9 +553,11 @@ namespace APPMVC.Areas.Admin.Controllers
             await _hoaDonChiTietService.UpdateAsync(hoaDonChiTietList);
             return Json(new { success = true });
         }
+
         [HttpPost]
-        public async Task<IActionResult> XacNhanThanhToan(Guid idHoaDon, Guid? idKhachHang)
+        public async Task<IActionResult> XacNhanThanhToan(Guid idHoaDon, Guid? idKhachHang, double? soTienKhachDua)
         {
+
             Console.WriteLine($"idKhachHang: {idKhachHang}");
             if (!ModelState.IsValid)
             {
@@ -583,7 +585,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     double thanhTien = hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia;
                     tongTienHang += thanhTien;
 
-                    sanPhamCT.SoLuong -= hoaDonChiTiet.SoLuong; 
+                    sanPhamCT.SoLuong -= hoaDonChiTiet.SoLuong;
                     await _sanPhamCTService.Update(sanPhamCT);
                 }
             }
@@ -594,43 +596,8 @@ namespace APPMVC.Areas.Admin.Controllers
                 return NotFound(new { message = "Hóa đơn không tồn tại." });
             }
 
-            if (idKhachHang.HasValue && idKhachHang.Value != Guid.Empty)
-            {
-                hoaDon.IdKhachHang = idKhachHang.Value;
-                var customer = await _khachHangService.GetIdKhachHang(hoaDon.IdKhachHang);
-                if (customer != null)
-                {
-                    hoaDon.NguoiNhan = customer.HoTen; 
-                }
-            }
-            else
-            {
-                var newCustomer = new KhachHang
-                {
-                    IdKhachHang = Guid.NewGuid(),
-                    HoTen = "Khách Lẻ",
-                    AuthProvider = "1",
-                    NgayTao = DateTime.Now,
-                    NgayCapNhat = DateTime.Now,
-                    NguoiTao = "Nhân Viên",
-                    NguoiCapNhat = "Nhân Viên",
-                    KichHoat = 1,
-                };
-
-                try
-                {
-                    await _khachHangService.AddKhachHang(newCustomer);
-                    hoaDon.IdKhachHang = newCustomer.IdKhachHang;
-                    hoaDon.NguoiNhan = newCustomer.HoTen;
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, new { message = "Đã xảy ra lỗi khi tạo khách hàng." });
-                }
-            }
-
+            hoaDon.NguoiNhan = "Khách Lẻ";
             hoaDon.TienGiam = 0;
-
             hoaDon.TongTienDonHang = tongTienHang;
             hoaDon.TongTienHoaDon = tongTienHang;
             hoaDon.TrangThai = "Hoàn Thành";
@@ -651,24 +618,25 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 await _lichSuHoaDonService.AddAsync(lichSu);
 
+                var tienThua = soTienKhachDua.Value - hoaDon.TongTienHoaDon;
+
                 var lichSuThanhToan = new LichSuThanhToan
                 {
                     IdLichSuThanhToan = Guid.NewGuid(),
-                    SoTien = hoaDon.TongTienHoaDon,
-                    TienThua = 0, 
+                    SoTien = soTienKhachDua.Value,
+                    TienThua = tienThua,
                     NgayTao = DateTime.Now,
                     LoaiGiaoDich = "Thanh Toán",
-                    Pttt = "Tiền mặt", 
-                    NguoiThaoTac = "Nhân Viên", 
+                    Pttt = "Tiền mặt",
+                    NguoiThaoTac = "Nhân Viên",
                     TrangThai = "Đã thanh toán",
                     IdHoaDon = hoaDon.IdHoaDon,
-                    IdNhanVien = NVID 
+                    IdNhanVien = NVID
                 };
 
                 await _lichSuThanhToanService.AddAsync(lichSuThanhToan);
 
                 var htmlContent = await GenerateInvoiceHtmlFromTemplate(hoaDon, hoaDonChiTietList);
-
                 var pdfBytes = GeneratePdfFromHtml(htmlContent);
 
                 var tempFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "TempFiles");
@@ -805,46 +773,14 @@ namespace APPMVC.Areas.Admin.Controllers
                 return NotFound(new { message = "Không tìm thấy hóa đơn." });
             }
 
-            // Update invoice totals
             hoaDon.TongTienDonHang = tongTienHang;
             hoaDon.TongTienHoaDon = tongTienHang;
             hoaDon.TienGiam = 0;
 
-            // Check for guest customer and create if needed
-            if (hoaDon.IdKhachHang == null || hoaDon.IdKhachHang == Guid.Empty)
-            {
-                var newCustomer = new KhachHang
-                {
-                    IdKhachHang = Guid.NewGuid(),
-                    HoTen = "Khách Lẻ",
-                    AuthProvider = "1",
-                    NgayTao = DateTime.Now,
-                    NgayCapNhat = DateTime.Now,
-                    NguoiTao = "Nhân Viên",
-                    NguoiCapNhat = "Nhân Viên",
-                    KichHoat = 1,
-                };
-
-                try
-                {
-                    await _khachHangService.AddKhachHang(newCustomer);
-                    hoaDon.IdKhachHang = newCustomer.IdKhachHang;
-                    hoaDon.NguoiNhan = newCustomer.HoTen;
-
-                    // Store customer information in TempData
-                    TempData["IdKhachHang"] = newCustomer.IdKhachHang.ToString();
-                    TempData["NguoiNhan"] = newCustomer.HoTen;
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, new { message = "Đã xảy ra lỗi khi tạo khách hàng." });
-                }
-            }
-
-            // Store necessary data in TempData
+            hoaDon.NguoiNhan = "Khách Lẻ";
             TempData["idHoaDon"] = idHoaDon.ToString();
-            TempData["TongTienDonHang"] = tongTienHang.ToString(); // Convert to string
-            TempData["TongTienHoaDon"] = tongTienHang.ToString(); // Convert to string
+            TempData["TongTienDonHang"] = tongTienHang.ToString(); 
+            TempData["TongTienHoaDon"] = tongTienHang.ToString(); 
 
             var vnPay = new PaymentInformationModel()
             {

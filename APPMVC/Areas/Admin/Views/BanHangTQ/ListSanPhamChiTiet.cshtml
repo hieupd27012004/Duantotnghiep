@@ -53,12 +53,16 @@
                         <td>
                             @if (item.GiaDaGiam.HasValue && item.GiaDaGiam < item.Price)
                             {
-                                <span class="discounted-price">@item.Price.ToString("N0")</span>
-                                <span class="current-price">@item.GiaDaGiam.Value.ToString("N0")</span>
+                                <span class="discounted-price" style="text-decoration: line-through; color: gray;">
+                                    @item.Price.ToString("#,0") VNĐ
+                                </span>
+                                <span class="current-price" style="color: red; font-weight: bold;">
+                                    @item.GiaDaGiam.Value.ToString("#,0") VNĐ
+                                </span>
                             }
                             else
                             {
-                                @item.Price.ToString("N0")
+                                <span>@item.Price.ToString("#,0") VNĐ</span>
                             }
                         </td>
                         <td>@item.Quantity</td>

@@ -15,7 +15,34 @@ namespace APPMVC.Service
         }
         public async Task AddKhachHang(KhachHang kh)
         {
-             await _httpClient.PostAsJsonAsync("/api/KhachHang/DangKy", kh);          
+            if (kh == null)
+            {
+                throw new ArgumentNullException(nameof(kh));
+            }
+
+            if (string.IsNullOrWhiteSpace(kh.Email) || string.IsNullOrWhiteSpace(kh.MatKhau))
+            {
+                throw new ArgumentException("Email and password cannot be null or empty.");
+            }
+
+            try
+            {
+                var json = JsonConvert.SerializeObject(kh);
+                Console.WriteLine(json); // Kiểm tra nội dung JSON
+
+                var response = await _httpClient.PostAsJsonAsync("/api/KhachHang/DangKy", kh);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error: {response.StatusCode}, Details: {errorContent}");
+                    throw new Exception("Error adding customer");
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine($"Request error: {e.Message}");
+            }
         }
         public async Task<KhachHang?> LoginKH(string email, string password)
         {

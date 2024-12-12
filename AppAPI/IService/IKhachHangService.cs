@@ -6,6 +6,8 @@ namespace AppAPI.IService
     {
         Task<List<KhachHang>> GetAllKhachHang();
         Task<KhachHang> GetIdKhachHang(Guid id);
+
+        Task<Guid?> CreateKHReturnId(KhachHang kh);
         Task<KhachHang> AddKhachHang(KhachHang kh);
         Task<KhachHang> UpdateKhachHang(KhachHang kh);
         Task<KhachHang> UpdateKHThongTin(KhachHang kh);

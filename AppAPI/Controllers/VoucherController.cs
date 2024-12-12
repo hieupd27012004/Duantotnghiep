@@ -152,5 +152,41 @@ namespace AppAPI.Controllers
             }
             return Ok(khachhangs);
         }
+
+        [HttpGet("available/{khachHangId}")]
+        public async Task<IActionResult> GetAvailableVouchers(Guid khachHangId)
+        {
+            try
+            {
+                Console.WriteLine($"API: Requesting vouchers for customer ID: {khachHangId}");
+
+                var vouchers = await _service.GetAvailableVouchersForCustomerAsync(khachHangId);
+
+                Console.WriteLine($"API: Found {vouchers.Count} vouchers");
+
+                if (vouchers == null || vouchers.Count == 0)
+                {
+                    return NotFound(new
+                    {
+                        Message = "Không tìm thấy voucher khả dụng cho khách hàng này.",
+                        StatusCode = StatusCodes.Status404NotFound
+                    });
+                }
+
+                return Ok(vouchers); // Trả về trực tiếp danh sách vouchers
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"API Error: {ex.Message}");
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    new
+                    {
+                        Message = "Đã xảy ra lỗi khi lấy danh sách voucher.",
+                        StatusCode = StatusCodes.Status500InternalServerError
+                    }
+                );
+            }
+        }
     }
 }

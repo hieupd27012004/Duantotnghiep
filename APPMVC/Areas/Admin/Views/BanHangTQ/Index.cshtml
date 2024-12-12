@@ -137,6 +137,7 @@
                     loadSanPhamChiTiet(idHoaDon);
                     bindQuantityButtons(idHoaDon);
                     addCustomer();
+                    handlePayment()
                 })
                 .fail(function() {
                     alert("Không thể tải chi tiết hóa đơn.");
@@ -235,17 +236,18 @@
             }
         }
 
-        // Hàm xử lý thanh toán
         function handlePayment() {
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
             const form = document.getElementById('paymentForm');
 
+            // Set the action based on the payment method
             if (paymentMethod === 'cash') {
                 form.action = "@Url.Action("XacNhanThanhToan", "BanHangTQ", new { area = "Admin" })";
             } else if (paymentMethod === 'bankTransfer') {
                 form.action = "@Url.Action("ThanhToanVNPay", "BanHangTQ", new { area = "Admin" })";
             }
 
+            // Get the customer ID
             const customerId = document.getElementById('customerId').value;
             if (customerId) {
                 const idKhachHangInput = document.createElement('input');
@@ -253,6 +255,18 @@
                 idKhachHangInput.name = 'idKhachHang';
                 idKhachHangInput.value = customerId;
                 form.appendChild(idKhachHangInput);
+            }
+
+            // Get the amount given by the customer
+            const amountGiven = document.getElementById('amountGivenInput').value;
+            if (amountGiven) {
+                const soTienKhachDuaInput = document.createElement('input');
+                soTienKhachDuaInput.type = 'hidden';
+                soTienKhachDuaInput.name = 'soTienKhachDua';
+                soTienKhachDuaInput.value = amountGiven;
+                form.appendChild(soTienKhachDuaInput);
+            } else {
+                return; 
             }
 
             form.submit();

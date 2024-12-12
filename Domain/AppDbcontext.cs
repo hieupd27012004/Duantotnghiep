@@ -70,6 +70,8 @@ namespace AppData
 		public DbSet<District> districts { get; set; }
 		public DbSet<Ward> wards { get; set; }
 
+		public DbSet<DiaChiHoaDon> diaChiHoaDons { get; set; }
+
 		public DbSet<PromotionSanPhamChiTiet> promotionSanPhamChiTiets { get; set; }
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -1,4 +1,5 @@
-﻿@model AppData.ViewModel.ThanhToanViewModel
+﻿@using System.Globalization
+@model AppData.ViewModel.ThanhToanViewModel
 @{
     ViewData["Title"] = "Checkout";
     Layout = "~/Areas/Client/Views/Shared/_LayoutClient.cshtml";
@@ -163,7 +164,7 @@
 
         
         <div class="col-md-4">
-            <h2 class="my-4">Đơn hàng</h2>
+    <h2 class="my-4">Đơn hàng</h2>
             <div class="card">
                 <div class="card-body">
                     <h4 class="my-3">Thông tin đơn hàng</h4>
@@ -184,31 +185,90 @@
                                     <tr>
                                         <td>@item.ProductName</td>
                                         <td>@item.Quantity</td>
-                                        <td>@item.Price.ToString("C")</td>
+                                        <td>@(item.Price.ToString("N0", new CultureInfo("vi-VN")) + " VND")</td>
                                         <td hidden>@item.IdSanPhamChiTiet</td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
+                        <div class="form-group">
+                            <label for="tong_so_tien">Tổng số tiền</label>
+                            <input type="text" class="form-control" id="tong_so_tien"
+                                   value="@(Model.CartItems.Sum(i => i.Price * i.Quantity).ToString( new CultureInfo("vi-VN")) + " VND")" readonly />
+                        </div>
 
                         <div class="form-group">
+                            <label for="phi_van_chuyen">Phí vận chuyển</label>
+                            <input type="text" class="form-control" id="phi_van_chuyen"
+                                   value="@(Model.PhiVanChuyen.ToString(new CultureInfo("vi-VN")) + " VND")" readonly />
+                        </div>
 
-                            <div class="form-group">
-                                <label for="tong_so_tien">Tổng số tiền</label>
-                                <input type="text" class="form-control" id="tong_so_tien"
-                                       value="@(Model.CartItems.Sum(i => i.Price * i.Quantity))" readonly />
+                        <div class="form-group">
+                            <label for="tong_tien">Tổng tiền hóa đơn</label>
+                            <input type="text" class="form-control" id="tong_tien"
+                                   value="@(
+               (Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.PhiVanChuyen)
+               .ToString( new CultureInfo("vi-VN")) +
+               " VND"
+           )" readonly />
+                        </div>
+
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h4 class="mb-0">Áp Dụng Voucher</h4>
                             </div>
-
-                            <div class="form-group">
-                                <label for="phi_van_chuyen">Phí vận chuyển</label>
-                                <input type="text" class="form-control" id="phi_van_chuyen"
-                                       value="@(Model.PhiVanChuyen)" readonly />
-                            </div>
-
-                            <div class="form-group">
-                                <label for="tong_tien">Tổng tiền hóa đơn</label>
-                                <input type="text" class="form-control" id="tong_tien"
-                                       value="@(Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.PhiVanChuyen)" readonly />
+                            <div class="card-body">
+                                @if (ViewBag.AvailableVouchers != null && ViewBag.AvailableVouchers.Count > 0)
+                                {
+                                    <div class="voucher-list">
+                                        @foreach (var voucher in ViewBag.AvailableVouchers)
+                                        {
+                                            <div class="voucher-item border mb-2 p-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input voucher-radio"
+                                                           type="radio"
+                                                           name="SelectedVoucher"
+                                                           id="voucher_@(voucher.VoucherId)"
+                                                           value="@voucher.VoucherId"
+                                                           data-type="@voucher.LoaiGiamGia"
+                                                           data-value="@voucher.GiaTriGiam"
+                                                           data-max-value="@(voucher.SoTienToiDa ?? 0)"
+                                                           data-min-order="@(voucher.GiaTriDonHangToiThieu ?? 0)">
+                                                    <label class="form-check-label w-100" for="voucher_@(voucher.VoucherId)">
+                                                        <div class="d-flex justify-content-between">
+                                                            <div>
+                                                                <strong>@voucher.MaVoucher</strong>
+                                                                <p class="text-muted mb-0">@voucher.MoTaVoucher</p>
+                                                            </div>
+                                                            <div class="text-right">
+                                                                @if (voucher.LoaiGiamGia == 1)
+                                                                {
+                                                                    <span class="badge bg-primary">Giảm @(voucher.GiaTriGiam)%</span>
+                                                                    @if (voucher.SoTienToiDa > 0)
+                                                                    {
+                                                                        <small class="d-block text-muted">Tối đa @(voucher.SoTienToiDa.ToString("N0"))đ</small>
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge bg-success">Giảm @(voucher.GiaTriGiam.ToString("N0"))đ</span>
+                                                                }
+                                                                @if (voucher.GiaTriDonHangToiThieu > 0)
+                                                                {
+                                                                    <small class="d-block text-muted">Áp dụng cho đơn hàng từ @(voucher.GiaTriDonHangToiThieu.ToString("N0"))đ</small>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="text-muted">Không có voucher khả dụng</p>
+                                }
                             </div>
                         </div>
                     }
@@ -218,85 +278,132 @@
                     }
                 </div>
             </div>
-        </div>
+</div>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-   
+    // Define the formatCurrency function in the global scope
+    function formatCurrency(value) {
+        return value.toLocaleString('vi-VN') + ' VND';
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
-        const formatCurrency = (value) => {
-            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-        };
+        // Get total amounts
+        const totalAmount = parseFloat(document.getElementById('tong_so_tien').value.replace(/[^0-9.-]+/g, ""));
+        const shippingFee = parseFloat(document.getElementById('phi_van_chuyen').value.replace(/[^0-9.-]+/g, ""));
+        const totalBill = totalAmount + shippingFee;
 
-        document.getElementById('tong_so_tien').value = formatCurrency(parseFloat(document.getElementById('tong_so_tien').value));
-        document.getElementById('phi_van_chuyen').value = formatCurrency(parseFloat(document.getElementById('phi_van_chuyen').value));
-        document.getElementById('tong_tien').value = formatCurrency(parseFloat(document.getElementById('tong_tien').value));
-    });
-    //Địa Chỉ
-    
-    $("#ProvinceId").change(function () {
-        var provinceId = $(this).val();
-        console.log("ProvinceId:", provinceId);
-        $.get('/Client/HomeClient/GetDistricts', { provinceId: provinceId }, function (data) {
-            console.log(data);
-            if (Array.isArray(data)) {
-                $("#DistrictId").empty();
-                $("#DistrictId").append('<option value="">Chọn quận/huyện</option>');
-                $.each(data, function (i, item) {
-                    $("#DistrictId").append('<option value="' + item.districtId + '">' + item.districtName + '</option>');
-                });
-            } else {
-                $("#DistrictId").empty().append('<option value="">Không có quận/huyện</option>');
-            }
-            var selectedProvince = $("#ProvinceId option:selected").text();
-            $("#ProvinceName").val(selectedProvince);
-        }).fail(function (jqXHR, textStatus, errorThrown) {
-            console.error("Error: " + textStatus, errorThrown);
-            alert("Có lỗi khi tải dữ liệu quận/huyện!");
-        });
-    });
-    // Khi thay đổi Quận/Huyện, lấy danh sách Phường/Xã và gán DistrictName
-    $("#DistrictId").change(function () {
-        var districtId = $(this).val();
-        console.log("DistrictId:", districtId); // Kiểm tra districtId
-        $.get('@Url.Action("GetWards", "HomeClient", new { area = "Client" })?districtId=' + districtId, function (data) {
-            console.log(data); // Kiểm tra dữ liệu trả về
-            $("#WardId").empty().append('<option value="">Chọn phường/xã</option>');
-            $.each(data, function (i, item) {
-                console.log("WardId:", item.wardId, "WardName:", item.wardName); // Kiểm tra dữ liệu của phường/xã
-                $("#WardId").append('<option value="' + item.wardId + '">' + item.wardName + '</option>');
-            });
-
-            // Gán giá trị cho DistrictName
-            var selectedDistrict = $("#DistrictId option:selected").text();
-            $("#DistrictName").val(selectedDistrict);
-        });
+        // Update values with formatted currency
+        document.getElementById('tong_so_tien').value = formatCurrency(totalAmount);
+        document.getElementById('phi_van_chuyen').value = formatCurrency(shippingFee);
+        document.getElementById('tong_tien').value = formatCurrency(totalBill);
     });
 
-    // Khi thay đổi Phường/Xã, gán WardName
-    $("#WardId").change(function () {
-        var wardName = $("#WardId option:selected").text();
-        $("#WardName").val(wardName);
-    });
+    // Load user addresses function
     function loadUserAddresses() {
         $.ajax({
             url: '@Url.Action("GetUserAddresses", "HomeClient", new { area = "Client" })',
             type: 'GET',
-            success: function (data) {
+            success: function(data) {
                 $('#addressList').html(data);
             },
-            error: function () {
+            error: function() {
                 $('#addressList').html('<p>Không thể tải danh sách địa chỉ.</p>');
             }
         });
     }
 
-    //Thanh Toán
-    document.querySelectorAll('input[name="PaymentMethod"]').forEach(radio => {
-        radio.addEventListener('change', function () {
-            if (this.value === 'online_payment') {
-                document.getElementById('paymentForm').submit(); // Gửi form để xử lý
+    // Load districts when province changes
+    $("#ProvinceId").change(function() {
+        var provinceId = $(this).val();
+        console.log("ProvinceId:", provinceId);
+        $.get('/Client/HomeClient/GetDistricts', { provinceId: provinceId }, function(data) {
+            console.log(data);
+            $("#DistrictId").empty().append('<option value="">Chọn quận/huyện</option>');
+            if (Array.isArray(data)) {
+                $.each(data, function(i, item) {
+                    $("#DistrictId").append('<option value="' + item.districtId + '">' + item.districtName + '</option>');
+                });
+            } else {
+                $("#DistrictId").append('<option value="">Không có quận/huyện</option>');
+            }
+            var selectedProvince = $("#ProvinceId option:selected").text();
+            $("#ProvinceName").val(selectedProvince);
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            console.error("Error: " + textStatus, errorThrown);
+            alert("Có lỗi khi tải dữ liệu quận/huyện!");
+        });
+    });
+
+    // Load wards when district changes
+    $("#DistrictId").change(function() {
+        var districtId = $(this).val();
+        console.log("DistrictId:", districtId);
+        $.get('@Url.Action("GetWards", "HomeClient", new { area = "Client" })?districtId=' + districtId, function(data) {
+            console.log(data);
+            $("#WardId").empty().append('<option value="">Chọn phường/xã</option>');
+            $.each(data, function(i, item) {
+                $("#WardId").append('<option value="' + item.wardId + '">' + item.wardName + '</option>');
+            });
+            // Set DistrictName
+            var selectedDistrict = $("#DistrictId option:selected").text();
+            $("#DistrictName").val(selectedDistrict);
+        });
+    });
+
+    // When changing Ward, set WardName
+    $("#WardId").change(function() {
+        var wardName = $("#WardId option:selected").text();
+        $("#WardName").val(wardName);
+    });
+
+       $('.voucher-radio').on('change', function() {
+        var voucherId = $(this).val();
+        var shippingFee = parseFloat($('#phi_van_chuyen').val().replace(/[^0-9.-]+/g, "")); // Get shipping fee
+
+        $.ajax({
+            url: '@Url.Action("ApplyVoucher", "HomeClient", new { area = "Client" })',
+            type: 'POST',
+            data: { voucherId: voucherId, shippingFee: shippingFee },
+            success: function(response) {
+                // Format discount amounts
+                response.totalAfterDiscount = formatCurrency(response.totalAfterDiscount);
+                response.discountAmount = formatCurrency(response.discountAmount);
+
+                // Cập nhật hiển thị phí vận chuyển
+                $('#phi_van_chuyen').val(formatCurrency(shippingFee)); // Hiển thị phí vận chuyển
+
+                if (response.success) {
+                    // Remove previous vouchers
+                    $('#discount-row').remove();
+                    $('input[name="SelectedVoucherId"]').remove();
+                    $('input[name="DiscountAmount"]').remove();
+
+                    // Show discount
+                    $('#tong_so_tien').closest('.form-group').after(`
+                        <div id="discount-row" class="form-group">
+                            <label>Giảm giá Voucher</label>
+                            <input type="text" class="form-control" value="${response.discountAmount}" readonly />
+                        </div>
+                    `);
+
+                    // Cập nhật tổng tiền
+                    $('#tong_tien').val(response.totalAfterDiscount);
+
+                    // Add hidden fields for voucher info
+                    $('form').append(`
+                        <input type="hidden" name="SelectedVoucherId" value="${response.voucherId}" />
+                        <input type="hidden" name="DiscountAmount" value="${response.discountAmount.replace(/[^0-9.-]+/g, "")}" />
+                    `);
+                } else {
+                    // Handle failure case
+                    $('#discount-row').remove();
+                    alert(response.message);
+                }
+            },
+            error: function() {
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
             }
         });
     });
