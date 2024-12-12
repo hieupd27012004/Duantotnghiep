@@ -44,19 +44,10 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 try
                 {
-                    kh.AuthProvider = "1";
-                    kh.NgayTao = DateTime.Now;
-                    kh.NgayCapNhat = DateTime.Now;
-                    kh.NguoiTao = "Client";
-                    kh.NguoiCapNhat = "Client";
-                    kh.KichHoat = 1;
-
                    
                     await _service.AddKhachHang(kh);
 
 
-
-                    // Set a success message and redirect to the Login action
                     TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay.";
                     return RedirectToAction("Login");
                 }
