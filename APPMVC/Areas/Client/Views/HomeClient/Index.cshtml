@@ -3,7 +3,12 @@
     ViewData["Title"] = "HomeClient";
     Layout = "~/Areas/Client/Views/Shared/_LayoutClient.cshtml";
 }
-
+@if (TempData["ErrorMessage"] != null)
+{
+	<div class="alert alert-danger">
+		@TempData["ErrorMessage"]
+	</div>
+}
 <div class="hero">
 	<div class="container">
 		<div class="row justify-content-between">
