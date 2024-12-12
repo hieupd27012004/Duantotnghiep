@@ -258,7 +258,8 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             var lichSu = await _lichSuHoaDonService.GetByIdHoaDonAsync(id);
-            bool hasPaymentHistory = lichSu.Any();
+            // Ensure lichSu is a collection (e.g., List or IEnumerable)
+            bool hasPaymentHistory = lichSu.Any(); // This line is valid if lichSu is a collection
             string previousState = hoaDon.TrangThai;
 
             switch (hoaDon.TrangThai)
@@ -272,7 +273,12 @@ namespace APPMVC.Areas.Admin.Controllers
                     else if (hoaDon.TrangThai != "Đã Giao Hàng")
                     {
                         hoaDon.TrangThai = "Chờ Giao Hàng";
-                        await UpdateProductQuantities(hoaDon.IdHoaDon);
+                        var errorMessages = await UpdateProductQuantities(hoaDon.IdHoaDon);
+                        if (errorMessages.Any()) // This line checks for collected error messages
+                        {
+                            TempData["ErrorMessage"] = string.Join("<br/>", errorMessages);
+                            return RedirectToAction("Edit", new { id });
+                        }
                     }
                     break;
 
@@ -384,18 +390,32 @@ namespace APPMVC.Areas.Admin.Controllers
                 GhiChu = reason 
             });
         }
-        private async Task UpdateProductQuantities(Guid idHoaDon)
+        private async Task<List<string>> UpdateProductQuantities(Guid idHoaDon)
         {
             var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
+            var errorMessages = new List<string>(); // List to collect error messages
+
             foreach (var chiTiet in hoaDonChiTietList)
             {
                 var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(chiTiet.IdSanPhamChiTiet);
+                var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(chiTiet.IdSanPhamChiTiet);
+
                 if (sanPhamCT != null)
                 {
-                    sanPhamCT.SoLuong -= chiTiet.SoLuong; 
-                    await _sanPhamCTService.Update(sanPhamCT); 
+                    if (sanPhamCT.SoLuong >= chiTiet.SoLuong)
+                    {
+                        sanPhamCT.SoLuong -= chiTiet.SoLuong;
+                        await _sanPhamCTService.Update(sanPhamCT);
+                    }
+                    else
+                    {
+                        // Collect error message for insufficient stock
+                        errorMessages.Add($"Không đủ số lượng cho sản phẩm {sanPham.TenSanPham}. Số lượng hiện có: {sanPhamCT.SoLuong}, yêu cầu: {chiTiet.SoLuong}.");
+                    }
                 }
             }
+
+            return errorMessages; // Return the list of error messages
         }
         private async Task UpdateProductQuantities2(Guid idHoaDon)
         {

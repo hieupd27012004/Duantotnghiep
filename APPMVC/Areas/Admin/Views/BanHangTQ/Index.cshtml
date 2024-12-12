@@ -44,6 +44,12 @@
     <h4 class="fw-bold py-3 mb-4">
         <span class="text-muted fw-light">Bán Hàng Tại Quầy</span>
     </h4>
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
     <div class="row">
         <div class="col-md-12">
             <div class="card mb-4" style="padding: 20px">
@@ -156,7 +162,7 @@
         }
 
         // Hàm bind các nút tăng giảm số lượng
-        function bindQuantityButtons(idHoaDon) {
+                function bindQuantityButtons(idHoaDon) {
             const decreaseButtons = document.querySelectorAll('.decrease');
             const increaseButtons = document.querySelectorAll('.increase');
             const quantityInputs = document.querySelectorAll('.quantity-amount');
@@ -178,21 +184,30 @@
                 button.addEventListener('click', function () {
                     const input = this.previousElementSibling;
                     let currentValue = parseInt(input.value);
-                    input.value = currentValue + 1;
-                    updateInvoiceAndStock(idHoaDon);
+                    const maxQuantity = parseInt(input.getAttribute('data-original-quantity'));
+                    if (currentValue < maxQuantity) {
+                        input.value = currentValue + 1;
+                        updateInvoiceAndStock(idHoaDon);
+                    } else {
+                        alert("Số lượng không được vượt quá " + maxQuantity + ".");
+                        input.value = 1;
+                        updateInvoiceAndStock(idHoaDon);
+                    }
                 });
             });
 
             quantityInputs.forEach(input => {
-                let originalValue = parseInt(input.value);
-
                 input.addEventListener('input', function () {
                     const value = parseInt(this.value);
+                    const maxQuantity = parseInt(this.getAttribute('data-original-quantity'));
                     if (isNaN(value) || value < 1) {
-                        this.value = originalValue;
                         alert("Số lượng phải là một số dương và lớn hơn 0.");
+                        this.value = 1; // Reset to 1 if invalid
+                    } else if (value > maxQuantity) {
+                        alert("Số lượng không được vượt quá " + maxQuantity + ".");
+                        this.value = 1; 
+                        updateInvoiceAndStock(idHoaDon);
                     } else {
-                        originalValue = value;
                         updateInvoiceAndStock(idHoaDon);
                     }
                 });
@@ -223,16 +238,13 @@
                 const data = await response.json();
                 if (data.success) {
                     viewInvoiceDetail(document.querySelector(`.product-item[data-idhoadon="${idHoaDon}"]`));
+                    return 0;
                 } else {
-                    sanPhamChiTiets.forEach(item => {
-                        const input = document.querySelector(`.quantity-amount[data-id="${item.IdSanPhamChiTiet}"]`);
-                        if (input) {
-                            input.value = item.OriginalQuantity;
-                        }
-                    });
+                    return 1;
                 }
             } catch (error) {
                 console.error('Error:', error);
+                return 1;
             }
         }
 

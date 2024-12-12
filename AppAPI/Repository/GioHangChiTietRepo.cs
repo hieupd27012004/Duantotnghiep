@@ -78,5 +78,17 @@ namespace AppAPI.Repository
             return await _context.gioHangChiTiets
                 .FirstOrDefaultAsync(x => x.IdSanPhamChiTiet == sanPhamChiTietId && x.IdGioHang == cartId);
         }
+
+        public async Task<List<GioHangChiTiet>> GetByIdsAsync(List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return new List<GioHangChiTiet>(); 
+            }
+
+            return await _context.gioHangChiTiets
+                .Where(gioHangChiTiet => ids.Contains(gioHangChiTiet.IdGioHangChiTiet))
+                .ToListAsync();
+        }
     }
 }

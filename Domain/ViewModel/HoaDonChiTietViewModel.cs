@@ -64,6 +64,8 @@ namespace AppData.ViewModel
             public string? MaSanPham { get; set; }
             public string? ProductName { get; set; }
             public double Quantity { get; set; }
+
+            public double SoLuong { get; set; }
             public double Price { get; set; }
             public List<HinhAnh>? HinhAnhs { get; set; }
             public List<string> MauSac { get; set; } = new List<string>();

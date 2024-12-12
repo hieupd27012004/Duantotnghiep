@@ -18,5 +18,7 @@ namespace APPMVC.IService
 
         Task<GioHangChiTiet> GetByProductIdAndCartIdAsync(Guid sanPhamChiTietId, Guid cartId);
 
+        Task<List<GioHangChiTiet>> GetByIdsAsync(List<Guid> ids);
+
     }
 }

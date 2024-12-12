@@ -57,7 +57,12 @@
         </div>
     </div>
 </div>
-
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
 <div class="untree_co-section before-footer-section">
     <div class="container">
         <form id="cartForm">
@@ -125,15 +130,22 @@
                                     }
                                 </td>
                                 <td>
-                                    <div class="input-group mb-3 d-flex justify-content-center align-items-center quantity-container" style="max-width: 120px; margin: auto;">
-                                        <div class="input-group-prepend">
-                                            <button class="btn btn-outline-black decrease rounded-circle" type="button" aria-label="Giảm Số Lượng">&minus;</button>
+                                    @if (item.SoLuong == 0)
+                                    {
+                                        <span class="text-danger">Đã hết hàng</span>
+                                    }
+                                    else
+                                    {
+                                        <div class="input-group mb-3 d-flex justify-content-center align-items-center quantity-container" style="max-width: 120px; margin: auto;">
+                                            <div class="input-group-prepend">
+                                                <button class="btn btn-outline-black decrease rounded-circle" type="button" aria-label="Giảm Số Lượng">&minus;</button>
+                                            </div>
+                                            <input type="number" name="quantities[@item.IdGioHangChiTiet]" class="form-control text-center quantity-amount" value="@item.SoLuong" min="1" aria-label="Số Lượng" @(item.SoLuong == 0 ? "disabled" : "") />
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-black increase rounded-circle" type="button" aria-label="Tăng Số Lượng">&plus;</button>
+                                            </div>
                                         </div>
-                                        <input type="number" name="quantities[@item.IdGioHangChiTiet]" class="form-control text-center quantity-amount" value="@item.SoLuong" min="1" aria-label="Số Lượng" />
-                                        <div class="input-group-append">
-                                            <button class="btn btn-outline-black increase rounded-circle" type="button" aria-label="Tăng Số Lượng">&plus;</button>
-                                        </div>
-                                    </div>
+                                    }
                                 </td>
                                 <td class="total-price" data-item-total="@itemTotal">@FormatCurrency(itemTotal)</td>
                                 <td>
@@ -319,14 +331,12 @@
         return amount.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' VND';
     }
 
-    function updateCartQuantity(input) {
+        function updateCartQuantity(input) {
         const row = input.closest('tr');
         const id = row.querySelector('td').textContent.trim();
         const price = parseFloat(row.dataset.itemPrice);
         const quantity = parseInt(input.value);
         const total = (price * quantity).toFixed(2);
-
-        const previousQuantity = previousQuantities[id];
 
         const quantities = [{
             IdGioHangChiTiet: id,
@@ -344,16 +354,16 @@
         .then(response => response.json())
         .then(data => {
             if (!data.success) {
-                input.value = previousQuantity; // Khôi phục giá trị trước đó nếu có lỗi
+                input.value = 1; // Reset to 1 if there's an error
                 updateTotal();
                 alert(data.message || 'Failed to update quantities.');
             } else {
-                previousQuantities[id] = quantity; // Cập nhật số lượng trước đó
+                previousQuantities[id] = quantity; // Update previous quantity
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            input.value = previousQuantity;
+            input.value = 1; // Reset to 1 on fetch error
         });
     }
 

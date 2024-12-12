@@ -165,5 +165,28 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("getbyids")]
+        public async Task<IActionResult> GetByIds([FromQuery] List<Guid> ids)
+        {
+            try
+            {
+                if (ids == null || !ids.Any())
+                {
+                    return BadRequest("No IDs provided.");
+                }
+
+                var gioHangChiTietList = await _service.GetByIdsAsync(ids);
+                if (gioHangChiTietList == null || gioHangChiTietList.Count == 0)
+                {
+                    return NotFound("No GioHangChiTiet found for the provided IDs.");
+                }
+
+                return Ok(gioHangChiTietList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

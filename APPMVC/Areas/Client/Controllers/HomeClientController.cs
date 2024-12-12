@@ -178,18 +178,35 @@ namespace APPMVC.Areas.Client.Controllers
             // Save selectedItems into session
             HttpContext.Session.SetObject("SelectedItems", selectedItems);
 
+            // Retrieve the quantities for the selected items
+            var gioHangChiTiets = await _gioHangChiTietService.GetByIdsAsync(selectedItems); // Assuming you have a method to get the details
+
+            foreach (var item in gioHangChiTiets)
+            {
+                var sanphamchitiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
+                var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
+
+                // Check if the quantity exceeds available stock
+                if (item.SoLuong > sanphamchitiet.SoLuong)
+                {
+                    TempData["ErrorMessage"] = $"Số lượng cho sản phẩm {sanPham.TenSanPham} vượt quá số lượng có sẵn.";
+                    return RedirectToAction("Card");
+                }
+            }
+
             var (cartItems, thanhToanViewModel) = await GetCartItemsWithAddress(selectedItems);
 
             if (thanhToanViewModel == null)
             {
                 return RedirectToAction("Index");
             }
+
             var availableVouchers = await GetAvailableVouchersForCustomer();
             Console.WriteLine($"Available Vouchers Count: {availableVouchers?.Count ?? 0}");
 
             ViewBag.AvailableVouchers = availableVouchers;
-
             ViewBag.Provinces = await _diaChiService.GetProvincesAsync();
+
             return View(thanhToanViewModel);
         }
         [HttpPost]
@@ -440,6 +457,18 @@ namespace APPMVC.Areas.Client.Controllers
                 return Unauthorized(new { message = "Customer not found in session." });
             }
 
+            // Check product quantities against available stock
+            foreach (var item in cartItems)
+            {
+                var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
+                var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
+                if (item.Quantity > sanPhamChiTiet?.SoLuong)
+                {
+                    TempData["ErrorMessage"] = $"Số lượng cho sản phẩm {sanPham?.TenSanPham} vượt quá số lượng có sẵn.";
+                    return RedirectToAction("Index", "Home"); // Redirect to the Home controller's Index action
+                }
+            }
+
             double totalDonHang = cartItems.Sum(item => item.Price * item.Quantity);
             double discountAmount = 0; // Khởi tạo giá trị giảm giá
 
@@ -468,7 +497,7 @@ namespace APPMVC.Areas.Client.Controllers
                     CreatDate = DateTime.Now,
                     Description = "Thanh Toán VnPay",
                     FullName = thanhToanViewModel.NguoiNhan,
-                    OrderId = Guid.NewGuid(), 
+                    OrderId = Guid.NewGuid(),
                 };
 
                 string paymentUrl = _vnPayService.CreatePaymentUrl(vnPay, HttpContext);
