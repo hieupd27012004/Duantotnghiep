@@ -14,48 +14,119 @@ namespace APPMVC.Service
         }
         public async Task<List<ThongKeNgay>> GetStatisticsByDate(DateTime date)
         {
-            var respone = await _httpClient.GetAsync($"/api/ThongKe/ThongKeTheoNgay?date={date}");
-            respone.EnsureSuccessStatusCode();
-           
-            return await respone.Content.ReadFromJsonAsync<List<ThongKeNgay>>();
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/ThongKe/ThongKeTheoNgay?date={date:yyyy-MM-dd}");
 
+                // Kiểm tra trạng thái phản hồi
+                response.EnsureSuccessStatusCode();
+
+                // Đọc và trả về danh sách thống kê
+                var statistics = await response.Content.ReadFromJsonAsync<List<ThongKeNgay>>();
+
+                return statistics ?? new List<ThongKeNgay>(); // Trả về danh sách rỗng nếu không có dữ liệu
+            }
+            catch (HttpRequestException ex)
+            {
+                // Xử lý lỗi HTTP
+                Console.WriteLine($"Error fetching statistics: {ex.Message}");
+                return new List<ThongKeNgay>(); // Trả về danh sách rỗng trong trường hợp lỗi
+            }
         }
         public async Task<List<ThongKeNgay>> GetStatisticsByWeek(DateTime date)
         {
-            var respone = await _httpClient.GetAsync($"/api/ThongKe/ThongKeTheoTuan?date={date}");
-            respone.EnsureSuccessStatusCode();
-            return await respone.Content.ReadFromJsonAsync<List<ThongKeNgay>>();
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/ThongKe/ThongKeTheoTuan?date={date:yyyy-MM-dd}");
+                response.EnsureSuccessStatusCode();
+                var statistics = await response.Content.ReadFromJsonAsync<List<ThongKeNgay>>();
+                return statistics ?? new List<ThongKeNgay>(); // Trả về danh sách rỗng nếu không có dữ liệu
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Error fetching statistics by week: {ex.Message}");
+                return new List<ThongKeNgay>(); // Trả về danh sách rỗng trong trường hợp lỗi
+            }
         }
+
         public async Task<List<ThongKeNgay>> GetStatisticsByMonth(int year, int month)
         {
-            var respone = await _httpClient.GetAsync($"/api/ThongKe/ThongKeTheoThang?year={year}&month={month}");
-            respone.EnsureSuccessStatusCode();
-            return await respone.Content.ReadFromJsonAsync<List<ThongKeNgay>>();
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/ThongKe/ThongKeTheoThang?year={year}&month={month}");
+                response.EnsureSuccessStatusCode();
+                var statistics = await response.Content.ReadFromJsonAsync<List<ThongKeNgay>>();
+                return statistics ?? new List<ThongKeNgay>(); // Trả về danh sách rỗng nếu không có dữ liệu
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Error fetching statistics by month: {ex.Message}");
+                return new List<ThongKeNgay>(); // Trả về danh sách rỗng trong trường hợp lỗi
+            }
         }
+
         public async Task<List<ThongKeThang>> GetStatisticsByYear(int year)
         {
-            var respone = await _httpClient.GetAsync($"/api/ThongKe/ThongKeTheoNam?year={year}");
-            respone.EnsureSuccessStatusCode();
-            return await respone.Content.ReadFromJsonAsync<List<ThongKeThang>>();
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/ThongKe/ThongKeTheoNam?year={year}");
+                response.EnsureSuccessStatusCode();
+                var statistics = await response.Content.ReadFromJsonAsync<List<ThongKeThang>>();
+                return statistics ?? new List<ThongKeThang>(); // Trả về danh sách rỗng nếu không có dữ liệu
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Error fetching statistics by year: {ex.Message}");
+                return new List<ThongKeThang>(); // Trả về danh sách rỗng trong trường hợp lỗi
+            }
         }
 
         public async Task<ThongKeTongQuan> GetTotalOrdersAndRevenue()
         {
-            var response = await _httpClient.GetAsync($"/api/ThongKe/TongQuan");
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<ThongKeTongQuan>();
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/ThongKe/TongQuan");
+                response.EnsureSuccessStatusCode();
+                var total = await response.Content.ReadFromJsonAsync<ThongKeTongQuan>();
+                return total ?? new ThongKeTongQuan(); // Trả về giá trị mặc định nếu không tìm thấy
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Error fetching total orders and revenue: {ex.Message}");
+                return new ThongKeTongQuan(); // Trả về giá trị mặc định trong trường hợp lỗi
+            }
         }
+
         public async Task<List<ThongKeKhoangThoiGian>> GetStatisticsByTimeRange(DateTime startDate, DateTime endDate)
         {
-            var response = await _httpClient.GetAsync($"/api/ThongKe/ThongKeTheoKhoangThoiGian?startDate={startDate}&endDate={endDate}");
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<List<ThongKeKhoangThoiGian>>();
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/ThongKe/ThongKeTheoKhoangThoiGian?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
+                response.EnsureSuccessStatusCode();
+                var statistics = await response.Content.ReadFromJsonAsync<List<ThongKeKhoangThoiGian>>();
+                return statistics ?? new List<ThongKeKhoangThoiGian>(); // Trả về danh sách rỗng nếu không có dữ liệu
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Error fetching statistics by time range: {ex.Message}");
+                return new List<ThongKeKhoangThoiGian>(); // Trả về danh sách rỗng trong trường hợp lỗi
+            }
         }
+
         public async Task<List<TopSellingProductViewModel>> GetTopSellingProductsAsync(DateTime? startDate, DateTime? endDate)
         {
-            var response = await _httpClient.GetAsync($"/api/ThongKe/TopSellingProducts?startDate={startDate}&endDate={endDate}");
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<List<TopSellingProductViewModel>>();
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/ThongKe/TopSellingProducts?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
+                response.EnsureSuccessStatusCode();
+                var products = await response.Content.ReadFromJsonAsync<List<TopSellingProductViewModel>>();
+                return products ?? new List<TopSellingProductViewModel>(); // Trả về danh sách rỗng nếu không có dữ liệu
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Error fetching top selling products: {ex.Message}");
+                return new List<TopSellingProductViewModel>(); // Trả về danh sách rỗng trong trường hợp lỗi
+            }
         }
     }
 }

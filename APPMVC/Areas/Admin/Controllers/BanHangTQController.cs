@@ -677,8 +677,7 @@ namespace APPMVC.Areas.Admin.Controllers
             string chiTietHoaDonHtml = "";
 
             string tenNhanVien = HttpContext.Session.GetString("NhanVienName") ?? "Nhân Viên";
-            var khachHang = await _khachHangService.GetIdKhachHang(hoaDon.IdKhachHang);
-            string tenKhachHang = khachHang?.HoTen ?? "Khách Lẻ";
+            string tenKhachHang = hoaDon.NguoiNhan; 
 
             foreach (var chiTiet in hoaDonChiTietList)
             {
@@ -687,7 +686,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 {
                     var idSanPham = sanPhamCT.IdSanPham;
                     var sanPham = await _sanPhamService.GetSanPhamById(idSanPham);
-                    if(sanPham != null)
+                    if (sanPham != null)
                     {
                         var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
                         string tenMauSac = mauSacList != null && mauSacList.Count > 0
@@ -698,16 +697,15 @@ namespace APPMVC.Areas.Admin.Controllers
                             ? string.Join(",", kichCoList.Select(m => m.TenKichCo)) : "Không xác định";
 
                         chiTietHoaDonHtml += $@"
-                        <tr>
-                            <td>{sanPham.TenSanPham}</td>  
-                            <td>{tenMauSac}</td>
-                            <td>{kichCo}</td>
-                            <td>{chiTiet.SoLuong}</td>
-                            <td>{chiTiet.DonGia.ToString("N0")} VND</td>
-                            <td>{(chiTiet.SoLuong * chiTiet.DonGia).ToString("N0")} VND</td>
-                        </tr>";
+                <tr>
+                    <td>{sanPham.TenSanPham}</td>  
+                    <td>{tenMauSac}</td>
+                    <td>{kichCo}</td>
+                    <td>{chiTiet.SoLuong}</td>
+                    <td>{chiTiet.DonGia.ToString("N0")} VND</td>
+                    <td>{(chiTiet.SoLuong * chiTiet.DonGia).ToString("N0")} VND</td>
+                </tr>";
                     }
-            
                 }
             }
 
