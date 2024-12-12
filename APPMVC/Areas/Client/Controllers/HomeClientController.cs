@@ -465,7 +465,7 @@ namespace APPMVC.Areas.Client.Controllers
                 if (item.Quantity > sanPhamChiTiet?.SoLuong)
                 {
                     TempData["ErrorMessage"] = $"Số lượng cho sản phẩm {sanPham?.TenSanPham} vượt quá số lượng có sẵn.";
-                    return RedirectToAction("Index", "Home"); // Redirect to the Home controller's Index action
+                    return RedirectToAction("Index", "HomeClient"); 
                 }
             }
 
