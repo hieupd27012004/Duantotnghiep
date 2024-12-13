@@ -248,6 +248,7 @@
                                                                     {
                                                                         <small class="d-block text-muted">Tối đa @(voucher.SoTienToiDa.ToString("N0"))đ</small>
                                                                     }
+
                                                                 }
                                                                 else
                                                                 {
@@ -258,6 +259,9 @@
                                                                     <small class="d-block text-muted">Áp dụng cho đơn hàng từ @(voucher.GiaTriDonHangToiThieu.ToString("N0"))đ</small>
                                                                 }
                                                             </div>
+                                                            <small class="text-muted">
+                                                                Còn @voucher.SoLuongVoucherConLai lượt sử dụng
+                                                            </small>
                                                         </div>
                                                     </label>
                                                 </div>
