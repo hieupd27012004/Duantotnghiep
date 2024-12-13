@@ -1,6 +1,8 @@
 ﻿@model (List<AppData.ViewModel.HoaDonChiTietViewModel.SanPhamChiTietViewModel> SanPhamChiTiets, Guid IdHoaDon)
 @{
     ViewData["Title"] = "ListSanPhamCHiTiet";
+
+    var sortedSanPhamChiTiets = Model.SanPhamChiTiets.OrderByDescending(item => item.MaSanPham).ToList();
 }
 <style>
     .table th, .table td {
@@ -27,7 +29,8 @@
 </style>
 
 <div class="modal-body">
-    <table class="table">
+    <input type="text" id="searchInput" placeholder="Tìm kiếm theo mã hoặc tên sản phẩm" style="margin-bottom: 10px; padding: 5px; width: 33%;" />
+    <table class="table" id="productTable">
         <thead>
             <tr>
                 <th hidden>ID</th>
@@ -42,21 +45,21 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model.SanPhamChiTiets != null && Model.SanPhamChiTiets.Any())
+            @if (sortedSanPhamChiTiets != null && sortedSanPhamChiTiets.Any())
             {
-                foreach (var item in Model.SanPhamChiTiets)
+                foreach (var item in sortedSanPhamChiTiets)
                 {
-                    <tr>
+                    <tr style="@(item.Quantity == 0 ? "background-color: #d6d6d6;" : "")">
                         <td hidden>@item.IdSanPhamChiTiet</td>
                         <td>@item.MaSanPham</td>
                         <td>@item.ProductName</td>
                         <td>
                             @if (item.GiaDaGiam.HasValue && item.GiaDaGiam < item.Price)
                             {
-                                <span class="discounted-price" style="text-decoration: line-through; color: gray;">
+                                <span class="discounted-price">
                                     @item.Price.ToString("#,0") VNĐ
                                 </span>
-                                <span class="current-price" style="color: red; font-weight: bold;">
+                                <span class="current-price">
                                     @item.GiaDaGiam.Value.ToString("#,0") VNĐ
                                 </span>
                             }
@@ -65,7 +68,17 @@
                                 <span>@item.Price.ToString("#,0") VNĐ</span>
                             }
                         </td>
-                        <td>@item.Quantity</td>
+                        <td>
+                            @if (item.Quantity == 0)
+                            {
+                                <span style="color: red;">Đã hết hàng</span>
+                                <input type="hidden" value="0" />
+                            }
+                            else
+                            {
+                                @item.Quantity
+                            }
+                        </td>
                         <td>@string.Join(", ", item.MauSac)</td>
                         <td>@string.Join(", ", item.KichCo)</td>
                         <td>
@@ -91,9 +104,12 @@
                             }
                         </td>
                         <td>
-                            <a href="#" class="btn btn-success add-product-button" data-id-san-pham-chi-tiet="@item.IdSanPhamChiTiet" data-id-hoa-don="@Model.IdHoaDon">
-                                <i class="fas fa-plus"></i> Thêm
-                            </a>
+                            @if (item.Quantity > 0) // Chỉ hiển thị nút thêm nếu còn hàng
+                            {
+                                <a href="#" class="btn btn-success add-product-button" data-id-san-pham-chi-tiet="@item.IdSanPhamChiTiet" data-id-hoa-don="@Model.IdHoaDon">
+                                    <i class="fas fa-plus"></i> Thêm
+                                </a>
+                            }
                         </td>
                     </tr>
                 }
@@ -136,6 +152,13 @@
             error: function () {
                 alert('Đã xảy ra lỗi.');
             }
+        });
+    });
+     $('#searchInput').on('keyup', function () {
+        var value = $(this).val().toLowerCase();
+        $('#productTable tbody tr').filter(function () {
+            $(this).toggle($(this).children('td').eq(1).text().toLowerCase().indexOf(value) > -1 || // Kiểm tra mã sản phẩm
+                          $(this).children('td').eq(2).text().toLowerCase().indexOf(value) > -1); // Kiểm tra tên sản phẩm
         });
     });
 </script>

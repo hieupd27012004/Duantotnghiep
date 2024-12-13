@@ -55,26 +55,34 @@ namespace APPMVC.Areas.Admin.Controllers
             _lichSuThanhToanService = lichSuThanhToanService;
         }
         [HttpGet]
-        public async Task<ActionResult> Index(int page = 1, string status = null)
+        public async Task<ActionResult> Index(int page = 1, string status = null, string search = null)
         {
-            page = page < 1 ? 1 : page; // Ensure that the page number is at least 1
+            page = page < 1 ? 1 : page; // Đảm bảo rằng số trang ít nhất là 1
             const int pageSize = 5;
 
-            // Fetch all invoices
+            // Lấy tất cả hóa đơn
             var hoaDons = await _hoaDonService.GetAllAsync() ?? new List<HoaDon>();
 
-            // Filter out unnecessary statuses
+            // Lọc trạng thái không cần thiết
             var filteredHoaDons = hoaDons
                 .Where(h => h.TrangThai != "Tạo đơn hàng")
                 .ToList();
 
-            // Apply status filtering if provided
+            // Áp dụng lọc theo trạng thái nếu có
             if (!string.IsNullOrEmpty(status))
             {
                 filteredHoaDons = filteredHoaDons.Where(h => h.TrangThai == status).ToList();
             }
 
-            // Fetch distinct statuses for the status filter dropdown
+            // Áp dụng tìm kiếm theo mã đơn và tên khách hàng nếu có
+            if (!string.IsNullOrEmpty(search))
+            {
+                filteredHoaDons = filteredHoaDons
+                    .Where(h => h.MaDon.Contains(search) || h.NguoiNhan.Contains(search))
+                    .ToList();
+            }
+
+            // Lấy các trạng thái khác nhau cho dropdown
             var distinctStatuses = hoaDons
                 .Select(h => h.TrangThai)
                 .Where(s => s != "Tạo đơn hàng")
@@ -83,7 +91,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
             var hoaDonViewModels = new List<AppData.ViewModel.HoaDonViewModell>();
 
-            // Populate view models and calculate total quantities
+            // Tạo view models và tính tổng số lượng
             foreach (var hoaDon in filteredHoaDons)
             {
                 var hoaDonChiTiets = await _hoaDonChiTietService.GetByIdHoaDonAsync(hoaDon.IdHoaDon);
@@ -97,16 +105,17 @@ namespace APPMVC.Areas.Admin.Controllers
                 });
             }
 
-            // Sort the view models by NgayTao in descending order
+            // Sắp xếp danh sách view models theo NgayTao giảm dần
             hoaDonViewModels = hoaDonViewModels
                 .OrderByDescending(vm => vm.HoaDon.NgayTao)
                 .ToList();
 
-            // Paginate the sorted list
+            // Phân trang danh sách đã sắp xếp
             var pagedHoaDons = hoaDonViewModels.ToPagedList(page, pageSize);
 
-            // Set view bag properties for status filtering and total quantity
+            // Thiết lập các thuộc tính view bag cho lọc trạng thái và tổng số lượng sản phẩm
             ViewBag.CurrentStatus = status;
+            ViewBag.CurrentSearch = search; // Giữ lại giá trị tìm kiếm
             ViewBag.TotalProductQuantity = hoaDonViewModels.Sum(vm => vm.TotalQuantity);
             ViewBag.Statuses = distinctStatuses;
 
