@@ -402,7 +402,6 @@ namespace APPMVC.Areas.Client.Controllers
                 await _hoaDonChiTietService.AddAsync(orderDetails);
                 await _lichSuHoaDonService.AddAsync(lichSu);
 
-                // Chỉ tạo lịch sử thanh toán nếu không phải là COD
                 if (pttt != "Tiền Mặt")
                 {
                     var lichSuThanhToan = new LichSuThanhToan
@@ -881,7 +880,7 @@ namespace APPMVC.Areas.Client.Controllers
             bool success = await _diaChiService.UpdateAsync(IdDiaChi, dc);
             if (success)
             {
-                return RedirectToAction("Checkout");
+                return RedirectToAction("Checkout", new { selectedItems = HttpContext.Session.GetObject<List<Guid>>("SelectedItems") });
             }
 
             await LoadDropDowns(dc);
@@ -959,7 +958,7 @@ namespace APPMVC.Areas.Client.Controllers
             bool success = await _diaChiService.AddAsync(dc);
             if (success)
             {
-                return RedirectToAction("Checkout");
+                return RedirectToAction("Checkout", new { selectedItems = HttpContext.Session.GetObject<List<Guid>>("SelectedItems") });
             }
             await LoadDropDowns(dc);
             return View(dc);

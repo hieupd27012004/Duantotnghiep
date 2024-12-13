@@ -53,11 +53,15 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card mb-4" style="padding: 20px">
-                <div class="header">
+                <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h2>Bán hàng</h2>
-                    <form action="@Url.Action("TaoHD", "BanHangTQ", new { area = "Admin" })" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-primary ms-2">+ Tạo Đơn Hàng</button>
-                    </form>
+                    <div style="display: flex; gap: 10px;">
+                        <!-- Thêm div để chứa hai nút -->
+                        <button class="btn btn-primary" id="btnAddCustomer" data-bs-toggle="modal" data-bs-target="#addCustomerModal">Thêm Khách Hàng</button>
+                        <form action="@Url.Action("TaoHD", "BanHangTQ", new { area = "Admin" })" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-primary">+ Tạo Đơn Hàng</button>
+                        </form>
+                    </div>
                 </div>
                 <div class="product-list">
                     @if (Model == null || !Model.Any())
@@ -96,7 +100,37 @@
         </div>
     </div>
 </div>
-
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <!-- Điều chỉnh chiều rộng tối đa -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center w-100" id="addCustomerModalLabel">Thêm Khách Hàng</h5> <!-- Căn giữa tiêu đề -->
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="ThemKhachHang" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Tên Khách Hàng</label>
+                        <input type="text" class="form-control" name="HoTen" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số Điện Thoại</label>
+                        <input type="text" class="form-control" name="SoDienThoai" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="Email" />
+                    </div>
+                    <div class="text-center">
+                        <input type="submit" value="Thêm Khách Hàng" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
         // Hàm xóa hóa đơn
@@ -330,33 +364,32 @@
             document.getElementById('customerId').value = '';
         }
 
-        function addCustomer() {
-              $('#addCustomerForm').on('submit', function(e) {
-                  e.preventDefault();
+        $('#addCustomerForm').on('submit', function(e) {
+                    e.preventDefault();
 
-                  $.ajax({
-                      type: 'POST',
-                      url: $(this).attr('action'),
-                      data: $(this).serialize(),
-                      success: function(response) {
-                          if (response.success) {
-                              $('#customerName').text(response.customerName);
-                              $('#customerId').val(response.idKhachHang);
-                              $('#addCustomerModal').modal('hide');
+                    $.ajax({
+                        type: 'POST',
+                        url: $(this).attr('action'),
+                        data: $(this).serialize(),
+                        success: function(response) {
+                            if (response.success) {
+                                $('#customerName').text(response.customerName);
+                                $('#customerId').val(response.idKhachHang);
+                                $('#addCustomerModal').modal('hide');
+                                alert('Thêm khách hàng thành công!');
 
-                              // Cập nhật mã đơn hàng
-                              const idHoaDon = $('#invoiceId').val(); // Lấy mã đơn hàng hiện tại
-                              viewInvoiceDetail(document.querySelector(`.product-item[data-idhoadon="${idHoaDon}"]`));
-                          } else {
-                              alert('Có lỗi xảy ra: ' + response.message);
-                          }
-                      },
-                      error: function(xhr, status, error) {
-                          alert('Đã xảy ra lỗi: ' + error);
-                      }
-                  });
-              });
-          }
+                                // Cập nhật mã đơn hàng
+                                const idHoaDon = $('#invoiceId').val(); // Lấy mã đơn hàng hiện tại
+                                viewInvoiceDetail(document.querySelector(`.product-item[data-idhoadon="${idHoaDon}"]`));
+                            } else {
+                                alert('Có lỗi xảy ra: ' + response.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            alert('Đã xảy ra lỗi: ' + error);
+                        }
+                    });
+                });
 
          
 
