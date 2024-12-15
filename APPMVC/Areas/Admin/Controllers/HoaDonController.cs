@@ -57,10 +57,9 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpGet]
         public async Task<ActionResult> Index(int page = 1, string status = null, string search = null)
         {
-            page = page < 1 ? 1 : page; // Đảm bảo rằng số trang ít nhất là 1
+            page = page < 1 ? 1 : page; 
             const int pageSize = 5;
 
-            // Lấy tất cả hóa đơn
             var hoaDons = await _hoaDonService.GetAllAsync() ?? new List<HoaDon>();
 
             // Lọc trạng thái không cần thiết
@@ -156,14 +155,19 @@ namespace APPMVC.Areas.Admin.Controllers
 
                     var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
 
-                    var giaBan = sanPhamCT.Gia;
-                    var giaDaGiam = sanPhamCT.GiaGiam;
+                    var giaBan = hoaDonChiTiet.DonGia;
+                    var giaDaGiam = hoaDonChiTiet.TienGiam;
                     double? phanTramGiam = null;
 
-                    if (giaDaGiam.HasValue && giaDaGiam < giaBan)
+                    // Calculate discount percentage if there is a discount
+                    if (giaDaGiam > 0 && giaDaGiam < giaBan)
                     {
-                        phanTramGiam = Math.Round(((giaBan - giaDaGiam.Value) / giaBan) * 100, 2);
-
+                        phanTramGiam = Math.Round(((giaBan - giaDaGiam) / giaBan) * 100, 2);
+                    }
+                    else if (giaDaGiam == 0)
+                    {
+                        // If no discount, use the full selling price
+                        giaDaGiam = giaBan; // Set giaDaGiam to giaBan if there's no discount
                     }
 
                     sanPhamChiTiets.Add(new HoaDonChiTietViewModel.SanPhamChiTietViewModel
@@ -175,7 +179,11 @@ namespace APPMVC.Areas.Admin.Controllers
                         MauSac = mauSacTenList,
                         KichCo = kichCoTenList,
                         HinhAnhs = hinhAnhs,
-                        GiaDaGiam = giaDaGiam,
+                        GiaDaGiam = giaDaGiam, // Use updated giaDaGiam
+
+                        // Show both original price and discount information
+                        OriginalPrice = giaBan, // Add this property to the view model
+                        DiscountAmount = giaDaGiam < giaBan ? (giaBan - giaDaGiam) : 0, // Calculate discount amount
                         PhanTramGiam = phanTramGiam
                     });
                 }
@@ -266,9 +274,8 @@ namespace APPMVC.Areas.Admin.Controllers
                 return NotFound($"Hóa đơn với ID {id} không tồn tại.");
             }
 
-            var lichSu = await _lichSuHoaDonService.GetByIdHoaDonAsync(id);
-            // Ensure lichSu is a collection (e.g., List or IEnumerable)
-            bool hasPaymentHistory = lichSu.Any(); // This line is valid if lichSu is a collection
+            var lichSu = await _lichSuThanhToanService.GetByIdHoaDonAsync(id);
+            bool hasPaymentHistory = lichSu.Any(); // Check if there is any payment history
             string previousState = hoaDon.TrangThai;
 
             switch (hoaDon.TrangThai)
@@ -279,14 +286,23 @@ namespace APPMVC.Areas.Admin.Controllers
                         hoaDon.TrangThai = "Đã Hủy";
                         await UpdateProductQuantities2(hoaDon.IdHoaDon);
                     }
-                    else if (hoaDon.TrangThai != "Đã Giao Hàng")
+                    else
                     {
-                        hoaDon.TrangThai = "Chờ Giao Hàng";
-                        var errorMessages = await UpdateProductQuantities(hoaDon.IdHoaDon);
-                        if (errorMessages.Any()) // This line checks for collected error messages
+                        // If hasPaymentHistory is false, update quantities
+                        if (!hasPaymentHistory && hoaDon.TrangThai != "Đã Giao Hàng")
                         {
-                            TempData["ErrorMessage"] = string.Join("<br/>", errorMessages);
-                            return RedirectToAction("Edit", new { id });
+                            hoaDon.TrangThai = "Chờ Giao Hàng";
+                            var errorMessages = await UpdateProductQuantities(hoaDon.IdHoaDon);
+                            if (errorMessages.Any())
+                            {
+                                TempData["ErrorMessage"] = string.Join("<br/>", errorMessages);
+                                return RedirectToAction("Edit", new { id });
+                            }
+                        }
+                        // If hasPaymentHistory is true, still set the status but skip quantity update
+                        else if (hasPaymentHistory && hoaDon.TrangThai != "Đã Giao Hàng")
+                        {
+                            hoaDon.TrangThai = "Chờ Giao Hàng";
                         }
                     }
                     break;
@@ -299,7 +315,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     }
                     else if (actionType == "quayLai")
                     {
-                        return await RevertInvoiceStatus(id, reason);
+                        return await RevertInvoiceStatus(id, reason, hasPaymentHistory);
                     }
                     else
                     {
@@ -310,7 +326,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 case "Đang Vận Chuyển":
                     if (actionType == "quayLai")
                     {
-                        return await RevertInvoiceStatus(id, reason);
+                        return BadRequest("Không thể quay lại từ trạng thái 'Đang Vận Chuyển'."); // Disallow reverting
                     }
                     else
                     {
@@ -321,7 +337,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 case "Đã Giao Hàng":
                     if (actionType == "quayLai")
                     {
-                        return await RevertInvoiceStatus(id, reason);
+                        return BadRequest("Không thể quay lại từ trạng thái 'Đã Giao Hàng'.");
                     }
                     else if (hasPaymentHistory)
                     {
@@ -336,7 +352,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 case "Đã Thanh Toán":
                     if (actionType == "quayLai")
                     {
-                        return await RevertInvoiceStatus(id, reason);
+                        return BadRequest("Không thể quay lại từ trạng thái 'Đã Thanh Toán'."); 
                     }
                     else
                     {
@@ -357,7 +373,7 @@ namespace APPMVC.Areas.Admin.Controllers
             return RedirectToAction("Edit", new { id });
         }
 
-        private async Task<IActionResult> RevertInvoiceStatus(Guid id, string reason)
+        private async Task<IActionResult> RevertInvoiceStatus(Guid id, string reason, bool hasPaymentHistory)
         {
             var hoaDon = await _hoaDonService.GetByIdAsync(id);
             if (hoaDon == null)
@@ -373,15 +389,16 @@ namespace APPMVC.Areas.Admin.Controllers
 
             var previousState = lichSu[lichSu.Count - 2].ThaoTac;
 
+            // Update the invoice status to the previous state
             hoaDon.TrangThai = previousState;
 
-            if (previousState == "Chờ Xác Nhận")
+            // Only update product quantities if reverting to "Chờ Xác Nhận" and no payment history exists
+            if (previousState == "Chờ Xác Nhận" && !hasPaymentHistory)
             {
                 await UpdateProductQuantities2(hoaDon.IdHoaDon);
             }
 
             await LogHistory(hoaDon, $"{previousState}", reason);
-
             await _hoaDonService.UpdateAsync(hoaDon);
 
             return RedirectToAction("Edit", new { id });

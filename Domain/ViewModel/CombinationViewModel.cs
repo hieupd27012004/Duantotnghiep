@@ -22,6 +22,8 @@ namespace AppData.ViewModel
 
         [NotMapped]
         public List<IFormFile>? Files { get; set; } = new List<IFormFile>();
+        public string? KichCoId { get; set; }
+        public string? MauSacId { get; set; }
     }
 
 }

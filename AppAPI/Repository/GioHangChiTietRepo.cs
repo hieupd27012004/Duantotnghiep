@@ -53,17 +53,27 @@ namespace AppAPI.Repository
             .ToListAsync();
         }
 
-        public async Task ClearCartByIdAsync(Guid cartId) 
+        public async Task RemoveItemsFromCartAsync(Guid cartId, List<Guid> productDetailIds)
         {
-            var cartItems = await _context.gioHangChiTiets
-            .Where(item => item.IdGioHang == cartId) 
-            .ToListAsync(); 
+            // Kiểm tra xem danh sách productDetailIds có hợp lệ không
+            if (productDetailIds == null || !productDetailIds.Any())
+            {
+                // Trả về nếu không có ID nào
+                return;
+            }
 
-            _context.gioHangChiTiets.RemoveRange(cartItems); 
+            // Lấy danh sách các sản phẩm chi tiết cần xóa
+            var itemsToRemove = await _context.gioHangChiTiets
+                .Where(x => x.IdGioHang == cartId && productDetailIds.Contains(x.IdSanPhamChiTiet))
+                .ToListAsync();
 
-            await _context.SaveChangesAsync(); 
+            // Chỉ xóa nếu có sản phẩm nào được tìm thấy
+            if (itemsToRemove.Count > 0)
+            {
+                _context.gioHangChiTiets.RemoveRange(itemsToRemove);
+                await _context.SaveChangesAsync();
+            }
         }
-
         public async Task<double> GetTotalQuantityBySanPhamChiTietIdAsync(Guid sanPhamChiTietId, Guid cartId)
         {
             var cartDetails = await _context.gioHangChiTiets

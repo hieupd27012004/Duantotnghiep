@@ -20,10 +20,6 @@ namespace APPMVC.Service
                 throw new ArgumentNullException(nameof(kh));
             }
 
-            if (string.IsNullOrWhiteSpace(kh.Email) || string.IsNullOrWhiteSpace(kh.MatKhau))
-            {
-                throw new ArgumentException("Email and password cannot be null or empty.");
-            }
 
             try
             {

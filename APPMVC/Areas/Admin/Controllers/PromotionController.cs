@@ -184,7 +184,7 @@ namespace APPMVC.Areas.Admin.Controllers
                         if (sanPhamChiTiet != null)
                         {
                             double originalPrice = sanPhamChiTiet.Gia;
-                            double discountPercentage = promotion.PhanTramGiam; // Giả sử bạn có phần trăm giảm trong promotion
+                            double discountPercentage = promotion.PhanTramGiam; 
 
                             // Tính giá sau giảm
                             double discountedPrice = originalPrice * (1 - (discountPercentage / 100.0));

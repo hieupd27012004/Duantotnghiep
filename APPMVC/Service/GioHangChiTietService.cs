@@ -27,12 +27,6 @@ namespace APPMVC.Service
 			response.EnsureSuccessStatusCode();
 		}
 
-        public async Task ClearCartByIdAsync(Guid cartId)
-        {
-            var response = await _httpClient.DeleteAsync($"api/GioHangChiTiet/clear?cartId={cartId}");
-            response.EnsureSuccessStatusCode(); 
-        }
-
         // Xóa giỏ hàng chi tiết theo ID
         public async Task DeleteAsync(Guid id)
 		{
@@ -97,16 +91,40 @@ namespace APPMVC.Service
 
         public async Task<List<GioHangChiTiet>> GetByIdsAsync(List<Guid> ids)
         {
-            if (ids == null || !ids.Any())
+            // Build the query string with each ID as a separate parameter
+            var queryParameters = string.Join("&", ids.Select(id => $"ids={Uri.EscapeDataString(id.ToString())}"));
+            var requestUrl = $"api/GioHangChiTiet/getbyids?{queryParameters}";
+
+            // Log the request URL for debugging
+            Console.WriteLine("Request URL: " + requestUrl);
+
+            try
             {
-                throw new ArgumentException("No IDs provided", nameof(ids));
+                var response = await _httpClient.GetAsync(requestUrl);
+
+                // Check for success status
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<List<GioHangChiTiet>>();
+                    return result ?? new List<GioHangChiTiet>(); // Return an empty list if result is null
+                }
+                else
+                {
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error: {response.StatusCode}, Response: {responseBody}");
+                    return new List<GioHangChiTiet>(); // Return an empty list on failure
+                }
             }
-
-            var idsQuery = string.Join(",", ids);
-            var response = await _httpClient.GetAsync($"api/GioHangChiTiet/getbyids?ids={idsQuery}");
-
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<List<GioHangChiTiet>>();
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Request error: {ex.Message}");
+                return new List<GioHangChiTiet>(); // Return an empty list on error
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error: {ex.Message}");
+                return new List<GioHangChiTiet>(); // Return an empty list on unexpected error
+            }
         }
 
         public async Task<GioHangChiTiet> GetByProductIdAndCartIdAsync(Guid sanPhamChiTietId, Guid cartId)
@@ -146,6 +164,33 @@ namespace APPMVC.Service
             // Read the total quantity from the response
             var totalQuantity = await response.Content.ReadFromJsonAsync<double>();
             return totalQuantity;
+        }
+
+        public async Task RemoveItemsFromCartAsync(Guid cartId, List<Guid> productDetailIds)
+        {
+            // Kiểm tra xem danh sách productDetailIds có hợp lệ không
+            if (productDetailIds == null || !productDetailIds.Any())
+            {
+                return; // Không làm gì nếu không có ID nào
+            }
+
+            // Xây dựng chuỗi tham số query cho các ID
+            var queryParameters = string.Join("&", productDetailIds.Select(id => $"productDetailIds={Uri.EscapeDataString(id.ToString())}"));
+            var requestUrl = $"api/GioHangChiTiet/removeitems/{cartId}?{queryParameters}";
+
+            try
+            {
+                // Gửi yêu cầu DELETE tới API
+                var response = await _httpClient.DeleteAsync(requestUrl);
+
+                // Đảm bảo phản hồi thành công
+                response.EnsureSuccessStatusCode();
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Request error: {ex.Message}");
+                throw; // Ném lại ngoại lệ để xử lý ở nơi khác nếu cần
+            }
         }
 
         // Cập nhật giỏ hàng chi tiết

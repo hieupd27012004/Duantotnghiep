@@ -174,40 +174,39 @@
                         url: url,
                         type: 'GET',
                         data: { sanPhamIds: selectedProductIds.join(',') },
-                                success: function (data) {
-            console.log("Response data: ", data);
-            if (data.chiTietSanPhams && data.chiTietSanPhams.length > 0) {
-                $.each(data.chiTietSanPhams, function (index, item) {
-                    var mauSacDisplay = item.mauSac && Array.isArray(item.mauSac) ? item.mauSac.join(", ") : 'N/A';
-                    var kichCoDisplay = item.kichCo && Array.isArray(item.kichCo) ? item.kichCo.join(", ") : 'N/A';
+                        success: function (data) {
+                            console.log("Response data: ", data);
+                            if (data.chiTietSanPhams && data.chiTietSanPhams.length > 0) {
+                                $.each(data.chiTietSanPhams, function (index, item) {
+                                    var mauSacDisplay = item.mauSac && Array.isArray(item.mauSac) ? item.mauSac.join(", ") : 'N/A';
+                                    var kichCoDisplay = item.kichCo && Array.isArray(item.kichCo) ? item.kichCo.join(", ") : 'N/A';
 
-                    // Assuming item.hinhAnhs contains an array of images with properties DataHinhAnh and LoaiFileHinhAnh
-                    var hinhAnhDisplay = '';
-                    if (item.hinhAnhs && item.hinhAnhs.length > 0) {
-                        var hinhAnh = item.hinhAnhs[0];
-                        var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(hinhAnh.DataHinhAnh)));
-                        hinhAnhDisplay = `data:${hinhAnh.LoaiFileHinhAnh};base64,${base64String}`;
-                    }
+                                    var hinhAnhDisplay = '';
+                                    if (item.hinhAnhs && item.hinhAnhs.length > 0) {
+                                        var hinhAnh = item.hinhAnhs[0];
+                                        var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(hinhAnh.DataHinhAnh)));
+                                        hinhAnhDisplay = `data:${hinhAnh.LoaiFileHinhAnh};base64,${base64String}`;
+                                    }
 
-                    var row = `<tr>
-                        <td><input type="checkbox" name="SelectedSanPhamChiTietIds" value="${item.idSanPhamChiTiet}" /></td>
-                        <td hidden>${item.idSanPhamChiTiet}</td>
-                        <td>${item.productName}</td>
-                        <td>${item.price.toFixed(2)}</td>
-                        <td>${item.quantity}</td>
-                        <td>${mauSacDisplay}</td>
-                        <td>${kichCoDisplay}</td>
-                        <td><img src="${hinhAnhDisplay}" alt="Hình ảnh" style="width: 50px; height: auto;" /></td>
-                    </tr>`;
-                    $('#productDetailsBody').append(row);
-                });
-                $('#productDetailsTable').show();
-                $('#productDetailsSection').show();
-            } else {
-                $('#productDetailsTable').hide();
-                $('#productDetailsSection').hide();
-            }
-        },
+                                    var row = `<tr>
+                                        <td><input type="checkbox" name="SelectedSanPhamChiTietIds" value="${item.idSanPhamChiTiet}" /></td>
+                                        <td hidden>${item.idSanPhamChiTiet}</td>
+                                        <td>${item.productName}</td>
+                                        <td>${formatCurrency(item.price)}</td> <!-- Định dạng giá ở đây -->
+                                        <td>${item.quantity}</td>
+                                        <td>${mauSacDisplay}</td>
+                                        <td>${kichCoDisplay}</td>
+                                        <td><img src="${hinhAnhDisplay}" alt="Hình ảnh" style="width: 50px; height: auto;" /></td>
+                                    </tr>`;
+                                    $('#productDetailsBody').append(row);
+                                });
+                                $('#productDetailsTable').show();
+                                $('#productDetailsSection').show();
+                            } else {
+                                $('#productDetailsTable').hide();
+                                $('#productDetailsSection').hide();
+                            }
+                        },
                         error: function (xhr, status, error) {
                             console.error("Error fetching product details: ", error);
                             alert("An error occurred while fetching product details. Please try again.");
@@ -215,31 +214,37 @@
                     });
                 } else {
                     $('#productDetailsTable').hide();
-                    $('#productDetailsSection').hide(); 
+                    $('#productDetailsSection').hide();
                 }
             });
         });
-                   function validatePercentage() {
+
+        function formatCurrency(value) {
+            if (isNaN(value)) return '';
+            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
+        }
+
+        function validatePercentage() {
             var phanTramGiamInput = document.getElementById("phanTramGiam");
             var numericValue = parseFloat(phanTramGiamInput.value);
 
-            // Kiểm tra nếu giá trị không hợp lệ
             if (isNaN(numericValue) || numericValue < 0 || numericValue > 100) {
                 alert("Phần trăm giảm phải là một số từ 0 đến 100.");
-                phanTramGiamInput.value = null; 
+                phanTramGiamInput.value = null;
             }
         }
+
         function validateEndDate() {
-        var startDateInput = document.querySelector('input[name="Promotion.NgayBatDau"]');
-        var endDateInput = document.querySelector('input[name="Promotion.NgayKetThuc"]');
+            var startDateInput = document.querySelector('input[name="Promotion.NgayBatDau"]');
+            var endDateInput = document.querySelector('input[name="Promotion.NgayKetThuc"]');
 
-        var startDate = new Date(startDateInput.value);
-        var endDate = new Date(endDateInput.value);
+            var startDate = new Date(startDateInput.value);
+            var endDate = new Date(endDateInput.value);
 
-        if (endDate <= startDate) {
-            alert("Ngày Kết Thúc phải sau Ngày Bắt Đầu.");
-            endDateInput.value = ""; // Reset the end date field
+            if (endDate <= startDate) {
+                alert("Ngày Kết Thúc phải sau Ngày Bắt Đầu.");
+                endDateInput.value = ""; // Reset the end date field
+            }
         }
-    }
     </script>
 }

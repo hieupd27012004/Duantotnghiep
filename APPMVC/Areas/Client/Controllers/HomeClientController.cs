@@ -26,6 +26,12 @@ namespace APPMVC.Areas.Client.Controllers
         private readonly iVnpayClientService _vnPayService;
         private readonly GiaoHangNhanhService _giaoHangNhanhService;
         private readonly IVoucherService _voucherService;
+        private readonly IMauSacService _mauSacService;
+        private readonly IKichCoService _kichCoService;
+        private readonly ISanPhamChiTietMauSacService _sanPhamChiTietMauSacService;
+        private readonly ISanPhamChiTietKichCoService _sanPhamChiTietKichCoService;
+        private readonly IPromotionSanPhamChiTietService _promotionSanPhamChiTietService;
+        private readonly IPromotionService _promotionService;
         public HomeClientController(IGioHangChiTietService gioHangChiTietService,
                                     IHinhAnhService hinhAnhService,
                                     ISanPhamChiTietService sanPhamChiTietService,
@@ -38,7 +44,13 @@ namespace APPMVC.Areas.Client.Controllers
                                     GiaoHangNhanhService giaoHangNhanhService,
                                     iVnpayClientService vnPayService,
                                     ILichSuThanhToanService lichSuThanhToanService,
-                                    IVoucherService voucherService
+                                    IMauSacService mauSacService,
+                                    IKichCoService kichCoService,
+                                    ISanPhamChiTietMauSacService sanPhamChiTietMauSacService,
+                                    ISanPhamChiTietKichCoService sanPhamChiTietKichCoService,
+                                    IVoucherService voucherService,
+                                    IPromotionSanPhamChiTietService promotionSanPhamChiTietService,
+                                    IPromotionService promotionService
                                     )
         {
             _gioHangChiTietService = gioHangChiTietService;
@@ -55,6 +67,12 @@ namespace APPMVC.Areas.Client.Controllers
             _sanPhamService = sanPhamService;
             _khachHangService = khachHangService;
             _voucherService = voucherService;
+            _mauSacService = mauSacService;
+            _kichCoService = kichCoService;
+            _sanPhamChiTietMauSacService = sanPhamChiTietMauSacService;
+            _sanPhamChiTietKichCoService = sanPhamChiTietKichCoService;
+            _promotionSanPhamChiTietService = promotionSanPhamChiTietService;
+            _promotionService = promotionService;
         }
         public IActionResult Index()
         {
@@ -86,25 +104,44 @@ namespace APPMVC.Areas.Client.Controllers
                 var hinhanh = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(item.IdSanPhamChiTiet);
                 var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
 
-                var gia = sanPhamChiTiet?.Gia;
-                var giaDaGiam = sanPhamChiTiet?.GiaGiam;
-                double? phanTramGiam = null;
+                var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
+                var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
 
-                if (gia.HasValue && giaDaGiam.HasValue && giaDaGiam < gia)
+                var originalPrice = sanPhamChiTiet?.Gia;
+                double? discountedPrice = null;
+                double? discountPercentage = null;
+
+                var promotionId = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(sanPhamChiTiet.IdSanPhamChiTiet);
+                if (promotionId.HasValue && promotionId.Value != Guid.Empty)
                 {
-                    phanTramGiam = Math.Round(((gia.Value - giaDaGiam.Value) / gia.Value) * 100, 2);
+                    var promotionDetails = await _promotionService.GetPromotionByIdAsync(promotionId.Value);
+                    if (promotionDetails != null && promotionDetails.TrangThai == 1 && promotionDetails.PhanTramGiam > 0)
+                    {
+                        // Calculate the discounted price based on the discount amount
+                        discountedPrice = originalPrice - (originalPrice - sanPhamChiTiet.GiaGiam);
+                    }
                 }
+
+                if (originalPrice.HasValue && discountedPrice.HasValue && discountedPrice < originalPrice)
+                {
+                    discountPercentage = Math.Round(((originalPrice.Value - discountedPrice.Value) / originalPrice.Value) * 100, 2);
+                }
+
+                var tenSanPham = sanPham?.TenSanPham ?? "Unknown Product";
+                var kichCoTen = string.Join(", ", kichCoList.Select(kc => kc.TenKichCo));
+                var mauSacTen = string.Join(", ", mauSacList.Select(ms => ms.TenMauSac));
+                var tenSanPhamFull = $"{tenSanPham} ({kichCoTen} + {mauSacTen})";
 
                 return new GioHangChiTietViewModel
                 {
                     IdGioHangChiTiet = item.IdGioHangChiTiet,
                     HinhAnhs = hinhanh,
-                    TenSanPham = sanPham?.TenSanPham ?? "Unknown Product",
-                    DonGia = gia,
+                    TenSanPham = tenSanPhamFull,
+                    DonGia = originalPrice,
                     SoLuong = item.SoLuong,
                     TongTien = item.TongTien,
-                    GiaDaGiam = giaDaGiam,
-                    PhanTramGiam = phanTramGiam
+                    GiaDaGiam = discountedPrice,
+                    PhanTramGiam = discountPercentage
                 };
             });
 
@@ -117,8 +154,7 @@ namespace APPMVC.Areas.Client.Controllers
         public async Task<IActionResult> Remove(Guid idGioHangChiTiet)
         {
             await _gioHangChiTietService.DeleteAsync(idGioHangChiTiet);
-
-            return RedirectToAction("Card");
+            return Json(new { success = true });
         }
         [HttpPost]
         public async Task<IActionResult> UpdateQuantity([FromBody] List<UpdateQuantityViewModel>? models)
@@ -245,7 +281,7 @@ namespace APPMVC.Areas.Client.Controllers
                     return Json(new { success = false, message = "Voucher đã hết" });
                 }
 
-                double totalOrderValue = cartItems.Sum(item => item.Price * item.Quantity) + shippingFee; // Bao gồm phí vận chuyển
+                double totalOrderValue = cartItems.Sum(item => item.Price * item.Quantity) + shippingFee; 
 
                 // Kiểm tra điều kiện áp dụng voucher
                 if (voucher.GiaTriDonHangToiThieu.HasValue && totalOrderValue < voucher.GiaTriDonHangToiThieu.Value)
@@ -322,13 +358,16 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 var vouchers = await _voucherService.GetAvailableVouchersForCustomerAsync(customerId);
 
-                Console.WriteLine($"Found {vouchers.Count} available vouchers");
-                foreach (var voucher in vouchers)
+                // Filter vouchers with status = 1
+                var availableVouchers = vouchers.Where(v => v.TrangThai == 2).ToList();
+
+                Console.WriteLine($"Found {availableVouchers.Count} available vouchers with status = 1");
+                foreach (var voucher in availableVouchers)
                 {
                     Console.WriteLine($"Voucher Details: ID={voucher.VoucherId}, Code={voucher.MaVoucher}, Description={voucher.MoTaVoucher}");
                 }
 
-                return vouchers;
+                return availableVouchers;
             }
             catch (Exception ex)
             {
@@ -345,7 +384,7 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 var idGioHang = await _cardService.GetCartIdByCustomerIdAsync(customerId);
                 double totalDonHang = cartItems.Sum(item => item.Price * item.Quantity);
-                double discountAmount = 0; // Khởi tạo giá trị giảm giá
+                double discountAmount = 0;
 
                 // Lấy giá trị discountAmount từ session
                 var discountAmountString = HttpContext.Session.GetString("DiscountAmount");
@@ -354,7 +393,7 @@ namespace APPMVC.Areas.Client.Controllers
                     discountAmount = discountValue;
                 }
 
-                double totalHoaDon = totalDonHang + thanhToanViewModel.PhiVanChuyen - discountAmount; // Tính tổng hóa đơn sau khi trừ giảm giá
+                double totalHoaDon = totalDonHang + thanhToanViewModel.PhiVanChuyen - discountAmount;
 
                 var order = new HoaDon
                 {
@@ -422,7 +461,7 @@ namespace APPMVC.Areas.Client.Controllers
                 }
 
                 // Xóa giỏ hàng
-                await _gioHangChiTietService.ClearCartByIdAsync(idGioHang);
+                //await _gioHangChiTietService.RemoveItemsFromCartAsync(idGioHang, cartItems.Select(item => item.IdSanPhamChiTiet).ToList());
 
                 return true;
             }
@@ -478,7 +517,7 @@ namespace APPMVC.Areas.Client.Controllers
                 discountAmount = discountValue;
             }
 
-            double totalHoaDon = totalDonHang + thanhToanViewModel.PhiVanChuyen - discountAmount; // Tính tổng hóa đơn
+            double totalHoaDon = totalDonHang + thanhToanViewModel.PhiVanChuyen - discountAmount;
 
             if (model.PaymentMethod == "cash_on_delivery")
             {
@@ -518,7 +557,7 @@ namespace APPMVC.Areas.Client.Controllers
         public async Task<IActionResult> ReturnVNPay()
         {
             var response = _vnPayService.PaymentExecute(Request.Query);
-            if (response.VnPayResponseCode == "00") // Thanh toán thành công
+            if (response.VnPayResponseCode == "00") // Payment successful
             {
                 var temporaryOrderId = HttpContext.Session.GetString("TemporaryOrderId");
                 var cartItems = HttpContext.Session.GetObject<List<CartItemViewModel>>("CartItems");
@@ -528,10 +567,10 @@ namespace APPMVC.Areas.Client.Controllers
                 if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId) ||
                     cartItems == null || thanhToanViewModel == null || string.IsNullOrEmpty(temporaryOrderId))
                 {
-                    return BadRequest("Dữ liệu thanh toán không hợp lệ.");
+                    return BadRequest("Invalid payment data.");
                 }
 
-                // Lấy discountAmount từ session
+                // Retrieve discount amount from session
                 double discountAmount = 0;
                 var discountAmountString = HttpContext.Session.GetString("DiscountAmount");
                 if (!string.IsNullOrEmpty(discountAmountString) && double.TryParse(discountAmountString, out var discountValue))
@@ -539,23 +578,43 @@ namespace APPMVC.Areas.Client.Controllers
                     discountAmount = discountValue;
                 }
 
-                // Gọi phương thức SaveOrder với discountAmount
+                // Update product quantities
+                foreach (var item in cartItems)
+                {
+                    var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
+                    var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
+                    if (sanPhamChiTiet != null)
+                    {
+                        // Check if there is enough stock
+                        if (item.Quantity > sanPhamChiTiet.SoLuong)
+                        {
+                            return BadRequest($"The quantity for product {sanPham.TenSanPham} exceeds available stock.");
+                        }
+
+                        // Decrease stock quantity
+                        sanPhamChiTiet.SoLuong -= item.Quantity;
+
+                        // Update the product details in the database
+                        await _sanPhamChiTietService.Update(sanPhamChiTiet);
+                    }
+                }
+
+                // Save the order with the discount amount
                 var result = await SaveOrder(cartItems, thanhToanViewModel, customerId, "Thanh Toán VnPay", "VNPay", "Đã thanh toán");
                 if (result)
                 {
-                    // Xóa session
+                    // Clear session data
                     HttpContext.Session.Remove("TemporaryOrderId");
                     HttpContext.Session.Remove("CartItems");
                     HttpContext.Session.Remove("ThanhToanViewModel");
-                    HttpContext.Session.Remove("DiscountAmount"); // Xóa discountAmount nếu không cần nữa
+                    HttpContext.Session.Remove("DiscountAmount"); // Remove discount amount if not needed anymore
 
-                    return RedirectToAction("Index", new { message = "Thanh toán thành công!" });
+                    return RedirectToAction("Index", new { message = "Payment successful!" });
                 }
             }
 
-            return RedirectToAction("Checkout", new { message = "Thanh toán thất bại!" });
+            return RedirectToAction("Checkout", new { message = "Payment failed!" });
         }
-
 
         #endregion
 
@@ -588,15 +647,24 @@ namespace APPMVC.Areas.Client.Controllers
                     return (new List<CartItemViewModel>(), null);
                 }
 
+                // Get size and color information for the buy item
+                var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(buyItem.IdSanPhamChiTiet);
+                var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(buyItem.IdSanPhamChiTiet);
+
                 // Create a cart item from the buyItem
+                var kichCoTen = string.Join(", ", kichCoList.Select(kc => kc.TenKichCo));
+                var mauSacTen = string.Join(", ", mauSacList.Select(ms => ms.TenMauSac));
+                var tenSanPhamFull = $"{buyItem.ProductName} ({kichCoTen} + {mauSacTen})";
+
                 var singleCartItems = new List<CartItemViewModel>
         {
             new CartItemViewModel
             {
                 IdSanPhamChiTiet = buyItem.IdSanPhamChiTiet,
-                ProductName = buyItem.ProductName,
+                ProductName = tenSanPhamFull, // Combined product name
                 Quantity = buyItem.Quantity,
-                Price = buyItem.Price
+                Price = buyItem.Price, // Use discounted price
+                OriginalPrice = buyItem.OriginalPrice // Set the original price
             }
         };
 
@@ -625,14 +693,22 @@ namespace APPMVC.Areas.Client.Controllers
 
                 if (buyItem != null)
                 {
+                    var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(buyItem.IdSanPhamChiTiet);
+                    var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(buyItem.IdSanPhamChiTiet);
+
+                    var kichCoTen = string.Join(", ", kichCoList.Select(kc => kc.TenKichCo));
+                    var mauSacTen = string.Join(", ", mauSacList.Select(ms => ms.TenMauSac));
+                    var tenSanPhamFull = $"{buyItem.ProductName} ({kichCoTen} + {mauSacTen})";
+
                     var fallbackCartItems = new List<CartItemViewModel>
             {
                 new CartItemViewModel
                 {
                     IdSanPhamChiTiet = buyItem.IdSanPhamChiTiet,
-                    ProductName = buyItem.ProductName,
+                    ProductName = tenSanPhamFull, // Combined product name
                     Quantity = buyItem.Quantity,
-                    Price = buyItem.Price
+                    Price = buyItem.Price, // Use discounted price
+                    OriginalPrice = buyItem.OriginalPrice // Set the original price
                 }
             };
 
@@ -710,12 +786,25 @@ namespace APPMVC.Areas.Client.Controllers
                     if (selectedItems.Contains(item.IdGioHangChiTiet))
                     {
                         var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
+                        var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
+                        var originalPrice = sanPhamChiTiet?.Gia ?? 0;
+
+                        var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
+                        var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
+
+                        // Combine product name with size and color
+                        var tenSanPham = sanPham?.TenSanPham ?? "Unknown Product";
+                        var kichCoTen = string.Join(", ", kichCoList.Select(kc => kc.TenKichCo));
+                        var mauSacTen = string.Join(", ", mauSacList.Select(ms => ms.TenMauSac));
+                        var tenSanPhamFull = $"{tenSanPham} ({kichCoTen} + {mauSacTen})";
+
                         var cartItem = new CartItemViewModel
                         {
                             IdSanPhamChiTiet = item.IdSanPhamChiTiet,
-                            ProductName = sanPham?.TenSanPham ?? "Unknown Product",
+                            ProductName = tenSanPhamFull, // Combined product name
                             Quantity = item.SoLuong,
-                            Price = item.SoLuong > 0 ? item.TongTien / item.SoLuong : 0
+                            Price = item.SoLuong > 0 ? item.TongTien / item.SoLuong : 0,
+                            OriginalPrice = originalPrice // Set the original price
                         };
 
                         cartItems.Add(cartItem);
@@ -760,19 +849,27 @@ namespace APPMVC.Areas.Client.Controllers
                 var buyItem = HttpContext.Session.GetObject<BuyItemViewModel>("SelectedItem");
                 if (buyItem != null)
                 {
+                    var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(buyItem.IdSanPhamChiTiet);
+                    var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(buyItem.IdSanPhamChiTiet);
+
+                    var kichCoTen = string.Join(", ", kichCoList.Select(kc => kc.TenKichCo));
+                    var mauSacTen = string.Join(", ", mauSacList.Select(ms => ms.TenMauSac));
+                    var tenSanPhamFull = $"{buyItem.ProductName} ({kichCoTen} + {mauSacTen})";
+
                     cartItems.Add(new CartItemViewModel
                     {
                         IdSanPhamChiTiet = buyItem.IdSanPhamChiTiet,
-                        ProductName = buyItem.ProductName,
+                        ProductName = tenSanPhamFull, // Combined product name
                         Quantity = buyItem.Quantity,
-                        Price = buyItem.Price
+                        Price = buyItem.Price, // Use discounted price
+                        OriginalPrice = buyItem.OriginalPrice // Set the original price
                     });
 
                     // Get customer address for shipping calculation
                     if (diaChiKhachHang != null)
                     {
-                        int toDistrictId = diaChiKhachHang.DistrictId; // Destination district ID
-                        string toWardCode = diaChiKhachHang.WardId; // Destination ward code
+                        int toDistrictId = diaChiKhachHang.DistrictId;
+                        string toWardCode = diaChiKhachHang.WardId;
 
                         // Calculate shipping fee for the buy item
                         phiVanChuyen = await _giaoHangNhanhService.CalculateShippingFee(

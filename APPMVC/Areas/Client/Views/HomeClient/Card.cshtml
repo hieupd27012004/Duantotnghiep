@@ -121,7 +121,7 @@
                                 <td>
                                     @if (item.GiaDaGiam.HasValue && item.GiaDaGiam < item.DonGia)
                                     {
-                                        <span class="discount-price">@FormatCurrency(Convert.ToDecimal(item.DonGia))</span>
+                                        <span class="discount-price" style="text-decoration: line-through;">@FormatCurrency(Convert.ToDecimal(item.DonGia))</span>
                                         <span class="current-price">@FormatCurrency(Convert.ToDecimal(item.GiaDaGiam.Value))</span>
                                     }
                                     else
@@ -149,7 +149,7 @@
                                 </td>
                                 <td class="total-price" data-item-total="@itemTotal">@FormatCurrency(itemTotal)</td>
                                 <td>
-                                    <button type="button" class="btn btn-black btn-sm btn-remove">X</button>
+                                    <button type="button" class="btn btn-black btn-sm btn-remove" data-id="@item.IdGioHangChiTiet">X</button>
                                 </td>
                             </tr>
                         }
@@ -219,14 +219,16 @@
     </div>
 </div>
 
+
 <script>
-        document.querySelectorAll('.btn-remove').forEach(button => {
+       document.querySelectorAll('.btn-remove').forEach(button => {
         button.addEventListener('click', function (event) {
             event.preventDefault();
-            const row = this.closest('tr');
-            const id = row.querySelector('td').textContent.trim();
+            const row = this.closest('tr'); // Get the closest row
+            const id = row.querySelector('td[hidden]').textContent.trim(); // Access the hidden cell to get the ID
 
-            // Show confirmation dialog
+            console.log('ID:', id); // Log the ID for debugging
+
             const confirmDelete = confirm("Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?");
             if (confirmDelete) {
                 fetch(`/Client/HomeClient/Remove`, {
@@ -234,12 +236,14 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ idGioHangChiTiet: id })
+                    body: JSON.stringify({ IdGioHangChiTiet: id })
                 })
-                .then(response => {
-                    if (response.ok) {
-                        row.remove(); // Remove the item from the UI
-                        updateTotal(); // Update totals after removal
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Response:', data); // Log response for debugging
+                    if (data.success) {
+                        row.remove();
+                        updateTotal();
                     } else {
                         alert('Failed to remove item.');
                     }

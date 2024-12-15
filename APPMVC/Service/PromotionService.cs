@@ -91,17 +91,20 @@ namespace APPMVC.Service
             {
                 var response = await _httpClient.GetAsync($"api/Promotion/GetPromotionById?id={id}");
                 response.EnsureSuccessStatusCode();
-                return await response.Content.ReadFromJsonAsync<Promotion>();
+
+                // Nếu không có nội dung, trả về một đối tượng khuyến mãi rỗng
+                var promotion = await response.Content.ReadFromJsonAsync<Promotion>();
+                return promotion ?? new Promotion(); // Trả về một đối tượng khuyến mãi rỗng nếu promotion là null
             }
             catch (HttpRequestException ex)
             {
                 Console.WriteLine($"HTTP request error when getting promotion by ID: {ex.Message}");
-                return null;
+                return new Promotion(); // Trả về một đối tượng khuyến mãi rỗng trong trường hợp lỗi
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error when getting promotion by ID: {ex.Message}");
-                return null;
+                return new Promotion(); // Trả về một đối tượng khuyến mãi rỗng trong trường hợp lỗi khác
             }
         }
 
