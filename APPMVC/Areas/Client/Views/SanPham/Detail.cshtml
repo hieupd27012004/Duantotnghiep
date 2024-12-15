@@ -135,6 +135,7 @@
         let sanPhamId = '@Model.IdSanPham';
         let availableQuantity = @(Model.SoLuong.HasValue ? Model.SoLuong.Value : 0);
 
+        // Initial price display
         let firstDetail = @Html.Raw(Json.Serialize(Model.SanPhamChiTietList.FirstOrDefault()));
         let initialPriceDisplay = '';
 
@@ -203,6 +204,7 @@
 
                             $('#product-price').html(priceDisplay);
                             $('#product-quantity').text('Số lượng: ' + data.quantity);
+                            availableQuantity = data.quantity; // Update available quantity
 
                             // Update images
                             $('.product-detail-image').empty();
@@ -244,20 +246,20 @@
             });
         });
 
-      $('#quantity-input').on('input', function () {
-        let quantity = $(this).val();
+        $('#quantity-input').on('input', function () {
+            let quantity = $(this).val();
 
-        // Check if the input is invalid
-        if (!quantity || quantity < 1 || isNaN(quantity)) {
-            $(this).val(1); // Reset to 1 if invalid
-        } else if (quantity > availableQuantity) {
-            alert('Số lượng không được vượt quá số lượng sản phẩm có sẵn: ' + availableQuantity);
-            $(this).val(availableQuantity); // Reset to max available quantity
-        }
-    });
+            // Check if the input is invalid
+            if (!quantity || quantity < 1 || isNaN(quantity)) {
+                $(this).val(1); // Reset to 1 if invalid
+            } else if (quantity > availableQuantity) {
+                alert('Số lượng không được vượt quá số lượng sản phẩm có sẵn: ' + availableQuantity);
+                $(this).val(availableQuantity); // Reset to max available quantity
+            }
+        });
 
-    // Show the modal when the "Mua Ngay" button is clicked
-         $('#buy-now-btn').click(function () {
+        // Show the modal when the "Mua Ngay" button is clicked
+        $('#buy-now-btn').click(function () {
             if (!selectedColor || !selectedSize) {
                 alert('Vui lòng chọn màu và kích thước trước khi mua ngay.');
                 return;
@@ -268,6 +270,7 @@
         $('#confirm-buy-btn').click(function () {
             let quantity = $('#quantity-input').val();
 
+            // Validate the quantity input
             if (!quantity || quantity < 1 || isNaN(quantity)) {
                 alert('Vui lòng nhập số lượng hợp lệ.');
                 $('#quantity-input').val(1); // Reset input to 1
@@ -278,7 +281,7 @@
                 return;
             }
 
-            // Proceed with AJAX purchase...
+            // Proceed with AJAX purchase
             $.ajax({
                 url: '/Client/SanPham/BuyNow',
                 type: 'POST',
@@ -309,7 +312,6 @@
         });
     });
 </script>
-
 <style>
     .color-btn, .size-btn {
         transition: box-shadow 0.3s ease;

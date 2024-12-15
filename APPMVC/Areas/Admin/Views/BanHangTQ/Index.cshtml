@@ -38,16 +38,31 @@
         color: #ff6b6b;
         cursor: pointer;
     }
+
+    .product-item:hover {
+        background-color: #e6e6e6;
+    }
+
+    .product-item.selected {
+        background-color: #d0e7ff;
+    }
 </style>
 
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold py-3 mb-4">
         <span class="text-muted fw-light">Bán Hàng Tại Quầy</span>
     </h4>
-    @if (TempData["ErrorMessage"] != null)
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger">
-            @TempData["ErrorMessage"]
+            @TempData["Error"]
         </div>
     }
     <div class="row">
@@ -102,14 +117,13 @@
 </div>
 <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-        <!-- Điều chỉnh chiều rộng tối đa -->
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-center w-100" id="addCustomerModalLabel">Thêm Khách Hàng</h5> <!-- Căn giữa tiêu đề -->
+                <h5 class="modal-title text-center w-100" id="addCustomerModalLabel">Thêm Khách Hàng</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form asp-action="ThemKhachHang" method="post">
+                <form id="customerForm" asp-action="ThemKhachHang" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     <div class="mb-3">
                         <label class="form-label">Tên Khách Hàng</label>
@@ -168,7 +182,10 @@
         }
 
         // Hàm xem chi tiết hóa đơn
-        function viewInvoiceDetail(element) {
+           function viewInvoiceDetail(element) {
+            $('.product-item').removeClass('selected');
+            $(element).addClass('selected');
+
             const idHoaDon = $(element).data('idhoadon');
             $.get('@Url.Action("Edit", "BanHangTQ", new { area = "Admin" })', { id: idHoaDon })
                 .done(function(data) {
@@ -176,8 +193,7 @@
                     bindSearchButton();
                     loadSanPhamChiTiet(idHoaDon);
                     bindQuantityButtons(idHoaDon);
-                    // addCustomer();
-                    handlePayment()
+                    handlePayment();
                 })
                 .fail(function() {
                     alert("Không thể tải chi tiết hóa đơn.");
@@ -364,32 +380,37 @@
             document.getElementById('customerId').value = '';
         }
 
-        $('#addCustomerForm').on('submit', function(e) {
-                    e.preventDefault();
+                         $(document).ready(function() {
+            $('#customerForm').on('submit', function(e) {
+                e.preventDefault();
 
-                    $.ajax({
-                        type: 'POST',
-                        url: $(this).attr('action'),
-                        data: $(this).serialize(),
-                        success: function(response) {
-                            if (response.success) {
-                                $('#customerName').text(response.customerName);
-                                $('#customerId').val(response.idKhachHang);
-                                $('#addCustomerModal').modal('hide');
-                                alert('Thêm khách hàng thành công!');
+                $.ajax({
+                    type: 'POST',
+                    url: $(this).attr('action'),
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            $('#customerName').text(response.customerName);
+                            $('#customerId').val(response.idKhachHang);
 
-                                // Cập nhật mã đơn hàng
-                                const idHoaDon = $('#invoiceId').val(); // Lấy mã đơn hàng hiện tại
-                                viewInvoiceDetail(document.querySelector(`.product-item[data-idhoadon="${idHoaDon}"]`));
-                            } else {
-                                alert('Có lỗi xảy ra: ' + response.message);
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            alert('Đã xảy ra lỗi: ' + error);
+                            // Show success message
+                            const successAlert = $('<div class="alert alert-success" role="alert">' + response.message + '</div>');
+                            $('.container-xxl').prepend(successAlert); // Add the alert at the top of the container
+                            setTimeout(function() {
+                                successAlert.fadeOut(); // Fade out the alert after 3 seconds
+                            }, 3000);
+
+                            $('#addCustomerModal').modal('hide'); // Close the modal
+                        } else {
+                            alert('Có lỗi xảy ra: ' + response.message);
                         }
-                    });
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Đã xảy ra lỗi: ' + error);
+                    }
                 });
+            });
+        });
 
          
 
