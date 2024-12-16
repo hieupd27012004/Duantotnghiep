@@ -1,28 +1,28 @@
 ﻿<style>
 	.nav-link i {
-		font-size: 20px; 
-		color: black; 
+		font-size: 20px;
+		color: black;
 	}
 </style>
-<nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="SoleMates navigation bar">
+<nav class="custom-navbar navbar navbar-expand-md navbar-dark bg-dark" aria-label="Thanh điều hướng SoleMates">
 
 	<div class="container">
 		<a class="navbar-brand" href="index.html"><img src="~/Client/images/logo.png" width="200px" height="60px"></a>
 
-		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsSoleMates" aria-controls="navbarsSoleMates" aria-expanded="false" aria-label="Toggle navigation">
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsSoleMates" aria-controls="navbarsSoleMates" aria-expanded="false" aria-label="Chuyển đổi điều hướng">
 			<span class="navbar-toggler-icon"></span>
 		</button>
 
 		<div class="collapse navbar-collapse" id="navbarsFurni">
 			<ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
 				<li class="nav-item active">
-					<a class="nav-link" href="index.html">Home</a>
+					<a class="nav-link" href="@Url.Action("Index", "HomeClient", new { area = "Client" })">Trang Chủ</a>
 				</li>
-				<li><a class="nav-link" href="@Url.Action("Index", "SanPham", new { area = "Client" })">Shop</a></li>
-				<li><a class="nav-link" href="about.html">About us</a></li>
-				<li><a class="nav-link" href="services.html">Services</a></li>
-				<li><a class="nav-link" href="blog.html">Blog</a></li>
-				<li><a class="nav-link" href="contact.html">Contact us</a></li>
+				<li><a class="nav-link" href="@Url.Action("Index", "SanPham", new { area = "Client" })">Cửa Hàng</a></li>
+				<li><a class="nav-link" href="@Url.Action("About", "HomeClient", new { area = "Client" })">Về Chúng Tôi</a></li>
+				<li><a class="nav-link" href="@Url.Action("DichVu", "HomeClient", new { area = "Client" })">Dịch Vụ</a></li>
+				<li><a class="nav-link" href="@Url.Action("Blog", "HomeClient", new { area = "Client" })">Blog</a></li>
+				<li><a class="nav-link" href="@Url.Action("LienHe", "HomeClient", new { area = "Client" })">Liên Hệ</a></li>
 				<li><a class="nav-link" href="@Url.Action("GetHoaDonDetails", "HoaDon", new { area = "Client" })">Tra Cứu</a></li>
 			</ul>
 			<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
@@ -37,7 +37,7 @@
 						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu1">
 							<li>
 								<div class="dropdown-header" style="padding: 0.5rem 1rem; font-family: Arial, sans-serif; font-size: 16px; font-weight: 600; color: #333; border-bottom: 1px solid #e0e0e0;">
-									<span class="fw-semibold d-block">Hello, @tenKhach</span>
+									<span class="fw-semibold d-block">Xin chào, @tenKhach</span>
 								</div>
 							</li>
 							<li>
