@@ -78,6 +78,22 @@ namespace APPMVC.Areas.Client.Controllers
         {
             return View();
         }
+        public IActionResult About()
+        {
+            return View();
+        }
+        public IActionResult DichVu()
+        {
+            return View();
+        }
+        public IActionResult Blog()
+        {
+            return View();
+        }
+        public IActionResult LienHe()
+        {
+            return View();
+        }
         public IActionResult LoginRegister()
         {
             return View();

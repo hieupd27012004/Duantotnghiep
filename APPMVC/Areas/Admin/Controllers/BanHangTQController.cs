@@ -768,15 +768,14 @@ namespace APPMVC.Areas.Admin.Controllers
             string chiTietHoaDonHtml = "";
 
             string tenNhanVien = HttpContext.Session.GetString("NhanVienName") ?? "Nhân Viên";
-            string tenKhachHang = "Khách Lẻ"; // Default to "Khách Lẻ"
+            string tenKhachHang = "Khách Lẻ";
 
-            // Fetch customer details if idKhachHang is provided
             if (idKhachHang.HasValue)
             {
                 var khachHang = await _khachHangService.GetIdKhachHang(idKhachHang.Value);
                 if (khachHang != null)
                 {
-                    tenKhachHang = khachHang.HoTen; // Set customer name if found
+                    tenKhachHang = khachHang.HoTen;
                 }
             }
 
@@ -793,22 +792,31 @@ namespace APPMVC.Areas.Admin.Controllers
                     var mauSacTask = _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
                     var kichCoTask = _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(chiTiet.IdSanPhamChiTiet);
 
-                    // Await both tasks
                     var mauSacList = await mauSacTask;
                     var kichCoList = await kichCoTask;
 
+                    // Determine color and size
                     string tenMauSac = mauSacList?.Count > 0 ? string.Join(",", mauSacList.Select(m => m.TenMauSac)) : "Không xác định";
                     string kichCo = kichCoList?.Count > 0 ? string.Join(",", kichCoList.Select(m => m.TenKichCo)) : "Không xác định";
 
+                    // Get the price, considering any discounts
+                    double donGia = sanPhamCT.Gia; // Assume this is the base price
+
+                    // Check if there is a discount and if it is greater than zero
+                    if (sanPhamCT.GiaGiam.HasValue && sanPhamCT.GiaGiam.Value > 0)
+                    {
+                        donGia = sanPhamCT.GiaGiam.Value; // Use the discounted price if valid
+                    }
+
                     return $@"
-            <tr>
-                <td>{sanPham.TenSanPham}</td>  
-                <td>{tenMauSac}</td>
-                <td>{kichCo}</td>
-                <td>{chiTiet.SoLuong}</td>
-                <td>{chiTiet.DonGia.ToString("N0")} VND</td>
-                <td>{(chiTiet.SoLuong * chiTiet.DonGia).ToString("N0")} VND</td>
-            </tr>";
+<tr>
+    <td>{sanPham.TenSanPham}</td>  
+    <td>{tenMauSac}</td>
+    <td>{kichCo}</td>
+    <td>{chiTiet.SoLuong}</td>
+    <td>{donGia.ToString("N0")} VND</td>
+    <td>{(chiTiet.SoLuong * donGia).ToString("N0")} VND</td>
+</tr>";
                 }
                 return string.Empty; // Return empty if product not found
             });
@@ -827,7 +835,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 .Replace("{{TongTien}}", hoaDon.TongTienHoaDon.ToString("N0"));
 
             return finalHtml;
-        }    
+        }
 
         private byte[] GeneratePdfFromHtml(string htmlContent)
         {
