@@ -51,11 +51,11 @@ namespace AppAPI.Repository
             return false;
         }
 
-        public async Task<Promotion> GetPromotionsBySanPhamChiTietIdAsync(Guid sanPhamChiTietId)
+        public async Task<Guid?> GetPromotionsBySanPhamChiTietIdAsync(Guid sanPhamChiTietId)
         {
             return await _context.promotionSanPhamChiTiets
                 .Where(p => p.IdSanPhamChiTiet == sanPhamChiTietId)
-                .Select(p => p.Promotion)
+                .Select(p => p.Promotion.IdPromotion)
                 .FirstOrDefaultAsync();
         }
     }

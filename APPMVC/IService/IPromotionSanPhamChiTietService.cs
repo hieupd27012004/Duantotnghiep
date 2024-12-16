@@ -4,7 +4,7 @@ namespace APPMVC.IService
 {
     public interface IPromotionSanPhamChiTietService
     {
-        Task<List<PromotionSanPhamChiTiet>> GetPromotionSanPhamChiTietAsync();
+        Task<List<PromotionSanPhamChiTiet>> GetPromotionSanPhamChiTietAsync(Guid idSanPhamChiTiet);
 
         Task<PromotionSanPhamChiTiet> GetPromotionByIdAsync(Guid id);
 
@@ -12,6 +12,6 @@ namespace APPMVC.IService
 
         Task<bool> UpdateAsync(PromotionSanPhamChiTiet promotion);
         Task<bool> DeleteAsync(Guid id);
-        Task<Promotion> GetPromotionsBySanPhamChiTietIdAsync(Guid sanPhamChiTietId);
+        Task<Guid?> GetPromotionsBySanPhamChiTietIdAsync(Guid sanPhamChiTietId);
     }
 }

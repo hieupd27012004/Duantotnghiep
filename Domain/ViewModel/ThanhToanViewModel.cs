@@ -43,6 +43,8 @@ namespace AppData.ViewModel
         public double Quantity { get; set; }
         public double Price { get; set; }
 
+        public double OriginalPrice { get; set; }
+
     }
     public class BuyItemViewModel
     {
@@ -50,6 +52,7 @@ namespace AppData.ViewModel
         public string ProductName { get; set; }
         public double Quantity { get; set; }
         public double Price { get; set; }
+        public double OriginalPrice { get; set; }
 
     }
 }

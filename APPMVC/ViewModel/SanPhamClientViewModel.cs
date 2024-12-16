@@ -9,6 +9,7 @@
         public int SoLuongMau { get; set; }
         public byte[] RepresentativeImage { get; set; }
         public List<RepresentativeImageViewModel> ColorImages { get; set; }
+        public double HighestDiscountPercentage { get; set; }
     }
 
    

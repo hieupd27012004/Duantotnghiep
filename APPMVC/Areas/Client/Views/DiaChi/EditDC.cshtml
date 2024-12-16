@@ -1,9 +1,11 @@
-﻿@using Newtonsoft.Json
+﻿@{
+    ViewData["Title"] = "EditDC";
+    Layout = "~/Areas/Client/Views/Shared/_Tttk.cshtml";
+}
+@using Newtonsoft.Json
 @model AppData.Model.DiaChi
 
-@{
-    ViewData["Title"] = "EditDC";
-}
+
 @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger">

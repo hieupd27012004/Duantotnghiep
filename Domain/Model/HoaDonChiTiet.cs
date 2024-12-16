@@ -15,6 +15,10 @@ namespace AppData.Model
 		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
 		[Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
 		public double DonGia { get; set; }
+		//[Required(ErrorMessage = "Không Được Để Trống")]
+		//[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
+		//[Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]
+		public double TienGiam { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
 		[Range(1, double.MaxValue, ErrorMessage = "Không Được Nhập Số Âm")]

@@ -73,6 +73,9 @@ namespace AppData.ViewModel
             public double? GiaDaGiam { get; set; }
             public double? PhanTramGiam { get; set; }
             public Guid IdHoaDonChiTiet { get; set; }
+
+            public double OriginalPrice { get; set; }
+            public double DiscountAmount { get; set; } 
         }
         public class HoaDonViewModel
         {

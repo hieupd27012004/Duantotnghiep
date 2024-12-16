@@ -12,6 +12,6 @@ namespace AppAPI.IRepository
 
         Task<bool> UpdateAsync(PromotionSanPhamChiTiet promotion);
         Task<bool> DeleteAsync(Guid id);
-        Task<Promotion> GetPromotionsBySanPhamChiTietIdAsync(Guid sanPhamChiTietId);
+        Task<Guid?> GetPromotionsBySanPhamChiTietIdAsync(Guid sanPhamChiTietId);
     }
 }

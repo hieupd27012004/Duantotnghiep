@@ -112,6 +112,26 @@
         font-size: 0.9em; /* Slightly smaller font size */
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Shadow for depth */
     }
+
+    .modal-row {
+        display: flex; /* Sử dụng Flexbox để chia thành 2 cột */
+        justify-content: space-between; /* Đặt khoảng cách giữa các phần */
+        margin-top: 20px; /* Khoảng cách từ đầu modal */
+    }
+
+    .order-info, .qr-code {
+        flex: 1; /* Mỗi phần chiếm một nửa không gian */
+        padding: 10px; /* Đệm cho các phần */
+    }
+
+    .qr-code {
+        text-align: center; /* Căn giữa mã QR */
+    }
+
+        .qr-code img {
+            max-width: 100%; /* Đảm bảo ảnh không vượt quá chiều rộng của phần */
+            height: auto; /* Giữ tỷ lệ khung hình */
+        }
 </style>
 
 <div class="content-wrapper">
@@ -289,7 +309,6 @@
                 <dd class="col-sm-6" id="amountGiven">
                     <input type="number" id="amountGivenInput" placeholder="Nhập số tiền" value="@Model.TienKhachDua" />
                 </dd>
-
                 <dt class="col-sm-6">Phương Thức Thanh Toán</dt>
                 <dd class="col-sm-6">
                     <div>
