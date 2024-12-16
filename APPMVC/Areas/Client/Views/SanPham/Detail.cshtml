@@ -6,7 +6,6 @@
 
 <div class="container">
     <div class="row">
-        <!-- Hình ảnh sản phẩm -->
         <div class="col-lg-6">
             <div class="product-detail-image">
                 @if (Model.SanPhamChiTietList != null && Model.SanPhamChiTietList.Any())
@@ -90,7 +89,7 @@
             </div>
 
             <p>
-                The radiance lives on in the @Model.TenSanPham, the basketball original that puts a fresh spin on what you know best: durably stitched overlays, clean finishes and the perfect amount of flash to make you shine.
+                The radiance lives on in the @Model.MoTa, the basketball original that puts a fresh spin on what you know best: durably stitched overlays, clean finishes and the perfect amount of flash to make you shine.
             </p>
 
             <div class="actions mt-3">
@@ -151,7 +150,7 @@
                 </div>
             `;
         } else {
-            initialPriceDisplay = firstDetail.Gia ? `${firstDetail.Gia.toLocaleString()} VND` : "Chưa có giá";
+            initialPriceDisplay = firstDetail.Gia ? `${firstDetail.Gia.toLocaleString()} VND` : "Vui lòng chọn màu sắc và kích cỡ";
         }
 
         $('#product-price').html(initialPriceDisplay);

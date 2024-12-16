@@ -1,0 +1,132 @@
+﻿@model (List<AppData.ViewModel.HoaDonChiTietViewModel.SanPhamChiTietViewModel>, Guid)
+
+@{
+    ViewData["Title"] = "ThanhToanCK";
+}
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #aaa;
+    }
+
+    .modal-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .order-info {
+        flex: 1;
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .total-amount {
+        margin-top: 10px;
+    }
+
+    .label {
+        font-weight: bold;
+        display: block;
+    }
+
+    .value {
+        font-size: 16px;
+        color: #333;
+    }
+
+    .qr-code {
+        text-align: center;
+        flex: 1;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background: #4CAF50;
+        color: white;
+        font-size: 16px;
+        transition: background 0.3s;
+    }
+
+        button:hover {
+            background: #45a049;
+        }
+</style>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <div class="modal-row">
+            <div class="order-info">
+                <h2>Thông tin đơn hàng</h2>
+                <div class="total-amount">
+                    <span class="label">Số Tiền Thanh Toán</span>
+                    <span class="value">@Model.Item1.Sum(x => x.Price * x.Quantity).ToString("#,0") VNĐ</span>
+                </div>
+                <div class="total-amount">
+                    <span class="label">Giá Trị Đơn Hàng</span>
+                    <span class="value">@Model.Item1.Sum(x => x.Price * x.Quantity).ToString("#,0") VNĐ</span>
+                </div>
+                <div class="total-amount">
+                    <span class="label">Phí Giao Dịch</span>
+                    <span class="value">0 VNĐ</span>
+                </div>
+                <div class="total-amount">
+                    <span class="label">Mã Đơn Hàng</span>
+                    <span class="value">@Model.Item2.ToString()</span>
+                </div>
+            </div>
+            <div class="qr-code">
+                <h3>Quét mã ứng dụng Ngân hàng/ Ví điện tử</h3>
+                <img id="qrCode" src="~/Admin/assets/img/avatars/Chuyenkhoanmb.jpg" alt="Mã QR" />
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button onclick="confirmPayment('@Model.Item2')">Xác nhận thanh toán</button>
+            <button onclick="closeModal()">Hủy</button>
+        </div>
+    </div>
+</div>
+

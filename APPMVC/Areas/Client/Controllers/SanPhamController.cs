@@ -97,7 +97,7 @@ namespace APPMVC.Areas.Client.Controllers
                     }
 
                     // Tính toán giá hiệu dụng (giá sau khuyến mãi)
-                    double effectivePrice = sanPhamChiTiet.GiaGiam.HasValue ? sanPhamChiTiet.Gia - sanPhamChiTiet.GiaGiam.Value : sanPhamChiTiet.Gia;
+                    double effectivePrice = sanPhamChiTiet.GiaGiam.HasValue ? sanPhamChiTiet.GiaGiam.Value : sanPhamChiTiet.Gia;
 
                     // Cập nhật giá thấp nhất và cao nhất
                     minPrice = minPrice == null ? effectivePrice : Math.Min(minPrice.Value, effectivePrice);
@@ -191,9 +191,9 @@ namespace APPMVC.Areas.Client.Controllers
                     if (promotionId.HasValue && promotionId.Value != Guid.Empty)
                     {
                         var promotionDetails = await _promotionService.GetPromotionByIdAsync(promotionId.Value);
-                        if (promotionDetails != null && promotionDetails.TrangThai == 1) // Kiểm tra trạng thái khuyến mãi
+                        if (promotionDetails != null && promotionDetails.TrangThai == 1) 
                         {
-                            discountedPrice = chiTiet.Gia * (1 - promotionDetails.PhanTramGiam / 100); // Tính giá sau khuyến mãi
+                            discountedPrice = chiTiet.GiaGiam; 
                         }
                     }
 
@@ -217,7 +217,7 @@ namespace APPMVC.Areas.Client.Controllers
                     IdSanPham = sanphamId,
                     TenSanPham = sanPham.TenSanPham,
                     MoTa = sanPham.MoTa,
-                    DiscountedPrice = firstDetail?.GiaDaGiam, // Giá giảm
+                    DiscountedPrice = firstDetail?.GiaDaGiam, 
                     Gia = firstDetail?.Gia, // Giá gốc
                     SoLuong = firstDetail?.SoLuong,
                     SanPhamChiTietList = sanPhamChiTietViewModels,
@@ -265,7 +265,7 @@ namespace APPMVC.Areas.Client.Controllers
                 if (promotionDetails != null && promotionDetails.TrangThai == 1 && promotionDetails.PhanTramGiam > 0)
                 {
                     // Tính toán giá đã giảm
-                    discountedPrice = originalPrice - sanPhamChiTiet.GiaGiam;
+                    discountedPrice =  sanPhamChiTiet.GiaGiam;
 
                     // Ghi log giá giảm để kiểm tra
                     Console.WriteLine($"Discounted Price: {discountedPrice}, Original Price: {originalPrice}, Discount Percentage: {promotionDetails.PhanTramGiam}");
