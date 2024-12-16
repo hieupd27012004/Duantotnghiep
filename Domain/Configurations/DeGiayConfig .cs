@@ -14,7 +14,7 @@ namespace AppData.Configurations
 		public void Configure(EntityTypeBuilder<DeGiay> builder)
 		{
 			builder.HasKey(p => p.IdDeGiay);
-            
+          
         }
 
 	}

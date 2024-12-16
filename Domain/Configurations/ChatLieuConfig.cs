@@ -14,7 +14,6 @@ namespace AppData.Configurations
 		public void Configure(EntityTypeBuilder<ChatLieu> builder)
 		{
 			builder.HasKey(p => p.IdChatLieu);
-            
-        }
+		}
 	}
 }

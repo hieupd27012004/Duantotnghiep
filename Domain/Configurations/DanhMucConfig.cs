@@ -13,8 +13,7 @@ namespace AppData.Configurations
 	{
 		public void Configure(EntityTypeBuilder<DanhMuc> builder)
 		{
-			builder.HasKey(p => p.IdDanhMuc);
-			
+			builder.HasKey(p => p.IdDanhMuc);			
         }
 	}
 }
