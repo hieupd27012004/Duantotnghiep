@@ -19,6 +19,7 @@ namespace APPMVC.Areas.Admin.Controllers
         private readonly INhanVienService _service;
         private readonly IChucVuService chucVuService;
         private readonly IMemoryCache _memoryCache;
+        
         public NhanVienController(INhanVienService service, IChucVuService _cvser, IMemoryCache memoryCache)
         {
             _service = service;
@@ -353,13 +354,14 @@ namespace APPMVC.Areas.Admin.Controllers
                     var kh = await _service.LoginKH(nv.Email, nv.MatKhau);
                     if (kh != null)
                     {
+                        var chucVu = await chucVuService.GetChucVuId(kh.IdchucVu);
                         // Lưu thông tin khách hàng vào session
                         HttpContext.Session.SetString("NhanVien", JsonConvert.SerializeObject(kh));
                         HttpContext.Session.SetString("AvatarUrl", kh.AnhNhanVien); 
                         HttpContext.Session.SetString("NhanVienName", kh.TenNhanVien);
                         HttpContext.Session.SetString("IdNhanVien", kh.IdNhanVien.ToString());
-                        HttpContext.Session.SetString("NhanVienRole", kh.chucVu != null ? kh.chucVu.TenChucVu : "Không xác định"); // Vai trò nhân viên
-                        return RedirectToAction("DangNhapThanhCong");
+                        HttpContext.Session.SetString("NhanVienRole", chucVu != null ? chucVu.Code : "Không xác định"); // Vai trò nhân viên
+                        return RedirectToAction("ThongKeTongQuan", "ThongKe");
                     }
                     else
                     {
@@ -378,10 +380,19 @@ namespace APPMVC.Areas.Admin.Controllers
             }
             return View(nv);
         }
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+
+            TempData["SuccessMessage"] = "Bạn đã đăng xuất thành công.";
+
+            return RedirectToAction("Login");
+        }
+
         public IActionResult DangNhapThanhCong()
         {
             // Lấy dữ liệu từ Session
-            var sessionData = HttpContext.Session.GetString("NhanVien");
+            var sessionData = HttpContext.Session.GetString("NhanVienRole");
 
             // Trả về view với dữ liệu từ Session
             return View((object)sessionData);

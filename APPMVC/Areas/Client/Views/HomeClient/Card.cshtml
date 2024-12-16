@@ -1,7 +1,7 @@
 ﻿@model List<AppData.ViewModel.GioHangChiTietViewModel>
 
 @{
-    ViewData["Title"] = "Cart";
+    ViewData["Title"] = "Giỏ Hàng";
     Layout = "~/Areas/Client/Views/Shared/_LayoutClient.cshtml";
 
     string FormatCurrency(decimal amount)
@@ -22,28 +22,48 @@
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     }
 
-    .quantity-container .btn {
-        min-width: 30px;
-        height: 30px;
-        padding: 0;
-        border-radius: 50%;
-        font-size: 16px;
+    .table th, .table td {
+        vertical-align: middle;
     }
 
-    .quantity-container .form-control {
-        border: 1px solid #ced4da;
-        border-radius: 0;
+    .product-thumbnail img {
+        width: 60px; /* Giảm kích thước ảnh */
+        height: auto;
     }
 
-    .discount-price {
-        text-decoration: line-through;
-        color: red;
-        margin-right: 10px;
-    }
-
-    .current-price {
-        color: green;
+    .discount-badge {
+        position: absolute;
+        top: 5px; /* Đặt lại vị trí */
+        right: 5px;
+        background-color: red;
+        color: white;
+        padding: 2px 5px; /* Giảm kích thước padding */
+        border-radius: 3px; /* Giảm kích thước border-radius */
         font-weight: bold;
+        font-size: 12px; /* Giảm kích thước font */
+    }
+
+    .btn-remove {
+        background-color: #dc3545; /* Nút xóa màu đỏ */
+        color: white;
+    }
+
+        .btn-remove:hover {
+            background-color: #c82333; /* Màu khi hover */
+        }
+
+    .quantity-container {
+        max-width: 120px;
+        margin: auto;
+    }
+
+    .total-price {
+        font-weight: bold;
+    }
+
+    .cart-totals {
+        border-top: 2px solid #ccc;
+        padding-top: 20px;
     }
 </style>
 
@@ -57,12 +77,14 @@
         </div>
     </div>
 </div>
+
 @if (TempData["ErrorMessage"] != null)
 {
     <div class="alert alert-danger">
         @TempData["ErrorMessage"]
     </div>
 }
+
 <div class="untree_co-section before-footer-section">
     <div class="container">
         <form id="cartForm">
@@ -104,7 +126,7 @@
                                             <img src="@imageUrl" alt="Image" class="img-fluid" />
                                             @if (item.PhanTramGiam.HasValue)
                                             {
-                                                <div class="discount-badge" style="position: absolute; top: 10px; right: 10px; background-color: red; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold;">
+                                                <div class="discount-badge">
                                                     Giảm @item.PhanTramGiam%!
                                                 </div>
                                             }
@@ -136,7 +158,7 @@
                                     }
                                     else
                                     {
-                                        <div class="input-group mb-3 d-flex justify-content-center align-items-center quantity-container" style="max-width: 120px; margin: auto;">
+                                        <div class="input-group mb-3 d-flex justify-content-center align-items-center quantity-container">
                                             <div class="input-group-prepend">
                                                 <button class="btn btn-outline-black decrease rounded-circle" type="button" aria-label="Giảm Số Lượng">&minus;</button>
                                             </div>
@@ -155,63 +177,41 @@
                         }
                     </tbody>
                 </table>
-                <hr />
             </div>
         </form>
 
         <div class="row">
-            <div class="col-md-6">
-                <div class="row mb-5">
-                    <div class="col-md-6 mb-3 mb-md-0">
-                        <button class="btn btn-outline-black btn-sm btn-block" onclick="window.location='@Url.Action("Index", "Products")'">Tiếp Tục Mua Sắm</button>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <label class="text-black h4" for="coupon">Mã Giảm Giá</label>
-                        <p>Nhập mã giảm giá nếu bạn có.</p>
-                    </div>
-                    <div class="col-md-8 mb-3 mb-md-0">
-                        <input type="text" class="form-control py-3" id="coupon" placeholder="Mã Giảm Giá" />
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-black">Áp Dụng Mã</button>
-                    </div>
-                </div>
+            <div class="col-md-6 mb-3">
+                <button class="btn btn-outline-black btn-sm btn-block" onclick="window.location='@Url.Action("Index", "SanPham")'">Tiếp Tục Mua Sắm</button>
             </div>
-            <div class="col-md-6 pl-5">
-                <div class="row justify-content-end">
-                    <div class="col-md-7">
-                        <div class="row">
-                            <div class="col-md-12 text-right border-bottom mb-5">
-                                <h3 class="text-black h4 text-uppercase">Tổng Giỏ Hàng</h3>
-                            </div>
+        </div>
+
+        <div class="cart-totals">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="text-black h4 text-uppercase">Tổng Giỏ Hàng</h3>
+                </div>
+                <div class="col-md-6 text-right">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <span class="text-black">Tổng Tạm Tính</span>
                         </div>
-                        <div id="cart-totals" style="display: none;">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <span class="text-black">Tổng Tạm Tính</span>
-                                </div>
-                                <div class="col-md-6 text-right">
-                                    <strong class="text-black" id="subtotal">0 VND</strong>
-                                </div>
-                            </div>
-                            <div class="row mb-5">
-                                <div class="col-md-6">
-                                    <span class="text-black">Tổng Cộng</span>
-                                </div>
-                                <div class="col-md-6 text-right">
-                                    <strong class="text-black" id="total">0 VND</strong>
-                                </div>
-                            </div>
+                        <div class="col-md-6">
+                            <strong class="text-black" id="subtotal">0 VND</strong>
                         </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <button type="button" class="btn btn-black btn-lg py-3 btn-block" onclick="checkout()">
-                                    Thanh Toán
-                                </button>
-                            </div>
+                    </div>
+                    <div class="row mb-5">
+                        <div class="col-md-6">
+                            <span class="text-black">Tổng Cộng</span>
                         </div>
+                        <div class="col-md-6">
+                            <strong class="text-black" id="total">0 VND</strong>
+                        </div>
+                    </div>
+                    <div class="row mb-6 text-right">
+                        <button type="button" class="btn btn-black btn-lg py-3 btn-block" onclick="checkout()">
+                            Thanh Toán
+                        </button>
                     </div>
                 </div>
             </div>
