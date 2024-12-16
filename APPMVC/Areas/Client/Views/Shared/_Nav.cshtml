@@ -22,16 +22,16 @@
 					<a class="nav-link" href="@Url.Action("Index", "SanPham", new { area = "Client" })">Shop</a>
 				</li>
 				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "About" ? "active" : "")">
-					<a class="nav-link" href="about.html">About us</a>
+					<a class="nav-link" href="@Url.Action("About", "HomeClient", new { area = "Client" })">About us</a>
 				</li>
-				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "Services" ? "active" : "")">
-					<a class="nav-link" href="services.html">Services</a>
+				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "DichVu" ? "active" : "")">
+					<a class="nav-link" href="@Url.Action("DichVu", "HomeClient", new { area = "Client" })">Services</a>
 				</li>
 				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "Blog" ? "active" : "")">
-					<a class="nav-link" href="blog.html">Blog</a>
+					<a class="nav-link" href="@Url.Action("Blog", "HomeClient", new { area = "Client" })">Blog</a>
 				</li>
-				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "Contact" ? "active" : "")">
-					<a class="nav-link" href="contact.html">Contact us</a>
+				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "LienHe" ? "active" : "")">
+					<a class="nav-link" href="@Url.Action("LienHe", "HomeClient", new { area = "Client" })">Contact us</a>
 				</li>
 				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "GetHoaDonDetails" && ViewContext.RouteData.Values["controller"].ToString() == "HoaDon" ? "active" : "")">
 					<a class="nav-link" href="@Url.Action("GetHoaDonDetails", "HoaDon", new { area = "Client" })">Tra Cứu</a>

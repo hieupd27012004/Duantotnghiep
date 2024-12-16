@@ -14,38 +14,6 @@ namespace AppData.Configurations
 		public void Configure(EntityTypeBuilder<ChatLieu> builder)
 		{
 			builder.HasKey(p => p.IdChatLieu);
-            builder.HasData(
-              new ChatLieu
-              {
-                  IdChatLieu = Guid.NewGuid(),
-                  TenChatLieu = "Vải Cotton",
-                  NgayCapNhat = DateTime.Now,
-                  NgayTao = DateTime.Now,
-                  NguoiCapNhat = "Admin",
-                  NguoiTao = "Admin",
-                  KichHoat = 1
-              },
-              new ChatLieu
-              {
-                  IdChatLieu = Guid.NewGuid(),
-                  TenChatLieu = "Da thật",
-                  NgayCapNhat = DateTime.Now,
-                  NgayTao = DateTime.Now,
-                  NguoiCapNhat = "Admin",
-                  NguoiTao = "Admin",
-                  KichHoat = 1
-              },
-              new ChatLieu
-              {
-                  IdChatLieu = Guid.NewGuid(),
-                  TenChatLieu = "Vải Polyester",
-                  NgayCapNhat = DateTime.Now,
-                  NgayTao = DateTime.Now,
-                  NguoiCapNhat = "Admin",
-                  NguoiTao = "Admin",
-                  KichHoat = 1
-              }
-          );
-        }
+		}
 	}
 }
