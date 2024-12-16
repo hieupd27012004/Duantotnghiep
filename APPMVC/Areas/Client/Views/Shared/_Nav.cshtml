@@ -15,15 +15,27 @@
 
 		<div class="collapse navbar-collapse" id="navbarsFurni">
 			<ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
-				<li class="nav-item active">
-					<a class="nav-link" href="index.html">Home</a>
+				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewContext.RouteData.Values["controller"].ToString() == "HomeClient" ? "active" : "")">
+					<a class="nav-link" href="@Url.Action("Index", "HomeClient", new { area = "Client" })">Home</a>
 				</li>
-				<li><a class="nav-link" href="@Url.Action("Index", "SanPham", new { area = "Client" })">Shop</a></li>
-				<li><a class="nav-link" href="about.html">About us</a></li>
-				<li><a class="nav-link" href="services.html">Services</a></li>
-				<li><a class="nav-link" href="blog.html">Blog</a></li>
-				<li><a class="nav-link" href="contact.html">Contact us</a></li>
-				<li><a class="nav-link" href="@Url.Action("GetHoaDonDetails", "HoaDon", new { area = "Client" })">Tra Cứu</a></li>
+				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "Index" && ViewContext.RouteData.Values["controller"].ToString() == "SanPham" ? "active" : "")">
+					<a class="nav-link" href="@Url.Action("Index", "SanPham", new { area = "Client" })">Shop</a>
+				</li>
+				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "About" ? "active" : "")">
+					<a class="nav-link" href="about.html">About us</a>
+				</li>
+				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "Services" ? "active" : "")">
+					<a class="nav-link" href="services.html">Services</a>
+				</li>
+				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "Blog" ? "active" : "")">
+					<a class="nav-link" href="blog.html">Blog</a>
+				</li>
+				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "Contact" ? "active" : "")">
+					<a class="nav-link" href="contact.html">Contact us</a>
+				</li>
+				<li class="nav-item @(ViewContext.RouteData.Values["action"].ToString() == "GetHoaDonDetails" && ViewContext.RouteData.Values["controller"].ToString() == "HoaDon" ? "active" : "")">
+					<a class="nav-link" href="@Url.Action("GetHoaDonDetails", "HoaDon", new { area = "Client" })">Tra Cứu</a>
+				</li>
 			</ul>
 			<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
 				<div class="dropdown">

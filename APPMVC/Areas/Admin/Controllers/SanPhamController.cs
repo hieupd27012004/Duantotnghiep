@@ -109,11 +109,12 @@ namespace APPMVC.Areas.Admin.Controllers
         private async Task<List<SelectListItem>> GetKichCoOptions()
         {
             var kichCos = await _kichCoService.GetKichCo(null) ?? new List<KichCo>();
-            return kichCos.Select(k => new SelectListItem
-            {
-                Value = k.IdKichCo.ToString(),
-                Text = k.TenKichCo
-            }).ToList();
+            return kichCos
+                .Select(k => new SelectListItem
+                {
+                    Value = k.IdKichCo.ToString(),
+                    Text = k.TenKichCo
+                }).ToList();
         }
 
         private async Task<List<SelectListItem>> GetMauSacOptions()
@@ -603,7 +604,8 @@ namespace APPMVC.Areas.Admin.Controllers
                 DanhMucId = sanPham.IdDanhMuc,       
                 ChatLieuId = sanPham.IdChatLieu,     
                 KieuDangId = sanPham.IdKieuDang,     
-                DeGiayId = sanPham.IdDeGiay          
+                DeGiayId = sanPham.IdDeGiay,  
+                KichHoat = sanPham.KichHoat
             };
 
             return View(viewModel);
@@ -634,7 +636,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 sanPham.IdDanhMuc = viewModel.DanhMucId;
                 sanPham.IdDeGiay = viewModel.DeGiayId;
                 sanPham.IdKieuDang = viewModel.KieuDangId;
-
+                sanPham.KichHoat = viewModel.KichHoat;
                 await _sanPhamService.Update(sanPham);
 
                 TempData["Success"] = "Cập nhật thành công";
@@ -677,6 +679,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 Gia = sanPhamChiTiet.Gia,
                 SoLuong = sanPhamChiTiet.SoLuong,
                 XuatXu = sanPhamChiTiet.XuatXu,
+                KichHoat = sanPhamChiTiet.KichHoat
 
             };
 
@@ -710,6 +713,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 sanPhamChiTiet.Gia = viewModel.Gia;
                 sanPhamChiTiet.SoLuong = viewModel.SoLuong;
                 sanPhamChiTiet.XuatXu = viewModel.XuatXu;
+                sanPhamChiTiet.KichHoat = viewModel.KichHoat;
 
                 var existingImages = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
                 foreach (var existingImage in existingImages)
@@ -777,11 +781,11 @@ namespace APPMVC.Areas.Admin.Controllers
         }
         private async Task LoadViewBags()
         {
-            var listChatLieu = await _chatLieuService.GetChatLieu(null);
-            var listDeGiay = await _deGiayService.GetDeGiay(null);
-            var listDanhMuc = await _danhMucService.GetDanhMuc(null);
-            var listThuongHieu = await _thuongHieuService.GetThuongHieu(null);
-            var listKieuDang = await _kieuDangService.GetKieuDang(null);
+            var listChatLieu = (await _chatLieuService.GetChatLieu(null))?.Cast<ChatLieu>().Where(c => c.KichHoat != 0).ToList() ?? new List<ChatLieu>();
+            var listDeGiay = (await _deGiayService.GetDeGiay(null))?.Where(d => d.KichHoat != 0).ToList() ?? new List<DeGiay>();
+            var listDanhMuc = (await _danhMucService.GetDanhMuc(null))?.Where(d => d.KichHoat != 0).ToList() ?? new List<DanhMuc>();
+            var listThuongHieu = (await _thuongHieuService.GetThuongHieu(null))?.Where(t => t.KichHoat != 0).ToList() ?? new List<ThuongHieu>();
+            var listKieuDang = (await _kieuDangService.GetKieuDang(null))?.Where(k => k.KichHoat != 0).ToList() ?? new List<KieuDang>();
             var listMauSac = await _mauSacService.GetMauSac(null);
             var listKichCo = await _kichCoService.GetKichCo(null);
 

@@ -69,7 +69,7 @@ namespace APPMVC.Areas.Client.Controllers
             var customerIdString = HttpContext.Session.GetString("IdKhachHang");
             if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
             {
-                return Unauthorized(new { message = "Customer not found in session." });
+                return RedirectToAction("Login", "KhachHang");
             }
 
             var idGioHang = await _cardService.GetCartIdByCustomerIdAsync(customerId);

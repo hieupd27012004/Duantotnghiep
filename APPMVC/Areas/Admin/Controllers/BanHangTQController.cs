@@ -374,7 +374,9 @@ namespace APPMVC.Areas.Admin.Controllers
             try
             {
                 var sanPhamChiTietList = await _sanPhamCTService.GetSanPhamChiTiets();
-
+                sanPhamChiTietList = sanPhamChiTietList
+                    .Where(sanPhamCT => sanPhamCT.KichHoat == 1) // Kiểm tra trạng thái kích hoạt
+                    .ToList();
                 var sanPhamChiTietViewModels = new List<SanPhamChiTietViewModel>();
                 if (sanPhamChiTietList != null && sanPhamChiTietList.Any())
                 {
@@ -859,6 +861,84 @@ namespace APPMVC.Areas.Admin.Controllers
             };
 
             return Redirect(_vnPayServie.CreatePaymentUrl(vnPay, HttpContext));
+            //var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
+            //if (hoaDonChiTietList == null)
+            //{
+            //    return NotFound(new { message = "Không tìm thấy đơn hàng" });
+            //}
+            //double tongTienHang = 0;
+            //foreach (var hoaDonChiTiet in hoaDonChiTietList)
+            //{
+            //    var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
+            //    if (sanPhamCT == null)
+            //    {
+            //        tongTienHang += hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia;
+            //    }
+            //}
+            //var hoaDon = await _hoaDonService.GetByIdAsync(idHoaDon);
+            //if (hoaDon == null)
+            //{
+            //    return NotFound(new { message = "Không tìm thấy" });
+            //}
+            //hoaDon.TongTienDonHang = tongTienHang;
+            //string tenNguoiNhan = "Khách";
+            //if (idKhachHang.HasValue)
+            //{
+            //    var khachHang = await _khachHangService.GetIdKhachHang(idKhachHang.Value);
+            //    if (khachHang != null)
+            //    {
+            //        tenNguoiNhan = khachHang.HoTen;
+            //    }
+            //}
+            //var model = new ChuyenKhoanViewModel
+            //{
+            //    IdHoaDon = idHoaDon,
+            //    TenNguoiNhan = tenNguoiNhan,
+            //    TongTienHang = tongTienHang
+
+            //};
+            //return PartialView("ThanhToanModel", model);
+        }
+        [HttpPost]
+        public async Task<IActionResult> ThanhToanModal(Guid idHoaDon, Guid? idKhachHang)
+        {
+            var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
+            if(hoaDonChiTietList == null)
+            {
+                return NotFound(new { message = "Không tìm thấy đơn hàng" });
+            }
+            double tongTienHang = 0;
+            foreach(var hoaDonChiTiet in hoaDonChiTietList)
+            {
+                var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(hoaDonChiTiet.IdSanPhamChiTiet);
+                if(sanPhamCT == null)
+                {
+                    tongTienHang += hoaDonChiTiet.SoLuong * hoaDonChiTiet.DonGia;
+                }
+            }
+            var hoaDon = await _hoaDonService.GetByIdAsync(idHoaDon);
+            if(hoaDon == null)
+            {
+                return NotFound(new { message = "Không tìm thấy" });
+            }
+            hoaDon.TongTienDonHang = tongTienHang;
+            string tenNguoiNhan = "Khách";
+            if (idKhachHang.HasValue)
+            {
+                var khachHang = await _khachHangService.GetIdKhachHang(idKhachHang.Value);
+                if(khachHang != null)
+                {
+                    tenNguoiNhan = khachHang.HoTen;
+                }
+            }
+            var model = new ChuyenKhoanViewModel
+            {
+                IdHoaDon = idHoaDon,
+                TenNguoiNhan = tenNguoiNhan,
+                TongTienHang = tongTienHang
+
+            };
+            return PartialView("ThanhToanModal", model);
         }
 
         public IActionResult ThanhToanLoi()

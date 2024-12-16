@@ -9,19 +9,27 @@
 		@TempData["ErrorMessage"]
 	</div>
 }
+<style>
+	.product-thumbnail {
+		width: 100%;
+		height: auto; 
+		max-height: 200px; 
+		object-fit: cover; 
+	}
+</style>
 <div class="hero">
 	<div class="container">
 		<div class="row justify-content-between">
 			<div class="col-lg-5">
 				<div class="intro-excerpt">
 					<h1>Nike Air Jordan 4 Retro 2024 <span clsas="d-block">‘Military Blue’ FV5029‑141</span></h1>
-					<p class="mb-4">The Nike Air Jordan 4 Retro 2024 ‘Military Blue’ (FV5029‑141) features white, military blue, and grey tones, with a comfortable Air-Sole unit.</p>
-					<p><a href="" class="btn btn-secondary me-2">Shop Now</a><a href="#" class="btn btn-white-outline">Explore</a></p>
+					<p class="mb-4">Nike Air Jordan 4 Retro 2024 'Military Blue' (FV5029-141) có các tông màu trắng, xanh quân đội và xám, cùng với một đơn vị Air-Sole mang lại sự thoải mái.</p>
+					<p><a  href="@Url.Action("Index", "SanPham", new { area = "Client" })" class="btn btn-secondary me-2">Khám phá</a>
 				</div>
 			</div>
 			<div class="col-lg-7">
 				<div class="hero-img-wrap">
-					<img src="images/giaymau1.png" class="img-fluid">
+					<img src="/Client/img/giaymau1.png" class="img-fluid">
 				</div>
 			</div>
 		</div>
@@ -35,47 +43,30 @@
 
 			<!-- Start Column 1 -->
 			<div class="col-md-12 col-lg-3 mb-5 mb-lg-0">
-				<h2 class="mb-4 section-title">The best sports sneakers for performance and comfort. </h2>
-				<p class="mb-4">We guarantee that 100% of our products are authentic, genuine, and of the highest quality. </p>
-				<p><a href="shop.html" class="btn">Shop</a></p>
+				<h2 class="mb-4 section-title">Những đôi giày thể thao tốt nhất cho hiệu suất và sự thoải mái.</h2>
+				<p class="mb-4">Chúng tôi cam kết rằng 100% sản phẩm của chúng tôi là chính hãng, nguyên bản và có chất lượng cao nhất.</p>
+				<p><a href="@Url.Action("Index", "SanPham", new { area = "Client" })" class="btn">Khám phá</a></p>
 			</div>
 			<!-- End Column 1 -->
 			<!-- Start Column 2 -->
 			<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
 				<a class="product-item" href="cart.html">
-					<img src="images/giaymau1.png" class="img-fluid product-thumbnail">
-					<h3 class="product-title">Nike Air Jordan 4 Retro 2024 ‘Military Blue’ FV5029‑141</h3>
-					<strong class="product-price">$50.00</strong>
-
-					<span class="icon-cross">
-						<img src="images/cross.svg" class="img-fluid">
-					</span>
+					<img src="/Client/img/pngegg.png" class="img-fluid product-thumbnail">
+					<h3 class="product-title">Giày Nike Air Zoom Pegasus 32</h3>
 				</a>
 			</div>
 			<!-- End Column 2 -->
-			<!-- Start Column 3 -->
 			<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
 				<a class="product-item" href="cart.html">
-					<img src="images/giaymau1.png" class="img-fluid product-thumbnail">
-					<h3 class="product-title">Nike Air Jordan 4 Retro 2024 ‘Military Blue’ FV5029‑141</h3>
-					<strong class="product-price">$50.00</strong>
-
-					<span class="icon-cross">
-						<img src="images/cross.svg" class="img-fluid">
-					</span>
+					<img src="/Client/img/sanpham2.png" class="img-fluid product-thumbnail">
+					<h3 class="product-title">Nike AIR JORDAN XXXI Banned</h3>
 				</a>
 			</div>
 			<!-- End Column 3 -->
-			<!-- Start Column 4 -->
 			<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
 				<a class="product-item" href="cart.html">
-					<img src="images/giaymau1.png" class="img-fluid product-thumbnail">
-					<h3 class="product-title">Nike Air Jordan 4 Retro 2024 ‘Military Blue’ FV5029‑141</h3>
-					<strong class="product-price">$50.00</strong>
-
-					<span class="icon-cross">
-						<img src="images/cross.svg" class="img-fluid">
-					</span>
+					<img src="/Client/img/sanpham3.png" class="img-fluid product-thumbnail">
+					<h3 class="product-title">Giày adidas NMD_R1 ‘Focus Olive’ IG5534</h3>
 				</a>
 			</div>
 			<!-- End Column 4 -->
@@ -89,47 +80,47 @@
 	<div class="container">
 		<div class="row justify-content-between">
 			<div class="col-lg-6">
-				<h2 class="section-title">Why Choose Us</h2>
-				<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique.</p>
+				<h2 class="section-title">Tại sao chọn chúng tôi?</h2>
+				<p>Chúng tôi cam kết cung cấp 100% sản phẩm chính hãng, đảm bảo chất lượng vượt trội và độ bền cao.</p>
 
 				<div class="row my-5">
 					<div class="col-6 col-md-6">
 						<div class="feature">
 							<div class="icon">
-								<img src="images/truck.svg" alt="Image" class="imf-fluid">
+								<img src="~/Client/img/truck.svg" alt="Image" class="imf-fluid">
 							</div>
 							<h3>Fast &amp; Free Shipping</h3>
-							<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate.</p>
+							<p>Miễn phí giao hàng và chính sách đổi trả trong 30 ngày, mang lại sự an tâm cho bạn.</p>
 						</div>
 					</div>
 
 					<div class="col-6 col-md-6">
 						<div class="feature">
 							<div class="icon">
-								<img src="images/bag.svg" alt="Image" class="imf-fluid">
+								<img src="~/Client/img/bag.svg" alt="Image" class="imf-fluid">
 							</div>
 							<h3>Easy to Shop</h3>
-							<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate.</p>
+							<p>Cập nhật các mẫu giày thể thao mới nhất, luôn theo kịp xu hướng thời trang.</p>
 						</div>
 					</div>
 
 					<div class="col-6 col-md-6">
 						<div class="feature">
 							<div class="icon">
-								<img src="images/support.svg" alt="Image" class="imf-fluid">
+								<img src="~/Client/img/support.svg" alt="Image" class="imf-fluid">
 							</div>
 							<h3>24/7 Support</h3>
-							<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate.</p>
+							<p>Đội ngũ hỗ trợ khách hàng nhiệt tình, giúp bạn chọn lựa sản phẩm phù hợp nhanh chóng.</p>
 						</div>
 					</div>
 
 					<div class="col-6 col-md-6">
 						<div class="feature">
 							<div class="icon">
-								<img src="images/return.svg" alt="Image" class="imf-fluid">
+								<img src="~/Client/img/return.svg" alt="Image" class="imf-fluid">
 							</div>
 							<h3>Hassle Free Returns</h3>
-							<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate.</p>
+							<p>Chính sách Đổi trả không phiền phức giúp bạn thực hiện đổi trả dễ dàng, nhanh chóng và thuận tiện</p>
 						</div>
 					</div>
 
@@ -138,7 +129,7 @@
 
 			<div class="col-lg-5">
 				<div class="img-wrap">
-					<img src="images/maugiay2.jpg" alt="Image" class="img-fluid">
+					<img src="~/Client/img/maugiay2.jpg" alt="Image" class="img-fluid">
 				</div>
 			</div>
 
@@ -152,9 +143,9 @@
 		<div class="row justify-content-between">
 			<div class="col-lg-7 mb-5 mb-lg-0">
 				<div class="imgs-grid">
-					<div class="grid grid-1"><img src="images/WMNS+AIR+JORDAN+1+MID1.jpg" alt="Untree.co"></div>
-					<div class="grid grid-2"><img src="images/WMNS+AIR+JORDAN+1+MID2.jpg" alt="Untree.co"></div>
-					<div class="grid grid-3"><img src="images/WMNS+AIR+JORDAN+1+MID3.png" alt="Untree.co"></div>
+					<div class="grid grid-1"><img src="/Client/img/WMNS+AIR+JORDAN+1+MID1.jpg" alt="Untree.co"></div>
+					<div class="grid grid-2"><img src="/Client/img/WMNS+AIR+JORDAN+1+MID2.jpg" alt="Untree.co"></div>
+					<div class="grid grid-3"><img src="/Client/img/WMNS+AIR+JORDAN+1+MID3.png" alt="Untree.co"></div>
 				</div>
 			</div>
 			<div class="col-lg-5 ps-lg-5">

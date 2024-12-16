@@ -37,5 +37,9 @@ namespace AppAPI.Service
         {
             return await _repository.UpdateCV(cv);
         }
+        public async Task<ChucVu> GetChucVuId(Guid? idChucVu)
+        {
+            return await _repository.GetChucVuId(idChucVu);
+        }
     }
 }

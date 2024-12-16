@@ -18,5 +18,6 @@ namespace AppAPI.IRepository
         //check
         Task<bool> CheckSDT(string soDienThoai);
         Task<bool> CheckMail(string mail);
+        
     }
 }

@@ -10,5 +10,6 @@ namespace APPMVC.IService
         Task CreateCV(ChucVu cv);
         Task UpdateCV(ChucVu cv);
         Task DeleteCV(Guid id);
+        Task<ChucVu> GetChucVuId(Guid? idChucVu);
     }
 }

@@ -29,6 +29,16 @@ namespace AppAPI.Controllers
             }
            return Ok(chucVu);
         }
+        [HttpGet("GetChucVuId")]
+        public async Task<IActionResult> GetChucVuId(Guid? idChucVu)
+        {
+            var chucVu = await _service.GetChucVuId(idChucVu);
+            if(chucVu == null)
+            {
+                return NotFound();
+            }
+            return Ok(chucVu);
+        }
         [HttpPost("CreateChucVu")]
         public async Task<IActionResult> CreateCV(ChucVu cv)
         {

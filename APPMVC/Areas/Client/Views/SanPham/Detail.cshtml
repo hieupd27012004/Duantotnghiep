@@ -8,27 +8,58 @@
     <div class="row">
         <!-- Hình ảnh sản phẩm -->
         <div class="col-lg-6">
-            <div class="product-detail-image">
-                @if (Model.SanPhamChiTietList != null && Model.SanPhamChiTietList.Any())
-                {
-                    var firstDetail = Model.SanPhamChiTietList.First();
-                    if (firstDetail.HinhAnhs != null && firstDetail.HinhAnhs.Any())
+            <div id="product-carousel" class="carousel slide" data-ride="carousel">
+                <div class="carousel-inner">
+                    @if (Model.SanPhamChiTietList != null && Model.SanPhamChiTietList.Any())
                     {
-                        foreach (var hinhAnh in firstDetail.HinhAnhs)
+                        foreach (var detail in Model.SanPhamChiTietList)
                         {
-                            var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
-                            var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
-                            <img src="@imageUrl" alt="Hình ảnh sản phẩm" class="img-thumbnail" style="max-width: 200px; max-height: 200px; margin: 5px;" />
+                            if (detail.HinhAnhs != null && detail.HinhAnhs.Any())
+                            {
+                                foreach (var hinhAnh in detail.HinhAnhs)
+                                {
+                                    var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
+                                    var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
+                                    <div class="carousel-item @(detail == Model.SanPhamChiTietList.First() ? "active" : "")">
+                                        <img src="@imageUrl" class="d-block w-100" alt="Hình ảnh sản phẩm" />
+                                    </div>
+                                }
+                            }
                         }
                     }
                     else
                     {
-                        <span class="text-muted">Không có hình ảnh cho sản phẩm này.</span>
+                        <span class="text-muted">Không có thông tin chi tiết cho sản phẩm này.</span>
+                    }
+                </div>
+                <a class="carousel-control-prev" href="#product-carousel" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#product-carousel" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+            <div class="thumbs mt-2">
+                @if (Model.SanPhamChiTietList != null && Model.SanPhamChiTietList.Any())
+                {
+                    foreach (var detail in Model.SanPhamChiTietList)
+                    {
+                        if (detail.HinhAnhs != null && detail.HinhAnhs.Any())
+                        {
+                            foreach (var hinhAnh in detail.HinhAnhs)
+                            {
+                                var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
+                                var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
+                                <img src="@imageUrl" alt="Hình ảnh sản phẩm" class="img-thumbnail thumb-image" style="max-width: 100px; height: 200px;" data-target="@imageUrl" />
+                            }
+                        }
                     }
                 }
                 else
                 {
-                    <span class="text-muted">Không có thông tin chi tiết cho sản phẩm này.</span>
+                    <span class="text-muted">Không có hình ảnh cho sản phẩm này.</span>
                 }
             </div>
         </div>
@@ -36,7 +67,7 @@
         <!-- Thông tin sản phẩm -->
         <div class="col-lg-6 product-detail-info">
             <h2>@Model.TenSanPham</h2>
-            <p id="product-price" class="price"></p> <!-- Initially empty -->
+            <p id="product-price" class="price"></p>
             <p id="product-quantity" class="quantity">
                 Số lượng: @(Model.SoLuong.HasValue ? Model.SoLuong.Value.ToString() : "Không có thông tin")
             </p>
@@ -82,16 +113,15 @@
             </div>
 
             <div class="product-detail-specs">
+                <p><strong>Mô tả:</strong></p>
                 <ul>
-                    <li><strong>Materials:</strong> Leather, Synthetic Materials</li>
-                    <li><strong>Weight:</strong> 350g</li>
                     <li><strong>Made in:</strong> Vietnam</li>
+                    <li><strong>Tên sản phẩm: @Model.TenSanPham</strong></li>
                 </ul>
+                <p>
+                    @Model.MoTa
+                </p>
             </div>
-
-            <p>
-                The radiance lives on in the @Model.TenSanPham, the basketball original that puts a fresh spin on what you know best: durably stitched overlays, clean finishes and the perfect amount of flash to make you shine.
-            </p>
 
             <div class="actions mt-3">
                 <button id="add-to-cart-btn" class="btn btn-primary" type="button">
@@ -104,8 +134,8 @@
         </div>
     </div>
 </div>
-<!-- Modal -->
 
+<!-- Modal -->
 <div class="modal fade" id="quantityModal" tabindex="-1" role="dialog" aria-labelledby="quantityModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -127,7 +157,6 @@
     </div>
 </div>
 
-
 <script>
     $(document).ready(function () {
         let selectedColor = '@Model.SelectedColorId' || '';
@@ -140,15 +169,15 @@
 
         if (firstDetail && firstDetail.DiscountedPrice < firstDetail.Gia) {
             initialPriceDisplay = `
-                <div style="display: flex; align-items: center;">
-                    <span style="text-decoration: line-through; color: red; margin-right: 10px;">
-                        ${firstDetail.Gia.toLocaleString()} VND
-                    </span>
-                    <span style="color: green;">
-                        ${firstDetail.DiscountedPrice.toLocaleString()} VND
-                    </span>
-                </div>
-            `;
+                        <div style="display: flex; align-items: center;">
+                            <span style="text-decoration: line-through; color: red; margin-right: 10px;">
+                                ${firstDetail.Gia.toLocaleString()} VND
+                            </span>
+                            <span style="color: green;">
+                                ${firstDetail.DiscountedPrice.toLocaleString()} VND
+                            </span>
+                        </div>
+                    `;
         } else {
             initialPriceDisplay = firstDetail.Gia ? `${firstDetail.Gia.toLocaleString()} VND` : "Chưa có giá";
         }
@@ -188,15 +217,15 @@
                             let priceDisplay = '';
                             if (data.discountedPrice !== null && data.discountedPrice < data.originalPrice) {
                                 priceDisplay = `
-                                    <div style="display: flex; align-items: center;">
-                                        <span style="text-decoration: line-through; color: red; margin-right: 10px;">
-                                            ${data.originalPrice.toLocaleString()} VND
-                                        </span>
-                                        <span style="color: green;">
-                                            ${data.discountedPrice.toLocaleString()} VND
-                                        </span>
-                                    </div>
-                                `;
+                                            <div style="display: flex; align-items: center;">
+                                                <span style="text-decoration: line-through; color: red; margin-right: 10px;">
+                                                    ${data.originalPrice.toLocaleString()} VND
+                                                </span>
+                                                <span style="color: green;">
+                                                    ${data.discountedPrice.toLocaleString()} VND
+                                                </span>
+                                            </div>
+                                        `;
                             } else {
                                 priceDisplay = `${data.originalPrice.toLocaleString()} VND`;
                             }
@@ -204,15 +233,27 @@
                             $('#product-price').html(priceDisplay);
                             $('#product-quantity').text('Số lượng: ' + data.quantity);
 
-                            // Update images
-                            $('.product-detail-image').empty();
+                            // Cập nhật hình ảnh
+                            $('.carousel-inner').empty();
+                            $('.thumbs').empty();
                             if (data.images.length > 0) {
-                                data.images.forEach(function (image) {
+                                data.images.forEach(function (image, index) {
                                     var imageUrl = 'data:' + image.type + ';base64,' + image.base64;
-                                    $('.product-detail-image').append('<img src="' + imageUrl + '" alt="Hình ảnh sản phẩm" class="img-thumbnail" style="max-width: 200px; max-height: 200px; margin: 5px;" />');
+
+                                    // Thêm vào carousel
+                                    $('.carousel-inner').append(`
+                                                <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                                    <img src="${imageUrl}" class="d-block w-100" alt="Hình ảnh sản phẩm" />
+                                                </div>
+                                            `);
+
+                                    // Thêm thumbnail
+                                    $('.thumbs').append(`
+                                                <img src="${imageUrl}" alt="Hình ảnh sản phẩm" class="img-thumbnail thumb-image" style="max-width: 100px; cursor: pointer; margin: 5px;" data-target="${imageUrl}" />
+                                            `);
                                 });
                             } else {
-                                $('.product-detail-image').append('<span class="text-muted">Không có hình ảnh cho sản phẩm này.</span>');
+                                $('.carousel-inner').append('<span class="text-muted">Không có hình ảnh cho sản phẩm này.</span>');
                             }
                         } else {
                             alert(data.message);
@@ -244,20 +285,20 @@
             });
         });
 
-      $('#quantity-input').on('input', function () {
-        let quantity = $(this).val();
+        $('#quantity-input').on('input', function () {
+            let quantity = $(this).val();
 
-        // Check if the input is invalid
-        if (!quantity || quantity < 1 || isNaN(quantity)) {
-            $(this).val(1); // Reset to 1 if invalid
-        } else if (quantity > availableQuantity) {
-            alert('Số lượng không được vượt quá số lượng sản phẩm có sẵn: ' + availableQuantity);
-            $(this).val(availableQuantity); // Reset to max available quantity
-        }
-    });
+            // Check if the input is invalid
+            if (!quantity || quantity < 1 || isNaN(quantity)) {
+                $(this).val(1); // Reset to 1 if invalid
+            } else if (quantity > availableQuantity) {
+                alert('Số lượng không được vượt quá số lượng sản phẩm có sẵn: ' + availableQuantity);
+                $(this).val(availableQuantity); // Reset to max available quantity
+            }
+        });
 
-    // Show the modal when the "Mua Ngay" button is clicked
-         $('#buy-now-btn').click(function () {
+        // Show the modal when the "Mua Ngay" button is clicked
+        $('#buy-now-btn').click(function () {
             if (!selectedColor || !selectedSize) {
                 alert('Vui lòng chọn màu và kích thước trước khi mua ngay.');
                 return;
@@ -306,6 +347,12 @@
         $('.btn-secondary').click(function () {
             $('#quantity-input').val(1); // Reset input value to 1
             $('#quantityModal').modal('hide'); // Close the modal
+        });
+
+        // Sự kiện click cho thumbnail
+        $(document).on('click', '.thumb-image', function () {
+            const newImageUrl = $(this).data('target');
+            $('#product-carousel .carousel-item img').attr('src', newImageUrl);
         });
     });
 </script>
@@ -364,13 +411,22 @@
     #buy-now-btn {
         width: 100%;
         margin-top: 15px;
-        background-color: #28a745; 
-        color: white; 
-        border: none; 
+        background-color: #28a745;
+        color: white;
+        border: none;
     }
 
         #buy-now-btn:hover {
             background-color: #218838;
             color: white;
+        }
+
+    .thumb-image {
+        transition: transform 0.2s;
+    }
+
+        .thumb-image:hover {
+            transform: scale(1.1);
+            border: 2px solid #007bff;
         }
 </style>
