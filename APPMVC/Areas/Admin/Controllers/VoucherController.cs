@@ -162,11 +162,17 @@ namespace APPMVC.Areas.Admin.Controllers
 
         private async Task<IActionResult> LoadKhachHangAndReturnView(Voucher voucher)
         {
+            // Lấy tất cả khách hàng
             var khachHangs = await _khachHangService.GetAllKhachHang();
-            ViewBag.KhachHang = khachHangs;
+
+            // Lọc khách hàng có trạng thái = 1
+            var filteredKhachHangs = khachHangs
+                .Where(kh => kh.KichHoat == 1)
+                .ToList();
+
+            ViewBag.KhachHang = filteredKhachHangs; 
             return View(voucher);
         }
-
         // GET: Admin/Voucher/Edit/5
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)

@@ -23,26 +23,30 @@ namespace APPMVC.Areas.Admin.Controllers
             page = page < 1 ? 1 : page;
             int pageSize = 5;
 
+            // Lấy tất cả khách hàng
             var khachHangs = await _service.GetAllKhachHang();
+
+            // Lọc khách hàng có trạng thái = 1
+            var filteredKhachHangs = khachHangs
+                .Where(kh => kh.KichHoat == 1) // Giả sử TrangThai là thuộc tính của KhachHang
+                .ToList();
+
             var khachHangViewModels = new List<KhachHangViewModel>();
 
-            foreach (var khachHang in khachHangs)
+            foreach (var khachHang in filteredKhachHangs)
             {
                 var diaChiList = await _diaChiService.GetAllAsync(khachHang.IdKhachHang);
+                var diaChi = diaChiList?.FirstOrDefault();
 
-
-                var diaChi = diaChiList?.FirstOrDefault(); 
-
-             
                 khachHangViewModels.Add(new KhachHangViewModel
                 {
                     KhachHang = khachHang,
-                    DiaChi = diaChi?.WardName 
+                    DiaChi = diaChi?.WardName
                 });
             }
 
             var sortedKhachHangViewModels = khachHangViewModels
-                .OrderByDescending(k => k.KhachHang.NgayTao) // Adjust based on your model
+                .OrderByDescending(k => k.KhachHang.NgayTao) // Sắp xếp theo NgayTao
                 .ToList();
 
             var pagedKhachHangViewModels = sortedKhachHangViewModels.ToPagedList(page, pageSize);

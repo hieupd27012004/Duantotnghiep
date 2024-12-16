@@ -46,6 +46,8 @@
     .product-item.selected {
         background-color: #d0e7ff;
     }
+
+   
 </style>
 
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -145,9 +147,42 @@
         </div>
     </div>
 </div>
+<div class="modal-overlay" id="modalOverlay" style="display: none;">
+    <div class="modal-content">
+        <div id="modalBody">
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
-        // Hàm xóa hóa đơn
+             function closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+                function confirmPayment(orderId) {
+            fetch(`/Admin/BanHangTQ/XacNhanThanhToanCK?idHoaDon=${orderId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Lỗi khi xác nhận thanh toán');
+                }
+                return response.json(); // Chuyển đổi phản hồi thành JSON
+            })
+            .then(data => {
+                if (data.success) {
+                    // Nếu thành công, chuyển hướng đến view hiển thị hóa đơn
+                    window.location.href = data.redirectUrl; // Sử dụng URL từ phản hồi
+                } else {
+                    alert(data.message || 'Thanh toán không thành công.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi xác nhận thanh toán: ' + error.message);
+            });
+        }
+        // Xóa hóa đơn
         function deleteInvoice(idHoaDon) {
             if (confirm("Bạn có chắc chắn muốn xóa đơn hàng này không?")) {
                 $.ajax({
@@ -155,7 +190,7 @@
                     type: 'POST',
                     data: { idHoaDon: idHoaDon },
                     success: function() {
-                        location.reload(); // Tải lại trang để cập nhật danh sách đơn hàng
+                        location.reload(); // Tải lại trang
                     },
                     error: function() {
                         alert("Đã xảy ra lỗi khi xóa đơn hàng.");
@@ -164,7 +199,7 @@
             }
         }
 
-        // Hàm xóa sản phẩm
+        // Xóa sản phẩm
         function deleteProduct(idHoaDonChiTiet, idHoaDon) {
             if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
                 $.ajax({
@@ -181,8 +216,8 @@
             }
         }
 
-        // Hàm xem chi tiết hóa đơn
-           function viewInvoiceDetail(element) {
+        // Xem chi tiết hóa đơn
+        function viewInvoiceDetail(element) {
             $('.product-item').removeClass('selected');
             $(element).addClass('selected');
 
@@ -193,14 +228,14 @@
                     bindSearchButton();
                     loadSanPhamChiTiet(idHoaDon);
                     bindQuantityButtons(idHoaDon);
-                    handlePayment();
+                    setupPaymentMethodListener();
                 })
                 .fail(function() {
                     alert("Không thể tải chi tiết hóa đơn.");
                 });
         }
 
-        // Hàm tải danh sách sản phẩm chi tiết
+        // Tải danh sách sản phẩm chi tiết
         function loadSanPhamChiTiet(idHoaDon) {
             $.get('@Url.Action("GetSanPhamChiTietList", "BanHangTQ", new { area = "Admin" })', { idHoaDon: idHoaDon })
                 .done(function(data) {
@@ -211,8 +246,8 @@
                 });
         }
 
-        // Hàm bind các nút tăng giảm số lượng
-                function bindQuantityButtons(idHoaDon) {
+        // Bind các nút tăng giảm số lượng
+        function bindQuantityButtons(idHoaDon) {
             const decreaseButtons = document.querySelectorAll('.decrease');
             const increaseButtons = document.querySelectorAll('.increase');
             const quantityInputs = document.querySelectorAll('.quantity-amount');
@@ -255,7 +290,7 @@
                         this.value = 1; // Reset to 1 if invalid
                     } else if (value > maxQuantity) {
                         alert("Số lượng không được vượt quá " + maxQuantity + ".");
-                        this.value = 1; 
+                        this.value = 1;
                         updateInvoiceAndStock(idHoaDon);
                     } else {
                         updateInvoiceAndStock(idHoaDon);
@@ -264,7 +299,7 @@
             });
         }
 
-        // Hàm cập nhật hóa đơn và tồn kho
+        // Cập nhật hóa đơn và tồn kho
         async function updateInvoiceAndStock(idHoaDon) {
             const sanPhamChiTiets = Array.from(document.querySelectorAll('.quantity-amount'))
                 .map(input => ({
@@ -288,28 +323,65 @@
                 const data = await response.json();
                 if (data.success) {
                     viewInvoiceDetail(document.querySelector(`.product-item[data-idhoadon="${idHoaDon}"]`));
-                    return 0;
-                } else {
-                    return 1;
                 }
             } catch (error) {
                 console.error('Error:', error);
-                return 1;
             }
         }
 
-        function handlePayment() {
-            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-            const form = document.getElementById('paymentForm');
+        // Thiết lập lắng nghe cho phương thức thanh toán
+        function setupPaymentMethodListener() {
+            document.querySelectorAll('input[name="paymentMethod"]').forEach((elem) => {
+                elem.addEventListener("change", function () {
+                    const amountGivenContainer = document.getElementById('amountGiven');
+                    const amountGivenLabel = document.getElementById('amountGivenLabel');
 
-            // Set the action based on the payment method
-            if (paymentMethod === 'cash') {
-                form.action = "@Url.Action("XacNhanThanhToan", "BanHangTQ", new { area = "Admin" })";
-            } else if (paymentMethod === 'bankTransfer') {
-                form.action = "@Url.Action("ThanhToanVNPay", "BanHangTQ", new { area = "Admin" })";
+                    // Kiểm tra phương thức thanh toán
+                    if (this.value === 'bankTransfer') {
+                        amountGivenContainer.style.display = 'none'; // Ẩn trường nhập tiền khách đưa
+                        amountGivenLabel.style.display = 'none'; // Ẩn nhãn "Tiền khách đưa"
+                    } else {
+                        amountGivenContainer.style.display = ''; // Hiện trường nhập tiền khách đưa
+                        amountGivenLabel.style.display = ''; // Hiện nhãn "Tiền khách đưa"
+                    }
+                });
+            });
+
+            // Khởi tạo trạng thái hiển thị ban đầu
+            const checkedMethod = document.querySelector('input[name="paymentMethod"]:checked');
+            if (checkedMethod) {
+                checkedMethod.dispatchEvent(new Event('change'));
+            }
+        }
+
+        // Tải chi tiết hóa đơn
+        function loadOrderDetails(idHoaDon) {
+            $.get('@Url.Action("ThanhToanCK", "BanHangTQ", new { area = "Admin" })', { idHoaDon: idHoaDon })
+                .done(function(data) {
+                    $('#modalOverlay').html(data).css({
+                        display: 'flex',
+                        opacity: '1',
+                        visibility: 'visible'
+                    });
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    console.error("Error loading order details:", textStatus, errorThrown);
+                    alert("Đã xảy ra lỗi khi tải thông tin đơn hàng.");
+                });
+        }
+
+        // Xử lý thanh toán
+        function handlePayment() {
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+            if (!paymentMethod) {
+                alert("Vui lòng chọn phương thức thanh toán.");
+                return;
             }
 
-            // Get the customer ID
+            const selectedPaymentMethod = paymentMethod.value;
+            const form = document.getElementById('paymentForm');
+
+            // Lấy ID khách hàng
             const customerId = document.getElementById('customerId').value;
             if (customerId) {
                 const idKhachHangInput = document.createElement('input');
@@ -319,23 +391,30 @@
                 form.appendChild(idKhachHangInput);
             }
 
-            // Get the amount given by the customer
-            const amountGiven = document.getElementById('amountGivenInput').value;
-            if (amountGiven) {
-                const soTienKhachDuaInput = document.createElement('input');
-                soTienKhachDuaInput.type = 'hidden';
-                soTienKhachDuaInput.name = 'soTienKhachDua';
-                soTienKhachDuaInput.value = amountGiven;
-                form.appendChild(soTienKhachDuaInput);
-            } else {
-                return; 
+            // Xử lý thanh toán tiền mặt
+            if (selectedPaymentMethod === 'cash') {
+                const amountGiven = document.getElementById('amountGivenInput').value;
+                if (amountGiven) {
+                    const soTienKhachDuaInput = document.createElement('input');
+                    soTienKhachDuaInput.type = 'hidden';
+                    soTienKhachDuaInput.name = 'soTienKhachDua';
+                    soTienKhachDuaInput.value = amountGiven;
+                    form.appendChild(soTienKhachDuaInput);
+                    form.action = "@Url.Action("XacNhanThanhToan", "BanHangTQ", new { area = "Admin" })";
+                    form.submit();
+                } else {
+                    alert("Vui lòng nhập số tiền khách đưa.");
+                }
             }
-
-            form.submit();
+            // Xử lý chuyển khoản ngân hàng
+            else if (selectedPaymentMethod === 'bankTransfer') {
+                const idHoaDon = form.querySelector('input[name="idHoaDon"]').value;
+                loadOrderDetails(idHoaDon);
+            }
         }
 
-        // Hàm tìm kiếm khách hàng
-             function bindSearchButton() {
+        // Bind nút tìm kiếm
+        function bindSearchButton() {
             const searchButton = document.getElementById('btnSearchCustomer');
 
             searchButton.addEventListener('click', async function() {
@@ -361,7 +440,6 @@
                     if (result.idKhachHang) {
                         document.getElementById('customerName').innerText = result.customerName || 'Khách Lẻ';
                         document.getElementById('customerId').value = result.idKhachHang;
-
                     } else {
                         alert('Không tìm thấy khách hàng.');
                         resetCustomerDetails();
@@ -374,13 +452,13 @@
             });
         }
 
-
+        // Reset thông tin khách hàng
         function resetCustomerDetails() {
             document.getElementById('customerName').innerText = 'Khách Lẻ';
             document.getElementById('customerId').value = '';
         }
 
-                         $(document).ready(function() {
+        $(document).ready(function() {
             $('#customerForm').on('submit', function(e) {
                 e.preventDefault();
 
@@ -393,14 +471,14 @@
                             $('#customerName').text(response.customerName);
                             $('#customerId').val(response.idKhachHang);
 
-                            // Show success message
+                            // Hiện thông báo thành công
                             const successAlert = $('<div class="alert alert-success" role="alert">' + response.message + '</div>');
-                            $('.container-xxl').prepend(successAlert); // Add the alert at the top of the container
+                            $('.container-xxl').prepend(successAlert);
                             setTimeout(function() {
-                                successAlert.fadeOut(); // Fade out the alert after 3 seconds
+                                successAlert.fadeOut();
                             }, 3000);
 
-                            $('#addCustomerModal').modal('hide'); // Close the modal
+                            $('#addCustomerModal').modal('hide'); // Đóng modal
                         } else {
                             alert('Có lỗi xảy ra: ' + response.message);
                         }
@@ -411,8 +489,5 @@
                 });
             });
         });
-
-         
-
     </script>
 }
