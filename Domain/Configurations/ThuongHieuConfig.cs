@@ -14,38 +14,7 @@ namespace AppData.Configurations
 		public void Configure(EntityTypeBuilder<ThuongHieu> builder)
 		{
 			builder.HasKey(p => p.IdThuongHieu);
-			builder.HasData(
-                new ThuongHieu
-                {
-                    IdThuongHieu = Guid.NewGuid(),
-                    TenThuongHieu = "Nike",
-                    NgayTao = DateTime.Now,
-                    NgayCapNhat = DateTime.Now,
-                    NguoiTao = "Admin",
-                    NguoiCapNhat = "Admin",
-                    KichHoat = 1
-                },
-                new ThuongHieu
-                {
-                    IdThuongHieu = Guid.NewGuid(),
-                    TenThuongHieu = "Adidas",
-                    NgayTao = DateTime.Now,
-                    NgayCapNhat = DateTime.Now,
-                    NguoiTao = "Admin",
-                    NguoiCapNhat = "Admin",
-                    KichHoat = 1
-                },
-                new ThuongHieu
-                {
-                    IdThuongHieu = Guid.NewGuid(),
-                    TenThuongHieu = "Puma",
-                    NgayTao = DateTime.Now,
-                    NgayCapNhat = DateTime.Now,
-                    NguoiTao = "Admin",
-                    NguoiCapNhat = "Admin",
-                    KichHoat = 1
-                }
-            );
+			
         }
 	}
 }

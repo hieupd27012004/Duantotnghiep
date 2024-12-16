@@ -14,12 +14,7 @@ namespace AppData.Configurations
 		public void Configure(EntityTypeBuilder<ChucVu> builder)
 		{
 			builder.HasKey(p => p.IdChucVu);
-            builder.HasData(
-              new ChucVu { IdChucVu = Guid.NewGuid(), Code = "QL", TenChucVu = "Quản lý" },
-              new ChucVu { IdChucVu = Guid.NewGuid(), Code = "NV", TenChucVu = "Nhân viên" },
-              new ChucVu { IdChucVu = Guid.NewGuid(), Code = "KT", TenChucVu = "Kế toán" },
-              new ChucVu { IdChucVu = Guid.NewGuid(), Code = "KK", TenChucVu = "Thủ kho" }
-          );
+            
         }
 	}
 }
