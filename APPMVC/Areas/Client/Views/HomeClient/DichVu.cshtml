@@ -9,12 +9,12 @@
                 <div class="intro-excerpt">
                     <h1>Dịch Vụ</h1>
                     <p class="mb-4">Chúng tôi cung cấp các dịch vụ chất lượng cao với sự tận tâm và chuyên nghiệp.</p>
-                    <p><a href="" class="btn btn-secondary me-2">Mua Ngay</a><a href="#" class="btn btn-white-outline">Khám Phá</a></p>
+                    <p><a href="@Url.Action("Index", "SanPham", new { area = "Client" })" class="btn btn-secondary me-2">Mua Ngay</a><a href="@Url.Action("Index", "SanPham", new { area = "Client" })" class="btn btn-white-outline">Khám Phá</a></p>
                 </div>
             </div>
             <div class="col-lg-7">
                 <div class="hero-img-wrap">
-                    <img src="~/Client/images/couch.png" class="img-fluid">
+                    <img src="~/Client/img/mau2.png" class="img-fluid">
                 </div>
             </div>
         </div>
@@ -33,7 +33,7 @@
                     <div class="col-6 col-md-6">
                         <div class="feature">
                             <div class="icon">
-                                <img src="~/Client/images/truck.svg" alt="Giao Hàng Nhanh & Miễn Phí" class="img-fluid">
+                                <img src="~/Client/img/truck.svg" alt="Giao Hàng Nhanh & Miễn Phí" class="img-fluid">
                             </div>
                             <h3>Giao Hàng Nhanh & Miễn Phí</h3>
                             <p>Giao hàng miễn phí cho mọi đơn hàng, chỉ trong vòng 48h!</p>
@@ -43,7 +43,7 @@
                     <div class="col-6 col-md-6">
                         <div class="feature">
                             <div class="icon">
-                                <img src="~/Client/images/bag.svg" alt="Dễ Dàng Mua Sắm" class="img-fluid">
+                                <img src="~/Client/img/bag.svg" alt="Dễ Dàng Mua Sắm" class="img-fluid">
                             </div>
                             <h3>Dễ Dàng Mua Sắm</h3>
                             <p>Trải nghiệm mua sắm nhanh chóng và thuận tiện ngay tại SoleMates.</p>
@@ -53,7 +53,7 @@
                     <div class="col-6 col-md-6">
                         <div class="feature">
                             <div class="icon">
-                                <img src="~/Client/images/support.svg" alt="Hỗ Trợ Khách Hàng 24/7" class="img-fluid">
+                                <img src="~/Client/img/support.svg" alt="Hỗ Trợ Khách Hàng 24/7" class="img-fluid">
                             </div>
                             <h3>Hỗ Trợ Khách Hàng 24/7</h3>
                             <p>Chúng tôi luôn sẵn sàng hỗ trợ bạn mọi lúc, mọi nơi.</p>
@@ -63,7 +63,7 @@
                     <div class="col-6 col-md-6">
                         <div class="feature">
                             <div class="icon">
-                                <img src="~/Client/images/return.svg" alt="Đổi Trả Dễ Dàng" class="img-fluid">
+                                <img src="~/Client/img/return.svg" alt="Đổi Trả Dễ Dàng" class="img-fluid">
                             </div>
                             <h3>Đổi Trả Dễ Dàng</h3>
                             <p>Yên tâm đổi trả sản phẩm trong vòng 30 ngày nếu không hài lòng.</p>
@@ -81,62 +81,7 @@
     </div>
 </div>
 <!-- End Why Choose Us Section -->
-<!-- Start Product Section -->
-<div class="product-section pt-0">
-    <div class="container">
-        <div class="row">
 
-            <!-- Start Column 1 -->
-            <div class="col-md-12 col-lg-3 mb-5 mb-lg-0">
-                <h2 class="mb-4 section-title">Giày Sneaker Chất Lượng Cao</h2>
-                <p class="mb-4">Khám phá các mẫu giày sneaker từ các thương hiệu hàng đầu, thiết kế hiện đại và chất liệu bền bỉ. Chắc chắn sẽ làm bạn hài lòng.</p>
-                <p><a href="#" class="btn">Khám Phá Ngay</a></p>
-            </div>
-            <!-- End Column 1 -->
-            <!-- Start Column 2 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-                <a class="product-item" href="#">
-                    <img src="~/Client/images/anhgiay2.jpg" class="img-fluid product-thumbnail" alt="Giày Sneaker Nordic">
-                    <h3 class="product-title">Giày Sneaker Nordic</h3>
-                    <strong class="product-price">1,500,000 VND</strong>
-
-                    <span class="icon-cross">
-                        <img src="~/Client/images/cross.svg" class="img-fluid" alt="Icon Xóa">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 2 -->
-            <!-- Start Column 3 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-                <a class="product-item" href="#">
-                    <img src="~/Client/images/anhgiay1.jpg" class="img-fluid product-thumbnail" alt="Giày Sneaker Kruzo Aero">
-                    <h3 class="product-title">Giày Sneaker Kruzo Aero</h3>
-                    <strong class="product-price">1,800,000 VND</strong>
-
-                    <span class="icon-cross">
-                        <img src="~/Client/images/cross.svg" class="img-fluid" alt="Icon Xóa">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 3 -->
-            <!-- Start Column 4 -->
-            <div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-                <a class="product-item" href="#">
-                    <img src="~/Client/images/anhgiay2.jpg" class="img-fluid product-thumbnail" alt="Giày Sneaker Ergonomic">
-                    <h3 class="product-title">Giày Sneaker Ergonomic</h3>
-                    <strong class="product-price">1,200,000 VND</strong>
-
-                    <span class="icon-cross">
-                        <img src="~/Client/images/cross.svg" class="img-fluid" alt="Icon Xóa">
-                    </span>
-                </a>
-            </div>
-            <!-- End Column 4 -->
-
-        </div>
-    </div>
-</div>
-<!-- End Product Section -->
 <!-- Start Testimonial Slider -->
 <div class="testimonial-section">
     <div class="container">
