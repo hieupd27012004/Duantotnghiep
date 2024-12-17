@@ -152,7 +152,7 @@
                                     }
                                 </td>
                                 <td>
-                                    @if (item.SoLuong == 0)
+                                    @if (item.Quantity == 0)
                                     {
                                         <span class="text-danger">Đã hết hàng</span>
                                     }
@@ -162,7 +162,7 @@
                                             <div class="input-group-prepend">
                                                 <button class="btn btn-outline-black decrease rounded-circle" type="button" aria-label="Giảm Số Lượng">&minus;</button>
                                             </div>
-                                            <input type="number" name="quantities[@item.IdGioHangChiTiet]" class="form-control text-center quantity-amount" value="@item.SoLuong" min="1" aria-label="Số Lượng" @(item.SoLuong == 0 ? "disabled" : "") />
+                                            <input type="number" name="quantities[@item.IdGioHangChiTiet]" class="form-control text-center quantity-amount" value="@item.SoLuong" min="1" max="@item.Quantity" aria-label="Số Lượng" @(item.SoLuong == 0 ? "disabled" : "") />
                                             <div class="input-group-append">
                                                 <button class="btn btn-outline-black increase rounded-circle" type="button" aria-label="Tăng Số Lượng">&plus;</button>
                                             </div>
@@ -186,7 +186,7 @@
             </div>
         </div>
 
-        <div class="cart-totals">
+        <div id="cart-totals" class="cart-totals">
             <div class="row">
                 <div class="col-md-6">
                     <h3 class="text-black h4 text-uppercase">Tổng Giỏ Hàng</h3>
@@ -252,7 +252,7 @@
             }
         });
     });
-    let previousQuantities = {};
+     let previousQuantities = {};
 
     function initializeQuantityButtons() {
         document.querySelectorAll('.quantity-amount').forEach(input => {
@@ -260,10 +260,14 @@
             previousQuantities[id] = input.value;
 
             input.addEventListener('input', function () {
-
                 this.value = this.value.replace(/[^0-9]/g, '');
+
+                const maxQuantity = parseInt(this.max);
                 if (parseInt(this.value) < 1) {
                     this.value = 1;
+                } else if (parseInt(this.value) > maxQuantity) {
+                    alert("Số lượng không thể lớn hơn " + maxQuantity + ".");
+                    this.value = maxQuantity;
                 }
 
                 updateTotal();
@@ -286,41 +290,57 @@
 
     function handleIncrease() {
         const input = this.closest('.input-group').querySelector('.quantity-amount');
+        const maxQuantity = parseInt(input.max);
+        let currentVal = parseInt(input.value);
+
+        if (currentVal < maxQuantity) {
+        } else {
+            alert("Số lượng không thể lớn hơn " + maxQuantity + ".");
+            input.value = maxQuantity; // Reset to max if exceeded
+        }
+
         updateTotal();
         updateCartQuantity(input);
     }
 
-      function handleDecrease() {
+    function handleDecrease() {
         const input = this.closest('.input-group').querySelector('.quantity-amount');
         let currentVal = parseInt(input.value);
 
         if (!isNaN(currentVal) && currentVal > 0) {
-
-            updateTotal();
-            updateCartQuantity(input);
-        } else if (currentVal === 0) {
+        } else {
             alert("Số lượng không thể nhỏ hơn 1.");
-            input.value = 1;
-            return;
+            input.value = 1; 
         }
+
+        updateTotal();
+        updateCartQuantity(input);
     }
 
-    function updateTotal() {
+         function updateTotal() {
         let subtotal = 0;
         let hasCheckedItems = false;
 
         document.querySelectorAll('tr[data-item-price]').forEach(row => {
             const price = parseFloat(row.dataset.itemPrice);
-            const quantity = parseInt(row.querySelector('.quantity-amount').value);
+            const quantityInput = row.querySelector('.quantity-amount');
             const isChecked = row.querySelector('input[type="checkbox"]').checked;
 
-            const total = price * quantity;
+            if (quantityInput) {
+                let quantity = parseInt(quantityInput.value);
 
-            row.querySelector('.total-price').textContent = FormatCurrency(total);
+                if (isNaN(quantity) || quantity < 1) {
+                    quantityInput.value = 1;
+                    quantity = 1; // Reset quantity for calculation
+                }
 
-            if (isChecked) {
-                subtotal += total;
-                hasCheckedItems = true;
+                const total = price * quantity;
+                row.querySelector('.total-price').textContent = FormatCurrency(total);
+
+                if (isChecked) {
+                    subtotal += total;
+                    hasCheckedItems = true;
+                }
             }
         });
 
@@ -328,8 +348,11 @@
         document.getElementById('total').textContent = FormatCurrency(subtotal);
 
         const cartTotals = document.getElementById('cart-totals');
-        cartTotals.style.display = hasCheckedItems ? 'block' : 'none';
+        if (cartTotals) {
+            cartTotals.style.display = hasCheckedItems ? 'block' : 'none'; // Check if cartTotals exists
+        }
     }
+
 
     function FormatCurrency(amount) {
         return amount.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' VND';

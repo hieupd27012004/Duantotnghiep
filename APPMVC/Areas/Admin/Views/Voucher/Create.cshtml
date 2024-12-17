@@ -74,12 +74,6 @@
                 <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
-                <label asp-for="TongSoLuongVoucher" class="control-label">Tổng Số Lượng Voucher</label>
-                <input asp-for="TongSoLuongVoucher" class="form-control" />
-                <span asp-validation-for="TongSoLuongVoucher" class="text-danger"></span>
-            </div>
-
             <input type="hidden" asp-for="NguoiTao" value="Admin" />
             <input type="hidden" asp-for="TrangThai" value="1" />
 
@@ -91,7 +85,10 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Chọn</th>
+                        <th>
+                            <input type="checkbox" id="checkAllCustomers" />
+                            Chọn Tất Cả
+                        </th>
                         <th>Tên Khách Hàng</th>
                         <th>Số Điện Thoại</th>
                         <th>Email</th>
@@ -129,6 +126,55 @@
 </div>
 
 <script>
+    $(document).ready(function () {
+        // Chọn tất cả khách hàng
+        $('#checkAllCustomers').on('change', function () {
+            $('input[name="selectedKhachHangIds"]').prop('checked', $(this).prop('checked'));
+        });
+
+
+        // Cập nhật số lượng voucher khi chọn/bỏ chọn khách hàng
+        $('input[name="selectedKhachHangIds"]').on('change', autoFillVoucherQuantity);
+        $('#checkAllCustomers').on('change', autoFillVoucherQuantity);
+
+        // Validation form trước khi submit
+        $('form').on('submit', function (e) {
+            var selectedIds = $('input[name="selectedKhachHangIds"]:checked');
+
+            if (selectedIds.length === 0) {
+                alert("Vui lòng chọn ít nhất một khách hàng.");
+                e.preventDefault(); // Ngăn không cho gửi form
+                return false;
+            }
+
+            // Kiểm tra ngày
+            var ngayBatDau = new Date($('#NgayBatDau').val());
+            var ngayKetThuc = new Date($('#NgayKetThuc').val());
+
+            if (ngayBatDau >= ngayKetThuc) {
+                alert("Ngày bắt đầu phải nhỏ hơn ngày kết thúc.");
+                e.preventDefault();
+                return false;
+            }
+
+            // Kiểm tra giá trị giảm
+            var loaiGiamGia = $('#LoaiGiamGia').val();
+            var giaTriGiam = parseFloat($('#GiaTriGiam').val().replace(/\./g, ''));
+
+            if (loaiGiamGia == 1 && (giaTriGiam <= 0 || giaTriGiam > 100)) {
+                alert("Giảm giá theo % phải từ 1-100%.");
+                e.preventDefault();
+                return false;
+            }
+
+            if (loaiGiamGia == 2 && giaTriGiam <= 0) {
+                alert("Giảm giá theo tiền phải lớn hơn 0.");
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+
     $(document).ready(function () {
         var selectedValue = $('#LoaiGiamGia').val();
         toggleSoTienToiDa(selectedValue);
@@ -183,10 +229,10 @@
         var gmtPlus7Offset = 7 * 60 * 60 * 1000;
         var nowInGmtPlus7 = new Date(now.getTime() + gmtPlus7Offset);
 
-        var ngayBatDau = new Date(nowInGmtPlus7.getTime() + 1 * 60 * 60 * 1000);
+        var ngayBatDau = new Date(nowInGmtPlus7.getTime());
         document.getElementById("NgayBatDau").value = ngayBatDau.toISOString().slice(0, 16); // Định dạng YYYY-MM-DDTHH:mm
 
-        var ngayKetThuc = new Date(ngayBatDau.getTime() + 1 * 60 * 60 * 1000);
+        var ngayKetThuc = new Date(ngayBatDau.getTime() + 1 * 24 * 60 * 60 * 1000);
         document.getElementById("NgayKetThuc").value = ngayKetThuc.toISOString().slice(0, 16); // Định dạng YYYY-MM-DDTHH:mm
     });
 </script>

@@ -96,14 +96,6 @@ namespace APPMVC.Areas.Admin.Controllers
                     ModelState.AddModelError("", "Chỉ chấp nhận các file ảnh với định dạng .jpg, .jpeg, .png, .gif.");
                     return View(nhanVien);
                 }
-
-                // Kiểm tra kích thước file (giới hạn 5MB)
-                if (imgFile.Length > 5 * 1024 * 1024)
-                {
-                    ModelState.AddModelError("", "File ảnh phải nhỏ hơn 5MB.");
-                    return View(nhanVien);
-                }
-
                 // Tạo đường dẫn đến thư mục lưu trữ hình ảnh
                 string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Admin", "imgNV", imgFile.FileName);
 
@@ -135,11 +127,12 @@ namespace APPMVC.Areas.Admin.Controllers
                 return RedirectToAction("Index");
             }
             // Kiểm tra tính hợp lệ của ModelState trước khi lưu dữ liệu vào cơ sở dữ liệu
+            // Kiểm tra tính hợp lệ của ModelState trước khi lưu dữ liệu vào cơ sở dữ liệu
             if (!ModelState.IsValid)
-            {
                 TempData["Error"] = "Đăng ký thất bại! Vui lòng nhập đầy đủ thông tin";
                 // Trả về view hiện tại với model để hiển thị lại thông tin và thông báo lỗi
                 return View(nhanVien);
+                return RedirectToAction("Create");
             }
             nhanVien.MatKhau = GenerateRandomPassword(8);
             // Nếu tất cả hợp lệ, lưu thông tin nhân viên

@@ -17,7 +17,14 @@ namespace AppAPI.Repository
         {
             try
             {
-                _context.nhanViens.AddAsync(nv);
+                // Kiểm tra xem thuộc tính AnhNhanVien có giá trị không
+                if (string.IsNullOrEmpty(nv.AnhNhanVien))
+                {
+                    nv.AnhNhanVien = "anh_a.jpg"; // Gán ảnh mặc định nếu không có ảnh
+                }
+
+                // Thêm nhân viên vào ngữ cảnh
+                await _context.nhanViens.AddAsync(nv);
                 await _context.SaveChangesAsync();
                 return nv;
             }

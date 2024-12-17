@@ -130,6 +130,14 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(SanPhamViewModel viewModel)
         {
+            // Check if the product name is empty
+            if (string.IsNullOrWhiteSpace(viewModel.SanPham.TenSanPham))
+            {
+                TempData["Error"] = "Vui lòng nhập tên sản phẩm trước khi chọn màu sắc và kích cỡ.";
+                await LoadViewBags();
+                return RedirectToAction("Create");
+            }
+
             if (!ModelState.IsValid)
             {
                 await LoadViewBags();
@@ -141,14 +149,14 @@ namespace APPMVC.Areas.Admin.Controllers
                 if (viewModel.Combinations == null || !viewModel.Combinations.Any())
                 {
                     TempData["Error"] = "Không có tổ hợp nào được chọn.";
-                    return View(viewModel);
+                    return RedirectToAction("Create");
                 }
 
                 if (viewModel.Combinations.Any(c => c.SoLuong <= 0))
                 {
                     TempData["Error"] = "Tất cả các tổ hợp phải có số lượng lớn hơn 0.";
                     await LoadViewBags();
-                    return RedirectToAction("GetAll");
+                    return RedirectToAction("Create");
                 }
 
                 // Load related entities
@@ -165,7 +173,6 @@ namespace APPMVC.Areas.Admin.Controllers
                 viewModel.SanPham.DanhMuc = await danhMucTask;
                 viewModel.SanPham.DeGiay = await deGiayTask;
                 viewModel.SanPham.KieuDang = await kieuDangTask;
-
 
                 await _sanPhamService.Create(viewModel.SanPham);
                 var idSanPham = viewModel.SanPham.IdSanPham;

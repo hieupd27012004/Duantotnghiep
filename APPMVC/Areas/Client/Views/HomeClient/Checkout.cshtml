@@ -152,12 +152,12 @@
                         <input type="radio" id="thanh_toan_ngay" name="PaymentMethod" value="online_payment" class="custom-control-input"
                         @(Model.PaymentMethod == "online_payment" ? "checked" : "")>
                         <label class="custom-control-label" for="thanh_toan_ngay">
-                            <i class="fab fa-cc-visa"></i> Thanh toán ngay
+                            <i class="fas fa-credit-card"></i> Thanh toán ngay
                         </label>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Hoàn thành đặt hàng</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCheckout()">Hoàn thành đặt hàng</button>
 
             </form>           
         </div>
@@ -265,9 +265,6 @@
                                                                     <small class="d-block text-muted">Áp dụng cho đơn hàng từ @(voucher.GiaTriDonHangToiThieu.ToString("N0"))đ</small>
                                                                 }
                                                             </div>
-                                                            <small class="text-muted">
-                                                                Còn @voucher.SoLuongVoucherConLai lượt sử dụng
-                                                            </small>
                                                         </div>
                                                     </label>
                                                 </div>
@@ -293,15 +290,27 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    function confirmCheckout() {
+           const totalBill = parseFloat(document.getElementById('tong_tien').value.replace(/[^0-9.-]+/g, "")) || 0;
+
+           const confirmationMessage = `Bạn có chắc chắn muốn thanh toán tổng cộng ${formatCurrency(totalBill)}?`;
+           if (confirm(confirmationMessage)) {
+               // Submit the form if the user confirms
+               document.querySelector('form').submit();
+           }
+       }
     // Define the formatCurrency function in the global scope
     function formatCurrency(value) {
-        return value.toLocaleString('vi-VN') + ' VND';
+        if (value !== undefined && value !== null) {
+            return value.toLocaleString('vi-VN') + ' VND';
+        }
+        return '0 VND'; // Default return for undefined or null
     }
 
     document.addEventListener("DOMContentLoaded", function() {
         // Get total amounts
-        const totalAmount = parseFloat(document.getElementById('tong_so_tien').value.replace(/[^0-9.-]+/g, ""));
-        const shippingFee = parseFloat(document.getElementById('phi_van_chuyen').value.replace(/[^0-9.-]+/g, ""));
+        const totalAmount = parseFloat(document.getElementById('tong_so_tien').value.replace(/[^0-9.-]+/g, "")) || 0;
+        const shippingFee = parseFloat(document.getElementById('phi_van_chuyen').value.replace(/[^0-9.-]+/g, "")) || 0;
         const totalBill = totalAmount + shippingFee;
 
         // Update values with formatted currency
@@ -368,9 +377,9 @@
         $("#WardName").val(wardName);
     });
 
-       $('.voucher-radio').on('change', function() {
+    $('.voucher-radio').on('change', function() {
         var voucherId = $(this).val();
-        var shippingFee = parseFloat($('#phi_van_chuyen').val().replace(/[^0-9.-]+/g, "")); // Get shipping fee
+        var shippingFee = parseFloat($('#phi_van_chuyen').val().replace(/[^0-9.-]+/g, "")) || 0; // Get shipping fee
 
         $.ajax({
             url: '@Url.Action("ApplyVoucher", "HomeClient", new { area = "Client" })',

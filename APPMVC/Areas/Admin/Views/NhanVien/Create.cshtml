@@ -49,7 +49,11 @@
                                 <span asp-validation-for="AnhNhanVien" class="text-danger"></span>
                             </div>
 
-                           
+                            <div class="form-group mb-3">
+                                <label asp-for="MatKhau" class="control-label">Mật Khẩu</label>
+                                <input asp-for="MatKhau" class="form-control" placeholder="Nhập mật khẩu" required />
+                                <span asp-validation-for="MatKhau" class="text-danger"></span>
+                            </div>
 
                             <div class="form-group mb-3" hidden>
                                 <label asp-for="AuthProvider" class="control-label">AuthProvider</label>
@@ -88,27 +92,31 @@
                             </div>
 
                             <div class="form-group mb-3" hidden>
-                                <label asp-for="NgayCapNhat" class="control-label" >Ngày Cập Nhật</label>
+                                <label asp-for="NgayCapNhat" class="control-label">Ngày Cập Nhật</label>
                                 <input asp-for="NgayCapNhat" class="form-control" type="date" readonly />
                                 <span asp-validation-for="NgayCapNhat" class="text-danger"></span>
                             </div>
 
                             <div class="form-group mb-3" hidden>
-                                <label asp-for="NguoiTao" class="control-label" >Người Tạo</label>
+                                <label asp-for="NguoiTao" class="control-label">Người Tạo</label>
                                 <input asp-for="NguoiTao" class="form-control" readonly />
                                 <span asp-validation-for="NguoiTao" class="text-danger"></span>
                             </div>
 
                             <div class="form-group mb-3" hidden>
-                                <label asp-for="NguoiCapNhat" class="control-label" >Người Cập Nhật</label>
+                                <label asp-for="NguoiCapNhat" class="control-label">Người Cập Nhật</label>
                                 <input asp-for="NguoiCapNhat" class="form-control" readonly />
                                 <span asp-validation-for="NguoiCapNhat" class="text-danger"></span>
                             </div>
-                            <div class="form-group">
+
+                            <div class="form-group mb-3">
                                 <label asp-for="IdchucVu" class="control-label">Chức Vụ</label>
-                                <select asp-for="IdchucVu" class="form-control" asp-items="@(new SelectList(ViewBag.ChucVu, "IdChucVu", "TenChucVu"))"></select>
+                                <select asp-for="IdchucVu" class="form-control"
+                                        asp-items="@(ViewBag.ChucVu != null ? new SelectList(ViewBag.ChucVu, "IdChucVu", "TenChucVu") : Enumerable.Empty<SelectListItem>())">
+                                </select>
                                 <span asp-validation-for="IdchucVu" class="text-danger"></span>
                             </div>
+
                             <div class="form-group mb-3">
                                 <input type="submit" value="Tạo mới" class="btn btn-primary" />
                                 <a asp-action="Index" class="btn btn-secondary" style="margin-left:15px;">Quay lại danh sách</a>

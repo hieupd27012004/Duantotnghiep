@@ -394,20 +394,17 @@ namespace APPMVC.Areas.Client.Controllers
                     return Json(new { success = false, message = "Số lượng không đủ." });
                 }
 
-                // Kiểm tra khuyến mãi để xác định giá
-                double price = sanPhamChiTiet.Gia; // Giá gốc
+                double price = sanPhamChiTiet.Gia;
 
-                // Lấy ID khuyến mãi tương ứng với sản phẩm chi tiết
                 var promotionId = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(sanPhamChiTiet.IdSanPhamChiTiet);
 
-                // Kiểm tra nếu promotionId không phải là Guid.Empty
                 if (promotionId.HasValue && promotionId.Value != Guid.Empty)
                 {
                     var promotionDetails = await _promotionService.GetPromotionByIdAsync(promotionId.Value);
                     if (promotionDetails != null && promotionDetails.TrangThai == 1 && promotionDetails.PhanTramGiam > 0)
                     {
                         // Tính giá đã giảm
-                        price = sanPhamChiTiet.Gia - Convert.ToDouble(sanPhamChiTiet.GiaGiam);
+                        price = Convert.ToDouble(sanPhamChiTiet.GiaGiam);
                     }
                 }
 
@@ -416,10 +413,9 @@ namespace APPMVC.Areas.Client.Controllers
                     IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
                     ProductName = sanPham.TenSanPham,
                     Quantity = quantity,
-                    Price = price // Sử dụng giá đã được tính toán
+                    Price = price 
                 };
 
-                // Lưu BuyItem vào session
                 HttpContext.Session.SetObject("SelectedItem", buyItem);
 
                 // Trả về URL để redirect client

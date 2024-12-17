@@ -1501,8 +1501,6 @@ namespace AppData
                 SoTienToiDa = null,
                 NgayBatDau = DateTime.Now,
                 NgayKetThuc = DateTime.Now.AddMonths(1),
-                TongSoLuongVoucher = 100,
-                SoLuongVoucherConLai = 100,
                 TrangThai = 2, // Đang kích hoạt
                 NgayTao = DateTime.Now,
                 NguoiTao = "Admin",
@@ -1520,8 +1518,6 @@ namespace AppData
                 SoTienToiDa = 50000,
                 NgayBatDau = DateTime.Now,
                 NgayKetThuc = DateTime.Now.AddMonths(2),
-                TongSoLuongVoucher = 50,
-                SoLuongVoucherConLai = 50,
                 TrangThai = 1, // Chờ kích hoạt
                 NgayTao = DateTime.Now,
                 NguoiTao = "Admin",
@@ -1539,8 +1535,6 @@ namespace AppData
                 SoTienToiDa = 100000, // Giảm tối đa 100.000 VNĐ
                 NgayBatDau = DateTime.Now,
                 NgayKetThuc = DateTime.Now.AddMonths(3),
-                TongSoLuongVoucher = 200,
-                SoLuongVoucherConLai = 200,
                 TrangThai = 2, // Đang kích hoạt
                 NgayTao = DateTime.Now,
                 NguoiTao = "Admin",
@@ -1558,8 +1552,6 @@ namespace AppData
                  SoTienToiDa = 100000, // Không giảm quá 100.000 VNĐ
                  NgayBatDau = DateTime.Now,
                  NgayKetThuc = DateTime.Now.AddMonths(4),
-                 TongSoLuongVoucher = 80,
-                 SoLuongVoucherConLai = 80,
                  TrangThai = 1, // Chờ kích hoạt
                  NgayTao = DateTime.Now,
                  NguoiTao = "Admin",

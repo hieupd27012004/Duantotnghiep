@@ -77,17 +77,17 @@ namespace AppData
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 
-			//optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=daantotnghiep;Trusted_Connection=True;TrustServerCertificate=True;");
+			optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=daantotnghiep;Trusted_Connection=True;TrustServerCertificate=True;");
 
 			//Server Của Long
-			optionsBuilder.UseSqlServer("Server=DESKTOP-UC1K64J\\SQLEXPRESS04;Database=daantotnghiep;Trusted_Connection=True;TrustServerCertificate=True;");
+			//optionsBuilder.UseSqlServer("Server=DESKTOP-UC1K64J\\SQLEXPRESS04;Database=daantotnghiep;Trusted_Connection=True;TrustServerCertificate=True;");
 
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-            modelBuilder.Seed();
-        }
+			modelBuilder.Seed();
+		}
 	}
 }

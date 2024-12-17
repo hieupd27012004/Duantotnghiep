@@ -15,7 +15,6 @@ namespace AppData.Model
 		public string TenPromotion { get; set; }
 		[Required(ErrorMessage = "Không Được Để Trống")]
 		[RegularExpression(@"^[0-9]+$", ErrorMessage = "Không Đúng Ký Tự")]
-		[Range(1, 90, ErrorMessage = "Giá trị Promotion phải nằm trong khoảng 1% đến 90%")]
 		public int PhanTramGiam { get; set; }
 		[DataType(DataType.DateTime, ErrorMessage = "Không Đúng Định Dạng")]
 		[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
