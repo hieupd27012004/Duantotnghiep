@@ -42,31 +42,45 @@ namespace APPMVC.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(KichCo kichCo)
+        public async Task<IActionResult> Create(string TenKichCo)
         {
-            if (!ModelState.IsValid)
-            {
-                // Kiểm tra tính hợp lệ của dữ liệu
-                if (ModelState.ContainsKey("TenKichCo"))
-                {
-                    var error = ModelState["TenKichCo"].Errors.FirstOrDefault();
-                    if (error != null)
-                    {
-                        TempData["Error"] = error.ErrorMessage;
-                    }
-                }
-                return RedirectToAction("Getall");
-            }
             try
             {
+                // Kiểm tra dữ liệu đầu vào
+                if (string.IsNullOrWhiteSpace(TenKichCo))
+                {
+                    return Json(new { success = false, message = "Tên kích cỡ không được để trống" });
+                }
+
+                var kichCo = new KichCo
+                {
+                    IdKichCo = Guid.NewGuid(),
+                    TenKichCo = TenKichCo,
+                    NgayTao = DateTime.Now,
+                    NgayCapNhat = DateTime.Now,
+                    NguoiTao = "Admin", // Lấy từ session
+                    NguoiCapNhat = "Admin",
+                    KichHoat = 1
+                };
+
                 await _services.Create(kichCo);
-                TempData["Success"] = "Thêm mới thành công";
+
+                return Json(new
+                {
+                    success = true,
+                    id = kichCo.IdKichCo,
+                    tenKichCo = kichCo.TenKichCo
+                });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                TempData["Error"] = "Thêm mới thất bại";
+                // Log lỗi nếu có
+                return Json(new
+                {
+                    success = false,
+                    message = "Có lỗi xảy ra: " + ex.Message
+                });
             }
-            return RedirectToAction("Getall");
         }
 
         public async Task<IActionResult> Edit(Guid id)

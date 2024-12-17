@@ -42,33 +42,46 @@ namespace APPMVC.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(MauSac mauSac)
+        public async Task<IActionResult> Create(string TenMauSac)
         {
-            if (!ModelState.IsValid)
-            {
-                // Kiểm tra tính hợp lệ của dữ liệu
-                if (ModelState.ContainsKey("TenMauSac"))
-                {
-                    var error = ModelState["TenMauSac"].Errors.FirstOrDefault();
-                    if (error != null)
-                    {
-                        TempData["Error"] = error.ErrorMessage;
-                    }
-                }
-                return RedirectToAction("Getall");
-            }
             try
             {
-                await _services.Create(mauSac);
-                TempData["Success"] = "Thêm mới thành công";
-            }
-            catch (Exception)
-            {
-                TempData["Error"] = "Thêm mới thất bại";
-            }
-            return RedirectToAction("Getall");
-        }
+                // Kiểm tra dữ liệu đầu vào
+                if (string.IsNullOrWhiteSpace(TenMauSac))
+                {
+                    return Json(new { success = false, message = "Tên màu không được để trống" });
+                }
 
+                var mauSac = new MauSac
+                {
+                    IdMauSac = Guid.NewGuid(),
+                    TenMauSac = TenMauSac,
+                    NgayTao = DateTime.Now,
+                    NgayCapNhat = DateTime.Now,
+                    NguoiTao = "Admin", // Lấy từ session
+                    NguoiCapNhat = "Admin",
+                    KichHoat = 1
+                };
+
+                await _services.Create(mauSac);
+
+                return Json(new
+                {
+                    success = true,
+                    id = mauSac.IdMauSac,
+                    tenMauSac = mauSac.TenMauSac
+                });
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nếu có
+                return Json(new
+                {
+                    success = false,
+                    message = "Có lỗi xảy ra: " + ex.Message
+                });
+            }
+        }
         public async Task<IActionResult> Edit(Guid id)
         {
             var mauSac = await _services.GetMauSacById(id);

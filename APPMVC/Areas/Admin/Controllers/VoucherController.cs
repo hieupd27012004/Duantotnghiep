@@ -129,8 +129,6 @@ namespace APPMVC.Areas.Admin.Controllers
                     SoTienToiDa = voucher.SoTienToiDa,
                     NgayBatDau = voucher.NgayBatDau,
                     NgayKetThuc = voucher.NgayKetThuc,
-                    TongSoLuongVoucher = voucher.TongSoLuongVoucher,
-                    SoLuongVoucherConLai = voucher.SoLuongVoucherConLai,
                     TrangThai = voucher.TrangThai,
                     NgayTao = DateTime.UtcNow,
                     NguoiTao = voucher.NguoiTao,

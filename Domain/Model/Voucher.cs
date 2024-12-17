@@ -23,18 +23,17 @@ namespace AppData.Model
         [CheckVoucher]
         public int GiaTriGiam { get; set; }
         public int? GiaTriDonHangToiThieu { get; set; } 
-        public int? SoTienToiDa {  get; set; } //Số tiền giảm tối đa nếu loại giảm giá theo %
+        public int? SoTienToiDa {  get; set; }
         public DateTime NgayBatDau { get; set; }
         public DateTime NgayKetThuc { get; set; }
-        public int TongSoLuongVoucher { get; set; }
-        public int SoLuongVoucherConLai { get; set; }
+        //public int? TongSoLuongVoucher { get; set; }
+        //public int? SoLuongVoucherConLai { get; set; }
         public int TrangThai {  get; set; }
         public DateTime NgayTao {  get; set; }
         public string NguoiTao { get; set; } //Tạm thời nhập tay, sau khi hoàn thành phân quyền đăng nhập chuyển sang IdUser
         public DateTime? NgayUpdate {  get; set; }
         public string? NguoiUpdate { get; set; } //Tạm thời nhập tay, sau khi hoàn thành phân quyền đăng nhập chuyển sang IdUser
 
-        //Có thể sẽ thêm 1 trường điều kiện sử dụng voucher (Hạng khách hàng, tích luỹ...)
 
         public virtual ICollection<LichSuSuDungVoucher>? LichSuSuDungVouchers { get; set; }
 
