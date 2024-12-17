@@ -52,8 +52,7 @@ namespace APPMVC.Areas.Client.Controllers
                                     ISanPhamChiTietKichCoService sanPhamChiTietKichCoService,
                                     IVoucherService voucherService,
                                     IPromotionSanPhamChiTietService promotionSanPhamChiTietService,
-                                    IPromotionService promotionService
-                                    IVoucherService voucherService,
+                                    IPromotionService promotionService,
                                     ILichSuSuDungVoucherService lichSuSuDungVoucherService
                                     )
         {
