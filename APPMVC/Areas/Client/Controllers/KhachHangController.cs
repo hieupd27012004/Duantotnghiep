@@ -30,57 +30,60 @@ namespace APPMVC.Areas.Client.Controllers
         {
             if (!ModelState.IsValid)
             {
-				var allErrors = ModelState.Values
-								 .SelectMany(v => v.Errors)
-								 .Select(e => e.ErrorMessage)
-								 .ToList();
-				// Gộp các lỗi thành một chuỗi
-				TempData["Error"] = "Đăng ký thất bại! " + string.Join(" ", allErrors);
-				return RedirectToAction("Login");
-			}
-           
-            if (ModelState.IsValid)
-            {
-                try
-                {
-					var checkSdt = await _service.CheckSDT(kh.SoDienThoai);
-					if (checkSdt)
-					{
-						TempData["Error"] = "Đăng ký thất bại! Số điện thoại đã tồn tại";
-						return RedirectToAction("Login");
-					}
-					var checkEmail = await _service.CheckMail(kh.Email);
-					if (checkEmail)
-					{
-						TempData["Error"] = "Đăng ký thất bại! Email này đã tồn tại";
-						return RedirectToAction("Login");
-					}
-					await _service.AddKhachHang(kh);
-
-
-                    TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay.";
-                    return RedirectToAction("Login");
-                }
-                catch (Exception ex)
-                {
-					TempData["Error"] = "Đăng ký thất bại! Không được bỏ trống thông tin";
-					return RedirectToAction("Login");
-				}
-            }
-            else
-            {
-                //// Handle model state errors
-                //var allErrors = ModelState.Values.SelectMany(v => v.Errors).ToList();
-                //foreach (var error in allErrors)
-                //{
-                //    Console.WriteLine($"Error: {error.ErrorMessage}");
-                //}
-                //ModelState.AddModelError("", "Có lỗi xảy ra khi điền thông tin, vui lòng kiểm tra lại.");
-                TempData["Error"] = "Đăng ký thất bại vui lòng kiểm tra lại thông tin của bạn";
+                var allErrors = ModelState.Values
+                                        .SelectMany(v => v.Errors)
+                                        .Select(e => e.ErrorMessage)
+                                        .ToList();
+                TempData["Error"] = "Đăng ký thất bại! " + string.Join(" ", allErrors);
                 return RedirectToAction("Login");
             }
 
-            return View(kh); // Return the view with the entered data
+            // Validate password (assuming kh contains a Password property)
+            if (!IsValidPassword(kh.MatKhau))
+            {
+                TempData["Error"] = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
+                return RedirectToAction("Login");
+            }
+
+            try
+            {
+                var checkSdt = await _service.CheckSDT(kh.SoDienThoai);
+                if (checkSdt)
+                {
+                    TempData["Error"] = "Đăng ký thất bại! Số điện thoại đã tồn tại";
+                    return RedirectToAction("Login");
+                }
+
+                var checkEmail = await _service.CheckMail(kh.Email);
+                if (checkEmail)
+                {
+                    TempData["Error"] = "Đăng ký thất bại! Email này đã tồn tại";
+                    return RedirectToAction("Login");
+                }
+
+                await _service.AddKhachHang(kh);
+                TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay.";
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Đăng ký thất bại! Không được bỏ trống thông tin";
+                return RedirectToAction("Login");
+            }
+        }
+
+        // Password validation method
+        private bool IsValidPassword(string password)
+        {
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
+                return false;
+
+            bool hasUpperChar = password.Any(char.IsUpper);
+            bool hasLowerChar = password.Any(char.IsLower);
+            bool hasNumericChar = password.Any(char.IsDigit);
+            bool hasSpecialChar = password.Any(ch => "!@#$%^&*()_+-=<>?".Contains(ch));
+
+            return hasUpperChar && hasLowerChar && hasNumericChar && hasSpecialChar;
         }
 
         public IActionResult DangKyThanhCong()
@@ -206,23 +209,38 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 return RedirectToAction("Login");
             }
+
             var khachHang = JsonConvert.DeserializeObject<KhachHang>(sessionData);
-            if(newPassword != confirmPassword)
+
+            // Check if new passwords match
+            if (newPassword != confirmPassword)
             {
-                ModelState.AddModelError("ConfirmPassword", "Mật khẩu xác nhận không khớp.");
+                TempData["Error"] = "Mật khẩu xác nhận không khớp.";
                 return View();
             }
-            var result = await _service.ChangePassword(khachHang.IdKhachHang, newPassword, confirmPassword);
-            if(result)
+
+            // Validate password complexity
+            if (!IsValidPassword(newPassword))
             {
-                khachHang.MatKhau = newPassword;
+                TempData["Error"] = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
+                return View();
+            }
+
+            var result = await _service.ChangePassword(khachHang.IdKhachHang, newPassword, confirmPassword);
+            if (result)
+            {
+                khachHang.MatKhau = newPassword; // Ensure this is hashed before storing
                 HttpContext.Session.SetString("KhachHang", JsonConvert.SerializeObject(khachHang));
                 ViewBag.Message = "Đổi Mật Khẩu Thành Công";
                 return RedirectToAction("ThongTinKhachHang");
             }
-            ModelState.AddModelError("", "Đổi mật khẩu thất bại. Vui lòng kiểm tra lại.");
+
+            TempData["Error"] = "Đổi mật khẩu thất bại. Vui lòng kiểm tra lại.";
             return View();
         }
+
+        // Password validation method
+      
         public IActionResult ForgotPassword()
         {
             return View();
@@ -270,23 +288,31 @@ namespace APPMVC.Areas.Client.Controllers
         [HttpPost]
         public async Task<IActionResult> ResetPassword(string email, string newPassword, string confirmPassword)
         {
+            // Check if new passwords match
             if (newPassword != confirmPassword)
             {
-                ModelState.AddModelError("", "Mật khẩu không khớp.");
+                TempData["Error"] = "Mật khẩu không khớp.";
                 return View();
             }
+
+            // Validate password complexity
+            if (!IsValidPassword(newPassword))
+            {
+                TempData["Error"] = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
+                return View();
+            }
+
             var result = await _service.ResetPassword(email, newPassword, confirmPassword);
             if (result)
             {
-                
                 return RedirectToAction("Login");
             }
 
-            ModelState.AddModelError("", "Đổi mật khẩu thất bại. Vui lòng thử lại.");
+            TempData["Error"] = "Đổi mật khẩu thất bại. Vui lòng thử lại.";
             return View();
         }
 
-		public IActionResult Logout()
+        public IActionResult Logout()
 		{
 			HttpContext.Session.Clear();
 

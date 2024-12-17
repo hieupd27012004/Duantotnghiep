@@ -405,24 +405,48 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 return RedirectToAction("Login");
             }
+
             var nhanVien = JsonConvert.DeserializeObject<NhanVien>(sessionData);
+
+            // Check if new passwords match
             if (newPassword != confirmPassword)
             {
                 ModelState.AddModelError("ConfirmPassword", "Mật khẩu xác nhận không khớp.");
                 return View();
             }
 
+            // Validate password complexity
+            if (!IsValidPassword(newPassword))
+            {
+                ModelState.AddModelError("NewPassword", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.");
+                return View();
+            }
 
             var result = await _service.DoiMK(nhanVien.IdNhanVien, newPassword, confirmPassword);
             if (result)
             {
-                nhanVien.MatKhau = newPassword;
+                nhanVien.MatKhau = newPassword; // Ensure this is hashed
                 HttpContext.Session.SetString("NhanVien", JsonConvert.SerializeObject(nhanVien));
                 ViewBag.Message = "Password changed successfully";
                 return RedirectToAction("MyProfile");
             }
+
             ModelState.AddModelError("", "Đổi mật khẩu thất bại. Vui lòng kiểm tra lại.");
             return View();
+        }
+
+        // Password validation method
+        private bool IsValidPassword(string password)
+        {
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
+                return false;
+
+            bool hasUpperChar = password.Any(char.IsUpper);
+            bool hasLowerChar = password.Any(char.IsLower);
+            bool hasNumericChar = password.Any(char.IsDigit);
+            bool hasSpecialChar = password.Any(ch => "!@#$%^&*()_+-=<>?".Contains(ch));
+
+            return hasUpperChar && hasLowerChar && hasNumericChar && hasSpecialChar;
         }
         public IActionResult ForgotPassword()
         {
@@ -469,14 +493,23 @@ namespace APPMVC.Areas.Admin.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> RestPassword(string email, string newPassword, string confirmPassword) 
+        public async Task<IActionResult> RestPassword(string email, string newPassword, string confirmPassword)
         {
+            // Check if new passwords match
             if (newPassword != confirmPassword)
             {
                 ModelState.AddModelError("", "Mật khẩu không khớp.");
                 return View();
             }
-            var result = await _service.RestPassword(email,newPassword,confirmPassword);
+
+            // Validate password complexity
+            if (!IsValidPassword(newPassword))
+            {
+                ModelState.AddModelError("NewPassword", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.");
+                return View();
+            }
+
+            var result = await _service.RestPassword(email, newPassword, confirmPassword);
             if (result)
             {
                 ViewBag.Message = "Đổi mật khẩu thành công.";
