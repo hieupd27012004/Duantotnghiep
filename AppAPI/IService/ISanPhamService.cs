@@ -13,5 +13,6 @@ namespace AppAPI.IService
         Task<ThuongHieu?> GetThuongHieuBySanPhamIdAsync(Guid sanPhamId);
 
         Task<IEnumerable<SanPham>> GetSanPhamClientAsync(string? name);
+        Task<List<SanPham>> GetSanPhamByCategory(Guid idDanhMuc);
     }
 }

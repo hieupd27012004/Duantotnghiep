@@ -103,5 +103,19 @@ namespace AppAPI.Service
                 return new List<SanPham>();
             }
         }
+        public async Task<List<SanPham>> GetSanPhamByCategory(Guid idDanhMuc)
+        {
+            try
+            {
+                return await _repository.GetSanPhamByCategory(idDanhMuc);
+            
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine($"Lỗi GetSanPhamClient SanPhamService");
+                return new List<SanPham>();
+            }
+}
     }
 }
