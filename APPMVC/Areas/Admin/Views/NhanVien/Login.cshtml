@@ -1,21 +1,77 @@
 ﻿@model AppData.Model.NhanVien
-<form asp-action="Login" method="post">
-    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-    {
-        <div class="alert alert-danger">
-            @error.ErrorMessage
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">Đăng Nhập</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Login" method="post" class="needs-validation" novalidate>
+                        <!-- Hiển thị lỗi -->
+                        @if (ViewData.ModelState.ErrorCount > 0)
+                        {
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <!-- Email -->
+                        <div class="form-group mb-3">
+                            <label asp-for="Email" class="form-label fw-bold">Email</label>
+                            <input asp-for="Email" class="form-control" placeholder="Nhập email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <!-- Mật khẩu -->
+                        <div class="form-group mb-3">
+                            <label asp-for="MatKhau" class="form-label fw-bold">Mật Khẩu</label>
+                            <input asp-for="MatKhau" class="form-control" type="password" placeholder="Nhập mật khẩu" />
+                            <span asp-validation-for="MatKhau" class="text-danger"></span>
+                        </div>
+
+                        <!-- Nút đăng nhập -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Đăng Nhập</button>
+                        </div>
+                    </form>
+
+                    <!-- Nút Quên mật khẩu -->
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-link" onclick="location.href='@Url.Action("ForgotPassword", "NhanVien")'">Quên Mật Khẩu?</button>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
     }
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="MatKhau"></label>
-        <input asp-for="MatKhau" class="form-control" type="password" />
-        <span asp-validation-for="MatKhau" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Đăng nhập</button>
-</form>
-<button type="button" class="btn btn-primary" onclick="location.href='@Url.Action("ForgotPassword", "NhanVien")'">Quen Mật Khẩu</button>
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+    .btn-link {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+        .btn-link:hover {
+            text-decoration: underline;
+        }
+</style>

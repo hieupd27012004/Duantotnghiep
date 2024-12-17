@@ -382,6 +382,12 @@
             }
 
             const selectedPaymentMethod = paymentMethod.value;
+
+            const confirmMessage = `Bạn có chắc chắn muốn xác nhận thanh toán bằng phương thức: ${selectedPaymentMethod === 'cash' ? 'Tiền Mặt' : 'Chuyển Khoản'}?`;
+            if (!confirm(confirmMessage)) {
+                return; 
+            }
+
             const form = document.getElementById('paymentForm');
 
             // Add customer ID if available
@@ -395,58 +401,55 @@
             }
 
             // Handle cash payment
-                       if (selectedPaymentMethod === 'cash') {
-            const amountGivenInput = document.getElementById('amountGivenInput');
-            const totalAmountElement = document.getElementById('totalAmount');
+            if (selectedPaymentMethod === 'cash') {
+                const amountGivenInput = document.getElementById('amountGivenInput');
+                const totalAmountElement = document.getElementById('totalAmount');
 
-            // Ensure both inputs exist
-            if (!amountGivenInput || !totalAmountElement) {
-                console.error("Input elements not found.");
-                alert("Lỗi: Không thể tìm thấy các trường số tiền.");
-                return;
+                // Ensure both inputs exist
+                if (!amountGivenInput || !totalAmountElement) {
+                    console.error("Input elements not found.");
+                    alert("Lỗi: Không thể tìm thấy các trường số tiền.");
+                    return;
+                }
+
+                const amountGiven = parseFloat(amountGivenInput.value); // Parse to float
+
+                // Extract the numeric value from the totalAmount element
+                const totalAmountText = totalAmountElement.getAttribute('data-value'); // Use data attribute
+                const totalAmount = parseFloat(totalAmountText); // Parse to float
+
+                // Check if both values are valid numbers
+                if (isNaN(amountGiven)) {
+                    alert("Vui lòng nhập số tiền khách đưa hợp lệ.");
+                    return;
+                }
+
+                if (isNaN(totalAmount)) {
+                    alert("Lỗi: Tổng tiền không hợp lệ.");
+                    return;
+                }
+
+                if (amountGiven >= totalAmount) {
+                    const soTienKhachDuaInput = document.createElement('input');
+                    soTienKhachDuaInput.type = 'hidden';
+                    soTienKhachDuaInput.name = 'soTienKhachDua';
+                    soTienKhachDuaInput.value = amountGivenInput.value;
+                    form.appendChild(soTienKhachDuaInput);
+
+                    form.submit(); // Submit the form
+                } else {
+                    alert("Số tiền khách đưa phải lớn hơn hoặc bằng tổng tiền.");
+                }
+            } else if (selectedPaymentMethod === 'bankTransfer') {
+                const idHoaDonInput = form.querySelector('input[name="idHoaDon"]');
+                if (idHoaDonInput) {
+                    const idHoaDon = idHoaDonInput.value;
+                    loadOrderDetails(idHoaDon);
+                } else {
+                    console.error("Invoice ID input not found.");
+                    alert("Không thể tìm thấy ID hóa đơn.");
+                }
             }
-
-            const amountGiven = parseFloat(amountGivenInput.value); // Parse to float
-
-            // Extract the numeric value from the totalAmount element
-            const totalAmountText = totalAmountElement.getAttribute('data-value'); // Use data attribute
-            const totalAmount = parseFloat(totalAmountText); // Parse to float
-
-            // Check if both values are valid numbers
-            if (isNaN(amountGiven)) {
-                alert("Vui lòng nhập số tiền khách đưa hợp lệ.");
-                return;
-            }
-
-            if (isNaN(totalAmount)) {
-                alert("Lỗi: Tổng tiền không hợp lệ.");
-                return;
-            }
-
-            if (amountGiven >= totalAmount) {
-                const soTienKhachDuaInput = document.createElement('input');
-                soTienKhachDuaInput.type = 'hidden';
-                soTienKhachDuaInput.name = 'soTienKhachDua';
-                soTienKhachDuaInput.value = amountGivenInput.value;
-                form.appendChild(soTienKhachDuaInput);
-
-                form.action = "@Url.Action("XacNhanThanhToan", "BanHangTQ", new { area = "Admin" })";
-                form.submit();
-            } else {
-                alert("Số tiền khách đưa phải lớn hơn hoặc bằng tổng tiền.");
-            }
-        }
-
-        else if (selectedPaymentMethod === 'bankTransfer') {
-            const idHoaDonInput = form.querySelector('input[name="idHoaDon"]');
-            if (idHoaDonInput) {
-                const idHoaDon = idHoaDonInput.value;
-                loadOrderDetails(idHoaDon);
-            } else {
-                console.error("Invoice ID input not found.");
-                alert("Không thể tìm thấy ID hóa đơn.");
-            }
-        }
         }
 
 

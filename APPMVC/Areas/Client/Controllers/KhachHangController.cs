@@ -28,24 +28,34 @@ namespace APPMVC.Areas.Client.Controllers
 
         public async Task<IActionResult> Register(KhachHang kh = null)
         {
-            var checkSdt = await _service.CheckSDT(kh.SoDienThoai);
-            if(checkSdt)
+            if (!ModelState.IsValid)
             {
-                TempData["Error"] = "Đăng ký thất bại! Số điện thoại đã tồn tại";
-                return RedirectToAction("Login");
-            }
-            var checkEmail = await _service.CheckMail(kh.Email);
-            if(checkEmail)
-            {
-                TempData["Error"] = "Đăng ký thất bại! Email này đã tồn tại";
-                return RedirectToAction("Login");
-            }
+				var allErrors = ModelState.Values
+								 .SelectMany(v => v.Errors)
+								 .Select(e => e.ErrorMessage)
+								 .ToList();
+				// Gộp các lỗi thành một chuỗi
+				TempData["Error"] = "Đăng ký thất bại! " + string.Join(" ", allErrors);
+				return RedirectToAction("Login");
+			}
+           
             if (ModelState.IsValid)
             {
                 try
                 {
-                   
-                    await _service.AddKhachHang(kh);
+					var checkSdt = await _service.CheckSDT(kh.SoDienThoai);
+					if (checkSdt)
+					{
+						TempData["Error"] = "Đăng ký thất bại! Số điện thoại đã tồn tại";
+						return RedirectToAction("Login");
+					}
+					var checkEmail = await _service.CheckMail(kh.Email);
+					if (checkEmail)
+					{
+						TempData["Error"] = "Đăng ký thất bại! Email này đã tồn tại";
+						return RedirectToAction("Login");
+					}
+					await _service.AddKhachHang(kh);
 
 
                     TempData["SuccessMessage"] = "Đăng ký thành công! Bạn có thể đăng nhập ngay.";
@@ -53,12 +63,9 @@ namespace APPMVC.Areas.Client.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", $"Error: {ex.Message}");
-                    if (ex.InnerException != null)
-                    {
-                        ModelState.AddModelError("", $"Inner Exception: {ex.InnerException.Message}");
-                    }
-                }
+					TempData["Error"] = "Đăng ký thất bại! Không được bỏ trống thông tin";
+					return RedirectToAction("Login");
+				}
             }
             else
             {
@@ -117,7 +124,8 @@ namespace APPMVC.Areas.Client.Controllers
 				}
 				catch (Exception ex)
 				{
-					ModelState.AddModelError("", ex.Message);
+					TempData["Error"] = "Đăng nhập thất bại vui lòng kiểm tra lại thông tin của bạn";
+					return RedirectToAction("Login");
 				}
 			}
 

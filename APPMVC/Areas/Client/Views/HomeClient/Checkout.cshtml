@@ -157,7 +157,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Hoàn thành đặt hàng</button>
+                <button type="button" class="btn btn-primary" onclick="confirmCheckout()">Hoàn thành đặt hàng</button>
 
             </form>           
         </div>
@@ -290,6 +290,15 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    function confirmCheckout() {
+           const totalBill = parseFloat(document.getElementById('tong_tien').value.replace(/[^0-9.-]+/g, "")) || 0;
+
+           const confirmationMessage = `Bạn có chắc chắn muốn thanh toán tổng cộng ${formatCurrency(totalBill)}?`;
+           if (confirm(confirmationMessage)) {
+               // Submit the form if the user confirms
+               document.querySelector('form').submit();
+           }
+       }
     // Define the formatCurrency function in the global scope
     function formatCurrency(value) {
         if (value !== undefined && value !== null) {

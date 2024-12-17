@@ -818,10 +818,10 @@ namespace APPMVC.Areas.Admin.Controllers
     <td>{(chiTiet.SoLuong * donGia).ToString("N0")} VND</td>
 </tr>";
                 }
-                return string.Empty; // Return empty if product not found
+                return string.Empty;
             });
 
-            // Execute all tasks and wait for their completion
+
             var results = await Task.WhenAll(productTasks);
             chiTietHoaDonHtml = string.Join(string.Empty, results);
 

@@ -10,7 +10,12 @@
         <h4 class="fw-bold py-3 mb-4">
             <span class="text-muted fw-light">Quản lý nhân viên /</span> Tạo Nhân Viên Mới
         </h4>
-
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger" style="margin-top: 20px;">
+                @TempData["Error"]
+            </div>
+        }
         <div class="row">
             <div class="col-md-8 offset-md-2">
                 <div class="card mb-4">
@@ -38,17 +43,7 @@
                                 <span asp-validation-for="Email" class="text-danger"></span>
                             </div>
 
-                            <div class="form-group mb-3">
-                                <label for="imgFile" class="control-label">Ảnh Nhân Viên</label>
-                                <input type="file" name="imgFile" class="form-control" />
-                                <span asp-validation-for="AnhNhanVien" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group mb-3">
-                                <label asp-for="MatKhau" class="control-label">Mật Khẩu</label>
-                                <input asp-for="MatKhau" class="form-control" placeholder="Nhập mật khẩu" required />
-                                <span asp-validation-for="MatKhau" class="text-danger"></span>
-                            </div>
+                         
 
                             <div class="form-group mb-3" hidden>
                                 <label asp-for="AuthProvider" class="control-label">AuthProvider</label>
@@ -62,16 +57,16 @@
                                 <span asp-validation-for="DiaChi" class="text-danger"></span>
                             </div>
 
-                            <div class="form-group mb-3">
-                                <label asp-for="KichHoat" class="control-label">Kích Hoạt</label>
-                                <select asp-for="KichHoat" class="form-control">
-                                    <option value="1">Có</option>
+                            <div class="form-group mb-3" hidden>
+                                <label asp-for="KichHoat" class="control-label" hidden>Kích Hoạt</label>
+                                <select asp-for="KichHoat" class="form-control" hidden>
+                                    <option value="1">Có</option > 
                                     <option value="0">Không</option>
                                 </select>
                                 <span asp-validation-for="KichHoat" class="text-danger"></span>
                             </div>
 
-                            <div class="form-group mb-3">
+                            <div class="form-group mb-3" hidden>
                                 <label asp-for="TrangThai" class="control-label">Trạng Thái</label>
                                 <select asp-for="TrangThai" class="form-control">
                                     <option value="1">Hoạt Động</option>
@@ -87,27 +82,31 @@
                             </div>
 
                             <div class="form-group mb-3" hidden>
-                                <label asp-for="NgayCapNhat" class="control-label" >Ngày Cập Nhật</label>
+                                <label asp-for="NgayCapNhat" class="control-label">Ngày Cập Nhật</label>
                                 <input asp-for="NgayCapNhat" class="form-control" type="date" readonly />
                                 <span asp-validation-for="NgayCapNhat" class="text-danger"></span>
                             </div>
 
                             <div class="form-group mb-3" hidden>
-                                <label asp-for="NguoiTao" class="control-label" >Người Tạo</label>
+                                <label asp-for="NguoiTao" class="control-label">Người Tạo</label>
                                 <input asp-for="NguoiTao" class="form-control" readonly />
                                 <span asp-validation-for="NguoiTao" class="text-danger"></span>
                             </div>
 
                             <div class="form-group mb-3" hidden>
-                                <label asp-for="NguoiCapNhat" class="control-label" >Người Cập Nhật</label>
+                                <label asp-for="NguoiCapNhat" class="control-label">Người Cập Nhật</label>
                                 <input asp-for="NguoiCapNhat" class="form-control" readonly />
                                 <span asp-validation-for="NguoiCapNhat" class="text-danger"></span>
                             </div>
-                            <div class="form-group">
+
+                            <div class="form-group mb-3">
                                 <label asp-for="IdchucVu" class="control-label">Chức Vụ</label>
-                                <select asp-for="IdchucVu" class="form-control" asp-items="@(new SelectList(ViewBag.ChucVu, "IdChucVu", "TenChucVu"))"></select>
+                                <select asp-for="IdchucVu" class="form-control"
+                                        asp-items="@(ViewBag.ChucVu != null ? new SelectList(ViewBag.ChucVu, "IdChucVu", "TenChucVu") : Enumerable.Empty<SelectListItem>())">
+                                </select>
                                 <span asp-validation-for="IdchucVu" class="text-danger"></span>
                             </div>
+
                             <div class="form-group mb-3">
                                 <input type="submit" value="Tạo mới" class="btn btn-primary" />
                                 <a asp-action="Index" class="btn btn-secondary" style="margin-left:15px;">Quay lại danh sách</a>

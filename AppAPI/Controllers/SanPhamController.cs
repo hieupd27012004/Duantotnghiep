@@ -47,6 +47,19 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("getSanPhamDanhMuc")]
+        public async Task<IActionResult> GetSanPhamByCategory(Guid idDanhMuc)
+        {
+            try
+            {
+                var sanPham = await _service.GetSanPhamByCategory(idDanhMuc);
+                return Ok(sanPham);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
         // GET: api/SanPham/getbyid?id=<guid>
         [HttpGet("getbyid")]
         public async Task<IActionResult> Get(Guid id)

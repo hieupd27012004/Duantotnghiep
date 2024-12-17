@@ -17,7 +17,14 @@ namespace AppAPI.Repository
         {
             try
             {
-                _context.nhanViens.AddAsync(nv);
+                // Kiểm tra xem thuộc tính AnhNhanVien có giá trị không
+                if (string.IsNullOrEmpty(nv.AnhNhanVien))
+                {
+                    nv.AnhNhanVien = "anh_a.jpg"; // Gán ảnh mặc định nếu không có ảnh
+                }
+
+                // Thêm nhân viên vào ngữ cảnh
+                await _context.nhanViens.AddAsync(nv);
                 await _context.SaveChangesAsync();
                 return nv;
             }
@@ -73,27 +80,30 @@ namespace AppAPI.Repository
 
         public async Task<NhanVien> UpdateNV(NhanVien nv)
         {
-            _context.Entry(nv).State = EntityState.Modified;
+            _context.nhanViens.Attach(nv);
+            _context.Entry(nv).Property(x => x.TenNhanVien).IsModified = true;
+            _context.Entry(nv).Property(x => x.SoDienThoai).IsModified = true;
+            _context.Entry(nv).Property(x => x.Email).IsModified = true;
+            _context.Entry(nv).Property(x => x.AnhNhanVien).IsModified = true;
+            _context.Entry(nv).Property(x => x.DiaChi).IsModified = true;
+            _context.Entry(nv).Property(x => x.IdchucVu).IsModified = true;
+            _context.Entry(nv).Property(x => x.TrangThai).IsModified = true;
+           
             await _context.SaveChangesAsync();
             return nv;
+
         }
         public async Task<NhanVien> UpdateThongTin(NhanVien nv)
         {
-            var nhanVien =  _context.nhanViens.Find(nv.IdNhanVien);
-            if(nhanVien != null)
-            {
-                nhanVien.TenNhanVien = nv.TenNhanVien;
-                nhanVien.SoDienThoai = nv.SoDienThoai;
-                nhanVien.Email = nv.Email;
-                nhanVien.AnhNhanVien = nv.AnhNhanVien;
-                nhanVien.DiaChi = nv.DiaChi;
-                nhanVien.NgayCapNhat = nv.NgayCapNhat;
-                nhanVien.NgayTao = nv.NgayTao;
-                nhanVien.IdchucVu = nv.IdchucVu;
-                _context.Update(nv);
-                 _context.SaveChanges();
-                return nv;
-            }
+            _context.nhanViens.Attach(nv);
+            _context.Entry(nv).Property(x => x.TenNhanVien).IsModified = true;
+            _context.Entry(nv).Property(x => x.SoDienThoai).IsModified = true;
+            _context.Entry(nv).Property(x => x.Email).IsModified = true;
+            _context.Entry(nv).Property(x => x.AnhNhanVien).IsModified = true;
+            _context.Entry(nv).Property(x => x.DiaChi).IsModified = true;
+            _context.Entry(nv).Property(x => x.TrangThai).IsModified = true;
+
+            await _context.SaveChangesAsync();
             return nv;
         }
         public async Task<bool> DoiMK(Guid idNhanVien, string newPassWord)
