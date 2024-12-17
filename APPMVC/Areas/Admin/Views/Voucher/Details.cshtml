@@ -40,12 +40,6 @@
         <dt class="col-sm-3">Thời Gian Hiệu Lực</dt>
         <dd class="col-sm-9"> Từ @Model.NgayBatDau.ToString("dd/MM/yyyy HH:mm") đến @Model.NgayKetThuc.ToString("dd/MM/yyyy HH:mm") </dd>
 
-        <dt class="col-sm-3">Tổng Số Lượng</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.TongSoLuongVoucher)</dd>
-
-        <dt class="col-sm-3">Số Lượng Còn Lại</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.SoLuongVoucherConLai)</dd>
-
         <dt class="col-sm-3">Trạng Thái</dt>
         <dd class="col-sm-9">@Model.GetTrangThaiDisplay()</dd>
 
@@ -101,17 +95,4 @@
     </table>
 </div>
 
-<div class="mt-3">
-    <a asp-action="Edit" asp-route-id="@Model.VoucherId" class="btn btn-primary">Sửa</a> |
-    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
-</div>
-
-<style>
-    dt {
-        font-weight: bold;
-    }
-
-    dd {
-        margin-bottom: 1rem;
-    }
-</style>
+<div

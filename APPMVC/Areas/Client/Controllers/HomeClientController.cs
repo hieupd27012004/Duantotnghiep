@@ -6,6 +6,7 @@ using APPMVC.Session;
 using APPMVC.Service.VnpayClient;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace APPMVC.Areas.Client.Controllers
 {
@@ -32,6 +33,7 @@ namespace APPMVC.Areas.Client.Controllers
         private readonly ISanPhamChiTietKichCoService _sanPhamChiTietKichCoService;
         private readonly IPromotionSanPhamChiTietService _promotionSanPhamChiTietService;
         private readonly IPromotionService _promotionService;
+        private readonly ILichSuSuDungVoucherService _lichSuSuDungVoucherService;
         public HomeClientController(IGioHangChiTietService gioHangChiTietService,
                                     IHinhAnhService hinhAnhService,
                                     ISanPhamChiTietService sanPhamChiTietService,
@@ -51,6 +53,8 @@ namespace APPMVC.Areas.Client.Controllers
                                     IVoucherService voucherService,
                                     IPromotionSanPhamChiTietService promotionSanPhamChiTietService,
                                     IPromotionService promotionService
+                                    IVoucherService voucherService,
+                                    ILichSuSuDungVoucherService lichSuSuDungVoucherService
                                     )
         {
             _gioHangChiTietService = gioHangChiTietService;
@@ -73,6 +77,7 @@ namespace APPMVC.Areas.Client.Controllers
             _sanPhamChiTietKichCoService = sanPhamChiTietKichCoService;
             _promotionSanPhamChiTietService = promotionSanPhamChiTietService;
             _promotionService = promotionService;
+            _lichSuSuDungVoucherService = lichSuSuDungVoucherService;
         }
         public IActionResult Index()
         {
@@ -291,11 +296,6 @@ namespace APPMVC.Areas.Client.Controllers
                     return Json(new { success = false, message = "Voucher không tồn tại" });
                 }
 
-                // Kiểm tra số lượng voucher
-                if (voucher.SoLuongVoucherConLai <= 0)
-                {
-                    return Json(new { success = false, message = "Voucher đã hết" });
-                }
 
                 double totalOrderValue = cartItems.Sum(item => item.Price * item.Quantity) + shippingFee; 
 
@@ -312,8 +312,6 @@ namespace APPMVC.Areas.Client.Controllers
                 // Tính giảm giá
                 double discountAmount = CalculateDiscountAmount(voucher, totalOrderValue);
 
-                // Giảm số lượng voucher
-                voucher.SoLuongVoucherConLai -= 1;
 
                 // Cập nhật voucher
                 await _voucherService.UpdateAsync(voucher);
@@ -327,8 +325,7 @@ namespace APPMVC.Areas.Client.Controllers
                     message = "Áp dụng voucher thành công",
                     discountAmount = discountAmount, // Trả về giá trị giảm giá
                     totalAfterDiscount = totalOrderValue - discountAmount, // Tổng tiền sau khi giảm giá
-                    voucherId = voucher.VoucherId,
-                    remainingQuantity = voucher.SoLuongVoucherConLai
+                    voucherId = voucher.VoucherId
                 });
             }
             catch (Exception ex)
@@ -404,13 +401,22 @@ namespace APPMVC.Areas.Client.Controllers
 
                 // Lấy giá trị discountAmount từ session
                 var discountAmountString = HttpContext.Session.GetString("DiscountAmount");
-                if (!string.IsNullOrEmpty(discountAmountString) && double.TryParse(discountAmountString, out var discountValue))
+                Guid? usedVoucherId = null;
+
+
+
+                if (!string.IsNullOrEmpty(discountAmountString))
                 {
-                    discountAmount = discountValue;
+                    var voucherIdString = HttpContext.Session.GetString("SelectedVoucherId");
+                    if (Guid.TryParse(voucherIdString, out Guid voucherId))
+                    {
+                        usedVoucherId = voucherId;
+                    }
                 }
 
-                double totalHoaDon = totalDonHang + thanhToanViewModel.PhiVanChuyen - discountAmount;
+                double totalHoaDon = totalDonHang + thanhToanViewModel.PhiVanChuyen - discountAmount; // Tính tổng hóa đơn
 
+                // Tạo hóa đơn
                 var order = new HoaDon
                 {
                     IdHoaDon = Guid.NewGuid(),
@@ -431,50 +437,35 @@ namespace APPMVC.Areas.Client.Controllers
                     IdNhanVien = null
                 };
 
-                var orderDetails = cartItems.Select(item => new HoaDonChiTiet
-                {
-                    IdHoaDonChiTiet = Guid.NewGuid(),
-                    DonGia = item.Price,
-                    SoLuong = item.Quantity,
-                    TongTien = item.Price * item.Quantity,
-                    KichHoat = 1,
-                    IdHoaDon = order.IdHoaDon,
-                    IdSanPhamChiTiet = item.IdSanPhamChiTiet
-                }).ToList();
-
-                // Lưu lịch sử hóa đơn
-                var lichSu = new LichSuHoaDon
-                {
-                    IdLichSuHoaDon = Guid.NewGuid(),
-                    ThaoTac = order.TrangThai,
-                    NgayTao = DateTime.Now,
-                    NguoiThaoTac = "Khách hàng",
-                    TrangThai = "1",
-                    IdHoaDon = order.IdHoaDon,
-                };
-
+                // Lưu hóa đơn và chi tiết hóa đơn
                 await _hoaDonService.AddAsync(order);
-                await _hoaDonChiTietService.AddAsync(orderDetails);
-                await _lichSuHoaDonService.AddAsync(lichSu);
-
-                if (pttt != "Tiền Mặt")
-                {
-                    var lichSuThanhToan = new LichSuThanhToan
+                await _hoaDonChiTietService.AddAsync(cartItems.Select(item => new HoaDonChiTiet
                     {
-                        IdLichSuThanhToan = Guid.NewGuid(),
-                        SoTien = totalHoaDon,
-                        TienThua = 0,
-                        NgayTao = DateTime.Now,
-                        LoaiGiaoDich = giaoDich,
-                        Pttt = pttt,
-                        NguoiThaoTac = "Khách hàng",
-                        TrangThai = trangThaiThanhToan,
+                        IdHoaDonChiTiet = Guid.NewGuid(),
+                        DonGia = item.Price,
+                        SoLuong = item.Quantity,
+                        TongTien = item.Price * item.Quantity,
+                        KichHoat = 1,
                         IdHoaDon = order.IdHoaDon,
-                        IdNhanVien = null
-                    };
+                        IdSanPhamChiTiet = item.IdSanPhamChiTiet
+                    }).ToList());
 
-                    await _lichSuThanhToanService.AddAsync(lichSuThanhToan);
+                if (usedVoucherId.HasValue)
+                {
+                    // Tìm và cập nhật bản ghi LichSuSuDungVoucher
+                    var lichSuVoucher = await _lichSuSuDungVoucherService.GetAllAsync();
+                    var matchingLichSu = lichSuVoucher.FirstOrDefault(ls =>
+                        ls.IdVoucher == usedVoucherId.Value &&
+                        ls.IdKhachHang == customerId &&
+                        ls.TrangThaiVoucher == 1); // Chỉ cập nhật voucher chưa sử dụng
+
+                    if (matchingLichSu != null)
+                    {
+                        matchingLichSu.TrangThaiVoucher = 2; // Đánh dấu voucher đã được sử dụng
+                        await _lichSuSuDungVoucherService.UpdateAsync(matchingLichSu);
+                    }
                 }
+
 
                 // Xóa giỏ hàng
                 //await _gioHangChiTietService.RemoveItemsFromCartAsync(idGioHang, cartItems.Select(item => item.IdSanPhamChiTiet).ToList());
@@ -483,6 +474,7 @@ namespace APPMVC.Areas.Client.Controllers
             }
             catch (Exception ex)
             {
+                // Xử lý lỗi
                 return false;
             }
         }

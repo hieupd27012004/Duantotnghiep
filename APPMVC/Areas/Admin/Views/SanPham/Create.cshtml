@@ -82,42 +82,86 @@
                             <span asp-validation-for="SanPham.Sale" class="text-danger"></span>
                         </div>
                         @*                         <input asp-for="SanPhamChiTiet.IdSanPhamChiTiet" class="form-control"  hidden> *@
-                            <div class="row mb-3">
-                                <div class="col">
+                        <div class="row mb-3">
+                            <div class="col">
                                 @if (Model.KichCoOptions != null)
-
                                 {
-                                            <div class="form-group">
-                                                <label asp-for="SelectedKichCoIds" class="control-label">Chọn Kích Cỡ:</label>
-                                                <div>
+                                    <div class="form-group">
+                                        <label asp-for="SelectedKichCoIds" class="control-label">Chọn Kích Cỡ:</label>
+                                        <!-- Sử dụng data-bs-toggle và data-bs-target cho Bootstrap 5 -->
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSizeModal">+</button>
+
+                                        <div>
                                             @foreach (var kichCoOption in Model.KichCoOptions)
-
                                             {
-                                                            <input type="checkbox" name="SelectedKichCoIds" value="@kichCoOption.Value" />
-                                                            <label>@kichCoOption.Text</label>
+                                                <input type="checkbox" name="SelectedKichCoIds" value="@kichCoOption.Value" />
+                                                <label>@kichCoOption.Text</label>
                                             }
-                                                </div>
-                                            </div>
+                                        </div>
+                                    </div>
                                 }
-                                </div>
-                                <div class="col">
-                                @if (Model.MauSacOptions != null)
+                            </div>
 
-                                {
-                                            <div class="form-group">
-                                                <label asp-for="SelectedMauSacIds" class="control-label">Chọn Màu Sắc:</label>
-                                                <div>
-                                            @foreach (var mauSacOption in Model.MauSacOptions)
-
-                                            {
-                                                            <input type="checkbox" name="SelectedMauSacIds" value="@mauSacOption.Value" />
-                                                            <label>@mauSacOption.Text</label>
-                                            }
-                                                </div>
-                                            </div>
-                                }
+                            <!-- Modal cho Kích Cỡ -->
+                            <div class="modal fade" id="addSizeModal" tabindex="-1" aria-labelledby="addSizeModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="addSizeModalLabel">Thêm Kích Cỡ Mới</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="text" id="newSizeName" class="form-control" placeholder="Nhập tên kích cỡ" />
+                                            <span id="sizeError" class="text-danger"></span>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                            <button type="button" class="btn btn-primary" id="saveSize">Lưu</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
+                            <div class="col">
+                                @if (Model.MauSacOptions != null)
+                                {
+                                    <div class="form-group">
+                                        <label asp-for="SelectedMauSacIds" class="control-label">Chọn Màu Sắc:</label>
+                                        <!-- Sử dụng data-bs-toggle và data-bs-target cho Bootstrap 5 -->
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addColorModal">+</button>
+
+                                        <div>
+                                            @foreach (var mauSacOption in Model.MauSacOptions)
+                                            {
+                                                <input type="checkbox" name="SelectedMauSacIds" value="@mauSacOption.Value" />
+                                                <label>@mauSacOption.Text</label>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Modal cho Màu Sắc -->
+                            <div class="modal fade" id="addColorModal" tabindex="-1" aria-labelledby="addColorModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="addColorModalLabel">Thêm Màu Sắc Mới</h5>
+                                            <!-- Sử dụng data-bs-dismiss cho Bootstrap 5 -->
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="text" id="newColorName" class="form-control" placeholder="Nhập tên màu sắc" />
+                                            <span id="colorError" class="text-danger"></span>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                            <button type="button" class="btn btn-primary" id="saveColor">Lưu</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                                           <div class="form-group">
                             <label class="control-label">Tổ hợp Kích Cỡ và Màu Sắc</label>
                             <div id="combinations" class="border p-2">
@@ -246,6 +290,146 @@
 
             $("input[name='SelectedKichCoIds']").change(updateCombinations);
             $("input[name='SelectedMauSacIds']").change(updateCombinations);
+        });
+        // Xử lý thêm kích cỡ
+        $('#saveSize').click(function () {
+            var sizeName = $('#newSizeName').val().trim();
+
+            if (!sizeName) {
+                $('#sizeError').text('Tên kích cỡ không được để trống').show();
+                return;
+            }
+
+            // Validate kích cỡ là số tự nhiên từ 19-46
+            var sizeNumber = parseInt(sizeName);
+            if (isNaN(sizeNumber) || sizeNumber < 19 || sizeNumber > 46) {
+                $('#sizeError').text('Kích cỡ phải là số từ 19 đến 46').show();
+                return;
+            }
+
+            // Kiểm tra trùng tên kích cỡ
+            var isDuplicate = false;
+            $('input[name="SelectedKichCoIds"]').each(function () {
+                var existingSize = $(this).next('label').text().trim();
+                if (existingSize.toLowerCase() === sizeName.toLowerCase()) {
+                    isDuplicate = true;
+                    return false; // Thoát khỏi vòng lặp
+                }
+            });
+
+            if (isDuplicate) {
+                $('#sizeError').text('Kích cỡ này đã tồn tại').show();
+                return;
+            }
+
+            if (confirm(`Bạn có chắc muốn thêm kích cỡ "${sizeName}" không?`)) {
+                $.ajax({
+                    url: '@Url.Action("Create", "KichCo")',
+                    type: 'POST',
+                    data: { TenKichCo: sizeName },
+                    success: function (response) {
+                        if (response.success) {
+                            // Thêm checkbox mới
+                            var $checkboxContainer = $('input[name="SelectedKichCoIds"]').parent();
+
+                            $checkboxContainer.append(
+                                $('<input>', {
+                                    type: 'checkbox',
+                                    name: 'SelectedKichCoIds',
+                                    value: response.id,
+                                    checked: true
+                                })
+                            ).append(
+                                $('<label>').text(response.tenKichCo)
+                            );
+
+                            // Đóng modal
+                            var sizeModal = bootstrap.Modal.getInstance(document.getElementById('addSizeModal'));
+                            sizeModal.hide();
+
+                            // Reset form
+                            $('#newSizeName').val('');
+                            $('#sizeError').hide();
+
+                            // Cập nhật tổ hợp
+                            updateCombinations();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(xhr);
+                        alert('Có lỗi xảy ra: ' + xhr.responseText);
+                    }
+                });
+            }
+        });
+
+        // Tương tự cho màu sắc
+        $('#saveColor').click(function () {
+            var colorName = $('#newColorName').val().trim();
+
+            if (!colorName) {
+                $('#colorError').text('Tên màu không được để trống').show();
+                return;
+            }
+
+            // Kiểm tra trùng tên màu
+            var isDuplicate = false;
+            $('input[name="SelectedMauSacIds"]').each(function () {
+                var existingColor = $(this).next('label').text().trim();
+                if (existingColor.toLowerCase() === colorName.toLowerCase()) {
+                    isDuplicate = true;
+                    return false; // Thoát khỏi vòng lặp
+                }
+            });
+
+            if (isDuplicate) {
+                $('#colorError').text('Màu này đã tồn tại').show();
+                return;
+            }
+
+            if (confirm(`Bạn có chắc muốn thêm màu "${colorName}" không?`)) {
+                $.ajax({
+                    url: '@Url.Action("Create", "MauSac")',
+                    type: 'POST',
+                    data: { TenMauSac: colorName },
+                    success: function (response) {
+                        if (response.success) {
+                            // Thêm checkbox mới
+                            var $checkboxContainer = $('input[name="SelectedMauSacIds"]').parent();
+
+                            $checkboxContainer.append(
+                                $('<input>', {
+                                    type: 'checkbox',
+                                    name: 'SelectedMauSacIds',
+                                    value: response.id,
+                                    checked: true
+                                })
+                            ).append(
+                                $('<label>').text(response.tenMauSac)
+                            );
+
+                            // Đóng modal
+                            var colorModal = bootstrap.Modal.getInstance(document.getElementById('addColorModal'));
+                            colorModal.hide();
+
+                            // Reset form
+                            $('#newColorName').val('');
+                            $('#colorError').hide();
+
+                            // Cập nhật tổ hợp
+                            updateCombinations();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(xhr);
+                        alert('Có lỗi xảy ra: ' + xhr.responseText);
+                    }
+                });
+            }
         });
     </script>
 }

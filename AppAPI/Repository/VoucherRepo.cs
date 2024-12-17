@@ -68,8 +68,6 @@ namespace AppAPI.Repository
                     SoTienToiDa = voucherDto.SoTienToiDa,
                     NgayBatDau = voucherDto.NgayBatDau,
                     NgayKetThuc = voucherDto.NgayKetThuc,
-                    TongSoLuongVoucher = voucherDto.TongSoLuongVoucher,
-                    SoLuongVoucherConLai = voucherDto.SoLuongVoucherConLai,
                     TrangThai = voucherDto.TrangThai,
                     NgayTao = DateTime.UtcNow,
                     NguoiTao = voucherDto.NguoiTao,
@@ -156,8 +154,6 @@ namespace AppAPI.Repository
                 existingVoucher.SoTienToiDa = voucher.SoTienToiDa;
                 existingVoucher.NgayBatDau = voucher.NgayBatDau;
                 existingVoucher.NgayKetThuc = voucher.NgayKetThuc;
-                existingVoucher.TongSoLuongVoucher = voucher.TongSoLuongVoucher;
-                existingVoucher.SoLuongVoucherConLai = voucher.SoLuongVoucherConLai;
                 existingVoucher.TrangThai = voucher.TrangThai;
                 existingVoucher.NgayUpdate = voucher.NgayUpdate;
                 existingVoucher.NguoiUpdate = voucher.NguoiUpdate;
@@ -224,11 +220,10 @@ namespace AppAPI.Repository
                         v.TrangThai == 2 && // Chỉ lấy voucher có TrangThai = 2 (Đang kích hoạt)
                         v.NgayBatDau <= DateTime.Now &&
                         v.NgayKetThuc >= DateTime.Now &&
-                        v.SoLuongVoucherConLai > 0 &&
                         _context.LichSuSuDungVouchers.Any(ls =>
-                            ls.IdVoucher == v.VoucherId && 
+                            ls.IdVoucher == v.VoucherId &&
                             ls.IdKhachHang == khachHangId &&
-                            ls.TrangThaiVoucher == 1 // Voucher đã được gán cho khách hàng
+                            ls.TrangThaiVoucher == 1 // Chỉ lấy voucher chưa sử dụng
                         )
                     )
                     .ToListAsync();
