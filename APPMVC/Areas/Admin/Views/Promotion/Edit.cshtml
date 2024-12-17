@@ -1,11 +1,10 @@
 ﻿@model AppData.Model.Promotion
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Chỉnh Sửa Promotion";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Edit</h1>
-<h4>Promotion</h4>
+<h1>@ViewData["Title"]</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -14,27 +13,27 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="IdPromotion" />
             <div class="form-group">
-                <label asp-for="TenPromotion" class="control-label"></label>
+                <label asp-for="TenPromotion" class="control-label">Tên Promotion</label>
                 <input asp-for="TenPromotion" class="form-control" />
                 <span asp-validation-for="TenPromotion" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PhanTramGiam" class="control-label"></label>
+                <label asp-for="PhanTramGiam" class="control-label">Phần Trăm Giảm</label>
                 <input asp-for="PhanTramGiam" class="form-control" />
                 <span asp-validation-for="PhanTramGiam" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="NgayBatDau" class="control-label"></label>
+                <label asp-for="NgayBatDau" class="control-label">Ngày Bắt Đầu</label>
                 <input asp-for="NgayBatDau" class="form-control date-input" type="datetime-local" value="@Model.NgayBatDau.ToString("yyyy-MM-ddTHH:mm")" />
                 <span asp-validation-for="NgayBatDau" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="NgayKetThuc" class="control-label"></label>
+                <label asp-for="NgayKetThuc" class="control-label">Ngày Kết Thúc</label>
                 <input asp-for="NgayKetThuc" class="form-control date-input" type="datetime-local" value="@Model.NgayKetThuc.ToString("yyyy-MM-ddTHH:mm")" />
                 <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="TrangThai" class="control-label"></label>
+                <label asp-for="TrangThai" class="control-label">Trạng Thái</label>
                 <select asp-for="TrangThai" class="form-control" asp-items="ViewBag.TrangThaiList"></select>
                 <span asp-validation-for="TrangThai" class="text-danger"></span>
             </div>
@@ -45,7 +44,7 @@
     </div>
 </div>
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Quay Lại</a>
 </div>
 
 <script>

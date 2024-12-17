@@ -106,7 +106,7 @@ builder.Services.AddTransient<IPromotionSanPhamChiTietService, PromotionSanPhamC
 
 builder.Services.AddTransient<IThongKeRepo, ThongKeRepo>();
 builder.Services.AddTransient<IThongKeServices, ThongKeServices>();
-builder.Services.AddHostedService<VoucherStatusUpdater>();
+//builder.Services.AddHostedService<VoucherStatusUpdater>();
 builder.Services.AddSignalR();
 
 var app = builder.Build();
