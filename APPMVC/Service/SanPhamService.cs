@@ -84,5 +84,27 @@ namespace APPMVC.Service
             var response = _httpClient.GetFromJsonAsync<List<SanPham>>($"api/SanPham/getallspclient?name={name}");
             return response;
         }
+        public async Task<List<SanPham>> GetSanPhamByCategory(Guid idDanhMuc)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/SanPham/getSanPhamDanhMuc?idDanhMuc={idDanhMuc}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<List<SanPham>>();
+                }
+                else
+                {
+                    Console.WriteLine($"Error retrieving product: {response.StatusCode}");
+                    return null; // Trả về null nếu không tìm thấy
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"An error occurred while retrieving the product: {ex.Message}");
+                return null; // Trả về null nếu có lỗi
+            }
+        }
     }
 }

@@ -11,5 +11,6 @@ namespace AppAPI.IRepository
         Task<bool> DeleteAsync(Guid id);
         Task<ThuongHieu?> GetThuongHieuBySanPhamIdAsync(Guid sanPhamId);
         Task<List<SanPham>> GetSanPhamClientAsync(string? name);
+        Task<List<SanPham>> GetSanPhamByCategory(Guid idDanhMuc);
     }
 }

@@ -11,5 +11,6 @@ namespace APPMVC.IService
         Task Delete(Guid id);
         Task<ThuongHieu?> GetThuongHieuBySanPhamIdAsync(Guid sanPhamId);
         Task<List<SanPham>> GetSanPhamClient(string? name);
+        Task<List<SanPham>> GetSanPhamByCategory(Guid idDanhMuc);
     }
 }

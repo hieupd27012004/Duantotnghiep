@@ -120,8 +120,7 @@ namespace APPMVC.Areas.Admin.Controllers
             else
             {
                 // Nếu không có file nào được tải lên, thêm lỗi vào ModelState
-                ModelState.AddModelError("", "Vui lòng tải lên một file ảnh hợp lệ.");
-                return View(nhanVien);
+                nhanVien.AnhNhanVien = "no-image.jpg";
             }
             var checkSdt = await _service.CheckSDT(nhanVien.SoDienThoai);
             if (checkSdt)
@@ -138,17 +137,18 @@ namespace APPMVC.Areas.Admin.Controllers
             // Kiểm tra tính hợp lệ của ModelState trước khi lưu dữ liệu vào cơ sở dữ liệu
             if (!ModelState.IsValid)
             {
+                TempData["Error"] = "Đăng ký thất bại! Vui lòng nhập đầy đủ thông tin";
                 // Trả về view hiện tại với model để hiển thị lại thông tin và thông báo lỗi
                 return View(nhanVien);
             }
-
+            nhanVien.MatKhau = GenerateRandomPassword(8);
             // Nếu tất cả hợp lệ, lưu thông tin nhân viên
             await _service.CreateNV(nhanVien);
             return RedirectToAction("Index");
         }
+       
 
-
-            public async Task<IActionResult> Edit(Guid id)
+        public async Task<IActionResult> Edit(Guid id)
             {
                 var nhanVien = await _service.GetIdNhanVien(id);
                 if (nhanVien == null)
@@ -319,11 +319,19 @@ namespace APPMVC.Areas.Admin.Controllers
 
                     // Gán tên file vào thuộc tính AnhNhanVien của đối tượng NhanVien
                     nv.AnhNhanVien = imgFile.FileName;
-                }
-
+                }              
                 // Cập nhật thông tin nhân viên
                 await _service.UpdateThongTin(nv);
-                return RedirectToAction("Index");
+                var updatedNV = await _service.GetIdNhanVien(nv.IdNhanVien);
+                var chucVu = await chucVuService.GetChucVuId(updatedNV.IdchucVu);
+
+                // Cập nhật session với thông tin mới
+                HttpContext.Session.SetString("NhanVien", JsonConvert.SerializeObject(updatedNV));
+                HttpContext.Session.SetString("AvatarUrl", updatedNV.AnhNhanVien);
+                HttpContext.Session.SetString("NhanVienName", updatedNV.TenNhanVien);
+                HttpContext.Session.SetString("IdNhanVien", updatedNV.IdNhanVien.ToString());
+                HttpContext.Session.SetString("NhanVienRole", chucVu != null ? chucVu.Code : "Không xác định"); // Vai trò nhân viên
+                return RedirectToAction("MyProfile", "NhanVien");
             }
             else
             {
@@ -382,10 +390,7 @@ namespace APPMVC.Areas.Admin.Controllers
         }
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear();
-
-            TempData["SuccessMessage"] = "Bạn đã đăng xuất thành công.";
-
+            HttpContext.Session.Clear();      
             return RedirectToAction("Login");
         }
 
@@ -520,5 +525,13 @@ namespace APPMVC.Areas.Admin.Controllers
             ModelState.AddModelError("", "Đổi mật khẩu thất bại. Vui lòng thử lại.");
             return View();
         }
+        private string GenerateRandomPassword(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
     }
+
 }

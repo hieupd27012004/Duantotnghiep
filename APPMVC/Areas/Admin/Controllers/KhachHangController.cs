@@ -71,6 +71,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 TempData["Error"] = "Đăng ký thất bại! Email này đã tồn tại";
                 return RedirectToAction("Index");
             }
+            kh.MatKhau = "123456";
             if (ModelState.IsValid)
             {
                 await _service.AddKhachHang(kh);

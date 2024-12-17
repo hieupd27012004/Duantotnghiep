@@ -28,6 +28,7 @@ namespace APPMVC.Areas.Client.Controllers
         private readonly IPromotionSanPhamChiTietService _promotionSanPhamChiTietService;
         private readonly IKhachHangService _khachHangService;
         private readonly IPromotionService _promotionService;
+        private readonly IDanhMucService _danhMucService;
         public SanPhamController(
             ISanPhamService sanPhamservice,
             ISanPhamChiTietService sanPhamCTservice,
@@ -41,7 +42,8 @@ namespace APPMVC.Areas.Client.Controllers
             ICardService cardService,
             IPromotionSanPhamChiTietService promotionSanPhamChiTietService,
             IKhachHangService khachHangService,
-            IPromotionService promotionService)
+            IPromotionService promotionService,
+            IDanhMucService danhMucService)
         {
             _sanPhamservice = sanPhamservice;
             _sanPhamCTservice = sanPhamCTservice;
@@ -56,6 +58,7 @@ namespace APPMVC.Areas.Client.Controllers
             _promotionSanPhamChiTietService = promotionSanPhamChiTietService;
             _khachHangService = khachHangService;
             _promotionService = promotionService;
+            _danhMucService = danhMucService;
         }
 
         public async Task<IActionResult> Index(string? name)
@@ -428,6 +431,6 @@ namespace APPMVC.Areas.Client.Controllers
                 Console.WriteLine($"Lỗi trong BuyNow: {ex.Message}");
                 return StatusCode(500, new { message = "Đã xảy ra lỗi trong quá trình xử lý yêu cầu." });
             }
-        }
+        }       
     }
 }

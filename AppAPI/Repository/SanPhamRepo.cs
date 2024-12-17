@@ -215,5 +215,9 @@ namespace AppAPI.Repository
             // Trả về thương hiệu của sản phẩm
             return sanPham.ThuongHieu;
         }
+        public async Task<List<SanPham>> GetSanPhamByCategory(Guid idDanhMuc)
+        {
+            return await _context.sanPhams.Where(sp => sp.IdDanhMuc == idDanhMuc).ToListAsync();
+        }
     }
 }
