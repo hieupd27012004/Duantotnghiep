@@ -75,57 +75,20 @@
             </ul>
             
         </li>
-
-
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Tài khoản</span>
-        </li>
+        <!-- Misc -->
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">Bán hàng tại quầy </span></li>
         <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-dock-top"></i>
-                <div data-i18n="Account Settings">Nhân Viên</div>
+            <a href="@Url.Action("Index", "BanHangTQ", new {area = "Admin"})" class="menu-link" onclick="return checkLogin();">
+                <i class="menu-icon tf-icons bx bx-detail"></i>
+                <div data-i18n="Form Elements">Bán hàng</div>
             </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="@Url.Action("Index", "NhanVien", new { area = "Admin" })" class="menu-link" onclick="return checkLoginAndRole();">
-                        <div data-i18n="Account">Account</div>
-                    </a>
-                </li>
-                @*     <li class="menu-item">
-                            <a href="pages-account-settings-notifications.html" class="menu-link">
-                                <div data-i18n="Notifications">Notifications</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="pages-account-settings-connections.html" class="menu-link">
-                                <div data-i18n="Connections">Connections</div>
-                            </a>
-                        </li> *@
-            </ul>
         </li>
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">Quản lý hóa đơn </span></li>
         <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-lock-open-alt"></i>
-                <div data-i18n="Authentications">Khách Hàng</div>
+            <a href="@Url.Action("Index", "HoaDon", new {area = "Admin"})" class="menu-link" onclick="return checkLogin();">
+                <i class="menu-icon tf-icons bx bx-detail"></i>
+                <div data-i18n="Form Elements">Hóa Đơn</div>
             </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="@Url.Action("Index", "KhachHang", new { area = "Admin" })" class="menu-link" onclick="return checkLogin();">
-                        <div data-i18n="Basic">Account</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="@Url.Action("GetAll", "DiaChi", new { area = "Admin" })" class="menu-link" onclick="return checkLogin();">
-                        <div data-i18n="Basic">Address</div>
-                    </a>
-                </li>
-                @*  <li class="menu-item">
-                            <a href="auth-register-basic.html" class="menu-link" target="_blank">
-                                <div data-i18n="Basic">Register</div>
-                            </a>
-                        </li> *@
-
-            </ul>
         </li>
         <!-- Components -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Quản lý sản phẩm</span></li>
@@ -166,12 +129,6 @@
                 <div data-i18n="Boxicons">Danh Mục</div>
             </a>
         </li>
-@*         <li class="menu-item">
-            <a href="@Url.Action("Index", "HinhAnh", new { area = "Admin" })" class="menu-link" onclick="return checkLogin();">
-                <i class="menu-icon tf-icons bx bx-category"></i>
-                <div data-i18n="Boxicons">HinhAnh</div>
-            </a>
-        </li> *@
 
         <!-- Forms & Tables -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Promotion & Voucher</span></li>
@@ -183,32 +140,46 @@
             </a>
         </li>
         <li class="menu-item">
-            <a href="@Url.Action("Index", "Voucher", new {area = "Admin"})" class="menu-link" @* onclick="return checkLogin(); *@">
+            <a href="@Url.Action("Index", "Voucher", new {area = "Admin"})" class="menu-link" onclick="return checkLogin();">
                 <i class="menu-icon tf-icons bx bx-detail"></i>
                 <div data-i18n="Form Layouts">Voucher</div>
             </a>
         </li>
-        <!-- Misc -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Bán hàng tại quầy </span></li>
-        <li class="menu-item">
-            <a href="@Url.Action("Index", "BanHangTQ", new {area = "Admin"})" class="menu-link" onclick="return checkLogin();">
-                <i class="menu-icon tf-icons bx bx-detail"></i>
-                <div data-i18n="Form Elements">Bán hàng</div>
-            </a>
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Tài khoản</span>
         </li>
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Quản lý hóa đơn </span></li>
         <li class="menu-item">
-            <a href="@Url.Action("Index", "HoaDon", new {area = "Admin"})" class="menu-link" onclick="return checkLogin();">
-                <i class="menu-icon tf-icons bx bx-detail"></i>
-                <div data-i18n="Form Elements">Hóa Đơn</div>
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-dock-top"></i>
+                <div data-i18n="Account Settings">Nhân Viên</div>
             </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="@Url.Action("Index", "NhanVien", new { area = "Admin" })" class="menu-link" onclick="return checkLoginAndRole();">
+                        <div data-i18n="Account">Account</div>
+                    </a>
+                </li>
+            </ul>
         </li>
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Quản lý trả hàng </span></li>
         <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-detail"></i>
-                <div data-i18n="Form Elements">Trả Hàng</div>
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-lock-open-alt"></i>
+                <div data-i18n="Authentications">Khách Hàng</div>
             </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="@Url.Action("Index", "KhachHang", new { area = "Admin" })" class="menu-link" onclick="return checkLogin();">
+                        <div data-i18n="Basic">Account</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="@Url.Action("GetAll", "DiaChi", new { area = "Admin" })" class="menu-link" onclick="return checkLogin();">
+                        <div data-i18n="Basic">Address</div>
+                    </a>
+                </li>
+            </ul>
         </li>
+  
+
     </ul>
 </aside>

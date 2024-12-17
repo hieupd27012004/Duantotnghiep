@@ -62,26 +62,23 @@ namespace APPMVC.Areas.Admin.Controllers
 
             var hoaDons = await _hoaDonService.GetAllAsync() ?? new List<HoaDon>();
 
-            // Lọc trạng thái không cần thiết
             var filteredHoaDons = hoaDons
                 .Where(h => h.TrangThai != "Tạo đơn hàng")
                 .ToList();
 
-            // Áp dụng lọc theo trạng thái nếu có
             if (!string.IsNullOrEmpty(status))
             {
                 filteredHoaDons = filteredHoaDons.Where(h => h.TrangThai == status).ToList();
             }
-
-            // Áp dụng tìm kiếm theo mã đơn và tên khách hàng nếu có
             if (!string.IsNullOrEmpty(search))
             {
                 filteredHoaDons = filteredHoaDons
-                    .Where(h => h.MaDon.Contains(search) || h.NguoiNhan.Contains(search))
+                    .Where(h => h != null &&
+                                 (h.MaDon != null && h.MaDon.Contains(search) ||
+                                  h.NguoiNhan != null && h.NguoiNhan.Contains(search)))
                     .ToList();
             }
 
-            // Lấy các trạng thái khác nhau cho dropdown
             var distinctStatuses = hoaDons
                 .Select(h => h.TrangThai)
                 .Where(s => s != "Tạo đơn hàng")
@@ -93,15 +90,18 @@ namespace APPMVC.Areas.Admin.Controllers
             // Tạo view models và tính tổng số lượng
             foreach (var hoaDon in filteredHoaDons)
             {
-                var hoaDonChiTiets = await _hoaDonChiTietService.GetByIdHoaDonAsync(hoaDon.IdHoaDon);
-                var totalQuantity = hoaDonChiTiets.Sum(d => d.SoLuong);
-
-                hoaDonViewModels.Add(new AppData.ViewModel.HoaDonViewModell
+                if (hoaDon != null)
                 {
-                    HoaDon = hoaDon,
-                    TotalQuantity = totalQuantity,
-                    HoaDonChiTiets = hoaDonChiTiets
-                });
+                    var hoaDonChiTiets = await _hoaDonChiTietService.GetByIdHoaDonAsync(hoaDon.IdHoaDon);
+                    var totalQuantity = hoaDonChiTiets.Sum(d => d.SoLuong);
+
+                    hoaDonViewModels.Add(new AppData.ViewModel.HoaDonViewModell
+                    {
+                        HoaDon = hoaDon,
+                        TotalQuantity = totalQuantity,
+                        HoaDonChiTiets = hoaDonChiTiets
+                    });
+                }
             }
 
             // Sắp xếp danh sách view models theo NgayTao giảm dần

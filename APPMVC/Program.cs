@@ -129,12 +129,12 @@ app.UseEndpoints(endpoints =>
 
     endpoints.MapControllerRoute(
         name: "areas",
-        pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}");
+        pattern: "{area:exists}/{controller=NhanVien}/{action=Login}/{id?}");
 
     endpoints.MapControllerRoute(
         name: "Admin",
-        pattern: "{area:exists}/{controller=HomeAdmin}/{action=Index}/{id?}",
-        defaults: new { area = "Admin", controller = "HomeAdmin", action = "Index" });
+        pattern: "{area:exists}/{controller=NhanVien}/{action=Login}/{id?}",
+        defaults: new { area = "Admin", controller = "NhanVien", action = "Login" });
 });
 
 app.Run();
