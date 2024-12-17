@@ -132,7 +132,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(idSanPhamChiTiet);
                     if (sanPhamChiTiet == null) continue;
 
-                    var productName = sanPhamChiTiet.SanPham?.TenSanPham ?? "Sản phẩm không xác định";
+                    var productName = sanPhamChiTiet.SanPham;
 
                     var conflictingPromotions = existingPromotions
                         .Where(p => p.TrangThai == 1 &&
@@ -147,7 +147,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     if (conflictingPromotions.Any())
                     {
                         var conflictDetails = conflictingPromotions.Select(p =>
-                            $"Khuyến mãi '{p.TenPromotion}' từ {p.NgayBatDau:dd/MM/yyyy} đến {p.NgayKetThuc:dd/MM/yyyy}")
+                            $"Khuyến mãi '{p.TenPromotion}' từ {p.NgayBatDau:yyyy-MM-dd THH:mm} đến {p.NgayKetThuc:yyyy-MM-dd THH:mm}")
                             .ToList();
 
                         conflictingProductDetails.Add(
@@ -174,6 +174,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     .ToList();
 
                 var result = await _promotionService.CreateAsync(promotion);
+                model.Promotion.TrangThai = 1;
                 if (result)
                 {
                     // Cập nhật giá giảm cho từng sản phẩm chi tiết
@@ -216,20 +217,24 @@ namespace APPMVC.Areas.Admin.Controllers
         public async Task<IActionResult> CheckProductInPromotion(Guid productDetailId, DateTime startDate, DateTime endDate)
         {
             var existingPromotions = await _promotionService.GetPromotionsAsync();
-            var isInPromotion = existingPromotions.Any(p =>
-                p.TrangThai == 1 && // Chỉ kiểm tra các khuyến mãi đang hoạt động
-                p.PromotionSanPhamChiTiets.Any(ps => ps.IdSanPhamChiTiet == productDetailId) &&
-                CheckPromotionTimeConflict(p.NgayBatDau, p.NgayKetThuc, startDate, endDate));
+
+            // Kiểm tra xem sản phẩm có trong bất kỳ khuyến mãi nào đang hoạt động không
+            var isInPromotion = existingPromotions
+                .Where(p => p.TrangThai == 1 && // Chỉ kiểm tra các khuyến mãi đang hoạt động
+                       p.PromotionSanPhamChiTiets != null &&
+                       p.PromotionSanPhamChiTiets.Any(ps => ps.IdSanPhamChiTiet == productDetailId))
+                .Any(p => CheckPromotionTimeConflict(p.NgayBatDau, p.NgayKetThuc, startDate, endDate));
 
             return Json(isInPromotion);
         }
         private bool CheckPromotionTimeConflict(DateTime existStart, DateTime existEnd,
-                                         DateTime newStart, DateTime newEnd)
+                                        DateTime newStart, DateTime newEnd)
         {
-            return (newStart < existEnd && newEnd > existStart) || // Giao nhau
-                   (newStart >= existStart && newStart < existEnd) || // Bắt đầu trong khoảng
-                   (newEnd > existStart && newEnd <= existEnd) || // Kết thúc trong khoảng
-                   (newStart <= existStart && newEnd >= existEnd); // Bao trùm hoàn toàn
+            // Kiểm tra xem khoảng thời gian mới có giao với khoảng thời gian hiện tại không
+            return (newStart < existEnd && newEnd > existStart) ||  // Giao nhau
+                    (newStart >= existStart && newStart < existEnd) ||  // Bắt đầu trong khoảng
+                    (newEnd > existStart && newEnd <= existEnd) ||  // Kết thúc trong khoảng
+                    (newStart <= existStart && newEnd >= existEnd);  // Bao trùm hoàn toàn
         }
         [HttpGet]
         private async Task<List<PromotionViewModel.SanPhamViewModel>> GetProducts()

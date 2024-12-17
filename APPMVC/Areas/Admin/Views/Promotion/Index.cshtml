@@ -18,34 +18,34 @@
         @Html.Raw(TempData["ErrorMessage"])
     </div>
 }
-<h1>Promotion List</h1>
+<h1>Danh Sách Promotion</h1>
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Tạo Mới</a>
 </p>
-<p>Promotion Count: @Model.Count</p>
+<p>Số lượng Promotion: @Model.Count</p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                No.
+                STT
             </th>
             <th>
-                Promotion Name
+                Tên Promotion
             </th>
             <th>
-                Discount Percentage
+                Phần Trăm Giảm
             </th>
             <th>
-                Created Time
+                Ngày Tạo
             </th>
             <th>
-                Start Time
+                Ngày Bắt Đầu
             </th>
             <th>
-                End Time
+                Ngày Kết Thúc
             </th>
             <th>
-                Status
+                Trạng Thái
             </th>
             <th></th>
         </tr>
