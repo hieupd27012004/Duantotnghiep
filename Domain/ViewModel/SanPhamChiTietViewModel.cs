@@ -24,7 +24,8 @@ namespace AppData.ViewModel
         public string? DanhMuc { get; set; }
         public string? ChatLieu { get; set; }
         public string? KieuDang { get; set; }
-        public string? DeGiay { get; set; }
+        public string? DeGiay { get; set; }   
+        public int KichHoat { get; set; }
         public List<string>? SelectedKichCoIds { get; set; }
         public List<string>? SelectedMauSacIds { get; set; } 
         public List<SanPhamChiTietItemViewModel>? SanPhamChiTietList { get; set; } = new List<SanPhamChiTietItemViewModel>();
@@ -40,6 +41,7 @@ namespace AppData.ViewModel
         public double Gia { get; set; }
         public double SoLuong { get; set; }
         public string? XuatXu { get; set; }
+        public int KichHoat { get; set; }
         public bool Chon { get; set; }
         public List<IFormFile>? Files { get; set; } = new List<IFormFile>();
 

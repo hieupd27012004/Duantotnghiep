@@ -42,5 +42,14 @@ namespace APPMVC.Service
         {
             throw new NotImplementedException();
         }
+        public async Task<ChucVu> GetChucVuId(Guid? idChucVu)
+        {
+            var response = await httpClient.GetAsync($"/api/ChucVu/GetChucVuId?idChucVu={idChucVu}");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<ChucVu>();
+            }
+            return null;
+        }
     }
 }

@@ -122,18 +122,30 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        [HttpDelete("clear")]
-        public async Task<IActionResult> ClearCart(Guid cartId)
+        [HttpPost("removeitems")]
+        public async Task<IActionResult> RemoveItemsFromCart([FromBody] RemoveItemsRequest request)
         {
+            if (request.ProductDetailIds == null || !request.ProductDetailIds.Any())
+            {
+                return BadRequest("No product detail IDs provided.");
+            }
+
             try
             {
-                await _service.ClearCartByIdAsync(cartId);
+                await _service.RemoveItemsFromCartAsync(request.CartId, request.ProductDetailIds);
                 return NoContent(); // 204 No Content
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+        }
+
+        // Đối tượng yêu cầu
+        public class RemoveItemsRequest
+        {
+            public Guid CartId { get; set; }
+            public List<Guid> ProductDetailIds { get; set; }
         }
         [HttpGet("gettotalquantity")]
         public async Task<IActionResult> GetTotalQuantityBySanPhamChiTietId(Guid sanPhamChiTietId, Guid cartId)

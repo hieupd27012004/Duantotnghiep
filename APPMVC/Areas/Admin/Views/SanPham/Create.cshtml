@@ -205,57 +205,61 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            let combinationIndex = 0; 
+            let combinationIndex = 0;
             const kichCoNames = {};
-            const mauSacNames = {}; 
+            const mauSacNames = {};
 
             $("input[name='SelectedKichCoIds']").each(function() {
-                kichCoNames[$(this).val()] = $(this).next('label').text(); 
+                kichCoNames[$(this).val()] = $(this).next('label').text();
             });
 
             $("input[name='SelectedMauSacIds']").each(function() {
-                mauSacNames[$(this).val()] = $(this).next('label').text(); 
-            })
+                mauSacNames[$(this).val()] = $(this).next('label').text();
+            });
 
-            function updateCombinations() {
-                const selectedKichCoIds = $("input[name='SelectedKichCoIds']:checked").map(function () {
-                    return $(this).val(); 
-                }).get();
+               function updateCombinations() {
+        const selectedKichCoIds = $("input[name='SelectedKichCoIds']:checked").map(function () {
+            return $(this).val();
+        }).get();
 
-                const selectedMauSacIds = $("input[name='SelectedMauSacIds']:checked").map(function () {
-                    return $(this).val(); 
-                }).get();
+        const selectedMauSacIds = $("input[name='SelectedMauSacIds']:checked").map(function () {
+            return $(this).val();
+        }).get();
 
-                const tenSanPham = $("input[name='SanPham.TenSanPham']").val();
-                const combinationsContainer = $("#combinations");
-                combinationsContainer.empty();
-                combinationIndex = 0;
+        const tenSanPham = $("input[name='SanPham.TenSanPham']").val();
+        const combinationsContainer = $("#combinations");
+        combinationsContainer.empty();
+        combinationIndex = 0;
 
-                if (selectedKichCoIds.length > 0 && selectedMauSacIds.length > 0) {
-                    const headerRow = $("<tr><th>Tên Sản Phẩm</th><th>Kích Cỡ</th><th>Màu Sắc</th><th>Giá</th><th>Số Lượng</th><th>Xuất Xứ</th><th>Hình ảnh</th><th>Hình ảnh mẫu</th></tr>");
-                    combinationsContainer.append("<strong>Các Tổ Hợp:</strong><table class='table table-bordered'><thead>" + headerRow.prop('outerHTML') + "</thead><tbody id='combinations-tbody'></tbody></table>");
+        if (selectedKichCoIds.length > 0 && selectedMauSacIds.length > 0) {
+            const headerRow = $("<tr><th>Tên Sản Phẩm</th><th>Kích Cỡ</th><th>Màu Sắc</th><th>Giá</th><th>Số Lượng</th><th>Xuất Xứ</th><th>Hình ảnh</th><th>Hình ảnh mẫu</th></tr>");
+            combinationsContainer.append("<strong>Các Tổ Hợp:</strong><table class='table table-bordered'><thead>" + headerRow.prop('outerHTML') + "</thead><tbody id='combinations-tbody'></tbody></table>");
 
-                    selectedMauSacIds.forEach(function (mauSacId) {
-                        selectedKichCoIds.forEach(function (kichCoId) {
-                            const row = $("<tr>");
-                            row.append($("<td>").text(tenSanPham));
-                            row.append($("<td>").text(kichCoNames[kichCoId])); 
-                            row.append($("<td>").text(mauSacNames[mauSacId])); 
-                            row.append($("<td>").append($("<input type='number' name='Combinations[" + combinationIndex + "].Gia' class='form-control' value='100000' placeholder='Giá'>")));
-                            row.append($("<td>").append($("<input type='number' name='Combinations[" + combinationIndex + "].SoLuong' class='form-control' value='10' placeholder='Số lượng'>")));
-                            row.append($("<td>").append($("<input type='text' name='Combinations[" + combinationIndex + "].XuatXu' class='form-control' value='Việt Nam' placeholder='Xuất xứ'>")));
+            selectedMauSacIds.forEach(function (mauSacId) {
+                selectedKichCoIds.forEach(function (kichCoId) {
+                    const row = $("<tr>");
+                    row.append($("<td>").text(tenSanPham));
+                    row.append($("<td>").text(kichCoNames[kichCoId]));
+                    row.append($("<td>").text(mauSacNames[mauSacId]));
+                    row.append($("<td>").append($("<input type='number' name='Combinations[" + combinationIndex + "].Gia' class='form-control' value='100000' placeholder='Giá'>")));
+                    row.append($("<td>").append($("<input type='number' name='Combinations[" + combinationIndex + "].SoLuong' class='form-control' value='10' placeholder='Số lượng'>")));
+                    row.append($("<td>").append($("<input type='text' name='Combinations[" + combinationIndex + "].XuatXu' class='form-control' value='Việt Nam' placeholder='Xuất xứ'>")));
 
-                            const imageCell = $("<td><input type='file' name='Combinations[" + combinationIndex + "].Files' class='form-control image-upload' multiple></td>");
-                            const sampleImageCell = $("<td class='image-display' style='display: flex; flex-direction: row; flex-wrap: wrap;'></td>");
-                            row.append(imageCell).append(sampleImageCell);
+                    // Add KichCoId and MauSacId to the combination
+                    row.append($("<input type='hidden' name='Combinations[" + combinationIndex + "].KichCoId' value='" + kichCoId + "'/>"));
+                    row.append($("<input type='hidden' name='Combinations[" + combinationIndex + "].MauSacId' value='" + mauSacId + "'/>"));
 
-                            $("#combinations-tbody").append(row);
-                            combinationIndex++; 
-                        });
-                    });
-                } else {
-                    combinationsContainer.append("<p>Không có tổ hợp nào được chọn.</p>");
-                }
+                    const imageCell = $("<td><input type='file' name='Combinations[" + combinationIndex + "].Files' class='form-control image-upload' multiple></td>");
+                    const sampleImageCell = $("<td class='image-display' style='display: flex; flex-direction: row; flex-wrap: wrap;'></td>");
+                    row.append(imageCell).append(sampleImageCell);
+
+                    $("#combinations-tbody").append(row);
+                    combinationIndex++;
+                });
+            });
+        } else {
+            combinationsContainer.append("<p>Không có tổ hợp nào được chọn.</p>");
+        }
 
                 $(".image-upload").change(function () {
                     const files = this.files;
@@ -276,7 +280,7 @@
 
                         const reader = new FileReader();
                         reader.onload = function (e) {
-                            const image = $("<img src='" + e.target.result + "' width='100' height='100' style='margin-right: 5px;'>"); 
+                            const image = $("<img src='" + e.target.result + "' width='100' height='100' style='margin-right: 5px;'>");
                             imageContainer.append(image);
                         };
                         reader.readAsDataURL(file);

@@ -18,8 +18,39 @@ namespace APPMVC.Service
 
         public async Task AddAsync(List<HoaDonChiTiet> hoaDonChiTietList)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/HoaDonChiTiet/them", hoaDonChiTietList); 
-            response.EnsureSuccessStatusCode();
+            if (hoaDonChiTietList == null || !hoaDonChiTietList.Any())
+            {
+                throw new ArgumentException("The list of HoaDonChiTiet cannot be null or empty.", nameof(hoaDonChiTietList));
+            }
+
+            try
+            {
+                // Send a POST request with the list of HoaDonChiTiet
+                var response = await _httpClient.PostAsJsonAsync("api/HoaDonChiTiet/them", hoaDonChiTietList);
+
+                // Check if the response indicates success
+                if (!response.IsSuccessStatusCode)
+                {
+                    // Log the response content for debugging
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error: {response.StatusCode} - {errorContent}");
+
+                    // Optionally, you can throw an exception with a more descriptive message
+                    throw new HttpRequestException($"Failed to add HoaDonChiTiet: {response.StatusCode} - {errorContent}");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                // Log the exception or handle it as needed
+                Console.WriteLine($"Request error: {ex.Message}");
+                throw; // Rethrow the exception to be handled by the caller
+            }
+            catch (Exception ex)
+            {
+                // Handle any other exceptions that may occur
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                throw; // Rethrow the exception to maintain the stack trace
+            }
         }
 
         // Xóa chi tiết hóa đơn theo ID

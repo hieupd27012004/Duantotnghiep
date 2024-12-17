@@ -45,7 +45,14 @@
             <span asp-validation-for="KieuDangId" class="text-danger"></span>
         </div>
     </div>
-
+    <div class="form-group mb-3">
+        <label asp-for="KichHoat" class="control-label">Kích Hoạt</label>
+        <div>
+            <input type="radio" asp-for="KichHoat" value="1" /> Hoạt động
+            <input type="radio" asp-for="KichHoat" value="0" /> Không hoạt động
+        </div>
+        <span asp-validation-for="KichHoat" class="text-danger"></span>
+    </div>
     <div class="form-group">
         <button type="submit" class="btn btn-primary">Cập nhật sản phẩm</button>
         <a href="@Url.Action("Edit", "SanPham", new { area = "Admin", id = Model.IdSanPham })" class="btn btn-secondary" style="margin-left: 10px;">Hủy</a>

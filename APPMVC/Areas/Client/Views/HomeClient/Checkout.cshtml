@@ -164,7 +164,7 @@
 
         
         <div class="col-md-4">
-    <h2 class="my-4">Đơn hàng</h2>
+            <h2 class="my-4">Đơn hàng</h2>
             <div class="card">
                 <div class="card-body">
                     <h4 class="my-3">Thông tin đơn hàng</h4>
@@ -185,7 +185,16 @@
                                     <tr>
                                         <td>@item.ProductName</td>
                                         <td>@item.Quantity</td>
-                                        <td>@(item.Price.ToString("N0", new CultureInfo("vi-VN")) + " VND")</td>
+                                        <td>
+                                            @if (item.OriginalPrice > item.Price)
+                                            {
+                                                <span style="text-decoration: line-through;">
+                                                    @(item.OriginalPrice.ToString("N0", new CultureInfo("vi-VN")) + " VND")
+                                                </span>
+                                                <br />
+                                            }
+                                            @(item.Price.ToString("N0", new CultureInfo("vi-VN")) + " VND")
+                                        </td>
                                         <td hidden>@item.IdSanPhamChiTiet</td>
                                     </tr>
                                 }
@@ -194,7 +203,7 @@
                         <div class="form-group">
                             <label for="tong_so_tien">Tổng số tiền</label>
                             <input type="text" class="form-control" id="tong_so_tien"
-                                   value="@(Model.CartItems.Sum(i => i.Price * i.Quantity).ToString( new CultureInfo("vi-VN")) + " VND")" readonly />
+                                   value="@(Model.CartItems.Sum(i => i.Price * i.Quantity).ToString(new CultureInfo("vi-VN")) + " VND")" readonly />
                         </div>
 
                         <div class="form-group">
@@ -206,11 +215,8 @@
                         <div class="form-group">
                             <label for="tong_tien">Tổng tiền hóa đơn</label>
                             <input type="text" class="form-control" id="tong_tien"
-                                   value="@(
-               (Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.PhiVanChuyen)
-               .ToString( new CultureInfo("vi-VN")) +
-               " VND"
-           )" readonly />
+                                   value="@((Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.PhiVanChuyen)
+                           .ToString(new CultureInfo("vi-VN")) + " VND")" readonly />
                         </div>
 
                         <div class="card mt-3">
@@ -279,7 +285,7 @@
                     }
                 </div>
             </div>
-</div>
+        </div>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

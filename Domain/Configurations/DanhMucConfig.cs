@@ -13,39 +13,7 @@ namespace AppData.Configurations
 	{
 		public void Configure(EntityTypeBuilder<DanhMuc> builder)
 		{
-			builder.HasKey(p => p.IdDanhMuc);
-			builder.HasData(
-                new DanhMuc
-                {
-                    IdDanhMuc = Guid.NewGuid(),
-                    TenDanhMuc = "Giày Thể Thao",
-                    NgayTao = DateTime.Now,
-                    NgayCapNhat = DateTime.Now,
-                    NguoiTao = "Admin",
-                    NguoiCapNhat = "Admin",
-                    KichHoat = 1
-                },
-                new DanhMuc
-                {
-                    IdDanhMuc = Guid.NewGuid(),
-                    TenDanhMuc = "Giày Da",
-                    NgayTao = DateTime.Now,
-                    NgayCapNhat = DateTime.Now,
-                    NguoiTao = "Admin",
-                    NguoiCapNhat = "Admin",
-                    KichHoat = 1
-                },
-                new DanhMuc
-                {
-                    IdDanhMuc = Guid.NewGuid(),
-                    TenDanhMuc = "Giày Cao Gót",
-                    NgayTao = DateTime.Now,
-                    NgayCapNhat = DateTime.Now,
-                    NguoiTao = "Admin",
-                    NguoiCapNhat = "Admin",
-                    KichHoat = 1
-                }
-            );
+			builder.HasKey(p => p.IdDanhMuc);			
         }
 	}
 }

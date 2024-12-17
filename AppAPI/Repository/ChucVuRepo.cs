@@ -47,5 +47,17 @@ namespace AppAPI.Repository
             await _context.SaveChangesAsync();
             return cv;
         }
+        public async Task<ChucVu> GetChucVuId(Guid? idChucVu)
+        {
+            // Kiểm tra nếu idChucVu không có giá trị, trả về null
+            if (!idChucVu.HasValue)
+            {
+                return null;
+            }
+
+            // Truy vấn cơ sở dữ liệu để lấy Chức Vụ
+            return await _context.chuVu
+                .FirstOrDefaultAsync(c => c.IdChucVu == idChucVu.Value);
+        }
     }
 }

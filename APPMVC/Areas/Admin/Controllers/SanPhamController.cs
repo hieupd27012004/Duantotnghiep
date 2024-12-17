@@ -109,11 +109,12 @@ namespace APPMVC.Areas.Admin.Controllers
         private async Task<List<SelectListItem>> GetKichCoOptions()
         {
             var kichCos = await _kichCoService.GetKichCo(null) ?? new List<KichCo>();
-            return kichCos.Select(k => new SelectListItem
-            {
-                Value = k.IdKichCo.ToString(),
-                Text = k.TenKichCo
-            }).ToList();
+            return kichCos
+                .Select(k => new SelectListItem
+                {
+                    Value = k.IdKichCo.ToString(),
+                    Text = k.TenKichCo
+                }).ToList();
         }
 
         private async Task<List<SelectListItem>> GetMauSacOptions()
@@ -169,7 +170,6 @@ namespace APPMVC.Areas.Admin.Controllers
                 await _sanPhamService.Create(viewModel.SanPham);
                 var idSanPham = viewModel.SanPham.IdSanPham;
 
-                // HashSet to track created pairs
                 var createdPairs = new HashSet<(string KichCoId, string MauSacId)>();
 
                 // Iterate through sizes and colors
@@ -177,62 +177,69 @@ namespace APPMVC.Areas.Admin.Controllers
                 {
                     foreach (var mauSacId in viewModel.SelectedMauSacIds)
                     {
-                        var combination = viewModel.Combinations.First(); // Adjust logic as needed
-                        var pair = (KichCoId: kichCoId, MauSacId: mauSacId);
+                        // Find the combination index based on the current kichCoId and mauSacId
+                        var combinationIndex = viewModel.Combinations.FindIndex(c =>
+                            c.KichCoId == kichCoId && c.MauSacId == mauSacId);
 
-                        if (!createdPairs.Contains(pair))
+                        if (combinationIndex >= 0) // Ensure a valid combination exists
                         {
-                            var sanPhamChiTiet = new SanPhamChiTiet
-                            {
-                                IdSanPhamChiTiet = Guid.NewGuid(),
-                                MaSp = await GenerateProductCodeAsync(),
-                                IdSanPham = idSanPham,
-                                Gia = combination.Gia,
-                                SoLuong = combination.SoLuong,
-                                XuatXu = combination.XuatXu,
-                                GioiTinh = "Nam",
-                                NgayTao = DateTime.Now,
-                                NgayCapNhat = DateTime.Now,
-                                NguoiTao = "Admin",
-                                NguoiCapNhat = "Admin",
-                                KichHoat = 1
-                            };
+                            var combination = viewModel.Combinations[combinationIndex];
+                            var pair = (KichCoId: kichCoId, MauSacId: mauSacId);
 
-                            await _sanPhamCTService.Create(sanPhamChiTiet);
-                            await _sanPhamChiTietKichCoService.Create(new SanPhamChiTietKichCo
+                            if (!createdPairs.Contains(pair))
                             {
-                                IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
-                                IdKichCo = Guid.Parse(kichCoId)
-                            });
-                            await _sanPhamChiTietMauSacService.Create(new SanPhamChiTietMauSac
-                            {
-                                IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
-                                IdMauSac = Guid.Parse(mauSacId)
-                            });
-
-                            // Handle image uploads
-                            if (combination.Files != null && combination.Files.Count > 0)
-                            {
-                                foreach (var file in combination.Files)
+                                var sanPhamChiTiet = new SanPhamChiTiet
                                 {
-                                    if (file.Length > 0)
-                                    {
-                                        var imageData = await ConvertFileToByteArray(file);
-                                        var hinhAnh = new HinhAnh
-                                        {
-                                            IdHinhAnh = Guid.NewGuid(),
-                                            LoaiFileHinhAnh = file.ContentType,
-                                            DataHinhAnh = imageData,
-                                            TrangThai = 1,
-                                            IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet
-                                        };
+                                    IdSanPhamChiTiet = Guid.NewGuid(),
+                                    MaSp = await GenerateProductCodeAsync(),
+                                    IdSanPham = idSanPham,
+                                    Gia = combination.Gia,
+                                    SoLuong = combination.SoLuong,
+                                    XuatXu = combination.XuatXu,
+                                    GioiTinh = "Nam",
+                                    NgayTao = DateTime.Now,
+                                    NgayCapNhat = DateTime.Now,
+                                    NguoiTao = "Admin",
+                                    NguoiCapNhat = "Admin",
+                                    KichHoat = 1
+                                };
 
-                                        await _hinhAnhService.UploadAsync(hinhAnh);
+                                await _sanPhamCTService.Create(sanPhamChiTiet);
+                                await _sanPhamChiTietKichCoService.Create(new SanPhamChiTietKichCo
+                                {
+                                    IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+                                    IdKichCo = Guid.Parse(kichCoId)
+                                });
+                                await _sanPhamChiTietMauSacService.Create(new SanPhamChiTietMauSac
+                                {
+                                    IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+                                    IdMauSac = Guid.Parse(mauSacId)
+                                });
+
+                                // Handle image uploads
+                                if (combination.Files != null && combination.Files.Count > 0)
+                                {
+                                    foreach (var file in combination.Files)
+                                    {
+                                        if (file.Length > 0)
+                                        {
+                                            var imageData = await ConvertFileToByteArray(file);
+                                            var hinhAnh = new HinhAnh
+                                            {
+                                                IdHinhAnh = Guid.NewGuid(),
+                                                LoaiFileHinhAnh = file.ContentType,
+                                                DataHinhAnh = imageData,
+                                                TrangThai = 1,
+                                                IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet
+                                            };
+
+                                            await _hinhAnhService.UploadAsync(hinhAnh);
+                                        }
                                     }
                                 }
-                            }
 
-                            createdPairs.Add(pair);
+                                createdPairs.Add(pair);
+                            }
                         }
                     }
                 }
@@ -603,7 +610,8 @@ namespace APPMVC.Areas.Admin.Controllers
                 DanhMucId = sanPham.IdDanhMuc,       
                 ChatLieuId = sanPham.IdChatLieu,     
                 KieuDangId = sanPham.IdKieuDang,     
-                DeGiayId = sanPham.IdDeGiay          
+                DeGiayId = sanPham.IdDeGiay,  
+                KichHoat = sanPham.KichHoat
             };
 
             return View(viewModel);
@@ -634,7 +642,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 sanPham.IdDanhMuc = viewModel.DanhMucId;
                 sanPham.IdDeGiay = viewModel.DeGiayId;
                 sanPham.IdKieuDang = viewModel.KieuDangId;
-
+                sanPham.KichHoat = viewModel.KichHoat;
                 await _sanPhamService.Update(sanPham);
 
                 TempData["Success"] = "Cập nhật thành công";
@@ -677,6 +685,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 Gia = sanPhamChiTiet.Gia,
                 SoLuong = sanPhamChiTiet.SoLuong,
                 XuatXu = sanPhamChiTiet.XuatXu,
+                KichHoat = sanPhamChiTiet.KichHoat
 
             };
 
@@ -710,6 +719,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 sanPhamChiTiet.Gia = viewModel.Gia;
                 sanPhamChiTiet.SoLuong = viewModel.SoLuong;
                 sanPhamChiTiet.XuatXu = viewModel.XuatXu;
+                sanPhamChiTiet.KichHoat = viewModel.KichHoat;
 
                 var existingImages = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
                 foreach (var existingImage in existingImages)
@@ -777,11 +787,11 @@ namespace APPMVC.Areas.Admin.Controllers
         }
         private async Task LoadViewBags()
         {
-            var listChatLieu = await _chatLieuService.GetChatLieu(null);
-            var listDeGiay = await _deGiayService.GetDeGiay(null);
-            var listDanhMuc = await _danhMucService.GetDanhMuc(null);
-            var listThuongHieu = await _thuongHieuService.GetThuongHieu(null);
-            var listKieuDang = await _kieuDangService.GetKieuDang(null);
+            var listChatLieu = (await _chatLieuService.GetChatLieu(null))?.Cast<ChatLieu>().Where(c => c.KichHoat != 0).ToList() ?? new List<ChatLieu>();
+            var listDeGiay = (await _deGiayService.GetDeGiay(null))?.Where(d => d.KichHoat != 0).ToList() ?? new List<DeGiay>();
+            var listDanhMuc = (await _danhMucService.GetDanhMuc(null))?.Where(d => d.KichHoat != 0).ToList() ?? new List<DanhMuc>();
+            var listThuongHieu = (await _thuongHieuService.GetThuongHieu(null))?.Where(t => t.KichHoat != 0).ToList() ?? new List<ThuongHieu>();
+            var listKieuDang = (await _kieuDangService.GetKieuDang(null))?.Where(k => k.KichHoat != 0).ToList() ?? new List<KieuDang>();
             var listMauSac = await _mauSacService.GetMauSac(null);
             var listKichCo = await _kichCoService.GetKichCo(null);
 

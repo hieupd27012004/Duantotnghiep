@@ -48,15 +48,36 @@
 </div>
 <script>
     function checkLogin() {
-        var isLoggedIn = @Html.Raw(isLoggedIn.ToString().ToLower());
-
+        var isLoggedIn = @Html.Raw(isLoggedIn.ToString().ToLower());         
         if (!isLoggedIn) {
             alert('Bạn Cần Đăng Nhập Để Thực Hiện Chức Năng Này');
             return false;
-        }
+        }         
         return true;
 
     }
+        function checkRole() {
+            var role = '@ViewContext.HttpContext.Session.GetString("NhanVienRole")';
+
+            if (role !== 'QL') {
+                alert('Bạn Không Có Quyền Thực Hiện Chức Năng Này');
+                return false;
+            }
+            return true;
+        }
+        function checkLoginAndRole() {
+            // Kiểm tra đăng nhập
+            if (!checkLogin()) {
+                return false;
+            }
+
+            // Kiểm tra quyền
+            if (!checkRole()) {
+                return false;
+            }
+
+            return true;
+        }
 </script>
 
 

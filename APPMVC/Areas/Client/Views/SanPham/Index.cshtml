@@ -13,9 +13,9 @@
         transition: transform 0.3s ease;
     }
 
-    .product-card:hover {
-        transform: translateY(-5px);
-    }
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
 
     .product-image {
         position: relative;
@@ -23,15 +23,15 @@
         overflow: hidden;
     }
 
-    .product-image img {
-        width: 100%;
-        height: auto;
-        object-fit: cover; /* Ensures the image covers the area */
-        position: absolute; /* Aligns the image correctly */
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+        .product-image img {
+            width: 100%;
+            height: auto;
+            object-fit: cover; /* Ensures the image covers the area */
+            position: absolute; /* Aligns the image correctly */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
 
     .discount-badge {
         position: absolute;
@@ -61,9 +61,9 @@
         transition: transform 0.3s ease;
     }
 
-    .color-item:hover {
-        transform: scale(1.2);
-    }
+        .color-item:hover {
+            transform: scale(1.2);
+        }
 
     .product-info {
         padding: 15px; /* Reduced padding for a compact look */
@@ -81,8 +81,6 @@
         color: #007bff;
         margin-bottom: 20px;
     }
-
-   
 </style>
 
 <div class="container">
@@ -97,10 +95,9 @@
                              alt="@sanPham.TenSanPham"
                              data-original-image="@(sanPham.RepresentativeImage != null ? $"data:image;base64,{Convert.ToBase64String(sanPham.RepresentativeImage)}" : "/images/default-product.jpg")" />
 
-                        @if (sanPham.GiaThapNhat < sanPham.GiaCaoNhat)
+                        @if (sanPham.HighestDiscountPercentage > 0)
                         {
-                            var discountPercentage = Math.Round(((Convert.ToDouble(sanPham.GiaCaoNhat) - Convert.ToDouble(sanPham.GiaThapNhat)) / Convert.ToDouble(sanPham.GiaCaoNhat)) * 100);
-                            <div class="discount-badge">Giảm @discountPercentage%!</div>
+                            <div class="discount-badge">Giảm @sanPham.HighestDiscountPercentage%!</div>
                         }
                     </div>
                     <div class="product-info">

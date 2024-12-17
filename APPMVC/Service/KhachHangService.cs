@@ -20,10 +20,6 @@ namespace APPMVC.Service
                 throw new ArgumentNullException(nameof(kh));
             }
 
-            if (string.IsNullOrWhiteSpace(kh.Email) || string.IsNullOrWhiteSpace(kh.MatKhau))
-            {
-                throw new ArgumentException("Email and password cannot be null or empty.");
-            }
 
             try
             {
@@ -73,18 +69,18 @@ namespace APPMVC.Service
         {
             if (!id.HasValue)
             {
-                return null; // Trả về null nếu id không có giá trị
+                return new KhachHang(); // Trả về đối tượng KhachHang rỗng nếu id không có giá trị
             }
 
             try
             {
                 var khachHang = await _httpClient.GetFromJsonAsync<KhachHang>($"/api/KhachHang/GetById?id={id}");
-                return khachHang; // Trả về khách hàng nếu tìm thấy
+                return khachHang ?? new KhachHang(); // Trả về khách hàng nếu tìm thấy, ngược lại trả về đối tượng rỗng
             }
             catch (HttpRequestException)
             {
                 // Xử lý lỗi HTTP (ví dụ: không tìm thấy)
-                return null; // Trả về null nếu có lỗi
+                return new KhachHang(); // Trả về đối tượng KhachHang rỗng nếu có lỗi
             }
         }
         public async Task UpdateKhachHang(KhachHang kh)

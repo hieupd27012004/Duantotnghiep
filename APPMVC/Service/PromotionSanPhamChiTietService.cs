@@ -20,7 +20,7 @@ namespace AppAPI.Service
             };
         }
 
-        public async Task<List<PromotionSanPhamChiTiet>> GetPromotionSanPhamChiTietAsync()
+        public async Task<List<PromotionSanPhamChiTiet>> GetPromotionSanPhamChiTietAsync(Guid idSanPhamChiTiet)
         {
             try
             {
@@ -56,11 +56,11 @@ namespace AppAPI.Service
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<Promotion> GetPromotionsBySanPhamChiTietIdAsync(Guid sanPhamChiTietId)
+        public async Task<Guid?> GetPromotionsBySanPhamChiTietIdAsync(Guid sanPhamChiTietId)
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<Promotion>($"api/PromotionSanPhamChiTiet/promotionsBySanPhamChiTietId?sanPhamChiTietId={sanPhamChiTietId}");
+                return await _httpClient.GetFromJsonAsync<Guid?>($"api/PromotionSanPhamChiTiet/promotionsBySanPhamChiTietId?sanPhamChiTietId={sanPhamChiTietId}");
             }
             catch (HttpRequestException ex)
             {

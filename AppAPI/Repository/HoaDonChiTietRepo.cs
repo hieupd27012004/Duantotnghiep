@@ -26,8 +26,32 @@ namespace AppAPI.Repository
 
         public async Task AddAsync(List<HoaDonChiTiet> hoaDonChiTietList)
         {
-            await _context.hoaDonChiTiets.AddRangeAsync(hoaDonChiTietList); 
-            await _context.SaveChangesAsync();
+            if (hoaDonChiTietList == null || !hoaDonChiTietList.Any())
+            {
+                throw new ArgumentException("The list of HoaDonChiTiet cannot be null or empty.", nameof(hoaDonChiTietList));
+            }
+
+            try
+            {
+                // Add the list of HoaDonChiTiet to the context
+                await _context.hoaDonChiTiets.AddRangeAsync(hoaDonChiTietList);
+
+                // Save changes to the database
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Log the exception or handle it as needed
+                Console.WriteLine($"Database update error: {ex.Message}");
+                // Optionally, throw the exception to be handled by the caller
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Handle any other exceptions that may occur
+                Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                throw; // Rethrow to maintain the stack trace
+            }
         }
 
         public async Task UpdateAsync(List<HoaDonChiTiet> hoaDonChiTietList)
