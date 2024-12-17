@@ -12,15 +12,12 @@ namespace AppData
             // Định nghĩa ID cố định cho các chức vụ
             var chucVuQL = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var chucVuNV = Guid.Parse("22222222-2222-2222-2222-222222222222");
-            var chucVuKT = Guid.Parse("33333333-3333-3333-3333-333333333333");
-            var chucVuKK = Guid.Parse("44444444-4444-4444-4444-444444444444");
+         
 
             // Seed dữ liệu chức vụ
             modelBuilder.Entity<ChucVu>().HasData(
                 new ChucVu() { IdChucVu = chucVuQL, Code = "QL", TenChucVu = "Quản lý" },
-                new ChucVu() { IdChucVu = chucVuNV, Code = "NV", TenChucVu = "Nhân viên" },
-                new ChucVu() { IdChucVu = chucVuKT, Code = "KT", TenChucVu = "Kế toán" },
-                new ChucVu() { IdChucVu = chucVuKK, Code = "KK", TenChucVu = "Thủ kho" }
+                new ChucVu() { IdChucVu = chucVuNV, Code = "NV", TenChucVu = "Nhân viên" }
             );
 
             // Định nghĩa ID cố định cho các nhân viên
