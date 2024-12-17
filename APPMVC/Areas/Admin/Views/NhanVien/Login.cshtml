@@ -1,13 +1,16 @@
 ﻿@model AppData.Model.NhanVien
 
 <div class="container mt-5">
+   
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white text-center">
                     <h4 class="mb-0">Đăng Nhập</h4>
                 </div>
+                
                 <div class="card-body">
+                    
                     <form asp-action="Login" method="post" class="needs-validation" novalidate>
                         <!-- Hiển thị lỗi -->
                         @if (ViewData.ModelState.ErrorCount > 0)

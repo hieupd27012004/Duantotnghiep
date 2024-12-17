@@ -291,25 +291,27 @@ namespace APPMVC.Areas.Client.Controllers
             // Check if new passwords match
             if (newPassword != confirmPassword)
             {
-                TempData["Error"] = "Mật khẩu không khớp.";
-                return View();
+                TempData["Error"] = "Mật khẩu không khớp! Vui lòng thử lại";
+                return RedirectToAction("Login", "KhachHang");
             }
 
             // Validate password complexity
             if (!IsValidPassword(newPassword))
             {
-                TempData["Error"] = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
-                return View();
+                TempData["Error"] = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt. Vui lòng thử lại";
+                return RedirectToAction("Login", "KhachHang");
             }
 
             var result = await _service.ResetPassword(email, newPassword, confirmPassword);
             if (result)
             {
+
+                TempData["SuccessMessage"] = "Đổi mật khẩu thành công";
                 return RedirectToAction("Login");
             }
 
             TempData["Error"] = "Đổi mật khẩu thất bại. Vui lòng thử lại.";
-            return View();
+            return RedirectToAction("Login", "KhachHang");
         }
 
         public IActionResult Logout()

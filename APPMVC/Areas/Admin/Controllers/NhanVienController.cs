@@ -498,14 +498,14 @@ namespace APPMVC.Areas.Admin.Controllers
             // Check if new passwords match
             if (newPassword != confirmPassword)
             {
-                ModelState.AddModelError("", "Mật khẩu không khớp.");
-                return View();
+                TempData["Error"] = "Đổi mật khẩu thất bại do nhập sai mật khẩu! Vui lòng thử lại";
+                return RedirectToAction("Login", "NhanVien");
             }
 
             // Validate password complexity
             if (!IsValidPassword(newPassword))
             {
-                ModelState.AddModelError("NewPassword", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.");
+                TempData["Error"] = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
                 return View();
             }
 
