@@ -902,7 +902,7 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
             }
-
+            var TenNV = HttpContext.Session.GetString("NhanVienName");
             var NVIdString = HttpContext.Session.GetString("IdNhanVien");
             if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
             {
@@ -977,6 +977,22 @@ namespace APPMVC.Areas.Admin.Controllers
                     IdHoaDon = hoaDon.IdHoaDon,
                 };
                 await _lichSuHoaDonService.AddAsync(lichSu);
+
+                var lichSuThanhToan = new LichSuThanhToan
+                {
+                    IdLichSuThanhToan = Guid.NewGuid(),
+                    SoTien = tongTienHang,
+                    TienThua = 0,
+                    NgayTao = DateTime.Now,
+                    LoaiGiaoDich = "Thanh Toán",
+                    Pttt = "Chuyển Khoản",
+                    NguoiThaoTac = TenNV,
+                    TrangThai = "Đã thanh toán",
+                    IdHoaDon = hoaDon.IdHoaDon,
+                    IdNhanVien = NVID
+                };
+
+                await _lichSuThanhToanService.AddAsync(lichSuThanhToan);
 
                 var htmlContent = await GenerateInvoiceHtmlFromTemplate(hoaDon, hoaDonChiTietList, idKhachHang);
                 var pdfBytes = GeneratePdfFromHtml(htmlContent);
