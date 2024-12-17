@@ -67,6 +67,7 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             var chucVuList = await chucVuService.GetAllChucVu();
             ViewBag.ChucVu = chucVuList;
+
             NhanVien nv = new NhanVien()
             {
                 IdNhanVien = Guid.NewGuid(),
@@ -75,69 +76,36 @@ namespace APPMVC.Areas.Admin.Controllers
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "admin",
                 NguoiTao = "admin",
-
             };
+
             return View(nv);
         }
 
+
         [HttpPost]
-        public async Task<IActionResult> Create(NhanVien nhanVien, IFormFile imgFile)
+        public async Task<IActionResult> Create(NhanVien nhanVien)
         {
-            // Kiểm tra xem có file ảnh được tải lên hay không
-            if (imgFile != null && imgFile.Length > 0)
+            // Kiểm tra số điện thoại và email
+            if (await _service.CheckSDT(nhanVien.SoDienThoai))
             {
-                // Kiểm tra loại file (chỉ chấp nhận các định dạng ảnh)
-                var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-                var ext = Path.GetExtension(imgFile.FileName).ToLowerInvariant();
-
-                // Kiểm tra phần mở rộng có hợp lệ không
-                if (!permittedExtensions.Contains(ext))
-                {
-                    ModelState.AddModelError("", "Chỉ chấp nhận các file ảnh với định dạng .jpg, .jpeg, .png, .gif.");
-                    return View(nhanVien);
-                }
-                // Tạo đường dẫn đến thư mục lưu trữ hình ảnh
-                string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Admin", "imgNV", imgFile.FileName);
-
-                // Tạo file stream để lưu file hình ảnh
-                using (var stream = new FileStream(path, FileMode.Create))
-                {
-                    // Sao chép dữ liệu từ imgFile vào stream
-                    await imgFile.CopyToAsync(stream);
-                }
-
-                // Gán tên file vào thuộc tính AnhNhanVien của đối tượng NhanVien
-                nhanVien.AnhNhanVien = imgFile.FileName;
-            }
-            else
-            {
-                // Nếu không có file nào được tải lên, thêm lỗi vào ModelState
-                nhanVien.AnhNhanVien = "no-image.jpg";
-            }
-            var checkSdt = await _service.CheckSDT(nhanVien.SoDienThoai);
-            if (checkSdt)
-            {
-                TempData["Error"] = "Đăng ký thất bại! Số điện thoại đã tồn tại";
-                return RedirectToAction("Index");
-            }
-            var checkEmail = await _service.CheckMail(nhanVien.Email);
-            if (checkEmail)
-            {
-                TempData["Error"] = "Đăng ký thất bại! Email này đã tồn tại";
-                return RedirectToAction("Index");
-            }
-            // Kiểm tra tính hợp lệ của ModelState trước khi lưu dữ liệu vào cơ sở dữ liệu
-            // Kiểm tra tính hợp lệ của ModelState trước khi lưu dữ liệu vào cơ sở dữ liệu
-            if (!ModelState.IsValid)
-                TempData["Error"] = "Đăng ký thất bại! Vui lòng nhập đầy đủ thông tin";
-                // Trả về view hiện tại với model để hiển thị lại thông tin và thông báo lỗi
+                ModelState.AddModelError("", "Đăng ký thất bại! Số điện thoại đã tồn tại.");
                 return View(nhanVien);
-                return RedirectToAction("Create");
+            }
+
+            if (await _service.CheckMail(nhanVien.Email))
+            {
+                ModelState.AddModelError("", "Đăng ký thất bại! Email này đã tồn tại.");
+                return View(nhanVien);
+            }
+
+            if (!ModelState.IsValid) { 
+                TempData["Error"] = "Đăng ký thất bại! Vui lòng nhập đầy đủ thông tin";
+                return View(nhanVien);
+
             }
             nhanVien.MatKhau = GenerateRandomPassword(8);
-            // Nếu tất cả hợp lệ, lưu thông tin nhân viên
-            await _service.CreateNV(nhanVien);
-            return RedirectToAction("Index");
+             await _service.CreateNV(nhanVien);
+             return RedirectToAction("Index");
         }
        
 
