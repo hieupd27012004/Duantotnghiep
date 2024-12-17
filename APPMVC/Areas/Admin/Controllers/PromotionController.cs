@@ -106,7 +106,6 @@ namespace APPMVC.Areas.Admin.Controllers
                     model.SanPhams = await GetProducts();
                     return View(model);
                 }
-
                 // Lấy danh sách khuyến mãi hiện có
                 var existingPromotions = await _promotionService.GetPromotionsAsync();
                 _logger.LogInformation($"Total existing promotions: {existingPromotions.Count}");
@@ -211,6 +210,26 @@ namespace APPMVC.Areas.Admin.Controllers
                 model.SanPhams = await GetProducts();
                 return View(model);
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CheckProductInPromotion(Guid productDetailId, DateTime startDate, DateTime endDate)
+        {
+            var existingPromotions = await _promotionService.GetPromotionsAsync();
+            var isInPromotion = existingPromotions.Any(p =>
+                p.TrangThai == 1 && // Chỉ kiểm tra các khuyến mãi đang hoạt động
+                p.PromotionSanPhamChiTiets.Any(ps => ps.IdSanPhamChiTiet == productDetailId) &&
+                CheckPromotionTimeConflict(p.NgayBatDau, p.NgayKetThuc, startDate, endDate));
+
+            return Json(isInPromotion);
+        }
+        private bool CheckPromotionTimeConflict(DateTime existStart, DateTime existEnd,
+                                         DateTime newStart, DateTime newEnd)
+        {
+            return (newStart < existEnd && newEnd > existStart) || // Giao nhau
+                   (newStart >= existStart && newStart < existEnd) || // Bắt đầu trong khoảng
+                   (newEnd > existStart && newEnd <= existEnd) || // Kết thúc trong khoảng
+                   (newStart <= existStart && newEnd >= existEnd); // Bao trùm hoàn toàn
         }
         [HttpGet]
         private async Task<List<PromotionViewModel.SanPhamViewModel>> GetProducts()
