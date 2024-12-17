@@ -122,18 +122,17 @@ namespace APPMVC.Areas.Client.Controllers
 
                 var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
                 var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
-
+                
                 var originalPrice = sanPhamChiTiet?.Gia;
                 double? discountedPrice = null;
                 double? discountPercentage = null;
-
+                var quantity = sanPhamChiTiet.SoLuong;
                 var promotionId = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(sanPhamChiTiet.IdSanPhamChiTiet);
                 if (promotionId.HasValue && promotionId.Value != Guid.Empty)
                 {
                     var promotionDetails = await _promotionService.GetPromotionByIdAsync(promotionId.Value);
                     if (promotionDetails != null && promotionDetails.TrangThai == 1 && promotionDetails.PhanTramGiam > 0)
                     {
-                        // Calculate the discounted price based on the discount amount
                         discountedPrice = originalPrice - (originalPrice - sanPhamChiTiet.GiaGiam);
                     }
                 }
@@ -157,7 +156,8 @@ namespace APPMVC.Areas.Client.Controllers
                     SoLuong = item.SoLuong,
                     TongTien = item.TongTien,
                     GiaDaGiam = discountedPrice,
-                    PhanTramGiam = discountPercentage
+                    PhanTramGiam = discountPercentage,
+                    Quantity = quantity
                 };
             });
 

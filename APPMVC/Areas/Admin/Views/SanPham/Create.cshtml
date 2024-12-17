@@ -5,7 +5,6 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 
 }
-
 <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4">
@@ -14,6 +13,9 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card mb-4" style="padding: 20px">
+                    <div id="error-message" class="text-danger mb-3">
+                        @Html.Raw(TempData["Error"])
+                    </div>
                     <form asp-action="Create" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input asp-for="SanPham.IdSanPham" class="form-control"  hidden>
@@ -160,6 +162,12 @@
 
 @section Scripts {
     <script>
+        $(document).ready(function () {
+                  var errorMessage = '@Html.Raw(TempData["Error"])';
+                  if (errorMessage) {
+                      $('#error-message').text(errorMessage);
+                  }
+              });
         $(document).ready(function () {
             let combinationIndex = 0;
             const kichCoNames = {};

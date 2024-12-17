@@ -304,7 +304,7 @@
                 <dt class="col-sm-6">Giảm Giá</dt>
                 <dd class="col-sm-6">0 VNĐ</dd>
                 <dt class="col-sm-6">Tổng Tiền</dt>
-                <dd class="col-sm-6">@Model.TongTien.ToString("#,0") VNĐ</dd>
+                <dd class="col-sm-6" id="totalAmount" data-value="@Model.TongTien">@Model.TongTien.ToString("#,0") VNĐ</dd>
                 <dt class="col-sm-6" id="amountGivenLabel">Tiền khách đưa</dt>
                 <dd class="col-sm-6" id="amountGiven">
                     <input type="number" id="amountGivenInput" placeholder="Nhập số tiền" value="@Model.TienKhachDua" />

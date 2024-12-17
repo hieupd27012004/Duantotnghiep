@@ -130,8 +130,8 @@ namespace APPMVC.Areas.Admin.Controllers
 
             if (countPendingOrders >= 5)
             {
-                ModelState.AddModelError("", "Không thể tạo thêm đơn hàng. Đã đạt giới hạn tối đa 5 đơn hàng với trạng thái 'Tạo đơn hàng'.");
-                return View("Index");
+                TempData["ErrorMessage"] = "Không thể tạo thêm đơn hàng. Đã đạt giới hạn tối đa 5 đơn hàng với trạng thái 'Tạo đơn hàng'.";
+                return RedirectToAction("Index");
             }
 
             var order = new HoaDon
@@ -214,7 +214,7 @@ namespace APPMVC.Areas.Admin.Controllers
             try
             {
                 await _khachHangService.AddKhachHang(khachHang);
-                return Json(new { success = true, /*message = "Thêm khách hàng thành công!",*/ customerName = model.HoTen, idKhachHang = khachHang.IdKhachHang });
+                return Json(new { success = true, customerName = model.HoTen, idKhachHang = khachHang.IdKhachHang });
             }
             catch (Exception ex)
             {
