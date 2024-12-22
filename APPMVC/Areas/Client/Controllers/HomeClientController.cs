@@ -161,7 +161,9 @@ namespace APPMVC.Areas.Client.Controllers
                     TongTien = item.TongTien,
                     GiaDaGiam = discountedPrice,
                     PhanTramGiam = discountPercentage,
-                    Quantity = quantity
+                    Quantity = quantity,
+                    KichHoat = sanPhamChiTiet.KichHoat,
+                    HoatKich = sanPham.KichHoat
                 };
             });
 
@@ -524,18 +526,24 @@ namespace APPMVC.Areas.Client.Controllers
             var customerIdString = HttpContext.Session.GetString("IdKhachHang");
             if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
             {
-                return Unauthorized(new { message = "Customer not found in session." });
+                return Unauthorized(new { message = "Không tìm thấy khách hàng trong phiên." });
             }
 
-            // Check product quantities against available stock
             foreach (var item in cartItems)
             {
-                var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
                 var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
-                if (item.Quantity > sanPhamChiTiet?.SoLuong)
+                var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
+                if (sanPhamChiTiet.KichHoat == 0 || sanPham.KichHoat == 0) 
+                {
+                    TempData["ErrorMessage"] = $"Sản phẩm {sanPham?.TenSanPham} không còn hoạt động.";
+                    return RedirectToAction("Index", "HomeClient");
+                }
+
+                // Kiểm tra số lượng sản phẩm
+                if (item.Quantity > sanPhamChiTiet.SoLuong)
                 {
                     TempData["ErrorMessage"] = $"Số lượng cho sản phẩm {sanPham?.TenSanPham} vượt quá số lượng có sẵn.";
-                    return RedirectToAction("Index", "HomeClient"); 
+                    return RedirectToAction("Index", "HomeClient");
                 }
             }
 
@@ -617,10 +625,16 @@ namespace APPMVC.Areas.Client.Controllers
                     var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
                     if (sanPhamChiTiet != null)
                     {
+                        // Check if product is active
+                        if (sanPhamChiTiet.KichHoat != 1 && sanPham.KichHoat != 1)
+                        {
+                            return BadRequest($"Sản phẩm {sanPham.TenSanPham} không còn hoạt động.");
+                        }
+
                         // Check if there is enough stock
                         if (item.Quantity > sanPhamChiTiet.SoLuong)
                         {
-                            return BadRequest($"The quantity for product {sanPham.TenSanPham} exceeds available stock.");
+                            return BadRequest($"Số lượng cho sản phẩm {sanPham.TenSanPham} vượt quá số lượng có sẵn.");
                         }
 
                         // Decrease stock quantity
@@ -641,13 +655,12 @@ namespace APPMVC.Areas.Client.Controllers
                     HttpContext.Session.Remove("ThanhToanViewModel");
                     HttpContext.Session.Remove("DiscountAmount"); // Remove discount amount if not needed anymore
 
-                    return RedirectToAction("Index", new { message = "Payment successful!" });
+                    return RedirectToAction("Index", new { message = "Thanh toán thành công!" });
                 }
             }
 
-            return RedirectToAction("Checkout", new { message = "Payment failed!" });
+            return RedirectToAction("Checkout", new { message = "Thanh toán không thành công!" });
         }
-
         #endregion
 
         private string GenerateOrderNumber()

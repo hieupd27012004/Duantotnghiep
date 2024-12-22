@@ -113,7 +113,15 @@
                             <tr data-item-price="@itemPrice">
                                 <td hidden>@item.IdGioHangChiTiet</td>
                                 <td>
-                                    <input type="checkbox" name="selectedItems" value="@item.IdGioHangChiTiet" />
+                                    @if (item.KichHoat == 1 && item.Quantity > 0 && item.HoatKich == 1)
+                                    {
+                                        <input type="checkbox" name="selectedItems" value="@item.IdGioHangChiTiet" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger">Sản phẩm không khả dụng</span>
+                                        <input type="checkbox" hidden />
+                                    }
                                 </td>
                                 <td class="product-thumbnail">
                                     @if (item.HinhAnhs != null && item.HinhAnhs.Any())
@@ -152,7 +160,7 @@
                                     }
                                 </td>
                                 <td>
-                                    @if (item.Quantity == 0)
+                                    @if (item.KichHoat == 1 && item.Quantity == 0 && item.HoatKich == 1)
                                     {
                                         <span class="text-danger">Đã hết hàng</span>
                                     }
@@ -162,7 +170,7 @@
                                             <div class="input-group-prepend">
                                                 <button class="btn btn-outline-black decrease rounded-circle" type="button" aria-label="Giảm Số Lượng">&minus;</button>
                                             </div>
-                                            <input type="number" name="quantities[@item.IdGioHangChiTiet]" class="form-control text-center quantity-amount" value="@item.SoLuong" min="1" max="@item.Quantity" aria-label="Số Lượng" @(item.SoLuong == 0 ? "disabled" : "") />
+                                            <input type="number" name="quantities[@item.IdGioHangChiTiet]" class="form-control text-center quantity-amount" value="@item.SoLuong" min="1" max="@item.Quantity" aria-label="Số Lượng" />
                                             <div class="input-group-append">
                                                 <button class="btn btn-outline-black increase rounded-circle" type="button" aria-label="Tăng Số Lượng">&plus;</button>
                                             </div>
