@@ -136,6 +136,7 @@ namespace AppAPI.Repository
                 {
                     IdSanPham = sanPham.IdSanPham,
                     TenSanPham = sanPham.TenSanPham,
+                    KichHoat = sanPham.KichHoat
                     // Map các thuộc tính khác nếu cần
                 };
 

@@ -210,6 +210,7 @@ namespace APPMVC.Areas.Client.Controllers
                         GiaDaGiam = discountedPrice, // Gán giá giảm nếu có khuyến mãi
                         SoLuong = chiTiet.SoLuong,
                         XuatXu = chiTiet.XuatXu,
+                        KichHoat = chiTiet.KichHoat
                     });
                 }
 
@@ -229,6 +230,8 @@ namespace APPMVC.Areas.Client.Controllers
                     AvailableSizes = availableSizes.ToList(),
                     SelectedColorId = selectedColorId,
                     SelectedSizeId = selectedSizeId,
+                    KichHoat = firstDetail.KichHoat,
+
                 };
 
                 return View(viewModel);
@@ -244,9 +247,10 @@ namespace APPMVC.Areas.Client.Controllers
             // Lấy thông tin sản phẩm chi tiết theo bộ lọc
             var sanPhamChiTiet = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(productId, sizeId, colorId);
 
-            if (sanPhamChiTiet == null)
+            // Kiểm tra nếu sản phẩm chi tiết không tồn tại hoặc không được kích hoạt
+            if (sanPhamChiTiet == null || sanPhamChiTiet.KichHoat != 1)
             {
-                return Json(new { success = false, message = "Không tìm thấy sản phẩm phù hợp" });
+                return Json(new { success = false, message = "Sản phẩm không hoạt động" });
             }
 
             // Lấy hình ảnh cho sản phẩm chi tiết
@@ -268,7 +272,7 @@ namespace APPMVC.Areas.Client.Controllers
                 if (promotionDetails != null && promotionDetails.TrangThai == 1 && promotionDetails.PhanTramGiam > 0)
                 {
                     // Tính toán giá đã giảm
-                    discountedPrice =  sanPhamChiTiet.GiaGiam;
+                    discountedPrice = sanPhamChiTiet.GiaGiam;
 
                     // Ghi log giá giảm để kiểm tra
                     Console.WriteLine($"Discounted Price: {discountedPrice}, Original Price: {originalPrice}, Discount Percentage: {promotionDetails.PhanTramGiam}");
@@ -285,7 +289,8 @@ namespace APPMVC.Areas.Client.Controllers
                 {
                     base64 = Convert.ToBase64String(h.DataHinhAnh),
                     type = h.LoaiFileHinhAnh
-                }).ToList()
+                }).ToList(),
+                kichHoat = sanPhamChiTiet.KichHoat
             });
         }
         [HttpPost]
@@ -301,30 +306,30 @@ namespace APPMVC.Areas.Client.Controllers
                 var customerIdString = HttpContext.Session.GetString("IdKhachHang");
                 if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
                 {
-                    return Unauthorized(new { message = "Customer not found in session." });
+                    return Json(new { message = "Không tìm thấy khách hàng trong phiên." });
                 }
 
                 var idGioHang = await _cardService.GetCartIdByCustomerIdAsync(customerId);
                 if (idGioHang == Guid.Empty)
                 {
-                    return NotFound(new { message = "Shopping cart not found for this customer." });
+                    return Json(new { message = "Không tìm thấy giỏ hàng cho khách hàng này." });
                 }
 
                 var sanPhamChiTiet = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(productId, sizeId, colorId);
                 if (sanPhamChiTiet == null)
                 {
-                    return Json(new { success = false, message = "Product not found" });
+                    return Json(new { success = false, message = "Không tìm thấy sản phẩm." });
                 }
 
                 int requestedQuantity = 1;
                 if (requestedQuantity <= 0)
                 {
-                    return Json(new { success = false, message = "Quantity must be greater than zero." });
+                    return Json(new { success = false, message = "Số lượng phải lớn hơn không." });
                 }
 
                 if (requestedQuantity > sanPhamChiTiet.SoLuong)
                 {
-                    return Json(new { success = false, message = "Insufficient quantity available." });
+                    return Json(new { success = false, message = "Số lượng còn lại không đủ." });
                 }
 
                 var existingItem = await _gioHangChiTietService.GetByProductIdAndCartIdAsync(sanPhamChiTiet.IdSanPhamChiTiet, idGioHang);
@@ -334,14 +339,14 @@ namespace APPMVC.Areas.Client.Controllers
 
                     if (newQuantity > sanPhamChiTiet.SoLuong)
                     {
-                        return Json(new { success = false, message = "Total quantity exceeds available stock." });
+                        return Json(new { success = false, message = "Tổng số lượng vượt quá hàng tồn kho." });
                     }
 
                     existingItem.SoLuong = newQuantity;
                     existingItem.TongTien = existingItem.DonGia * newQuantity;
 
                     await _gioHangChiTietService.UpdateAsync(existingItem);
-                    return Ok(new { message = "Item quantity updated in cart successfully", existingItem });
+                    return Ok(new { message = "Số lượng mặt hàng đã được cập nhật trong giỏ hàng thành công", existingItem });
                 }
 
                 var donGia = sanPhamChiTiet.GiaGiam ?? sanPhamChiTiet.Gia;
@@ -359,13 +364,13 @@ namespace APPMVC.Areas.Client.Controllers
 
                 await _gioHangChiTietService.AddAsync(gioHangChiTiet);
 
-                return Ok(new { message = "Item added to cart successfully", gioHangChiTiet });
+                return Ok(new { message = "Mặt hàng đã được thêm vào giỏ hàng thành công", gioHangChiTiet });
             }
             catch (Exception ex)
             {
                 // Log the exception
-                Console.WriteLine($"Error in AddToCard: {ex.Message}");
-                return StatusCode(500, new { message = "An error occurred while adding to the cart." });
+                Console.WriteLine($"Lỗi trong AddToCard: {ex.Message}");
+                return StatusCode(500, new { message = "Đã xảy ra lỗi khi thêm vào giỏ hàng." });
             }
         }
         public async Task<IActionResult> BuyNow(Guid productId, Guid colorId, Guid sizeId, int quantity)

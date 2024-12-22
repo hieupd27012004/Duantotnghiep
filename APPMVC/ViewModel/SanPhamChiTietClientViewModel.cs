@@ -20,5 +20,6 @@ namespace APPMVC.ViewModel
         public List<KichCo> AvailableSizes { get; set; } = new List<KichCo>(); // Danh sách kích cỡ có sẵn
         public Guid? SelectedColorId { get; set; }
         public Guid? SelectedSizeId { get; set; }
+        public int KichHoat { get; set; }
     }
 }

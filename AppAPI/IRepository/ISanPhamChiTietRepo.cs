@@ -24,6 +24,8 @@ public class SanPhamDto
 {
     public Guid IdSanPham { get; set; }
     public string TenSanPham { get; set; }
+
+    public int KichHoat { get; set; }
     // Các thuộc tính cần thiết khác
 }
 

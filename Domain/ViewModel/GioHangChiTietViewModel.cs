@@ -20,6 +20,10 @@ namespace AppData.ViewModel
         public double? GiaDaGiam { get; set; }
         public double? PhanTramGiam { get; set; }
 
+        public int KichHoat {  get; set; }
+
+        public int HoatKich { get; set; }
+
     }
 
     public class UpdateQuantityViewModel
