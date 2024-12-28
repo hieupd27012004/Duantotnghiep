@@ -5,6 +5,38 @@
 }
 
 <style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+
+    .search-form {
+        display: flex;
+        justify-content: left;
+        margin: 20px 0 20px 20px; /* Thêm margin-left để tạo khoảng cách */
+    }
+
+        .search-form input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 300px;
+            margin-right: 10px;
+        }
+
+        .search-form button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+            .search-form button:hover {
+                background-color: #0056b3;
+            }
+
     .product-card {
         background-color: #fff;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
@@ -21,15 +53,15 @@
 
     .product-image {
         position: relative;
-        height: 200px; /* Fixed height for uniformity */
+        height: 200px;
         overflow: hidden;
     }
 
         .product-image img {
             width: 100%;
             height: auto;
-            object-fit: cover; /* Ensures the image covers the area */
-            position: absolute; /* Aligns the image correctly */
+            object-fit: cover;
+            position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -68,22 +100,29 @@
         }
 
     .product-info {
-        padding: 15px; /* Reduced padding for a compact look */
+        padding: 15px;
         text-align: center;
     }
 
     .product-title {
-        font-size: 16px; /* Slightly smaller font size */
+        font-size: 16px;
         font-weight: bold;
         margin-bottom: 10px;
     }
 
     .product-price {
-        font-size: 15px; /* Slightly smaller font size */
+        font-size: 15px;
         color: #007bff;
         margin-bottom: 20px;
     }
 </style>
+
+<div class="search-form">
+    <form method="get" action="@Url.Action("Index")">
+        <input type="text" name="name" placeholder="Tìm kiếm sản phẩm..." value="@ViewData["SearchTerm"]" />
+        <button type="submit">Tìm kiếm</button>
+    </form>
+</div>
 
 <div class="container">
     <div class="row">

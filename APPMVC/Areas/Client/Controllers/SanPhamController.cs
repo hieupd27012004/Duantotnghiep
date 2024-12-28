@@ -9,6 +9,9 @@ using AppData.ViewModel;
 using Microsoft.EntityFrameworkCore;
 using Castle.Core.Resource;
 using APPMVC.Session;
+using AppData;
+using System.Drawing;
+using NuGet.Packaging;
 
 namespace APPMVC.Areas.Client.Controllers
 {
@@ -29,6 +32,7 @@ namespace APPMVC.Areas.Client.Controllers
         private readonly IKhachHangService _khachHangService;
         private readonly IPromotionService _promotionService;
         private readonly IDanhMucService _danhMucService;
+        private readonly AppDbcontext _context;
         public SanPhamController(
             ISanPhamService sanPhamservice,
             ISanPhamChiTietService sanPhamCTservice,
@@ -43,7 +47,8 @@ namespace APPMVC.Areas.Client.Controllers
             IPromotionSanPhamChiTietService promotionSanPhamChiTietService,
             IKhachHangService khachHangService,
             IPromotionService promotionService,
-            IDanhMucService danhMucService)
+            IDanhMucService danhMucService,
+            AppDbcontext context)
         {
             _sanPhamservice = sanPhamservice;
             _sanPhamCTservice = sanPhamCTservice;
@@ -59,38 +64,84 @@ namespace APPMVC.Areas.Client.Controllers
             _khachHangService = khachHangService;
             _promotionService = promotionService;
             _danhMucService = danhMucService;
+            _context = context;
         }
 
-        public async Task<IActionResult> Index(string? name)
+        public async Task<IActionResult> Index(string? name, Guid? categoryId, Guid? colorId)
         {
+            // Fetch all products from the service
             var sanPhams = await _sanPhamservice.GetSanPhamClient(name);
-            var activeSanPhams = sanPhams.Where(sp => sp.KichHoat == 1).ToList();
 
+            // Filter products by category if categoryId is provided
+            if (categoryId.HasValue)
+            {
+                sanPhams = sanPhams.Where(sp => sp.IdDanhMuc == categoryId.Value).ToList();
+            }
+
+            // Get all product details for filtering by color
+            var allChiTietSanPhams = new List<SanPhamChiTiet>();
+            foreach (var sanPham in sanPhams)
+            {
+                var chiTietList = await _sanPhamCTservice.GetSanPhamChiTietBySanPhamId(sanPham.IdSanPham);
+                allChiTietSanPhams.AddRange(chiTietList);
+            }
+
+            // Filter product details by color if colorId is provided
+            if (colorId.HasValue)
+            {
+                // Lấy danh sách IdSanPhamChiTiet dựa trên mauSacId
+                var sanPhamChiTietIds = await _sanPhamChiTietMauSacService.GetSanPhamChiTietIdsByMauSacId(colorId.Value);
+
+                // Kiểm tra xem sanPhamChiTietIds có rỗng không
+                if (sanPhamChiTietIds == null || !sanPhamChiTietIds.Any())
+                {
+                    // Nếu không có IdSanPhamChiTiet nào, hiển thị thông báo
+                    ViewData["Message"] = "No products found for the selected color.";
+                }
+
+                // Lọc sản phẩm dựa trên IdSanPhamChiTiet
+                var filteredSanPhams = new List<SanPham>();
+
+                foreach (var sanPham in sanPhams)
+                {
+                    // Lấy danh sách chi tiết sản phẩm cho mỗi sản phẩm
+                    var chiTietList = await _sanPhamCTservice.GetSanPhamChiTietBySanPhamId(sanPham.IdSanPham);
+
+                    // Kiểm tra xem có sản phẩm chi tiết nào có IdSanPhamChiTiet trong danh sách không
+                    if (chiTietList.Any(ct => sanPhamChiTietIds.Contains(ct.IdSanPhamChiTiet)))
+                    {
+                        filteredSanPhams.Add(sanPham);
+                    }
+                }
+
+                // Cập nhật danh sách sanPhams với sản phẩm đã lọc
+                sanPhams = filteredSanPhams;
+            }
+            // Filter products by name if provided
+            if (!string.IsNullOrEmpty(name))
+            {
+                sanPhams = sanPhams.Where(sp => sp.TenSanPham.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            var activeSanPhams = sanPhams.Where(sp => sp.KichHoat == 1).ToList();
             var sanPhamClientViewModels = new List<SanPhamClientViewModel>();
 
             foreach (var sanPham in activeSanPhams)
             {
                 var sanPhamChiTietList = await _sanPhamCTservice.GetSanPhamChiTietBySanPhamId(sanPham.IdSanPham);
-
-                var hasActivePromotion = false;
                 double highestDiscountPercentage = 0;
                 double? minPrice = null;
                 double? maxPrice = null;
 
                 foreach (var sanPhamChiTiet in sanPhamChiTietList)
                 {
-                    // Lấy ID khuyến mãi tương ứng với sản phẩm chi tiết
                     var promotionId = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(sanPhamChiTiet.IdSanPhamChiTiet);
 
-                    // Kiểm tra nếu promotionId không phải là Guid.Empty
                     if (promotionId.HasValue && promotionId.Value != Guid.Empty)
                     {
                         var promotionDetails = await _promotionService.GetPromotionByIdAsync(promotionId.Value);
-                        if (promotionDetails != null && promotionDetails.TrangThai == 1)
+                        if (promotionDetails?.TrangThai == 1)
                         {
-                            hasActivePromotion = true;
-
-                            // Tính toán giá giảm chỉ nếu có khuyến mãi
                             if (sanPhamChiTiet.GiaGiam.HasValue && sanPhamChiTiet.GiaGiam.Value < sanPhamChiTiet.Gia)
                             {
                                 var discountPercentage = Math.Round(((sanPhamChiTiet.Gia - sanPhamChiTiet.GiaGiam.Value) / sanPhamChiTiet.Gia) * 100);
@@ -99,10 +150,7 @@ namespace APPMVC.Areas.Client.Controllers
                         }
                     }
 
-                    // Tính toán giá hiệu dụng (giá sau khuyến mãi)
-                    double effectivePrice = sanPhamChiTiet.GiaGiam.HasValue ? sanPhamChiTiet.GiaGiam.Value : sanPhamChiTiet.Gia;
-
-                    // Cập nhật giá thấp nhất và cao nhất
+                    double effectivePrice = sanPhamChiTiet.GiaGiam ?? sanPhamChiTiet.Gia;
                     minPrice = minPrice == null ? effectivePrice : Math.Min(minPrice.Value, effectivePrice);
                     maxPrice = maxPrice == null ? effectivePrice : Math.Max(maxPrice.Value, effectivePrice);
                 }
@@ -137,16 +185,31 @@ namespace APPMVC.Areas.Client.Controllers
                     IdSanPham = sanPham.IdSanPham,
                     TenSanPham = sanPham.TenSanPham,
                     SoLuongMau = colorImages.Count,
-                    // Cập nhật giá thấp nhất và cao nhất
                     GiaThapNhat = minPrice ?? sanPhamChiTietList.Min(x => x.Gia),
                     GiaCaoNhat = maxPrice ?? sanPhamChiTietList.Max(x => x.Gia),
                     RepresentativeImage = representativeImage,
                     ColorImages = colorImages,
-                    HighestDiscountPercentage = highestDiscountPercentage // Phần trăm cao nhất từ sản phẩm có khuyến mãi
+                    HighestDiscountPercentage = highestDiscountPercentage
                 };
 
                 sanPhamClientViewModels.Add(viewModel);
             }
+
+            // Fetch categories, colors, and sizes
+            var categories = await _danhMucService.GetDanhMuc(null);
+            var colors = await _mauSacService.GetMauSac(null);
+            var sizes = await _kichCoService.GetKichCo(null);
+
+            // Ensure these collections are not null and contain data
+            if (categories == null || colors == null || sizes == null)
+            {
+                throw new Exception("Failed to fetch data for categories, colors, or sizes.");
+            }
+
+            ViewData["Categories"] = categories;
+            ViewData["Colors"] = colors;
+            ViewData["Sizes"] = sizes;
+            ViewData["SearchTerm"] = name; // Keep search term for view
 
             return View(sanPhamClientViewModels);
         }

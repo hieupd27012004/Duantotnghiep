@@ -173,9 +173,14 @@ namespace APPMVC.Areas.Client.Controllers
             return View(viewModel);
         }
         [HttpPost]
-        public async Task<IActionResult> Remove(Guid idGioHangChiTiet)
+        public async Task<IActionResult> Remove([FromBody] RemoveRequest request)
         {
-            await _gioHangChiTietService.DeleteAsync(idGioHangChiTiet);
+            if (request == null || request.IdGioHangChiTiet == Guid.Empty)
+            {
+                return Json(new { success = false, message = "Invalid ID" });
+            }
+
+            await _gioHangChiTietService.DeleteAsync(request.IdGioHangChiTiet);
             return Json(new { success = true });
         }
         [HttpPost]
