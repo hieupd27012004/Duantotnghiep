@@ -1,4 +1,5 @@
-﻿using AppData.ViewModel;
+﻿using AppData.Model;
+using AppData.ViewModel;
 using APPMVC.IService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -46,9 +47,10 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 return Unauthorized(new { message = "Customer not found in session." });
             }
-
             var hoaDons = await _hoaDonService.GetHoaDonsByCustomerIdAsync(customerId);
-            return View(hoaDons);
+            var sortedHoaDons = hoaDons.OrderByDescending(hd => hd.NgayTao).ToList();
+
+            return View(sortedHoaDons);
         }
         [HttpGet]
         public async Task<ActionResult> Details(Guid id)

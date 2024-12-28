@@ -17,5 +17,6 @@ namespace AppAPI.IService
         Task<bool> ResetPass(string email, string newPassword);
         Task<bool> CheckSDT(string soDienThoai);
         Task<bool> CheckMail(string mail);
+        Task<List<NhanVien>> SearchNhanVien(string? name);
     }
 }

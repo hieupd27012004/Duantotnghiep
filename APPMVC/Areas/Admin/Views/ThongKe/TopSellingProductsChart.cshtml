@@ -3,27 +3,25 @@
     ViewData["Title"] = "Top Sản Phẩm Bán Chạy (Biểu Đồ Tròn)";
 }
 
-<h1 class="text-center mb-4">Top Sản Phẩm Bán Nhiều</h1>
+<h1 class="text-center mb-4">Top Sản Phẩm Bán Chạy</h1>
 
 <!-- Container for form and chart -->
-<div class="d-flex justify-content-between mb-4" style="height: 400px;">
+<div class="d-flex justify-content-between mb-4" style="height: 450px;">
     <!-- Form lọc dữ liệu -->
-    <form method="get" class="me-4 d-flex justify-items-center" style="flex: 1; height: 100%; padding: 15px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
-        <div class="form-group ">           
-            <div class="form-control mb-5 mt-7">
-                <label for="startDate" class="me-2">Từ ngày:</label>
-                <input type="date" id="startDate" name="startDate" value="@ViewData["StartDate"]" class="form-control" style="width: 180px;">
-            </div>
-            <div class="form-control mt-5">
-                <label for="endDate" class="me-2">Đến ngày:</label>
-                <input type="date" id="endDate" name="endDate" value="@ViewData["EndDate"]" class="form-control" style="width: 180px;">
-            </div>        
-            <button type="submit" class="btn btn-primary ms-2 mb-0">Lọc</button>
+    <form method="get" class="me-4 d-flex flex-column justify-content-between" style="flex: 1; height: 100%; padding: 20px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);">
+        <div class="form-group mb-4">
+            <label for="startDate" class="mb-2">Từ ngày:</label>
+            <input type="date" id="startDate" name="startDate" value="@ViewData["StartDate"]" class="form-control" style="width: 100%; border-radius: 8px;">
         </div>
+        <div class="form-group mb-4">
+            <label for="endDate" class="mb-2">Đến ngày:</label>
+            <input type="date" id="endDate" name="endDate" value="@ViewData["EndDate"]" class="form-control" style="width: 100%; border-radius: 8px;">
+        </div>
+        <button type="submit" class="btn btn-primary">Lọc</button>
     </form>
 
     <!-- Vùng chứa biểu đồ -->
-    <div class="chart-container d-flex justify-content-center" style="flex: 2; height: 100%; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
+    <div class="chart-container" style="flex: 2; height: 100%; padding: 20px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);">
         <canvas id="productChart" style="width: 100%; height: 100%;"></canvas>
     </div>
 </div>
@@ -32,6 +30,7 @@
 <script>
     const labels = @Html.Raw(Json.Serialize(Model.Select(x => x.Label).ToArray()));
     const dataValues = @Html.Raw(Json.Serialize(Model.Select(x => x.Value).ToArray()));
+
     const data = {
         labels: labels,
         datasets: [{
@@ -44,10 +43,32 @@
         }]
     };
 
-    // Hiển thị biểu đồ
     const config = {
         type: 'pie',
         data: data,
+        options: {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function (tooltipItem) {
+                            const label = tooltipItem.label || '';
+                            const value = dataValues[tooltipItem.dataIndex];
+                            const price = priceValues[tooltipItem.dataIndex].toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+                            return `${label}: ${value} sản phẩm - ${price}`;
+                        }
+                    }
+                },
+                legend: {
+                    position: 'right',
+                    labels: {
+                        font: {
+                            size: 14
+                        },
+                        color: '#555'
+                    }
+                }
+            }
+        }
     };
 
     const productChart = new Chart(
@@ -59,7 +80,7 @@
 <style>
     body {
         font-family: 'Arial', sans-serif;
-        background-color: #f8f9fa;
+        background-color: #f4f6f9;
         margin: 0;
         padding: 20px;
     }
@@ -68,27 +89,38 @@
         color: #333;
         font-weight: bold;
         margin-bottom: 20px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .form-group {
-        flex: 1; 
-    }
-
-    label {
+    .form-group label {
         font-weight: bold;
         color: #555;
     }
 
+    .form-control {
+        padding: 10px;
+        border: 1px solid #ddd;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
     .btn-primary {
-        margin-top: 10px;
         background-color: #007bff;
-        border-color: #007bff;
-        transition: background-color 0.2s, transform 0.2s;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 14px;
+        transition: all 0.3s ease-in-out;
     }
 
         .btn-primary:hover {
             background-color: #0056b3;
-            border-color: #0056b3;
-            transform: scale(1.05); /* Hiệu ứng phóng to khi hover */
+            transform: translateY(-2px);
         }
+
+    .chart-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 </style>

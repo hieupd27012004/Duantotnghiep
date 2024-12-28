@@ -284,6 +284,11 @@ namespace APPMVC.Areas.Admin.Controllers
                     if (actionType == "huy" && hoaDon.TrangThai != "Đã Hủy")
                     {
                         hoaDon.TrangThai = "Đã Hủy";
+                        foreach (var item in lichSu)
+                        {
+                            item.TrangThai = "Đã Hủy";
+                            await _lichSuThanhToanService.UpdateAsync(item);
+                        }
                         await UpdateProductQuantities2(hoaDon.IdHoaDon);
                     }
                     else
@@ -311,6 +316,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     if (actionType == "huy" && hoaDon.TrangThai != "Đã Hủy")
                     {
                         hoaDon.TrangThai = "Đã Hủy";
+                        
                         await UpdateProductQuantities2(hoaDon.IdHoaDon);
                     }
                     else if (actionType == "quayLai")

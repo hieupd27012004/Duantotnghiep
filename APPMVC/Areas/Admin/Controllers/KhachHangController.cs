@@ -52,6 +52,42 @@ namespace APPMVC.Areas.Admin.Controllers
             var pagedKhachHangViewModels = sortedKhachHangViewModels.ToPagedList(page, pageSize);
             return View(pagedKhachHangViewModels);
         }
+
+        public async Task<IActionResult> SearchKhachHang(string? name, int page = 1)
+        {
+            page = page < 1 ? 1 : page;
+            int pageSize = 5;
+
+            // Gọi dịch vụ để tìm kiếm nhân viên
+            var khachHangs = await _service.SearchKhachHang(name);
+
+            var filteredKhachHangs = khachHangs
+                .Where(kh => kh.KichHoat == 1) // Giả sử TrangThai là thuộc tính của KhachHang
+                .ToList();
+
+            var khachHangViewModels = new List<KhachHangViewModel>();
+
+            foreach (var khachHang in filteredKhachHangs)
+            {
+                var diaChiList = await _diaChiService.GetAllAsync(khachHang.IdKhachHang);
+                var diaChi = diaChiList?.FirstOrDefault();
+
+                khachHangViewModels.Add(new KhachHangViewModel
+                {
+                    KhachHang = khachHang,
+                    DiaChi = diaChi?.WardName
+                });
+            }
+
+            var sortedKhachHangViewModels = khachHangViewModels
+                .OrderByDescending(k => k.KhachHang.NgayTao) // Sắp xếp theo NgayTao
+                .ToList();
+
+            var pagedKhachHangViewModels = sortedKhachHangViewModels.ToPagedList(page, pageSize);
+            return View(pagedKhachHangViewModels);
+
+        } 
+
         public IActionResult Create()
         {
             return PartialView("Create");

@@ -20,5 +20,6 @@ namespace APPMVC.IService
         //Check SDT voi Mail
         Task<bool> CheckSDT(string soDienThoai);
         Task<bool> CheckMail(string mail);
+        Task<List<KhachHang>> SearchKhachHang(string? name);
     }
 }

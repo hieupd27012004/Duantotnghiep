@@ -5,31 +5,32 @@
     Layout = "~/Areas/Client/Views/Shared/_Tttk.cshtml";
 }
 
-<h2>@ViewBag.Title</h2>
+<h2 class="page-title">@ViewBag.Title</h2>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Thêm Địa Chỉ Mới</a>
 </p>
-<table class="table">
-    <thead>
+
+<table class="table table-hover table-bordered">
+    <thead class="table-light">
         <tr>
             <th hidden>@Html.DisplayNameFor(model => model.IdDiaChi)</th>
-            <th>@Html.DisplayNameFor(model => model.HoTen)</th>
-            <th>@Html.DisplayNameFor(model => model.SoDienThoai)</th>
+            <th>Họ Tên</th>
+            <th>Số Điện Thoại</th>
             <th>Địa Chỉ Cụ Thể</th>
-            <th>@Html.DisplayNameFor(model => model.ProvinceName)</th>
-            <th>@Html.DisplayNameFor(model => model.DistrictName)</th>
-            <th>@Html.DisplayNameFor(model => model.WardName)</th>
-            <th>@Html.DisplayNameFor(model => model.DiaChiMacDinh)</th>
+            <th>Tỉnh/Thành phố</th>
+            <th>Quận/Huyện</th>
+            <th>Phường/Xã</th>
+            <th>Địa Chỉ Mặc Định</th>
             <th hidden>@Html.DisplayNameFor(model => model.IdKhachHang)</th>
-            <th></th>
+            <th>Hành Động</th>
         </tr>
     </thead>
     <tbody>
         @if (Model == null || !Model.Any())
         {
             <tr>
-                <td colspan="9">No data available.</td>
+                <td colspan="9" class="text-center">Chưa có địa chỉ nào.</td>
             </tr>
         }
         else
@@ -44,14 +45,79 @@
                     <td>@Html.DisplayFor(modelItem => item.ProvinceName)</td>
                     <td>@Html.DisplayFor(modelItem => item.DistrictName)</td>
                     <td>@Html.DisplayFor(modelItem => item.WardName)</td>
-                    <td>@Html.DisplayFor(modelItem => item.DiaChiMacDinh)</td>
+                    <td class="text-center">
+                        @if (item.DiaChiMacDinh)
+                        {
+                            <span class="badge bg-success">Mặc Định</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Phụ</span>
+                        }
+                    </td>
                     <td hidden> @Html.DisplayFor(modelItem => item.IdKhachHang)</td>
                     <td>
-                        @Html.ActionLink("EditDC", "EditDC", new { IdDiaChi = item.IdDiaChi }) |
-                        @Html.ActionLink("Delete", "Delete", new { IdDiaChi = item.IdDiaChi })
+                        <a asp-action="EditDC" asp-route-IdDiaChi="@item.IdDiaChi" class="btn btn-sm btn-warning">Sửa</a>
+                        <a asp-action="Delete" asp-route-IdDiaChi="@item.IdDiaChi" class="btn btn-sm btn-danger">Xóa</a>
                     </td>
                 </tr>
             }
         }
     </tbody>
 </table>
+
+<style>
+    .page-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 20px;
+    }
+
+    .table {
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+        .table thead {
+            background-color: #f8f9fa;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+    .btn {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+    .btn-warning {
+        background-color: #ffc107;
+        color: #fff;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .badge {
+        padding: 5px 10px;
+        font-size: 12px;
+        border-radius: 12px;
+    }
+</style>

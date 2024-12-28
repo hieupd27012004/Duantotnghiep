@@ -19,6 +19,7 @@ namespace AppAPI.IService
         //Check
         Task<bool> CheckSDT(string soDienThoai);
         Task<bool> CheckMail(string mail);
+        Task<List<KhachHang>> SearchKhachHang(string? name);
 
     }
 }

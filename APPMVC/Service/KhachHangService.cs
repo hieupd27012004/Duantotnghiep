@@ -166,5 +166,10 @@ namespace APPMVC.Service
             var response = await _httpClient.GetAsync($"/api/KhachHang/CheckMail?mail={Uri.EscapeDataString(mail)}");
             return response.IsSuccessStatusCode && bool.Parse(await response.Content.ReadAsStringAsync());
         }
+        public async Task<List<KhachHang>> SearchKhachHang(string? name)
+        {
+            var repo = await _httpClient.GetFromJsonAsync<List<KhachHang>>($"/api/KhachHang/SearchKhachHang?name={name}");
+            return repo;
+        }
     }
 }

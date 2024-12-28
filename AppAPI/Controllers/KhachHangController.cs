@@ -186,5 +186,18 @@ namespace AppAPI.Controllers
                 return StatusCode(500, new { message = "Lỗi trong quá trình kiểm tra", error = ex.Message });
             }
         }
+        [HttpGet("SearchKhachHang")]
+        public async Task<IActionResult> SearchKhachHang(string? name)
+        {
+            try
+            {
+                var sanPham = await _service.SearchKhachHang(name); // Await the async method
+                return Ok(sanPham);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

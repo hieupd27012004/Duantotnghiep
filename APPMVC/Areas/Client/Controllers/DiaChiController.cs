@@ -52,23 +52,11 @@ namespace APPMVC.Areas.Client.Controllers
                 await LoadDropDownsCreate(dc);
 				return View(dc);
 			}
-			// Kiểm tra địa chỉ mặc định           
-			//if (dc.DiaChiMacDinh)
-			//{
-			//	bool check = await _services.HasDefaultAddressAsync(id);
-			//	if (check)
-			//	{
-			//		ModelState.AddModelError("", "Khách hàng này đã có một địa chỉ mặc định.");
-   //                 ViewBag.Provinces = await _services.GetProvincesAsync();
-   //                 await LoadDropDownsCreate(dc);
-			//		return View(dc);
-			//	}
-			//}
 			if (!ModelState.IsValid)
 			{
 				foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
 				{
-					Console.WriteLine($"Error: {error.ErrorMessage}");  // In lỗi ra console
+					Console.WriteLine($"Error: {error.ErrorMessage}"); 
 				}
                 ViewBag.Provinces = await _services.GetProvincesAsync();
                 await LoadDropDownsCreate(dc);
@@ -76,7 +64,7 @@ namespace APPMVC.Areas.Client.Controllers
 			}
 			if (string.IsNullOrEmpty(IdKhachHang))
 			{
-				return RedirectToAction("Login", "KhachHang");  // Nếu chưa đăng nhập, chuyển hướng đến trang login
+				return RedirectToAction("Login", "KhachHang");  
 			}
 			dc.IdKhachHang = id;
 			//Nếu tất cả ok thì thêm =))
@@ -104,8 +92,8 @@ namespace APPMVC.Areas.Client.Controllers
             if (dc.WardId == null)
             {
                 ModelState.AddModelError("WardId", "Vui lòng chọn phường/xã.");
-                await LoadDropDowns(dc);  // Tải lại các dropdown
-                return View(dc);  // Trả về lại view với thông báo lỗi
+                await LoadDropDowns(dc); 
+                return View(dc); 
             }
             if (IdDiaChi == Guid.Empty)
             {

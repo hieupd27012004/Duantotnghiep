@@ -564,7 +564,9 @@ namespace APPMVC.Areas.Client.Controllers
                 var result = await SaveOrder(cartItems, thanhToanViewModel, customerId, "Thanh Toán COD", "Tiền Mặt", "Chờ Thanh Toán");
                 if (result)
                 {
-                    return RedirectToAction("Index", new { message = "Đặt hàng thành công!" });
+                    TempData["SuccessMessage"] = "Đặt hàng thành công! Cảm ơn bạn đã mua sắm với chúng tôi.";
+                    return RedirectToAction("Index");
+
                 }
             }
             else if (model.PaymentMethod == "online_payment")
@@ -655,7 +657,8 @@ namespace APPMVC.Areas.Client.Controllers
                     HttpContext.Session.Remove("ThanhToanViewModel");
                     HttpContext.Session.Remove("DiscountAmount"); // Remove discount amount if not needed anymore
 
-                    return RedirectToAction("Index", new { message = "Thanh toán thành công!" });
+                    TempData["SuccessMessage"] = "Đặt hàng thành công! Cảm ơn bạn đã mua sắm với chúng tôi.";
+                    return RedirectToAction("Index");
                 }
             }
 

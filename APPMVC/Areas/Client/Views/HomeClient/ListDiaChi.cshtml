@@ -68,7 +68,16 @@
                         <td>@diaChi.ProvinceName</td>
                         <td>@diaChi.DistrictName</td>
                         <td>@diaChi.WardName</td>
-                        <td>@diaChi.DiaChiMacDinh</td>
+                        <td>
+                            @if (diaChi.DiaChiMacDinh)
+                            {
+                                <span class="badge bg-success">Mặc Định</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Phụ</span>
+                            }
+                        </td>
                         <td>
                             <a  asp-action="EditDC" asp-route-id="@diaChi.IdDiaChi">Chỉnh Sửa</a>
                         </td>

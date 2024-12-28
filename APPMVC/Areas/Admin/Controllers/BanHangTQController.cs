@@ -122,7 +122,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
             if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
             {
-                return Unauthorized(new { message = "Nhân viên không tồn tại trong phiên làm việc." });
+                return RedirectToAction("Login", "NhanVien");
             }
 
             var currentOrders = await _hoaDonService.GetAllAsync();
@@ -186,7 +186,7 @@ namespace APPMVC.Areas.Admin.Controllers
         }
         [HttpPost]
         public async Task<IActionResult> ThemKhachHang(HoaDonChiTietViewModel.KhachHangViewModel model)
-        {
+        {         
             if (!ModelState.IsValid)
             {
                 return Json(new { success = false, message = "Vui lòng kiểm tra thông tin đã nhập." });
