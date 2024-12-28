@@ -33,4 +33,8 @@ namespace AppData.ViewModel
         public double Quantity { get; set; }
         public double TongTien { get; set; } // Đổi tên thuộc tính
     }
+    public class RemoveRequest
+    {
+        public Guid IdGioHangChiTiet { get; set; }
+    }
 }

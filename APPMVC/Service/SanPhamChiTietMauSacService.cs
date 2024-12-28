@@ -34,11 +34,6 @@ namespace AppAPI.Service
             }
         }
 
-        // Retrieve a specific Mau Sac by ID
-        public async Task<SanPhamChiTietMauSac> GetMauSacById(Guid id)
-        {
-            return await _httpClient.GetFromJsonAsync<SanPhamChiTietMauSac>($"api/SanPhamChiTietMauSac/getbyid?id={id}");
-        }
 
         // Create a new Mau Sac
         public async Task Create(SanPhamChiTietMauSac sanPhamChiTietMauSac)
@@ -71,5 +66,21 @@ namespace AppAPI.Service
                 return new List<MauSac>(); // Return an empty list or handle accordingly
             }
         }
+
+        public async Task<List<Guid>> GetSanPhamChiTietIdsByMauSacId(Guid mauSacId)
+        {
+            try
+            {
+                // Gọi API để lấy danh sách IdSanPhamChiTiet dựa trên mauSacId
+                return await _httpClient.GetFromJsonAsync<List<Guid>>($"api/SanPhamChiTietMauSac/getbyid?id={mauSacId}");
+            }
+            catch (HttpRequestException ex)
+            {
+                // Xử lý lỗi
+                Console.WriteLine($"Error fetching SanPhamChiTiet IDs: {ex.Message}");
+                return new List<Guid>(); // Trả về danh sách rỗng
+            }
+        }
+
     }
 }

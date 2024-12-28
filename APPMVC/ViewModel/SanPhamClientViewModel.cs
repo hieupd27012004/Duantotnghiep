@@ -12,5 +12,5 @@
         public double HighestDiscountPercentage { get; set; }
     }
 
-   
+
 }

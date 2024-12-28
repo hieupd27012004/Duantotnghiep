@@ -76,6 +76,10 @@ namespace AppData.ViewModel
 
             public double OriginalPrice { get; set; }
             public double DiscountAmount { get; set; } 
+
+            public int KichHoat { get; set; }
+
+            public int HoatKich { get; set; }
         }
         public class HoaDonViewModel
         {

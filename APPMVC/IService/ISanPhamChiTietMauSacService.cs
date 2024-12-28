@@ -6,7 +6,7 @@ namespace APPMVC.IService
     {
         Task<List<SanPhamChiTietMauSac>> GetAllMauSac();
 
-        Task<SanPhamChiTietMauSac> GetMauSacById(Guid id);
+        Task<List<Guid>> GetSanPhamChiTietIdsByMauSacId(Guid mauSacId);
 
         // Create a new Mau Sac
         Task Create(SanPhamChiTietMauSac sanPhamChiTietMauSac);

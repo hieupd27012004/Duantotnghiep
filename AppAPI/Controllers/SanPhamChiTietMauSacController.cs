@@ -31,15 +31,21 @@ namespace AppAPI.Controllers
         {
             try
             {
-                var sanPhamChiTietMauSac = _service.GetMauSacById(id);
-                if (sanPhamChiTietMauSac == null)
+                // Gọi đến service để lấy danh sách IdSanPhamChiTiet dựa trên id màu sắc
+                var sanPhamChiTietMauSacIds = _service.GetSanPhamChiTietIdsByMauSacId(id);
+
+                // Kiểm tra xem danh sách có rỗng không
+                if (sanPhamChiTietMauSacIds == null || !sanPhamChiTietMauSacIds.Any())
                 {
-                    return NotFound($"SanPhamChiTietMauSac with ID {id} not found.");
+                    return NotFound($"No SanPhamChiTiet found for MauSac ID {id}.");
                 }
-                return Ok(sanPhamChiTietMauSac);
+
+                // Trả về danh sách IdSanPhamChiTiet
+                return Ok(sanPhamChiTietMauSacIds);
             }
             catch (Exception ex)
             {
+                // Trả về mã lỗi 500 nếu có lỗi xảy ra
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }

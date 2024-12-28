@@ -46,4 +46,5 @@ namespace AppData.ViewModel
         public List<IFormFile>? Files { get; set; } = new List<IFormFile>();
 
     }
+
 }

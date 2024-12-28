@@ -5,7 +5,7 @@ namespace AppAPI.IService
     public interface ISanPhamChiTietMauSacService
     {
         List<SanPhamChiTietMauSac> GetSanPhamChiTietMauSac();
-        SanPhamChiTietMauSac GetMauSacById(Guid id);
+        List<Guid> GetSanPhamChiTietIdsByMauSacId(Guid mauSacId);
 
         // Create a new Mau Sac
         bool Create(SanPhamChiTietMauSac mauSac);

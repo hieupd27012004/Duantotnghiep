@@ -174,12 +174,27 @@
             {
                 foreach (var sanPham in Model.SanPhamChiTiets)
                 {
-                    <tr style="@(sanPham.SoLuong == 0 ? "background-color: #d6d6d6;" : "")">
+                    string rowStyle = string.Empty;
+                    string statusMessage = string.Empty;
+
+                    // Kiểm tra KichHoat và HoatKich
+                    if (sanPham.KichHoat != 1 || sanPham.HoatKich != 1)
+                    {
+                        rowStyle = "background-color: #d6d6d6;"; // Màu xám
+                        statusMessage = "Sản phẩm đã ngừng hoạt động"; // Thông điệp hiển thị
+                    }
+                    else if (sanPham.SoLuong == 0)
+                    {
+                        rowStyle = "background-color: #d6d6d6;"; // Màu xám nếu không có hàng
+                        statusMessage = "Đã hết hàng"; // Thông điệp hiển thị
+                    }
+
+                    <tr style="@rowStyle">
                         <td>@sanPham.MaSanPham</td>
                         <td>@sanPham.ProductName</td>
                         <td>
                             <div class="quantity-container">
-                                @if (sanPham.SoLuong > 0)
+                                @if (sanPham.SoLuong > 0 && sanPham.KichHoat == 1 && sanPham.HoatKich == 1)
                                 {
                                     <button class="btn btn-outline-secondary decrease" type="button" aria-label="Decrease Quantity" data-id="@sanPham.IdSanPhamChiTiet">−</button>
                                     <input type="number" name="quantities[@sanPham.IdSanPhamChiTiet]"
@@ -193,7 +208,7 @@
                                 }
                                 else
                                 {
-                                    <span style="color: red;">Đã hết hàng</span>
+                                    <span style="color: red;">@statusMessage</span>
                                     <input type="hidden" value="0" />
                                 }
                             </div>

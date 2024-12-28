@@ -362,7 +362,9 @@ namespace APPMVC.Areas.Admin.Controllers
                         HinhAnhs = hinhAnhs,
                         IdHoaDonChiTiet = hoaDonChiTiet.IdHoaDonChiTiet,
                         GiaDaGiam = giaDaGiam, // Will be null if promotion is not active
-                        PhanTramGiam = phanTramGiam // Will be null if promotion is not active
+                        PhanTramGiam = phanTramGiam, // Will be null if promotion is not active
+                        KichHoat = sanPhamCT.KichHoat,
+                        HoatKich = sanPham.KichHoat
                     };
                 }
                 return null; // Handle case where sanPhamCT is null
@@ -461,7 +463,9 @@ namespace APPMVC.Areas.Admin.Controllers
                                 KichCo = kichCoTenList,
                                 HinhAnhs = hinhAnhs,
                                 GiaDaGiam = giaDaGiam,
-                                PhanTramGiam = phanTramGiam
+                                PhanTramGiam = phanTramGiam,
+                                KichHoat = sanPhamCT.KichHoat,
+                                HoatKich = sanPham.KichHoat
                             };
                         }
                         catch (Exception innerEx)
@@ -626,6 +630,7 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 return Unauthorized(new { message = "Nhân viên không tồn tại trong phiên làm việc." });
             }
+
             var TenNV = HttpContext.Session.GetString("NhanVienName");
             var hoaDonChiTietList = await _hoaDonChiTietService.GetByIdHoaDonAsync(idHoaDon);
             if (hoaDonChiTietList == null)
@@ -641,14 +646,19 @@ namespace APPMVC.Areas.Admin.Controllers
 
             var sanPhamCTList = await Task.WhenAll(sanPhamCTTasks);
 
-            // Check stock and calculate total
             foreach (var (hoaDonChiTiet, sanPhamCT) in hoaDonChiTietList.Zip(sanPhamCTList, (detail, product) => (detail, product)))
             {
                 if (sanPhamCT != null)
                 {
+                    var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(hoaDonChiTiet.IdSanPhamChiTiet);
+                    if (sanPham == null || sanPhamCT.KichHoat == 0 || sanPham.KichHoat == 0)
+                    {
+                        TempData["ErrorMessage"] = $"Sản phẩm {sanPham?.TenSanPham} không còn hoạt động.";
+                        return RedirectToAction("Index");
+                    }
+
                     if (sanPhamCT.SoLuong < hoaDonChiTiet.SoLuong)
                     {
-                        var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(hoaDonChiTiet.IdSanPhamChiTiet);
                         TempData["ErrorMessage"] = $"Không đủ số lượng cho sản phẩm {sanPham.TenSanPham}.";
                         return RedirectToAction("Index");
                     }
@@ -902,6 +912,7 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
             }
+
             var TenNV = HttpContext.Session.GetString("NhanVienName");
             var NVIdString = HttpContext.Session.GetString("IdNhanVien");
             if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
@@ -925,9 +936,15 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 if (sanPhamCT != null)
                 {
+                    // Kiểm tra KichHoat và HoatKich
+                    var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(hoaDonChiTiet.IdSanPhamChiTiet);
+                    if (sanPham == null || sanPhamCT.KichHoat == 0 || sanPham.KichHoat == 0)
+                    {
+                        return Json(new { success = false, message = $"Sản phẩm {sanPham?.TenSanPham} không còn hoạt động." });
+                    }
+
                     if (sanPhamCT.SoLuong < hoaDonChiTiet.SoLuong)
                     {
-                        var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(hoaDonChiTiet.IdSanPhamChiTiet);
                         return Json(new { success = false, message = $"Không đủ số lượng cho sản phẩm {sanPham.TenSanPham}." });
                     }
 

@@ -1,9 +1,11 @@
 ﻿@model (List<AppData.ViewModel.HoaDonChiTietViewModel.SanPhamChiTietViewModel> SanPhamChiTiets, Guid IdHoaDon)
+
 @{
-    ViewData["Title"] = "ListSanPhamCHiTiet";
+    ViewData["Title"] = "ListSanPhamChiTiet";
 
     var sortedSanPhamChiTiets = Model.SanPhamChiTiets.OrderByDescending(item => item.MaSanPham).ToList();
 }
+
 <style>
     .table th, .table td {
         padding: 10px;
@@ -49,7 +51,21 @@
             {
                 foreach (var item in sortedSanPhamChiTiets)
                 {
-                    <tr style="@(item.Quantity == 0 ? "background-color: #d6d6d6;" : "")">
+                    string rowStyle = string.Empty;
+                    string statusMessage = string.Empty;
+
+                    if (item.KichHoat != 1 || item.HoatKich != 1)
+                    {
+                        rowStyle = "background-color: #d6d6d6;"; 
+                        statusMessage = "Sản phẩm đã ngừng hoạt động"; 
+                    }
+                    else if (item.Quantity == 0)
+                    {
+                        rowStyle = "background-color: #d6d6d6;";
+                        statusMessage = "Đã hết hàng"; 
+                    }
+
+                    <tr style="@rowStyle">
                         <td hidden>@item.IdSanPhamChiTiet</td>
                         <td>@item.MaSanPham</td>
                         <td>@item.ProductName</td>
@@ -69,9 +85,9 @@
                             }
                         </td>
                         <td>
-                            @if (item.Quantity == 0)
+                            @if (statusMessage != string.Empty)
                             {
-                                <span style="color: red;">Đã hết hàng</span>
+                                <span style="color: red;">@statusMessage</span>
                                 <input type="hidden" value="0" />
                             }
                             else
@@ -104,7 +120,7 @@
                             }
                         </td>
                         <td>
-                            @if (item.Quantity > 0)
+                            @if (item.Quantity > 0 && item.KichHoat == 1 && item.HoatKich == 1)
                             {
                                 <a href="#" class="btn btn-success add-product-button" data-id-san-pham-chi-tiet="@item.IdSanPhamChiTiet" data-id-hoa-don="@Model.IdHoaDon">
                                     <i class="fas fa-plus"></i> Thêm
@@ -123,6 +139,7 @@
         </tbody>
     </table>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).on('click', '.add-product-button', function (e) {
@@ -154,11 +171,12 @@
             }
         });
     });
-     $('#searchInput').on('keyup', function () {
+
+    $('#searchInput').on('keyup', function () {
         var value = $(this).val().toLowerCase();
         $('#productTable tbody tr').filter(function () {
-            $(this).toggle($(this).children('td').eq(1).text().toLowerCase().indexOf(value) > -1 || 
-                          $(this).children('td').eq(2).text().toLowerCase().indexOf(value) > -1); 
+            $(this).toggle($(this).children('td').eq(1).text().toLowerCase().indexOf(value) > -1 ||
+                          $(this).children('td').eq(2).text().toLowerCase().indexOf(value) > -1);
         });
     });
 </script>

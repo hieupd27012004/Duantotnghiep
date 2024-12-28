@@ -22,9 +22,9 @@ namespace AppAPI.Service
         }
 
         // Retrieve a specific Mau Sac by ID
-        public SanPhamChiTietMauSac GetMauSacById(Guid id)
+        public List<Guid> GetSanPhamChiTietIdsByMauSacId(Guid mauSacId)
         {
-            return _repository.GetMauSacById(id);
+            return _repository.GetSanPhamChiTietIdsByMauSacId(mauSacId);
         }
 
         // Create a new Mau Sac
