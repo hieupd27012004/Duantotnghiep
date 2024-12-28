@@ -19,7 +19,7 @@ namespace AppAPI.IRepository
         Task<KhachHang?> GetCustomerByPhoneOrEmailAsync(string phoneOrEmail);
         Task<bool> CheckSDT(string soDienThoai);
         Task<bool> CheckMail(string mail);
-
+        Task<List<KhachHang>> SearchKhachHang(string? name);
     }
 }
 public class KhachHangDTO

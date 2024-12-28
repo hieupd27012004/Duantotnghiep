@@ -16,51 +16,99 @@
     <link href="~/Client/css/tiny-slider.css" rel="stylesheet">
     <link href="~/Client/css/style.css" rel="stylesheet">
     <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9; /* Nền sáng */
+            margin: 0;
+            color: #333;
+        }
+
         .menu-inner {
-            list-style: none; /* Bỏ dấu chấm ở đầu mỗi mục menu */
-            padding: 0; /* Bỏ padding mặc định */
-            margin: 0; /* Bỏ margin mặc định */
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
         .menu-item {
-            overflow: hidden; /* Đảm bảo không bị tràn ra ngoài */
+            margin-bottom: 15px;
         }
 
         .menu-link {
-            display: flex; /* Sử dụng flexbox để căn chỉnh icon và văn bản */
-            align-items: center; /* Căn giữa theo chiều dọc */
-            text-decoration: none; /* Bỏ gạch chân */
-            color: black; /* Màu chữ */
-            padding: 10px; /* Khoảng cách bên trong cho mục menu */
-            white-space: nowrap; /* Ngăn văn bản xuống dòng */
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 8px;
+            color: #333;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
 
             .menu-link:hover {
-                background-color: #e0e0e0; /* Màu nền khi hover */
+                background-color: #5bc0de; /* Màu xanh lam sáng */
+                color: #fff;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
             }
-        .nav-link i {
-            font-size: 20px; /* Tăng kích thước icon để dễ thấy */
-            color: black; /* Đặt màu sắc cho icon */
+
+            .menu-link i {
+                font-size: 20px;
+                margin-right: 10px;
+                color: #5bc0de; /* Biểu tượng màu xanh lam */
+                transition: color 0.3s ease;
+            }
+
+            .menu-link:hover i {
+                color: #fff; /* Biểu tượng trắng khi hover */
+            }
+
+        .menu-header {
+            font-size: 14px;
+            color: #777;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .layout-container {
-            display: flex; /* Sử dụng Flexbox để tạo bố cục bên trái và bên phải */
-            background-color: #d3d3d3; /* Màu xám cho layout container */
+            display: flex;
+            background-color: #f9f9f9; /* Nền sáng */
+            min-height: 100vh;
         }
 
         .menu-left {
-            width: 250px; /* Độ rộng cho menu bên trái */
-            background-color: #a9a9a9; /* Màu xám cho menu */
-            padding: 20px; /* Khoảng cách bên trong */
+            width: 280px;
+            background-color: #f0f0f5; /* Màu nền xám nhạt */
+            padding: 20px;
+            border-right: 1px solid #e0e0e0; /* Đường viền ngăn */
         }
 
+            .menu-left .menu-header-text {
+                color: #5bc0de;
+            }
+
         .content {
-            flex-grow: 1; /* Nội dung chiếm không gian còn lại */
-            padding: 20px; /* Khoảng cách bên trong */
-            background-color: #d3d3d3; /* Màu xám cho nội dung */
+            flex-grow: 1;
+            padding: 40px;
+            background-color: #fff; /* Nền nội dung trắng */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
         }
+
+            .content h1 {
+                font-size: 28px;
+                color: #333;
+                margin-bottom: 20px;
+            }
+
+            .content p {
+                font-size: 16px;
+                color: #555;
+                line-height: 1.6;
+            }
     </style>
 </head>
+
 <body>
     @Html.Partial("_Nav")
     <div class="layout-container">
@@ -70,37 +118,35 @@
                 <li class="menu-header small text-uppercase">
                     <span class="menu-header-text">Tài khoản</span>
                 </li>
-
                 <li class="menu-item">
                     <a href="@Url.Action("ThongTinKhachHang", "KhachHang", new { area = "Client" })" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-user"></i>
-                        <div data-i18n="Account">Thông tin tài khoản</div>
+                        <i class="fas fa-user"></i>
+                        <div>Thông tin tài khoản</div>
                     </a>
                 </li>
                 <li class="menu-item">
                     <a href="@Url.Action("Getall", "DiaChi", new { area = "Client" })" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-map"></i>
-                        <div data-i18n="Address">Địa chỉ</div>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>Địa chỉ</div>
                     </a>
                 </li>
-
                 <li class="menu-item">
                     <a href="@Url.Action("ChangePassword", "KhachHang", new { area = "Client" })" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-lock"></i>
-                        <div data-i18n="Change Password">Đổi mật khẩu</div>
+                        <i class="fas fa-lock"></i>
+                        <div>Đổi mật khẩu</div>
                     </a>
                 </li>
                 <li class="menu-item">
                     <a href="@Url.Action("Index", "HoaDon", new { area = "Client" })" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-map"></i>
-                        <div data-i18n="Order">Đơn Hàng</div>
+                        <i class="fas fa-receipt"></i>
+                        <div>Đơn Hàng</div>
                     </a>
                 </li>
             </ul>
         </aside>
 
         <!-- Nội dung bên phải -->
-        <div class="content">
+        <div class="content">        
             @RenderBody()
             @RenderSection("Scripts", required: false)
         </div>

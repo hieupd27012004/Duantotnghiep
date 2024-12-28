@@ -133,5 +133,17 @@ namespace AppAPI.Repository
         {
             return await _context.nhanViens.AnyAsync(x => x.Email == mail);
         }
+        //Tìm Kiếm 
+        public async Task<List<NhanVien>> SearchNhanVien(string? name)
+        {
+            var query = _context.nhanViens.AsQueryable();
+
+            // Tìm kiếm theo tên
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(nv => nv.TenNhanVien.Contains(name));
+            }
+            return await query.ToListAsync();
+        }
     }
 }

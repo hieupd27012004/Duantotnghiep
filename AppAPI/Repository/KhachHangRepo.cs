@@ -160,5 +160,17 @@ namespace AppAPI.Repository
         {
             return await _context.khachHangs.AnyAsync(x => x.Email == mail);
         }
+        //Tìm Kiếm 
+        public async Task<List<KhachHang>> SearchKhachHang(string? name)
+        {
+            var query = _context.khachHangs.AsQueryable();
+
+            // Tìm kiếm theo tên
+            if (!string.IsNullOrEmpty(name))
+            {
+                query = query.Where(nv => nv.HoTen.Contains(name));
+            }
+            return await query.ToListAsync();
+        }
     }
 }

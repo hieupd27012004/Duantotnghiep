@@ -4,8 +4,6 @@
 }
 @using Newtonsoft.Json
 @model AppData.Model.DiaChi
-
-<h1>Thêm địa chỉ</h1>
 @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger">
@@ -15,60 +13,67 @@
         }
     </div>
 }
-<form asp-action="Create" method="post">
-    <div class="form-group mb-3">
-        <label>Họ tên</label>
-        <input class="form-control" asp-for="HoTen" />
-        <span asp-validation-for="HoTen" class="text-danger"></span>
-    </div>
+<h1 class="text-center text-primary">Thêm địa chỉ</h1>
+<hr />
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <form asp-action="Create" method="post">
+            <div class="form-group mb-3">
+                <label>Họ tên</label>
+                <input class="form-control" asp-for="HoTen" />
+                <span asp-validation-for="HoTen" class="text-danger"></span>
+            </div>
 
-    <div class="form-group mb-3">
-        <label>Số điện thoại</label>
-        <input class="form-control" asp-for="SoDienThoai" />
-        <span asp-validation-for="SoDienThoai" class="text-danger"></span>
-    </div>
+            <div class="form-group mb-3">
+                <label>Số điện thoại</label>
+                <input class="form-control" asp-for="SoDienThoai" />
+                <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+            </div>
 
-    <div class="form-group mb-3">
-        <label>Tỉnh/Thành phố</label>
-        <select id="ProvinceId" asp-for="ProvinceId" class="form-control" asp-items="@(new SelectList(ViewBag.Provinces, "ProvinceId", "ProvinceName"))">
-            <option value="">Chọn tỉnh/thành phố</option>
-        </select>
-        <input type="hidden" id="ProvinceName" name="ProvinceName" asp-for="ProvinceName" />
-    </div>
+            <div class="form-group mb-3">
+                <label>Tỉnh/Thành phố</label>
+                <select id="ProvinceId" asp-for="ProvinceId" class="form-control" asp-items="@(new SelectList(ViewBag.Provinces, "ProvinceId", "ProvinceName"))">
+                    <option value="">Chọn tỉnh/thành phố</option>
+                </select>
+                <input type="hidden" id="ProvinceName" name="ProvinceName" asp-for="ProvinceName" />
+            </div>
 
-    <div class="form-group mb-3">
-        <label>Quận/Huyện</label>
-        <select id="DistrictId" class="form-control" asp-for="DistrictId">
-            <option value="">Chọn quận/huyện</option>
-        </select>
-        <input type="hidden" id="DistrictName" name="DistrictName" asp-for="DistrictName" />
-    </div>
+            <div class="form-group mb-3">
+                <label>Quận/Huyện</label>
+                <select id="DistrictId" class="form-control" asp-for="DistrictId">
+                    <option value="">Chọn quận/huyện</option>
+                </select>
+                <input type="hidden" id="DistrictName" name="DistrictName" asp-for="DistrictName" />
+            </div>
 
-    <div class="form-group mb-3">
-        <label>Phường/Xã</label>
-        <select id="WardId" asp-for="WardId" class="form-control">
-            <option value="">Chọn phường/xã</option>
-        </select>
-        <input type="hidden" id="WardName" name="WardName" asp-for="WardName" />
-    </div>
+            <div class="form-group mb-3">
+                <label>Phường/Xã</label>
+                <select id="WardId" asp-for="WardId" class="form-control">
+                    <option value="">Chọn phường/xã</option>
+                </select>
+                <input type="hidden" id="WardName" name="WardName" asp-for="WardName" />
+            </div>
 
-    <div class="form-group mb-3">
-        <label>Địa Chỉ Cụ Thể</label>
-        <input class="form-control" asp-for="MoTa" />
-        <span asp-validation-for="MoTa" class="text-danger"></span>
-    </div>
+            <div class="form-group mb-3">
+                <label>Địa Chỉ Cụ Thể</label>
+                <input class="form-control" asp-for="MoTa" />
+                <span asp-validation-for="MoTa" class="text-danger"></span>
+            </div>
 
-    <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" asp-for="DiaChiMacDinh" id="DiaChiMacDinh" />
-        <label class="form-check-label" for="DiaChiMacDinh">Đặt làm địa chỉ mặc định</label>
-        <span asp-validation-for="DiaChiMacDinh" class="text-danger"></span>
-    </div>
+            <div class="form-check  form-switch mb-3">
+                <input class="form-check-input" type="checkbox" asp-for="DiaChiMacDinh" id="DiaChiMacDinh" />
+                <label class="form-check-label" for="DiaChiMacDinh">Đặt làm địa chỉ mặc định</label>
+                <span asp-validation-for="DiaChiMacDinh" class="text-danger"></span>
+            </div>
 
-    <div class="form-group mb-3">
-        <input type="submit" value="Tạo mới" class="btn btn-primary" />
-        <a asp-action="GetAll" class="btn btn-secondary" style="margin-left:15px;">Quay lại danh sách</a>
+            <div class="form-group mb-3">
+                <input type="submit" value="Tạo mới" class="btn btn-primary" />
+                <a asp-action="GetAll" class="btn btn-secondary" style="margin-left:15px;">Quay lại danh sách</a>
+            </div>
+        </form>
     </div>
-</form>
+</div>
+
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

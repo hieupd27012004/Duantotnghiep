@@ -11,6 +11,7 @@ namespace AppData.ViewModel
         public int Thang { get; set; }
         public int Nam { get; set; }
         public int TongDonHang { get; set; }
+        public int DonHangHuy { get; set; }
         public int DonHangChoXacNhan { get; set; }
         public int DonHangThanhCong { get; set; }
         public double TongTien { get; set; }

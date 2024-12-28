@@ -71,5 +71,9 @@ namespace AppAPI.Service
         {
             return await _repo.CheckMail(mail);
         }
+        public async Task<List<KhachHang>> SearchKhachHang(string? name)
+        {
+            return await _repo.SearchKhachHang(name);
+        }
     }
 }

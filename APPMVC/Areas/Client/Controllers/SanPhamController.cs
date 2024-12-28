@@ -306,7 +306,7 @@ namespace APPMVC.Areas.Client.Controllers
                 var customerIdString = HttpContext.Session.GetString("IdKhachHang");
                 if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
                 {
-                    return Json(new { message = "Không tìm thấy khách hàng trong phiên." });
+                    return Json(new { message = "Vui Lòng Đăng Nhập Để Mua Sắm" });
                 }
 
                 var idGioHang = await _cardService.GetCartIdByCustomerIdAsync(customerId);
@@ -381,7 +381,11 @@ namespace APPMVC.Areas.Client.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-
+                var customerIdString = HttpContext.Session.GetString("IdKhachHang");
+                if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
+                {
+                    return Json(new { message = "Vui Lòng Đăng Nhập Để Mua Sắm" });
+                }
                 var sanPham = await _sanPhamservice.GetSanPhamById(productId);
                 var sanPhamChiTiet = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(productId, sizeId, colorId);
                 if (sanPhamChiTiet == null)

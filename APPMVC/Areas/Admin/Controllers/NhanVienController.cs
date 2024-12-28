@@ -57,6 +57,39 @@ namespace APPMVC.Areas.Admin.Controllers
 
             return View(pagedNhanViens);
         }
+        [HttpGet]
+        public async Task<IActionResult> SearchNhanVien(string? name, int page = 1)
+        {
+            page = page < 1 ? 1 : page;
+            int pageSize = 5;
+
+            // Gọi dịch vụ để tìm kiếm nhân viên
+            var nhanVienList = await _service.SearchNhanVien(name);
+
+            // Lấy danh sách chức vụ
+            var chucVuList = await chucVuService.GetAllChucVu();
+
+            // Chuyển đổi sang ViewModel
+            var nhanVienViewModels = nhanVienList.Select(nv => new NhanVienViewModel
+            {
+                IdNhanVien = nv.IdNhanVien,
+                TenNhanVien = nv.TenNhanVien,
+                SoDienThoai = nv.SoDienThoai,
+                Email = nv.Email,
+                DiaChi = nv.DiaChi,
+                TenChucVu = chucVuList.FirstOrDefault(c => c.IdChucVu == nv.IdchucVu)?.TenChucVu,
+                AnhNhanVien = nv.AnhNhanVien,
+                KichHoat = nv.KichHoat,
+                TrangThai = nv.TrangThai,
+                NgayTao = nv.NgayTao,
+                NgayCapNhat = nv.NgayCapNhat
+            }).ToList();
+
+            // Phân trang kết quả tìm kiếm
+            var pagedNhanViens = nhanVienViewModels.ToPagedList(page, pageSize);
+
+            return View("Index", pagedNhanViens); // Hiển thị kết quả tìm kiếm trên trang Index
+        }
         public ActionResult Details(int id)
         {
             return View();

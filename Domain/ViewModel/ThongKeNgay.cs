@@ -11,6 +11,7 @@ namespace AppData.ViewModel
         public DateTime Ngay { get; set; }
         public int TongDonHang { get; set; }
         public int DonHangChoXacNhan { get; set; }
+        public int DonHangHuy { get; set; }
         public int DonHangThanhCong { get; set; }
         public double TongTien { get; set; }
     }

@@ -17,6 +17,7 @@ namespace APPMVC.IService
         Task<string> GetVerificationCodeFromRedisAsync(string email);
         Task<bool> CheckSDT(string soDienThoai);
         Task<bool> CheckMail(string mail);
+        Task<List<NhanVien>> SearchNhanVien(string? name);
 
     }
 }

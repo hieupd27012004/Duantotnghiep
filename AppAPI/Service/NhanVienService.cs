@@ -61,5 +61,19 @@ namespace AppAPI.Service
         {
             return await _repo.CheckMail(mail);
         }
+        public async Task<List<NhanVien>> SearchNhanVien(string? name)
+        {
+            try
+            {
+                return await _repo.SearchNhanVien(name);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"An error occurred while retrieving products: {ex.Message}");
+                return new List<NhanVien>(); // Return an empty list in case of failure
+            }
+        }
+
     }
 }
