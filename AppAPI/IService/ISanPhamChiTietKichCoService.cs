@@ -24,6 +24,8 @@ namespace AppAPI.IService
 
         Task<List<KichCo>> GetKichCoIdsBySanPhamChiTietId(Guid sanPhamChiTietId);
 
-        
+        Task<List<Guid>> GetSanPhamChiTietIdsByKichCoIdAsync(Guid kichCoId);
+
+
     }
 }
