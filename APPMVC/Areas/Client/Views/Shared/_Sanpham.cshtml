@@ -86,6 +86,7 @@
 			padding: 5px; /* Padding around the swatch */
 			margin: 5px; /* Spacing between color swatches */
 			transition: border-color 0.3s ease; /* Smooth transition for border color */
+			cursor: pointer; /* Change cursor to pointer on hover */
 		}
 
 			.color-swatch:hover {
@@ -159,18 +160,31 @@
 			margin-left: 10px;
 		}
 
+		.size-filters {
+			display: flex;
+			flex-wrap: wrap; /* Allow buttons to wrap onto the next line */
+			margin-top: 10px; /* Space above the filter */
+		}
+
 		.size-button {
-			margin: 5px;
-			padding: 10px 15px;
-			border: none;
-			border-radius: 5px;
-			background-color: #007bff;
-			color: white;
-			cursor: pointer;
+			margin: 5px; /* Space between buttons */
+			padding: 10px 15px; /* Padding inside the button */
+			border: none; /* Remove default border */
+			border-radius: 25px; /* Make buttons more rounded */
+			background-color: #007bff; /* Primary button color */
+			color: white; /* Text color */
+			cursor: pointer; /* Pointer cursor on hover */
+			font-size: 14px; /* Font size */
+			transition: background-color 0.3s, transform 0.3s; /* Smooth transitions */
 		}
 
 			.size-button:hover {
-				background-color: #0056b3;
+				background-color: #0056b3; /* Darker shade on hover */
+				transform: scale(1.05); /* Slightly enlarge on hover */
+			}
+
+			.size-button:active {
+				transform: scale(0.95); /* Slightly smaller on click */
 			}
 
 	</style>
@@ -274,17 +288,21 @@
 						</div>
 						<div class="sidebar-block">
 							<h3 class="sidebar-title">Sizes</h3>
-							<div class="size-buttons" id="sizeButtons">
+							<div class="size-filters" id="sizeButtons" style="display: flex; flex-wrap: wrap;">
 								@if (ViewData["Sizes"] is List<KichCo> sizes)
 								{
 									foreach (var size in sizes)
 									{
-										<button class="size-button" data-size="@size.IdKichCo">@size.TenKichCo</button>
+										<button class="size-button"
+												onclick="location.href='@Url.Action("Index", new { sizeId = size.IdKichCo })'"
+												title="@size.TenKichCo">
+											@size.TenKichCo
+										</button>
 									}
 								}
 								else
 								{
-									<p>No sizes available.</p>
+									<span>No sizes available.</span>
 								}
 							</div>
 						</div>
