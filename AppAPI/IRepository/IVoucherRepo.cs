@@ -13,8 +13,9 @@ namespace AppAPI.IRepository
         Task<bool> DeleteAsync(Guid id);
         Task<bool> AddLichSuSuDungVoucherAsync(LichSuSuDungVoucher lichSuSuDungVoucher);
         Task<List<KhachHang>> GetKhachHangDaNhanVoucherAsync(Guid voucherId);
-
+        Task<bool> MaVoucher(string maVoucher);
         Task<List<Voucher>> GetAvailableVouchersForCustomerAsync(Guid khachHangId);
+        Task<bool> UpdateVoucherStatusAsync(Voucher voucher, int status);
     }
   
 }

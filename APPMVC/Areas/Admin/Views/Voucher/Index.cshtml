@@ -5,89 +5,74 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Voucher List</h1>
+<h1 class="my-4 text-center text-primary">Danh Sách Voucher</h1>
+
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success" id="successMessage">
-        @TempData["SuccessMessage"]
+    <div class="alert alert-success alert-dismissible fade show" id="successMessage" role="alert">
+        <strong>Thành công!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <a asp-action="Create" class="btn btn-primary btn-lg">
+        <i class="bi bi-plus-circle"></i> Tạo mới
+    </a>
+    
+</div>
+
+<table class="table table-hover table-bordered align-middle">
+    <thead class="table-dark">
         <tr>
-            <th>STT</th>
+            <th>#</th>
             <th>Mã Voucher</th>
             <th>Mô tả</th>
             <th>Loại Giảm Giá</th>
             <th>Giá Trị Giảm</th>
             <th>Trạng Thái</th>
-            <th></th>
+            <th>Người Tạo</th>
+            <th>Ngày Bắt Đầu</th>
+            <th>Ngày Kết Thúc</th>
+            <th>Hành Động</th>
         </tr>
     </thead>
     <tbody>
-        @{
-            int i = 1;
-        }
-        @foreach (var item in Model)
+        @for (int i = 0; i < Model.Count; i++)
         {
-            <tr data-voucher-id="@item.VoucherId">
-                <td>@i</td>
+            var item = Model[i];
+            <tr class="text-center">
+                <td>@(i + 1)</td>
                 <td>@Html.DisplayFor(modelItem => item.MaVoucher)</td>
                 <td>@Html.DisplayFor(modelItem => item.MoTaVoucher)</td>
                 <td>
-                    @{
-                        string typeClass = item.LoaiGiamGia switch
-                        {
-                            1 => "text-warning",
-                            2 => "text-success",
-                            _ => ""
-                        };
-                    }
-                    <span class="@typeClass">@item.GetLoaiGiamGiaDisplay()</span>
+                    <span class="badge bg-@(item.LoaiGiamGia == 1 ? "warning" : "success")">
+                        @item.GetLoaiGiamGiaDisplay()
+                    </span>
                 </td>
                 <td>
-                    @{
-                        string discountValue;
-                        if (item.LoaiGiamGia == 1) // Theo %
-                        {
-                            discountValue = $"{item.GiaTriGiam}%";
-                        }
-                        else if (item.LoaiGiamGia == 2) // Theo số tiền
-                        {
-                            discountValue = $"{item.GiaTriGiam:N0}".Replace(",", ".") + " VNĐ";
-                        }
-                        else
-                        {
-                            discountValue = item.GiaTriGiam.ToString(); // Fallback
-                        }
-                    }
-                    @Html.Raw(discountValue)
+                    @Html.Raw(item.LoaiGiamGia == 1 ? $"{item.GiaTriGiam}%" : $"{item.GiaTriGiam:N0}".Replace(",", ".") + " VNĐ")
                 </td>
                 <td>
-                    @{
-                        string statusClass = item.TrangThai switch
-                        {
-                            0 => "text-dark",
-                            1 => "text-info",
-                            2 => "text-success",
-                            3 => "text-warning",
-                            4 => "text-danger",
-                            5 => "text-muted",
-                            _ => ""
-                        };
-                    }
-                    <span class="@statusClass">@item.GetTrangThaiDisplay()</span>
+                    <span class="badge bg-@(item.TrangThai == 1 ? "info" : item.TrangThai == 2 ? "success" : item.TrangThai == 4 ? "danger" : "secondary")">
+                        @item.GetTrangThaiDisplay()
+                    </span>
                 </td>
+                <td>@Html.DisplayFor(modelItem => item.NguoiTao)</td>
+                <td>@item.NgayBatDau.ToString("dd/MM/yyyy")</td>
+                <td>@item.NgayKetThuc.ToString("dd/MM/yyyy")</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.VoucherId">Details</a> |
-                    <a asp-action="Edit" asp-route-id="@item.VoucherId">Edit</a> |
-                    <a asp-action="Delete" asp-route-id="@item.VoucherId" onclick="return confirmDelete(@item.MaVoucher);">Delete</a>
+                    <a asp-action="Details" asp-route-id="@item.VoucherId" class="btn btn-info btn-sm">
+                        <i class="bi bi-eye"></i> Chi tiết
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@item.VoucherId" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil"></i> Sửa
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@item.VoucherId" class="btn btn-danger btn-sm" onclick="return confirmDelete('@item.MaVoucher')">
+                        <i class="bi bi-trash"></i> Xóa
+                    </a>
                 </td>
             </tr>
-            i++;
         }
     </tbody>
 </table>

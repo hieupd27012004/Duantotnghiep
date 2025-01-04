@@ -138,5 +138,22 @@ namespace AppAPI.Service
                 return new List<Voucher>();
             }
         }
+        public async Task<bool> MaVoucher(string maVoucher)
+        {
+            return await _repository.MaVoucher(maVoucher);
+        }
+        public async Task<bool> UpdateVoucherStatusAsync(Voucher voucher, int status)
+        {
+            try
+            {
+                return await _repository.UpdateVoucherStatusAsync(voucher, status);
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine($"Error in ServiceVoucher.UpdateAsync: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

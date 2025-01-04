@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using X.PagedList;
 
 namespace APPMVC.Areas.Admin.Controllers
@@ -98,6 +99,12 @@ namespace APPMVC.Areas.Admin.Controllers
         // GET: NhanVienController/Create
         public async Task<IActionResult> Create()
         {
+            var sessionData = HttpContext.Session.GetString("NhanVien");
+            if (string.IsNullOrEmpty(sessionData))
+            {
+                return RedirectToAction("Login");
+
+            }
             var chucVuList = await chucVuService.GetAllChucVu();
             ViewBag.ChucVu = chucVuList;
 
@@ -118,24 +125,56 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(NhanVien nhanVien)
         {
+            var sessionData = HttpContext.Session.GetString("NhanVien");
+            if (string.IsNullOrEmpty(sessionData))
+            {
+                return RedirectToAction("Login");
+
+            }
+            var phoneRegex = new Regex(@"^\d{10}$");
+            if (!phoneRegex.IsMatch(nhanVien.SoDienThoai))
+            {
+                ModelState.AddModelError("", "Đăng ký thất bại! Số điện thoại phải có 10 chữ số.");
+                var chucVuList = await chucVuService.GetAllChucVu();
+                ViewBag.ChucVu = chucVuList;
+                return View(nhanVien);
+            }
+
+            // Kiểm tra định dạng email
+            var emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+            if (!emailRegex.IsMatch(nhanVien.Email))
+            {
+                ModelState.AddModelError("", "Đăng ký thất bại! Email không đúng định dạng.");
+                var chucVuList = await chucVuService.GetAllChucVu();
+                ViewBag.ChucVu = chucVuList;
+                return View(nhanVien);
+            }
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Đăng ký thất bại! Vui lòng nhập đầy đủ thông tin";
+                var chucVuList = await chucVuService.GetAllChucVu();
+                ViewBag.ChucVu = chucVuList;
+                return View(nhanVien);
+
+            }
             // Kiểm tra số điện thoại và email
             if (await _service.CheckSDT(nhanVien.SoDienThoai))
             {
                 ModelState.AddModelError("", "Đăng ký thất bại! Số điện thoại đã tồn tại.");
+                var chucVuList = await chucVuService.GetAllChucVu();
+                ViewBag.ChucVu = chucVuList;
                 return View(nhanVien);
             }
 
             if (await _service.CheckMail(nhanVien.Email))
             {
                 ModelState.AddModelError("", "Đăng ký thất bại! Email này đã tồn tại.");
+                var chucVuList = await chucVuService.GetAllChucVu();
+                ViewBag.ChucVu = chucVuList;
                 return View(nhanVien);
             }
 
-            if (!ModelState.IsValid) { 
-                TempData["Error"] = "Đăng ký thất bại! Vui lòng nhập đầy đủ thông tin";
-                return View(nhanVien);
-
-            }
+           
             nhanVien.MatKhau = GenerateRandomPassword(8);
              await _service.CreateNV(nhanVien);
              return RedirectToAction("Index");
@@ -143,8 +182,14 @@ namespace APPMVC.Areas.Admin.Controllers
        
 
         public async Task<IActionResult> Edit(Guid id)
+        {
+            var sessionData = HttpContext.Session.GetString("NhanVien");
+            if (string.IsNullOrEmpty(sessionData))
             {
-                var nhanVien = await _service.GetIdNhanVien(id);
+                return RedirectToAction("Login");
+
+            }
+            var nhanVien = await _service.GetIdNhanVien(id);
                 if (nhanVien == null)
                 {
                     return NotFound();
@@ -159,14 +204,14 @@ namespace APPMVC.Areas.Admin.Controllers
                 };
 
                 return View(viewModel);
-            }
+        }
 
         [HttpPost]
         public async Task<IActionResult> Edit(NhanVienViewModel model, IFormFile? imgFile)
         {
             if (ModelState.IsValid)
             {
-                // Lấy thông tin nhân viên cũ để xóa ảnh cũ
+                
                 var existingNV = await _service.GetIdNhanVien(model.NhanVien.IdNhanVien);
 
                 if (existingNV == null)
@@ -175,8 +220,38 @@ namespace APPMVC.Areas.Admin.Controllers
                     model.ChucVuList = await chucVuService.GetAllChucVu();
                     return View(model);
                 }
+                var phoneRegex = new Regex(@"^\d{10}$");
+                if (!phoneRegex.IsMatch(model.NhanVien.SoDienThoai))
+                {
+                    ModelState.AddModelError("", "Số điện thoại phải có 10 chữ số.");
+                    model.ChucVuList = await chucVuService.GetAllChucVu();
+                    return View(model);
+                }
 
-                // Kiểm tra xem có file ảnh mới được tải lên không
+                var isPhoneExists = await _service.CheckSDT(model.NhanVien.SoDienThoai);
+                if (isPhoneExists && model.NhanVien.SoDienThoai != existingNV.SoDienThoai)
+                {
+                    ModelState.AddModelError("", "Số điện thoại đã tồn tại.");
+                    model.ChucVuList = await chucVuService.GetAllChucVu();
+                    return View(model);
+                }
+
+                var emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+                if (!emailRegex.IsMatch(model.NhanVien.Email))
+                {
+                    ModelState.AddModelError("", "Email không đúng định dạng.");
+                    model.ChucVuList = await chucVuService.GetAllChucVu();
+                    return View(model);
+                }
+
+                var isMailExists = await _service.CheckMail(model.NhanVien.Email);
+                if(isMailExists && model.NhanVien.Email != existingNV.Email)
+                {
+                    ModelState.AddModelError("", "Email đã tồn tại.");
+                    model.ChucVuList = await chucVuService.GetAllChucVu();
+                    return View(model);
+                }
+                
                 if (imgFile != null && imgFile.Length > 0)
                 {
                     var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
@@ -198,7 +273,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
                     string uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Admin", "imgNV");
 
-                    // Xóa ảnh cũ nếu tồn tại
+                   
                     if (!string.IsNullOrEmpty(existingNV.AnhNhanVien))
                     {
                         string oldImagePath = Path.Combine(uploadFolder, existingNV.AnhNhanVien);
@@ -208,16 +283,16 @@ namespace APPMVC.Areas.Admin.Controllers
                         }
                     }
 
-                    // Tạo đường dẫn đến file ảnh mới
+                    
                     string newImagePath = Path.Combine(uploadFolder, imgFile.FileName);
 
-                    // Tạo file stream để lưu file hình ảnh
+                    
                     using (var stream = new FileStream(newImagePath, FileMode.Create))
                     {
                         await imgFile.CopyToAsync(stream);
                     }
 
-                    // Gán tên file vào thuộc tính AnhNhanVien của đối tượng NhanVien
+                    
                     model.NhanVien.AnhNhanVien = imgFile.FileName;
                 }
                 else
@@ -246,6 +321,8 @@ namespace APPMVC.Areas.Admin.Controllers
                 return View(model);
             }
         }
+
+
         //Sửa Thông Tin Của Nhân Viên
         public async Task<IActionResult> EditProfile(Guid id)
         {
@@ -261,12 +338,44 @@ namespace APPMVC.Areas.Admin.Controllers
             return View(nhanVien);
         }
         [HttpPost]
-        public async Task<IActionResult> EditProfile(NhanVien nv, IFormFile imgFile)
+        public async Task<IActionResult> EditProfile(NhanVien nv, IFormFile? imgFile)
         {
+            // Lấy thông tin nhân viên cũ
+            var existingNV = await _service.GetIdNhanVien(nv.IdNhanVien);
+
             if (ModelState.IsValid)
             {
-                // Lấy thông tin nhân viên cũ để xóa ảnh cũ
-                var existingNV = await _service.GetIdNhanVien(nv.IdNhanVien);
+                // Kiểm tra định dạng số điện thoại
+                var phoneRegex = new Regex(@"^\d{10}$"); // Giả sử số điện thoại có 10 chữ số
+                if (!phoneRegex.IsMatch(nv.SoDienThoai))
+                {
+                    ModelState.AddModelError("SoDienThoai", "Số điện thoại phải có 10 chữ số.");
+                    return View(existingNV); // Trả về thông tin cũ
+                }
+
+                // Kiểm tra tính duy nhất của số điện thoại
+                var isPhoneExists = await _service.CheckSDT(nv.SoDienThoai);
+                if (isPhoneExists && existingNV.SoDienThoai != nv.SoDienThoai)
+                {
+                    ModelState.AddModelError("SoDienThoai", "Số điện thoại đã tồn tại.");
+                    return View(existingNV); // Trả về thông tin cũ
+                }
+
+                // Kiểm tra định dạng email
+                var emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+                if (!emailRegex.IsMatch(nv.Email))
+                {
+                    ModelState.AddModelError("Email", "Email không đúng định dạng.");
+                    return View(existingNV); // Trả về thông tin cũ
+                }
+
+                // Kiểm tra tính duy nhất của email
+                var isEmailExists = await _service.CheckMail(nv.Email);
+                if (isEmailExists && existingNV.Email != nv.Email)
+                {
+                    ModelState.AddModelError("Email", "Email đã tồn tại.");
+                    return View(existingNV); // Trả về thông tin cũ
+                }
 
                 // Kiểm tra xem có file ảnh mới được tải lên không
                 if (imgFile != null && imgFile.Length > 0)
@@ -279,14 +388,14 @@ namespace APPMVC.Areas.Admin.Controllers
                     if (!permittedExtensions.Contains(ext))
                     {
                         ModelState.AddModelError("", "Chỉ chấp nhận các file ảnh với định dạng .jpg, .jpeg, .png, .gif.");
-                        return View(nv);
+                        return View(existingNV); // Trả về thông tin cũ
                     }
 
                     // Kiểm tra kích thước file (giới hạn 5MB)
                     if (imgFile.Length > 5 * 1024 * 1024)
                     {
                         ModelState.AddModelError("", "File ảnh phải nhỏ hơn 5MB.");
-                        return View(nv);
+                        return View(existingNV); // Trả về thông tin cũ
                     }
 
                     // Tạo đường dẫn đến thư mục lưu trữ hình ảnh
@@ -313,24 +422,30 @@ namespace APPMVC.Areas.Admin.Controllers
 
                     // Gán tên file vào thuộc tính AnhNhanVien của đối tượng NhanVien
                     nv.AnhNhanVien = imgFile.FileName;
-                }              
+                }
+                else
+                {
+                    // Nếu không có file ảnh mới, giữ nguyên giá trị cũ
+                    nv.AnhNhanVien = existingNV.AnhNhanVien;
+                }
+
                 // Cập nhật thông tin nhân viên
                 await _service.UpdateThongTin(nv);
-                var updatedNV = await _service.GetIdNhanVien(nv.IdNhanVien);
-                var chucVu = await chucVuService.GetChucVuId(updatedNV.IdchucVu);
 
                 // Cập nhật session với thông tin mới
+                var updatedNV = await _service.GetIdNhanVien(nv.IdNhanVien);
+                var chucVu = await chucVuService.GetChucVuId(updatedNV.IdchucVu);
                 HttpContext.Session.SetString("NhanVien", JsonConvert.SerializeObject(updatedNV));
                 HttpContext.Session.SetString("AvatarUrl", updatedNV.AnhNhanVien);
                 HttpContext.Session.SetString("NhanVienName", updatedNV.TenNhanVien);
                 HttpContext.Session.SetString("IdNhanVien", updatedNV.IdNhanVien.ToString());
                 HttpContext.Session.SetString("NhanVienRole", chucVu != null ? chucVu.Code : "Không xác định"); // Vai trò nhân viên
+
                 return RedirectToAction("MyProfile", "NhanVien");
             }
-            else
-            {
-                return View(nv);
-            }
+
+            // Nếu model không hợp lệ, trả về thông tin hiện tại
+            return View(existingNV);
         }
 
         public async Task<IActionResult> Delete(Guid id)

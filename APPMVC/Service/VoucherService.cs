@@ -124,6 +124,30 @@ namespace APPMVC.Service
                 return false;
             }
         }
+        public async Task<bool> UpdateVoucherStatusAsync(Voucher voucher, int status)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync($"api/Voucher/UpdateVoucherStatusAsync/{voucher.VoucherId}?status={status}", voucher);
+
+                // Add debug logging
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Update Response: Status: {response.StatusCode}, Content: {content}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Update failed with status code: {response.StatusCode}");
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in VoucherService.UpdateAsync: {ex.Message}");
+                return false;
+            }
+        }
         public async Task<bool> AddLichSuSuDungVoucherAsync(LichSuSuDungVoucher lichSuSuDungVoucher)
         {
             try
@@ -144,20 +168,13 @@ namespace APPMVC.Service
         }
         public async Task<List<KhachHang>> GetKhachHangDaNhanVoucherAsync(Guid voucherId)
         {
-            try
+            var response = await _httpClient.GetAsync($"/api/Voucher/GetKHDaNhanVoucher?voucherId={voucherId}");
+            response.EnsureSuccessStatusCode();
+            var responseBody = await response.Content.ReadAsStringAsync();
+            return System.Text.Json.JsonSerializer.Deserialize<List<KhachHang>>(responseBody, new JsonSerializerOptions
             {
-                return await _httpClient.GetFromJsonAsync<List<KhachHang>>("api/Voucher/GetKHDaNhanVoucher") ?? new List<KhachHang>();
-            }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine($"HTTP request error when getting kh: {ex.Message}");
-                return new List<KhachHang>();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error when getting kh: {ex.Message}");
-                return new List<KhachHang>();
-            }
+                PropertyNameCaseInsensitive = true
+            });        
         }
 
         public async Task<List<Voucher>> GetAvailableVouchersForCustomerAsync(Guid khachHangId)
@@ -193,6 +210,16 @@ namespace APPMVC.Service
                 Console.WriteLine($"Stack Trace: {ex.StackTrace}");
                 return new List<Voucher>();
             }
+        }
+        public async Task<bool> CheckMaVoucher(string maVoucher)
+        {
+            if (string.IsNullOrEmpty(maVoucher))
+            {
+                throw new ArgumentException("Mã Voucher không được để trống");
+
+            }
+            var response = await _httpClient.GetAsync($"/api/Voucher/checkMaVoucher?maVoucher={Uri.EscapeDataString(maVoucher)}");
+            return response.IsSuccessStatusCode && bool.Parse(await response.Content.ReadAsStringAsync());
         }
     }
 }

@@ -29,9 +29,9 @@
             <div class="col-md-12">
                 <div class="card mb-4" style="padding: 20px;">
                     <div class="nav-item d-flex align-items-center" style="display: flex; justify-content: space-between;">
-                        <form action="@Url.Action("SearchKhachHang", "KhachHang")" method="get" class="d-flex align-items-center">
+                        <form action="@Url.Action("SearchKhachHang", "KhachHang", new { area = "Admin" })" method="get" class="d-flex align-items-center">
                             <i class="bx bx-search fs-4 lh-0"></i>
-                            <input type="text" name="search" class="form-control border-1 shadow-none" placeholder="Tìm kiếm theo tên..." aria-label="Search..." />
+                            <input type="text" name="name" class="form-control border-1 shadow-none" placeholder="Tìm kiếm theo tên..." aria-label="Search..." />
                             <button type="submit" title="Tìm kiếm" class="btn btn-success" style="margin-left: 10px;">Tìm</button>
                         </form>
                         <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal" style="margin-left: 10px;">Tạo mới</a>

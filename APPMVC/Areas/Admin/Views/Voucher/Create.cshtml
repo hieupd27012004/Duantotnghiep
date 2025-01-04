@@ -1,128 +1,180 @@
 ﻿@model AppData.Model.Voucher
 
 @{
-    ViewData["Title"] = "Create Voucher";
+    ViewData["Title"] = "Tạo Mới Voucher";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="container py-4">
+    <h1 class="mb-4 text-center">@ViewData["Title"]</h1>
+    <div class="">
+        <div class="">
+            <form asp-action="Create" method="post" id="createVoucherForm" class="d-flex">
+                <div class="card shadow-lg me-5">
+                    <div class="card-body">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-<hr />
-<div class="row">
-    <div class="col-md-5"> <!-- Cột cho trường nhập liệu -->
-        <form asp-action="Create" method="post" id="createVoucherForm">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="MaVoucher" class="form-label fw-bold">Mã Voucher</label>
+                                <input asp-for="MaVoucher" class="form-control" placeholder="Nhập mã voucher" />
+                                <span asp-validation-for="MaVoucher" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="MoTaVoucher" class="form-label fw-bold">Mô Tả</label>
+                                <input asp-for="MoTaVoucher" class="form-control" placeholder="Nhập mô tả voucher" />
+                                <span asp-validation-for="MoTaVoucher" class="text-danger"></span>
+                            </div>
+                        </div>
 
-            <div class="form-group">
-                <label asp-for="MaVoucher" class="control-label">Mã Voucher</label>
-                <input asp-for="MaVoucher" class="form-control" />
-                <span asp-validation-for="MaVoucher" class="text-danger"></span>
-            </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="LoaiGiamGia" class="form-label fw-bold">Loại Giảm Giá</label>
+                                <select asp-for="LoaiGiamGia" class="form-select">
+                                    <option value="1">Theo % sản phẩm</option>
+                                    <option value="2">Theo số tiền</option>
+                                </select>
+                                <span asp-validation-for="LoaiGiamGia" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="GiaTriGiam" class="form-label fw-bold">Giá Trị Giảm</label>
+                                <div class="input-group">
+                                    <input asp-for="GiaTriGiam" class="form-control" id="GiaTriGiam" placeholder="Nhập giá trị giảm" />
+                                    <span class="input-group-text" id="GiaTriGiamUnit">%</span>
+                                </div>
+                                <span asp-validation-for="GiaTriGiam" class="text-danger"></span>
+                            </div>
+                        </div>
 
-            <div class="form-group">
-                <label asp-for="MoTaVoucher" class="control-label">Mô Tả</label>
-                <input asp-for="MoTaVoucher" class="form-control" />
-                <span asp-validation-for="MoTaVoucher" class="text-danger"></span>
-            </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="GiaTriDonHangToiThieu" class="form-label fw-bold">Giá Trị Đơn Hàng Tối Thiểu</label>
+                                <div class="input-group">
+                                    <input asp-for="GiaTriDonHangToiThieu" class="form-control" placeholder="Nhập giá trị tối thiểu" />
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                                <span asp-validation-for="GiaTriDonHangToiThieu" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6" id="SoTienToiDaContainer" class="hidden">
+                                <label asp-for="SoTienToiDa" class="form-label fw-bold">Số Tiền Giảm Tối Đa</label>
+                                <div class="input-group">
+                                    <input asp-for="SoTienToiDa" class="form-control" placeholder="Nhập số tiền tối đa" />
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                                <span asp-validation-for="SoTienToiDa" class="text-danger"></span>
+                            </div>
+                        </div>
 
-            <div class="form-group">
-                <label asp-for="LoaiGiamGia" class="control-label">Loại Giảm Giá</label>
-                <select asp-for="LoaiGiamGia" class="form-control" id="LoaiGiamGia">
-                    <option value="1">Theo % sản phẩm</option>
-                    <option value="2">Theo số tiền</option>
-                </select>
-                <span asp-validation-for="LoaiGiamGia" class="text-danger"></span>
-            </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="NgayBatDau" class="form-label fw-bold">Ngày Bắt Đầu</label>
+                                <input asp-for="NgayBatDau" class="form-control" type="datetime-local" />
+                                <span asp-validation-for="NgayBatDau" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="NgayKetThuc" class="form-label fw-bold">Ngày Kết Thúc</label>
+                                <input asp-for="NgayKetThuc" class="form-control" type="datetime-local" />
+                                <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
+                            </div>
+                        </div>
 
-            <div class="form-group">
-                <label asp-for="GiaTriGiam" class="control-label">Giá Trị Giảm</label>
-                <div class="input-container">
-                    <input asp-for="GiaTriGiam" class="form-control" id="GiaTriGiam" type="text" />
-                    <label class="input-unit" id="GiaTriGiamUnit">%</label>
+                        <input type="hidden" asp-for="NguoiTao" value="Admin" />
+                        <input type="hidden" asp-for="TrangThai" value="2" />
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary">Tạo Voucher</button>
+                                <a asp-action="Index" class="btn btn-outline-secondary">Quay lại</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <span asp-validation-for="GiaTriGiam" class="text-danger"></span>
-            </div>
+                <div class="card shadow-lg">
+                    <div class="card-body">
+                        <h4 class="mt-4">Danh Sách Khách Hàng</h4>
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th><input type="checkbox" id="checkAllCustomers" /> Chọn Tất Cả</th>
+                                    <th>Tên Khách Hàng</th>
+                                    <th>Số Điện Thoại</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.KhachHang != null)
+                                {
+                                    foreach (var khachHang in ViewBag.KhachHang)
+                                    {
+                                        <tr>
+                                            <td><input type="checkbox" name="selectedKhachHangIds" value="@khachHang.IdKhachHang" /></td>
+                                            <td>@khachHang.HoTen</td>
+                                            <td>@khachHang.SoDienThoai</td>
+                                            <td>@khachHang.Email</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center">Không có khách hàng nào.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
 
-            <div class="form-group">
-                <label asp-for="GiaTriDonHangToiThieu" class="control-label">Giá Trị Đơn Hàng Tối Thiểu</label>
-                <div class="input-container">
-                    <input asp-for="GiaTriDonHangToiThieu" class="form-control" type="text" />
-                    <label class="input-unit">VNĐ</label>
+                        <!-- Phân trang -->
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                                {
+                                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Create", new { page = i })">@i</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>                  
+                    </div>
                 </div>
-                <span asp-validation-for="GiaTriDonHangToiThieu" class="text-danger"></span>
-            </div>
-
-            <div class="form-group" id="SoTienToiDaContainer" class="hidden">
-                <label asp-for="SoTienToiDa" class="control-label">Số Tiền Giảm Tối Đa</label>
-                <div class="input-container">
-                    <input asp-for="SoTienToiDa" class="form-control" type="text" />
-                    <label class="input-unit">VNĐ</label>
-                </div>
-                <span asp-validation-for="SoTienToiDa" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="NgayBatDau" class="control-label">Ngày Bắt Đầu</label>
-                <input asp-for="NgayBatDau" class="form-control" id="NgayBatDau" />
-                <span asp-validation-for="NgayBatDau" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="NgayKetThuc" class="control-label">Ngày Kết Thúc</label>
-                <input asp-for="NgayKetThuc" class="form-control" id="NgayKetThuc" />
-                <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
-            </div>
-
-            <input type="hidden" asp-for="NguoiTao" value="Admin" />
-            <input type="hidden" asp-for="TrangThai" value="1" />
-
-            <div class="form-group">
-                <input type="submit" value="Create" class ="btn btn-primary" />
-            </div>
-            
-            <h3>Danh Sách Khách Hàng</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>
-                            <input type="checkbox" id="checkAllCustomers" />
-                            Chọn Tất Cả
-                        </th>
-                        <th>Tên Khách Hàng</th>
-                        <th>Số Điện Thoại</th>
-                        <th>Email</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (ViewBag.KhachHang != null)
-                    {
-                        @foreach (var khachHang in ViewBag.KhachHang)
+                @* <h4 class="mt-4">Danh Sách Khách Hàng</h4>
+                <table class="table table-bordered table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th><input type="checkbox" id="checkAllCustomers" /> Chọn Tất Cả</th>
+                            <th>Tên Khách Hàng</th>
+                            <th>Số Điện Thoại</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.KhachHang != null)
+                        {
+                            @foreach (var khachHang in ViewBag.KhachHang)
+                            {
+                                <tr>
+                                    <td><input type="checkbox" name="selectedKhachHangIds" value="@khachHang.IdKhachHang" /></td>
+                                    <td>@khachHang.HoTen</td>
+                                    <td>@khachHang.SoDienThoai</td>
+                                    <td>@khachHang.Email</td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td>
-                                    <input type="checkbox" name="selectedKhachHangIds" value="@khachHang.IdKhachHang" />
-                                </td>
-                                <td>@khachHang.HoTen</td>
-                                <td>@khachHang.SoDienThoai</td>
-                                <td>@khachHang.Email</td>
+                                <td colspan="4" class="text-center">Không có khách hàng nào.</td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="4">Không có khách hàng nào.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </form>
-    </div>
-</div>
+                    </tbody>
+                </table>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+                <div class="mt-4 d-flex justify-content-between">
+                  
+                   
+                </div> *@
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -144,16 +196,6 @@
             if (selectedIds.length === 0) {
                 alert("Vui lòng chọn ít nhất một khách hàng.");
                 e.preventDefault(); // Ngăn không cho gửi form
-                return false;
-            }
-
-            // Kiểm tra ngày
-            var ngayBatDau = new Date($('#NgayBatDau').val());
-            var ngayKetThuc = new Date($('#NgayKetThuc').val());
-
-            if (ngayBatDau >= ngayKetThuc) {
-                alert("Ngày bắt đầu phải nhỏ hơn ngày kết thúc.");
-                e.preventDefault();
                 return false;
             }
 

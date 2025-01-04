@@ -1481,81 +1481,8 @@ namespace AppData
 
 
 
-            var Voucher10 = Guid.NewGuid();
-            var Voucher50k = Guid.NewGuid();
-            var Voucher20 = Guid.NewGuid();
-            var Voucher100k = Guid.NewGuid();
-            modelBuilder.Entity<Voucher>().HasData(
-            // Tạo danh sách voucher mẫu
-            new Voucher
-            {
-                VoucherId = Voucher10,
-                MaVoucher = "VOUCHER10",
-                MoTaVoucher = "Giảm 10% cho đơn hàng trên 100.000 VNĐ",
-                LoaiGiamGia = 1,
-                GiaTriGiam = 10,
-                GiaTriDonHangToiThieu = 100000,
-                SoTienToiDa = null,
-                NgayBatDau = DateTime.Now,
-                NgayKetThuc = DateTime.Now.AddMonths(1),
-                TrangThai = 2, // Đang kích hoạt
-                NgayTao = DateTime.Now,
-                NguoiTao = "Admin",
-                NgayUpdate = null,
-                NguoiUpdate = null
-            },
-            new Voucher
-            {
-                VoucherId = Voucher50k,
-                MaVoucher = "VOUCHER50K",
-                MoTaVoucher = "Giảm 50.000 VNĐ cho đơn hàng trên 200.000 VNĐ",
-                LoaiGiamGia = 2,
-                GiaTriGiam = 50000,
-                GiaTriDonHangToiThieu = 200000,
-                SoTienToiDa = 50000,
-                NgayBatDau = DateTime.Now,
-                NgayKetThuc = DateTime.Now.AddMonths(2),
-                TrangThai = 1, // Chờ kích hoạt
-                NgayTao = DateTime.Now,
-                NguoiTao = "Admin",
-                NgayUpdate = null,
-                NguoiUpdate = null
-            },
-            new Voucher
-            {
-                VoucherId = Voucher20,
-                MaVoucher = "VOUCHER20",
-                MoTaVoucher = "Giảm 20% cho đơn hàng trên 300.000 VNĐ",
-                LoaiGiamGia = 1, // Giảm theo phần trăm
-                GiaTriGiam = 20,
-                GiaTriDonHangToiThieu = 300000,
-                SoTienToiDa = 100000, // Giảm tối đa 100.000 VNĐ
-                NgayBatDau = DateTime.Now,
-                NgayKetThuc = DateTime.Now.AddMonths(3),
-                TrangThai = 2, // Đang kích hoạt
-                NgayTao = DateTime.Now,
-                NguoiTao = "Admin",
-                NgayUpdate = null,
-                NguoiUpdate = null
-            },
-             new Voucher
-             {
-                 VoucherId = Voucher100k,
-                 MaVoucher = "VOUCHER100K",
-                 MoTaVoucher = "Giảm 100.000 VNĐ cho đơn hàng trên 500.000 VNĐ",
-                 LoaiGiamGia = 2, // Giảm giá cố định
-                 GiaTriGiam = 100000,
-                 GiaTriDonHangToiThieu = 500000,
-                 SoTienToiDa = 100000, // Không giảm quá 100.000 VNĐ
-                 NgayBatDau = DateTime.Now,
-                 NgayKetThuc = DateTime.Now.AddMonths(4),
-                 TrangThai = 1, // Chờ kích hoạt
-                 NgayTao = DateTime.Now,
-                 NguoiTao = "Admin",
-                 NgayUpdate = null,
-                 NguoiUpdate = null
-             }
-        );
+           
+        
 
         }
     }
