@@ -5,6 +5,28 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
+@if (TempData["ValidationErrors"] != null)
+{
+    var validationErrors = TempData["ValidationErrors"] as List<string>;
+    if (validationErrors != null && validationErrors.Any())
+    {
+        <div class="alert alert-danger">
+            <strong>Lỗi:</strong>
+            <ul>
+                @foreach (var error in validationErrors)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        </div>
+    }
+}
+@if (TempData["ErrorVouCher"] != null)
+{
+    <div class="alert alert-danger" style="margin-top: 20px;">
+        @TempData["ErrorVouCher"]
+    </div>
+}
 <div class="container-fluid">
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -14,63 +36,66 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
+                        <input asp-for="VoucherId" class="form-control" type="hidden" />
+
                         <div class="form-group">
                             <label asp-for="MaVoucher">Mã Voucher</label>
-                            <input asp-for="MaVoucher" class="form-control" />
+                            <input asp-for="MaVoucher" class="form-control" placeholder="Nhập mã voucher" />
                             <span asp-validation-for="MaVoucher" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
                             <label asp-for="MoTaVoucher">Mô Tả</label>
-                            <textarea asp-for="MoTaVoucher" class="form-control" rows="3"></textarea>
+                            <textarea asp-for="MoTaVoucher" class="form-control" rows="3" placeholder="Nhập mô tả"></textarea>
                             <span asp-validation-for="MoTaVoucher" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
                             <label asp-for="LoaiGiamGia">Loại Giảm Giá</label>
                             <select asp-for="LoaiGiamGia" class="form-control" id="LoaiGiamGia">
-                                <option value="1" selected="@(Model.LoaiGiamGia == 1 ? "selected" : null)">Theo % sản phẩm</option>
-                                <option value="2" selected="@(Model.LoaiGiamGia == 2 ? "selected" : null)">Theo số tiền</option>
+                                <option value="1" selected="@(Model.LoaiGiamGia == 1 ? "selected" : "")">Theo % sản phẩm</option>
+                                <option value="2" selected="@(Model.LoaiGiamGia == 2 ? "selected" : "")">Theo số tiền</option>
                             </select>
                             <span asp-validation-for="LoaiGiamGia" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
                             <label asp-for="GiaTriGiam">Giá Trị Giảm</label>
-                            <input asp-for="GiaTriGiam" class="form-control" id="GiaTriGiam" type="text" />
+                            <input asp-for="GiaTriGiam" class="form-control" type="number" placeholder="Nhập giá trị giảm" />
                             <span asp-validation-for="GiaTriGiam" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="GiaTriDonHangToiThieu">Giá Trị Đơn Hàng Tối Thiểu</label>
-                            <input asp-for="GiaTriDonHangToiThieu" class="form-control" type="text" />
-                            <span asp-validation-for="GiaTriDonHangToiThieu" class="text-danger"></span>
                         </div>
 
                         <div class="form-group" id="SoTienToiDaContainer" style="display:none;">
                             <label asp-for="SoTienToiDa">Số Tiền Giảm Tối Đa</label>
-                            <input asp-for="SoTienToiDa" class="form-control" type="text" />
+                            <input asp-for="SoTienToiDa" class="form-control" type="number" placeholder="Nhập số tiền giảm tối đa" />
                             <span asp-validation-for="SoTienToiDa" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
+                            <label asp-for="GiaTriDonHangToiThieu">Giá Trị Đơn Hàng Tối Thiểu</label>
+                            <input asp-for="GiaTriDonHangToiThieu" class="form-control" type="number" placeholder="Nhập giá trị đơn hàng tối thiểu" />
+                            <span asp-validation-for="GiaTriDonHangToiThieu" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
                             <label asp-for="NgayBatDau">Ngày Bắt Đầu</label>
-                            <input asp-for="NgayBatDau" class="form-control" />
+                            <input asp-for="NgayBatDau" class="form-control" type="date" />
                             <span asp-validation-for="NgayBatDau" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
                             <label asp-for="NgayKetThuc">Ngày Kết Thúc</label>
-                            <input asp-for="NgayKetThuc" class="form-control" />
+                            <input asp-for="NgayKetThuc" class="form-control" type="date" />
                             <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
                         </div>
 
-                        <div class="form-group mb-3">
+                        <div class="form-group">
                             <label asp-for="TrangThai">Trạng thái</label>
                             <select asp-for="TrangThai" class="form-control">
-                                <option value="1" selected="@(Model.TrangThai == 1 ? "selected" : null)">Chờ kích hoạt</option>
-                                <option value="3" selected="@(Model.TrangThai == 3 ? "selected" : null)">Tạm dừng</option>
-                                <option value="4" selected="@(Model.TrangThai == 4 ? "selected" : null)">Dừng</option>
+                                <option value="1" selected="@(Model.TrangThai == 1 ? "selected" : "")">Chờ kích hoạt</option>
+                                <option value="2" selected="@(Model.TrangThai == 2 ? "selected" : "")">kích hoạt</option>
+                                <option value="3" selected="@(Model.TrangThai == 3 ? "selected" : "")">Tạm dừng</option>
+                                <option value="4" selected="@(Model.TrangThai == 4 ? "selected" : "")">Dừng</option>
                             </select>
                             <span asp-validation-for="TrangThai" class="text-danger"></span>
                         </div>
@@ -78,7 +103,7 @@
                 </div>
             </div>
             <div class="card-footer">
-                <input type="submit" value="Lưu" class="btn btn-primary" />
+                <button type="submit" class="btn btn-primary">Lưu</button>
                 <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
             </div>
         </form>
@@ -87,20 +112,19 @@
 
 <script>
     $(document).ready(function () {
-        var selectedValue = $('#LoaiGiamGia').val();
-        if (selectedValue == 1) {
-            $('#SoTienToiDaContainer').slideDown(500);
-        } else {
-            $('#SoTienToiDaContainer').slideUp(500);
-        }
-
-        $('#LoaiGiamGia').on('change', function () {
-            var selectedValue = $(this).val();
+        function toggleSoTienToiDa() {
+            const selectedValue = $('#LoaiGiamGia').val();
             if (selectedValue == 1) {
                 $('#SoTienToiDaContainer').slideDown(500);
             } else {
                 $('#SoTienToiDaContainer').slideUp(500);
             }
-        });
+        }
+
+        // Initialize visibility based on the current selection
+        toggleSoTienToiDa();
+
+        // Update visibility on change
+        $('#LoaiGiamGia').on('change', toggleSoTienToiDa);
     });
 </script>

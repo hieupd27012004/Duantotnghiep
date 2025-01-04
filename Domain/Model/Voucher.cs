@@ -25,12 +25,10 @@ namespace AppData.Model
         public int? GiaTriDonHangToiThieu { get; set; } 
         public int? SoTienToiDa {  get; set; }
         public DateTime NgayBatDau { get; set; }
-        public DateTime NgayKetThuc { get; set; }
-        //public int? TongSoLuongVoucher { get; set; }
-        //public int? SoLuongVoucherConLai { get; set; }
+        public DateTime NgayKetThuc { get; set; }       
         public int TrangThai {  get; set; }
         public DateTime NgayTao {  get; set; }
-        public string NguoiTao { get; set; } //Tạm thời nhập tay, sau khi hoàn thành phân quyền đăng nhập chuyển sang IdUser
+        public string? NguoiTao { get; set; } 
         public DateTime? NgayUpdate {  get; set; }
         public string? NguoiUpdate { get; set; } //Tạm thời nhập tay, sau khi hoàn thành phân quyền đăng nhập chuyển sang IdUser
 

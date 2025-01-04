@@ -78,9 +78,36 @@ namespace AppAPI.Controllers
 
                 // Set update info
                 voucher.NgayUpdate = DateTime.Now;
-                voucher.NguoiUpdate = "Admin";
+               
 
                 var result = await _service.UpdateAsync(voucher);
+                if (result)
+                {
+                    return Ok(voucher);
+                }
+                return BadRequest("Failed to update voucher");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [HttpPost("UpdateVoucherStatusAsync/{id}")]
+        public async Task<IActionResult> UpdateVoucherStatusAsync(Guid id, [FromBody] Voucher voucher, int status)
+        {
+            try
+            {
+                if (id != voucher.VoucherId)
+                {
+                    return BadRequest("Id mismatch");
+                }
+
+                var existingVoucher = await _service.GetVoucherByIdAsync(id);
+                if (existingVoucher == null)
+                {
+                    return NotFound("Voucher not found");
+                }
+                var result = await _service.UpdateVoucherStatusAsync(voucher,status);
                 if (result)
                 {
                     return Ok(voucher);
@@ -186,6 +213,19 @@ namespace AppAPI.Controllers
                         StatusCode = StatusCodes.Status500InternalServerError
                     }
                 );
+            }
+        }
+        [HttpGet("checkMaVoucher")]
+        public async Task<IActionResult> CheckMaVoucher(string maVoucher)
+        {
+            try
+            {
+                var email = await _service.MaVoucher(maVoucher);
+                return Ok(email);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi trong quá trình kiểm tra", error = ex.Message });
             }
         }
     }

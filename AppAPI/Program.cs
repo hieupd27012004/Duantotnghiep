@@ -29,7 +29,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 // Configure SQL Server database context
 builder.Services.AddDbContext<AppDbcontext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddHttpClient("GHN", client =>
 {

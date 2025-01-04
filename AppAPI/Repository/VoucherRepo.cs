@@ -72,7 +72,8 @@ namespace AppAPI.Repository
                     NgayTao = DateTime.UtcNow,
                     NguoiTao = voucherDto.NguoiTao,
                     NgayUpdate = null,
-                    NguoiUpdate = null
+                    NguoiUpdate = null,
+                    
                 };
 
                 // Save the voucher to the database
@@ -176,6 +177,8 @@ namespace AppAPI.Repository
                 var voucher = await _context.vouchers.FindAsync(id);
                 if (voucher != null)
                 {
+                    var xoaLichSuVoucher = _context.LichSuSuDungVouchers.Where(ls => ls.IdVoucher == id);
+                    _context.LichSuSuDungVouchers.RemoveRange(xoaLichSuVoucher);
                     _context.vouchers.Remove(voucher);
                     await _context.SaveChangesAsync();
                     return true;
@@ -234,6 +237,30 @@ namespace AppAPI.Repository
             {
                 _logger.LogError($"Error getting available vouchers: {ex.Message}");
                 return new List<Voucher>();
+            }
+        }
+        public async Task<bool> MaVoucher(string maVoucher)
+        {
+            return await _context.vouchers.AnyAsync(x => x.MaVoucher == maVoucher);
+        }
+        public async Task<bool> UpdateVoucherStatusAsync(Voucher voucher, int status)
+        {
+            try
+            {
+                var existingVoucher = await _context.vouchers.FindAsync(voucher.VoucherId);
+                if (existingVoucher == null)
+                {
+                    return false;
+                }
+                existingVoucher.TrangThai = status;
+                _context.vouchers.Update(existingVoucher);
+                var result = await _context.SaveChangesAsync();
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating status for voucher {voucher}");
+                return false;
             }
         }
     }

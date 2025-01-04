@@ -58,11 +58,23 @@ namespace APPMVC.Areas.Admin.Controllers
             page = page < 1 ? 1 : page;
             int pageSize = 5;
 
-            // Gọi dịch vụ để tìm kiếm nhân viên
-            var khachHangs = await _service.SearchKhachHang(name);
+            // Lấy tất cả khách hàng nếu name là null hoặc rỗng
+            IEnumerable<KhachHang> khachHangs;
 
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                // Nếu không có tên tìm kiếm, lấy tất cả khách hàng
+                khachHangs = await _service.GetAllKhachHang();
+            }
+            else
+            {
+                // Gọi dịch vụ để tìm kiếm khách hàng theo tên
+                khachHangs = await _service.SearchKhachHang(name);
+            }
+
+            // Lọc khách hàng có trạng thái = 1
             var filteredKhachHangs = khachHangs
-                .Where(kh => kh.KichHoat == 1) // Giả sử TrangThai là thuộc tính của KhachHang
+                .Where(kh => kh.KichHoat == 1) // Giả sử KichHoat là thuộc tính của KhachHang
                 .ToList();
 
             var khachHangViewModels = new List<KhachHangViewModel>();
@@ -79,14 +91,15 @@ namespace APPMVC.Areas.Admin.Controllers
                 });
             }
 
+            // Sắp xếp theo NgayTao
             var sortedKhachHangViewModels = khachHangViewModels
-                .OrderByDescending(k => k.KhachHang.NgayTao) // Sắp xếp theo NgayTao
+                .OrderByDescending(k => k.KhachHang.NgayTao)
                 .ToList();
 
+            // Phân trang
             var pagedKhachHangViewModels = sortedKhachHangViewModels.ToPagedList(page, pageSize);
-            return View(pagedKhachHangViewModels);
-
-        } 
+            return View("Index",pagedKhachHangViewModels);
+        }
 
         public IActionResult Create()
         {

@@ -15,6 +15,7 @@ namespace APPMVC.IService
         Task<List<KhachHang>> GetKhachHangDaNhanVoucherAsync(Guid voucherId);
 
         Task<List<Voucher>> GetAvailableVouchersForCustomerAsync(Guid khachHangId);
-
+        Task<bool> CheckMaVoucher(string maVoucher);
+        Task<bool> UpdateVoucherStatusAsync(Voucher voucher, int status);
     }
 }
