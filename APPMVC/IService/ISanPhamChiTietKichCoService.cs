@@ -17,5 +17,7 @@ namespace APPMVC.IService
         Task Delete(Guid id);
 
         Task<List<KichCo>> GetKichCoIdsBySanPhamChiTietId(Guid sanPhamChiTietId);
+
+        Task<List<Guid>> GetSanPhamChiTietIdsByKichCoId(Guid kichCoId);
     }
 }

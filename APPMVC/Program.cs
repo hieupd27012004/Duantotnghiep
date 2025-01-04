@@ -96,6 +96,7 @@ builder.Services.AddTransient<GiaoHangNhanhService>(provider =>
     var httpClient = provider.GetRequiredService<HttpClient>();
     return new GiaoHangNhanhService(httpClient, "bcf656fe-256b-11ef-9e93-f2508e67c133", "5120262");
 });
+builder.Services.AddHostedService<PromotionStatusUpdaterService>();
 var app = builder.Build();
 
 

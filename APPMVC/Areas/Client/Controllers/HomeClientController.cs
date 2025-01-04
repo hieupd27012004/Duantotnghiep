@@ -498,7 +498,7 @@ namespace APPMVC.Areas.Client.Controllers
                 }
 
                 // Xóa giỏ hàng
-                // await _gioHangChiTietService.RemoveItemsFromCartAsync(idGioHang, cartItems.Select(item => item.IdSanPhamChiTiet).ToList());
+                await _gioHangChiTietService.RemoveItemsFromCartAsync(idGioHang, cartItems.Select(item => item.IdSanPhamChiTiet).ToList());
 
                 return true;
             }

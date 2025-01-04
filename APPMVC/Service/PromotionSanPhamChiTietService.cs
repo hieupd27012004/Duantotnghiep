@@ -68,5 +68,18 @@ namespace AppAPI.Service
                 return null; // Return null or handle accordingly
             }
         }
+
+        public async Task<List<PromotionSanPhamChiTiet>> GetPromotionSanPhamChiTietsByPromotionIdAsync(Guid promotionId)
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<PromotionSanPhamChiTiet>>($"api/PromotionSanPhamChiTiet/promotionsById?promotionId={promotionId}");
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Error fetching SanPhamChiTiets by PromotionId: {ex.Message}");
+                return new List<PromotionSanPhamChiTiet>(); // Return an empty list or handle accordingly
+            }
+        }
     }
 }

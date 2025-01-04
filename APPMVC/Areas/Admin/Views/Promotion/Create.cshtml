@@ -1,11 +1,10 @@
 ﻿@model AppData.ViewModel.PromotionViewModel
 
 @{
-    ViewData["Title"] = "Tạo Promotion";
+    ViewData["Title"] = "Tạo Khuyến Mãi";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-@* Hiển thị thông báo *@
 @if (TempData["ErrorMessage"] != null)
 {
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -26,14 +25,83 @@
         border: 1px solid #ced4da;
         border-left: none;
     }
-</style>
-<h1>@ViewData["Title"]</h1>
-<hr />
 
-<div class="row">
-    <div class="col-md-6">
-        <h3>Thông Tin Promotion</h3>
-        <div>
+    h1, h3 {
+        color: #333;
+    }
+
+    .form-control {
+        border-radius: 0.25rem;
+        box-shadow: none;
+        border: 1px solid #ced4da;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+    .table {
+        width: 100%;
+        margin-bottom: 1rem;
+        background-color: transparent;
+    }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+    .text-danger {
+        font-weight: bold;
+    }
+
+    /* Enhanced styling for product details table */
+    #productDetailsTable {
+        margin-top: 20px;
+        border-collapse: collapse;
+    }
+
+        #productDetailsTable th, #productDetailsTable td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+
+        #productDetailsTable th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #productDetailsTable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+    /* New styles for spacing */
+    .container {
+        margin: 20px; /* Adjust this value to control the spacing */
+        padding: 20px; /* Optional: add padding to the container */
+        border: 1px solid #dee2e6; /* Optional: add a border for visual distinction */
+        border-radius: 0.5rem; /* Optional: round the corners */
+        background-color: #f8f9fa; /* Optional: background color */
+    }
+</style>
+
+<div class="container">
+    <h1>@ViewData["Title"]</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Thông Tin Khuyến Mãi</h3>
             <form asp-action="Create" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -64,107 +132,105 @@
                     <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
                 </div>
 
-
                 <div class="form-group">
                     <input type="hidden" asp-for="Promotion.TrangThai" value="1" />
                 </div>
 
-                <!-- Product Details Section -->
-                <h3>Chi Tiết Sản Phẩm</h3>
-                <table id="productDetailsTable" class="table table-striped table-bordered" style="display: none;">
-                    <thead>
-                        <tr>
-                            <th>Select</th>
-                            <th hidden>Product ID</th>
-                            <th>Product Name</th>
-                            <th>Price</th>
-                            <th>Quantity</th>
-                            <th>Color</th>
-                            <th>Size</th>
-                            <th>Image</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productDetailsBody">
-                        <!-- Rows will be appended here by JavaScript -->
-                    </tbody>
-                </table>
+                <div class="col-md-12">
+                    <h3>Chi Tiết Sản Phẩm</h3>
+                    <table id="productDetailsTable" class="table table-striped table-bordered" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>Chọn</th>
+                                <th hidden>ID Sản Phẩm</th>
+                                <th>Mã Sản Phẩm</th>
+                                <th>Tên Sản Phẩm</th>
+                                <th>Giá</th>
+                                <th>Số Lượng</th>
+                                <th>Màu Sắc</th>
+                                <th>Kích Cỡ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productDetailsBody">
+                            <!-- Dòng sẽ được thêm vào đây bằng JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
 
                 <div class="form-group">
-                    <input type="submit" value="Create" class="btn btn-primary" />
+                    <input type="submit" value="Tạo" class="btn btn-primary" />
                 </div>
             </form>
         </div>
-    </div>
 
-    <!-- Product List Section -->
-    <div class="col-md-6">
-        <h3>Danh Sách Sản Phẩm</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th hidden>ID</th>
-                    <th>Chọn</th>
-                    <th>Tên Sản Phẩm</th>
-                    <th>Thương Hiệu</th>
-                    <th>Chất Liệu</th>
-                    <th>Danh Mục</th>
-                    <th>Đế Giày</th>
-                    <th>Kểu Dáng</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.SanPhams != null && Model.SanPhams.Any())
-                {
-                    foreach (var product in Model.SanPhams)
+        <div class="col-md-6">
+            <h3>Danh Sách Sản Phẩm</h3>
+            <div class="form-group">
+                <label for="searchProduct" class="control-label">Tìm Kiếm Sản Phẩm</label>
+                <input type="text" id="searchProduct" class="form-control" placeholder="Nhập tên sản phẩm để tìm..." />
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th hidden>ID</th>
+                        <th>Chọn</th>
+                        <th>Tên Sản Phẩm</th>
+                      
+                    </tr>
+                </thead>
+                <tbody id="productList">
+                    @if (Model.SanPhams != null && Model.SanPhams.Any())
+                    {
+                        foreach (var product in Model.SanPhams)
+                        {
+                            <tr>
+                                <td hidden>@product.IdSanPham</td>
+                                <td>
+                                    <input type="checkbox" name="SelectedSanPhamIds" class="select-product" value="@product.IdSanPham" />
+                                </td>
+                                <td>@product.TenSanPham</td>
+                             
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td hidden>@product.IdSanPham</td>
-                            <td>
-                                <input type="checkbox" name="SelectedSanPhamIds" class="select-product" value="@product.IdSanPham" />
-                            </td>
-                            <td>@product.TenSanPham</td>
-                            <td>@product.ThuongHieu</td>
-                            <td>@product.ChatLieu</td>
-                            <td>@product.DanhMuc</td>
-                            <td>@product.DeGiay</td>
-                            <td>@product.KieuDang</td>
+                            <td colspan="8" class="text-center">Không có sản phẩm nào để hiển thị.</td>
                         </tr>
                     }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="8" class="text-center">Không có sản phẩm nào để hiển thị.</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
+    </div>
 
-<div>
-    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    <div>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+    </div>
 </div>
 
 @section scripts {
     <script>
         $(document).ready(function () {
+             $('#searchProduct').on('input', function () {
+                var searchValue = $(this).val().toLowerCase();
+                $('#productList tr').filter(function () {
+                    $(this).toggle($(this).find('td:nth-child(3)').text().toLowerCase().indexOf(searchValue) > -1);
+                });
+            });
+
             $('.select-product').change(function () {
                 var selectedProductIds = $('.select-product:checked').map(function () {
                     return $(this).val();
                 }).get();
 
-                console.log("Selected Product IDs: ", selectedProductIds);
-
                 $('#productDetailsBody').empty();
                 $('#productDetailsTable').hide();
-                $('#productDetailsSection').hide();
 
                 if (selectedProductIds.length > 0) {
                     const url = '@Url.Action("GetProductDetails", "Promotion", new { area = "Admin" })';
-                    console.log("Fetching product details from: " + url + "?sanPhamIds=" + selectedProductIds.join(','));
 
-                    // Lấy ngày bắt đầu và kết thúc từ form
                     var startDate = new Date($('input[name="NgayBatDau"]').val());
                     var endDate = new Date($('input[name="NgayKetThuc"]').val());
 
@@ -173,83 +239,59 @@
                         type: 'GET',
                         data: { sanPhamIds: selectedProductIds.join(',') },
                         success: function (data) {
-                            console.log("Response data: ", data);
-
-                            // Kiểm tra và lọc các sản phẩm chi tiết không trong khuyến mãi
                             var availableProductDetails = [];
 
                             if (data.chiTietSanPhams && data.chiTietSanPhams.length > 0) {
                                 $.each(data.chiTietSanPhams, function (index, item) {
-                                    // Kiểm tra xem sản phẩm chi tiết có trong khuyến mãi không
                                     var isInPromotion = checkProductInPromotion(item.idSanPhamChiTiet, startDate, endDate);
-
                                     if (!isInPromotion) {
                                         availableProductDetails.push(item);
                                     }
                                 });
                             }
 
-                            // Hiển thị các sản phẩm chi tiết không trong khuyến mãi
                             if (availableProductDetails.length > 0) {
                                 $.each(availableProductDetails, function (index, item) {
                                     var mauSacDisplay = item.mauSac && Array.isArray(item.mauSac) ? item.mauSac.join(", ") : 'N/A';
                                     var kichCoDisplay = item.kichCo && Array.isArray(item.kichCo) ? item.kichCo.join(", ") : 'N/A';
-
-                                    // Xử lý hình ảnh
-                                    var hinhAnhDisplay = '';
-                                    if (item.hinhAnhs && item.hinhAnhs.length > 0) {
-                                        var hinhAnh = item.hinhAnhs[0];
-                                        var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(hinhAnh.DataHinhAnh)));
-                                        hinhAnhDisplay = `data:${hinhAnh.LoaiFileHinhAnh};base64,${base64String}`;
-                                    }
+                                    var formattedPrice = item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
+                                    var ma = item.MaSP.toString();
 
                                     var row = `<tr>
                                                 <td><input type="checkbox" name="SelectedSanPhamChiTietIds" value="${item.idSanPhamChiTiet}" /></td>
                                                 <td hidden>${item.idSanPhamChiTiet}</td>
+                                                <td>${ma}</td>
                                                 <td>${item.productName}</td>
-                                                <td>${item.price.toFixed(2)}</td>
+                                                <td>${formattedPrice}</td>
                                                 <td>${item.quantity}</td>
                                                 <td>${mauSacDisplay}</td>
                                                 <td>${kichCoDisplay}</td>
-                                                <td><img src="${hinhAnhDisplay}" alt="Hình ảnh" style="width: 50px; height: auto;" /></td>
                                             </tr>`;
                                     $('#productDetailsBody').append(row);
                                 });
 
                                 $('#productDetailsTable').show();
-                                $('#productDetailsSection').show();
-
-                                // Thêm thông báo nếu có sản phẩm bị loại
-                                if (availableProductDetails.length < data.chiTietSanPhams.length) {
-                                    var skippedCount = data.chiTietSanPhams.length - availableProductDetails.length;
-                                    alert(`${skippedCount} sản phẩm chi tiết đã bị loại do đang trong chương trình khuyến mãi khác.`);
-                                }
                             } else {
                                 alert('Không có sản phẩm chi tiết nào có sẵn để chọn.');
                                 $('#productDetailsTable').hide();
-                                $('#productDetailsSection').hide();
                             }
                         },
                         error: function (xhr, status, error) {
-                            console.error("Error fetching product details: ", error);
-                            alert("An error occurred while fetching product details. Please try again.");
+                            console.error("Lỗi khi lấy thông tin sản phẩm: ", error);
+                            alert("Đã xảy ra lỗi trong quá trình lấy thông tin sản phẩm. Vui lòng thử lại.");
                         }
                     });
                 } else {
                     $('#productDetailsTable').hide();
-                    $('#productDetailsSection').hide();
                 }
             });
 
-            // Hàm kiểm tra sản phẩm có trong khuyến mãi không
             function checkProductInPromotion(productDetailId, startDate, endDate) {
                 var isInPromotion = false;
-
-                // Gọi Ajax để kiểm tra
                 $.ajax({
                     url: '@Url.Action("CheckProductInPromotion", "Promotion", new { area = "Admin" })',
                     type: 'GET',
-                    async: false, // Đồng bộ để đảm bảo kết quả
+                    async: false,
                     data: {
                         productDetailId: productDetailId,
                         startDate: startDate.toISOString(),
@@ -259,16 +301,14 @@
                         isInPromotion = result;
                     },
                     error: function (xhr, status, error) {
-                        console.error("Error checking product in promotion: ", error);
+                        console.error("Lỗi khi kiểm tra sản phẩm trong khuyến mãi: ", error);
                         isInPromotion = true; // Mặc định không cho chọn nếu có lỗi
                     }
                 });
-
                 return isInPromotion;
             }
         });
 
-        // Các hàm validate khác giữ nguyên
         function validatePercentage() {
             var phanTramGiamInput = document.getElementById("phanTramGiam");
             var numericValue = parseFloat(phanTramGiamInput.value);

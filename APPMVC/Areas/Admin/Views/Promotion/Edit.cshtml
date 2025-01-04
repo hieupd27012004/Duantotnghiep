@@ -1,4 +1,5 @@
-﻿@model AppData.Model.Promotion
+﻿@model AppData.ViewModel.PromotionViewModel // Cập nhật kiểu model
+
 @{
     ViewData["Title"] = "Chỉnh Sửa Promotion";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
@@ -11,36 +12,53 @@
         <form asp-action="Edit" method="post">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdPromotion" />
+            <input type="hidden" asp-for="Promotion.IdPromotion" />
             <div class="form-group">
-                <label asp-for="TenPromotion" class="control-label">Tên Promotion</label>
-                <input asp-for="TenPromotion" class="form-control" />
-                <span asp-validation-for="TenPromotion" class="text-danger"></span>
+                <label asp-for="Promotion.TenPromotion" class="control-label">Tên Promotion</label>
+                <input asp-for="Promotion.TenPromotion" class="form-control" />
+                <span asp-validation-for="Promotion.TenPromotion" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PhanTramGiam" class="control-label">Phần Trăm Giảm</label>
-                <input asp-for="PhanTramGiam" class="form-control" />
-                <span asp-validation-for="PhanTramGiam" class="text-danger"></span>
+                <label asp-for="Promotion.PhanTramGiam" class="control-label">Phần Trăm Giảm</label>
+                <input asp-for="Promotion.PhanTramGiam" class="form-control" />
+                <span asp-validation-for="Promotion.PhanTramGiam" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="NgayBatDau" class="control-label">Ngày Bắt Đầu</label>
-                <input asp-for="NgayBatDau" class="form-control date-input" type="datetime-local" value="@Model.NgayBatDau.ToString("yyyy-MM-ddTHH:mm")" />
-                <span asp-validation-for="NgayBatDau" class="text-danger"></span>
+                <label asp-for="Promotion.NgayBatDau" class="control-label">Ngày Bắt Đầu</label>
+                <input asp-for="Promotion.NgayBatDau" class="form-control date-input" type="datetime-local" value="@Model.Promotion.NgayBatDau.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="Promotion.NgayBatDau" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="NgayKetThuc" class="control-label">Ngày Kết Thúc</label>
-                <input asp-for="NgayKetThuc" class="form-control date-input" type="datetime-local" value="@Model.NgayKetThuc.ToString("yyyy-MM-ddTHH:mm")" />
-                <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
+                <label asp-for="Promotion.NgayKetThuc" class="control-label">Ngày Kết Thúc</label>
+                <input asp-for="Promotion.NgayKetThuc" class="form-control date-input" type="datetime-local" value="@Model.Promotion.NgayKetThuc.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="Promotion.NgayKetThuc" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="TrangThai" class="control-label">Trạng Thái</label>
-                <select asp-for="TrangThai" class="form-control" asp-items="ViewBag.TrangThaiList"></select>
-                <span asp-validation-for="TrangThai" class="text-danger"></span>
+                <label asp-for="Promotion.TrangThai" class="control-label">Trạng Thái</label>
+                <select asp-for="Promotion.TrangThai" class="form-control" asp-items="ViewBag.TrangThaiList"></select>
+                <span asp-validation-for="Promotion.TrangThai" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
+    </div>
+    <div class="col-md-8">
+        <h3>Sản Phẩm Chi Tiết Áp Dụng</h3>
+        <ul class="list-group">
+            @foreach (var item in Model.SanPhamChiTiets)
+            {
+                <li class="list-group-item">
+                    Mã Sản Phẩm: @item.MaSP <br />
+                    Tên: @item.ProductName <br />
+                    Giá: @item.Price <br />
+                    Số Lượng: @item.Quantity <br />
+                    <strong>Màu Sắc:</strong> @string.Join(", ", item.MauSac) <br />
+                    <strong>Kích Cỡ:</strong> @string.Join(", ", item.KichCo) <br />
+                   
+                </li>
+            }
+        </ul>
     </div>
 </div>
 <div>
@@ -48,7 +66,7 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContent loaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
         var dateInputs = document.querySelectorAll('.date-input');
         dateInputs.forEach(function (input) {
             input.addEventListener('change', function () {

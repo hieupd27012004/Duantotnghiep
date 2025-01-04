@@ -38,6 +38,11 @@ namespace AppAPI.Service
         {
             return await _repository.GetKichCoIdsBySanPhamChiTietId(sanPhamChiTietId);
         }
+        public async Task<List<Guid>> GetSanPhamChiTietIdsByKichCoIdAsync(Guid kichCoId)
+        {
+            return await _repository.GetSanPhamChiTietIdsByKichCoIdAsync(kichCoId);
+        }
+
 
         public async Task<List<SanPhamChiTietKichCo>> GetSanPhamChiTietKichCoAsync()
         {

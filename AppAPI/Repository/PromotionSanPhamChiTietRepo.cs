@@ -58,5 +58,20 @@ namespace AppAPI.Repository
                 .Select(p => p.Promotion.IdPromotion)
                 .FirstOrDefaultAsync();
         }
+        public async Task<List<PromotionSanPhamChiTiet>> GetPromotionSanPhamChiTietsByPromotionIdAsync(Guid promotionId)
+        {
+            // Kiểm tra xem ID khuyến mãi có hợp lệ không
+            if (promotionId == Guid.Empty)
+            {
+                throw new ArgumentException("Promotion ID cannot be empty", nameof(promotionId));
+            }
+
+            // Truy vấn để lấy danh sách sản phẩm chi tiết cho khuyến mãi
+            var promotionSanPhamChiTiets = await _context.promotionSanPhamChiTiets
+                .Where(ps => ps.IdPromotion == promotionId)
+                .ToListAsync();
+
+            return promotionSanPhamChiTiets;
+        }
     }
 }

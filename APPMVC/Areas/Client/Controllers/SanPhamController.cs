@@ -67,7 +67,7 @@ namespace APPMVC.Areas.Client.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string? name, Guid? categoryId, Guid? colorId)
+        public async Task<IActionResult> Index(string? name, Guid? categoryId, Guid? colorId, Guid? sizeId)
         {
             // Fetch all products from the service
             var sanPhams = await _sanPhamservice.GetSanPhamClient(name);
@@ -78,45 +78,36 @@ namespace APPMVC.Areas.Client.Controllers
                 sanPhams = sanPhams.Where(sp => sp.IdDanhMuc == categoryId.Value).ToList();
             }
 
-            // Get all product details for filtering by color
-            var allChiTietSanPhams = new List<SanPhamChiTiet>();
-            foreach (var sanPham in sanPhams)
-            {
-                var chiTietList = await _sanPhamCTservice.GetSanPhamChiTietBySanPhamId(sanPham.IdSanPham);
-                allChiTietSanPhams.AddRange(chiTietList);
-            }
+            // Fetch all product details in one go for filtering by color and size
+            var allChiTietSanPhams = await Task.WhenAll(sanPhams.Select(sp => _sanPhamCTservice.GetSanPhamChiTietBySanPhamId(sp.IdSanPham)));
+            var flatChiTietSanPhams = allChiTietSanPhams.SelectMany(x => x).ToList();
 
             // Filter product details by color if colorId is provided
             if (colorId.HasValue)
             {
-                // Lấy danh sách IdSanPhamChiTiet dựa trên mauSacId
-                var sanPhamChiTietIds = await _sanPhamChiTietMauSacService.GetSanPhamChiTietIdsByMauSacId(colorId.Value);
-
-                // Kiểm tra xem sanPhamChiTietIds có rỗng không
-                if (sanPhamChiTietIds == null || !sanPhamChiTietIds.Any())
+                var sanPhamChiTietIdsByColor = await _sanPhamChiTietMauSacService.GetSanPhamChiTietIdsByMauSacId(colorId.Value);
+                if (sanPhamChiTietIdsByColor == null || !sanPhamChiTietIdsByColor.Any())
                 {
-                    // Nếu không có IdSanPhamChiTiet nào, hiển thị thông báo
                     ViewData["Message"] = "No products found for the selected color.";
                 }
 
-                // Lọc sản phẩm dựa trên IdSanPhamChiTiet
-                var filteredSanPhams = new List<SanPham>();
+                sanPhams = sanPhams.Where(sp =>
+                    flatChiTietSanPhams.Any(ct => sanPhamChiTietIdsByColor.Contains(ct.IdSanPhamChiTiet) && ct.IdSanPham == sp.IdSanPham)).ToList();
+            }
 
-                foreach (var sanPham in sanPhams)
+            // Filter product details by size if sizeId is provided
+            if (sizeId.HasValue)
+            {
+                var sanPhamChiTietIdsBySize = await _sanPhamChiTietKichCoService.GetSanPhamChiTietIdsByKichCoId(sizeId.Value);
+                if (sanPhamChiTietIdsBySize == null || !sanPhamChiTietIdsBySize.Any())
                 {
-                    // Lấy danh sách chi tiết sản phẩm cho mỗi sản phẩm
-                    var chiTietList = await _sanPhamCTservice.GetSanPhamChiTietBySanPhamId(sanPham.IdSanPham);
-
-                    // Kiểm tra xem có sản phẩm chi tiết nào có IdSanPhamChiTiet trong danh sách không
-                    if (chiTietList.Any(ct => sanPhamChiTietIds.Contains(ct.IdSanPhamChiTiet)))
-                    {
-                        filteredSanPhams.Add(sanPham);
-                    }
+                    ViewData["Message"] = "No products found for the selected size.";
                 }
 
-                // Cập nhật danh sách sanPhams với sản phẩm đã lọc
-                sanPhams = filteredSanPhams;
+                sanPhams = sanPhams.Where(sp =>
+                    flatChiTietSanPhams.Any(ct => sanPhamChiTietIdsBySize.Contains(ct.IdSanPhamChiTiet) && ct.IdSanPham == sp.IdSanPham)).ToList();
             }
+
             // Filter products by name if provided
             if (!string.IsNullOrEmpty(name))
             {
@@ -128,29 +119,27 @@ namespace APPMVC.Areas.Client.Controllers
 
             foreach (var sanPham in activeSanPhams)
             {
-                var sanPhamChiTietList = await _sanPhamCTservice.GetSanPhamChiTietBySanPhamId(sanPham.IdSanPham);
+                var sanPhamChiTietList = flatChiTietSanPhams.Where(ct => ct.IdSanPham == sanPham.IdSanPham).ToList();
                 double highestDiscountPercentage = 0;
                 double? minPrice = null;
                 double? maxPrice = null;
 
                 foreach (var sanPhamChiTiet in sanPhamChiTietList)
                 {
+                    // Fetch promotions in parallel
                     var promotionId = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(sanPhamChiTiet.IdSanPhamChiTiet);
-
                     if (promotionId.HasValue && promotionId.Value != Guid.Empty)
                     {
                         var promotionDetails = await _promotionService.GetPromotionByIdAsync(promotionId.Value);
-                        if (promotionDetails?.TrangThai == 1)
+                        if (promotionDetails?.TrangThai == 1 && sanPhamChiTiet.GiaGiam.HasValue && sanPhamChiTiet.GiaGiam > 0 && sanPhamChiTiet.GiaGiam < sanPhamChiTiet.Gia)
                         {
-                            if (sanPhamChiTiet.GiaGiam.HasValue && sanPhamChiTiet.GiaGiam.Value < sanPhamChiTiet.Gia)
-                            {
-                                var discountPercentage = Math.Round(((sanPhamChiTiet.Gia - sanPhamChiTiet.GiaGiam.Value) / sanPhamChiTiet.Gia) * 100);
-                                highestDiscountPercentage = Math.Max(highestDiscountPercentage, discountPercentage);
-                            }
+                            var discountPercentage = Math.Round(((sanPhamChiTiet.Gia - sanPhamChiTiet.GiaGiam.Value) / sanPhamChiTiet.Gia) * 100);
+                            highestDiscountPercentage = Math.Max(highestDiscountPercentage, discountPercentage);
                         }
                     }
 
-                    double effectivePrice = sanPhamChiTiet.GiaGiam ?? sanPhamChiTiet.Gia;
+                    // Determine the effective price
+                    double effectivePrice = (sanPhamChiTiet.GiaGiam.HasValue && sanPhamChiTiet.GiaGiam > 0) ? sanPhamChiTiet.GiaGiam.Value : sanPhamChiTiet.Gia;
                     minPrice = minPrice == null ? effectivePrice : Math.Min(minPrice.Value, effectivePrice);
                     maxPrice = maxPrice == null ? effectivePrice : Math.Max(maxPrice.Value, effectivePrice);
                 }
@@ -158,19 +147,21 @@ namespace APPMVC.Areas.Client.Controllers
                 var representativeImage = new byte[0];
                 var colorImages = new List<RepresentativeImageViewModel>();
 
+                // Original image fetching logic
                 foreach (var sanPhamChiTiet in sanPhamChiTietList)
                 {
                     var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
-                    foreach (var mauSac in mauSacList)
-                    {
-                        var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
-                        if (hinhAnhs.Any())
-                        {
-                            if (representativeImage.Length == 0)
-                            {
-                                representativeImage = hinhAnhs.First().DataHinhAnh;
-                            }
+                    var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet); // Use the old method here
 
+                    if (hinhAnhs.Any())
+                    {
+                        if (representativeImage.Length == 0)
+                        {
+                            representativeImage = hinhAnhs.First().DataHinhAnh;
+                        }
+
+                        foreach (var mauSac in mauSacList)
+                        {
                             colorImages.Add(new RepresentativeImageViewModel
                             {
                                 MauSacTen = mauSac.TenMauSac,
@@ -195,10 +186,16 @@ namespace APPMVC.Areas.Client.Controllers
                 sanPhamClientViewModels.Add(viewModel);
             }
 
-            // Fetch categories, colors, and sizes
-            var categories = await _danhMucService.GetDanhMuc(null);
-            var colors = await _mauSacService.GetMauSac(null);
-            var sizes = await _kichCoService.GetKichCo(null);
+            // Fetch categories, colors, and sizes concurrently
+            var categoriesTask = _danhMucService.GetDanhMuc(null);
+            var colorsTask = _mauSacService.GetMauSac(null);
+            var sizesTask = _kichCoService.GetKichCo(null);
+
+            await Task.WhenAll(categoriesTask, colorsTask, sizesTask);
+
+            var categories = await categoriesTask;
+            var colors = await colorsTask;
+            var sizes = await sizesTask;
 
             // Ensure these collections are not null and contain data
             if (categories == null || colors == null || sizes == null)
@@ -213,6 +210,7 @@ namespace APPMVC.Areas.Client.Controllers
 
             return View(sanPhamClientViewModels);
         }
+
         [HttpGet]
         public async Task<IActionResult> Detail(Guid sanphamId, Guid? selectedColorId = null, Guid? selectedSizeId = null)
         {
@@ -412,7 +410,16 @@ namespace APPMVC.Areas.Client.Controllers
                     return Ok(new { message = "Số lượng mặt hàng đã được cập nhật trong giỏ hàng thành công", existingItem });
                 }
 
-                var donGia = sanPhamChiTiet.GiaGiam ?? sanPhamChiTiet.Gia;
+                // Check for discount and decide the price
+                double donGia;
+                if (sanPhamChiTiet.GiaGiam.HasValue && sanPhamChiTiet.GiaGiam > 0)
+                {
+                    donGia = sanPhamChiTiet.GiaGiam.Value;
+                }
+                else
+                {
+                    donGia = sanPhamChiTiet.Gia;
+                }
 
                 var gioHangChiTiet = new GioHangChiTiet
                 {

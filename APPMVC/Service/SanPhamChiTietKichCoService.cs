@@ -65,5 +65,18 @@ namespace AppAPI.Service
                 return new List<KichCo>(); // Return an empty list or handle accordingly
             }
         }
+
+        public async Task<List<Guid>> GetSanPhamChiTietIdsByKichCoId(Guid kichCoId)
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<Guid>>($"api/SanPhamChiTietKichCo/sanphamchitietids?kichCoId={kichCoId}");
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Error fetching SanPhamChiTiet IDs: {ex.Message}");
+                return new List<Guid>(); // Return an empty list or handle accordingly
+            }
+        }
     }
 }
