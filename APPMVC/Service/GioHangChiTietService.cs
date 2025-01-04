@@ -174,14 +174,17 @@ namespace APPMVC.Service
                 return; // Không làm gì nếu không có ID nào
             }
 
-            // Xây dựng chuỗi tham số query cho các ID
-            var queryParameters = string.Join("&", productDetailIds.Select(id => $"productDetailIds={Uri.EscapeDataString(id.ToString())}"));
-            var requestUrl = $"api/GioHangChiTiet/removeitems/{cartId}?{queryParameters}";
+            // Tạo đối tượng yêu cầu
+            var request = new RemoveItemsRequest
+            {
+                CartId = cartId,
+                ProductDetailIds = productDetailIds
+            };
 
             try
             {
-                // Gửi yêu cầu DELETE tới API
-                var response = await _httpClient.DeleteAsync(requestUrl);
+                // Gửi yêu cầu POST tới API với body là request
+                var response = await _httpClient.PostAsJsonAsync("api/GioHangChiTiet/removeitems", request);
 
                 // Đảm bảo phản hồi thành công
                 response.EnsureSuccessStatusCode();
@@ -211,4 +214,10 @@ public class GioHangChiTiet
     public int KichHoat { get; set; }
     public Guid IdGioHang { get; set; }
     public Guid IdSanPhamChiTiet { get; set; }
+}
+public class RemoveItemsRequest
+{
+    public Guid CartId { get; set; }
+    public List<Guid> ProductDetailIds { get; set; }
+
 }

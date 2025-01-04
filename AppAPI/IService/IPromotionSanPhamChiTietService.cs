@@ -13,5 +13,6 @@ namespace AppAPI.IService
         Task<bool> UpdateAsync(PromotionSanPhamChiTiet promotion);
         Task<bool> DeleteAsync(Guid id);
         Task<Guid?> GetPromotionsBySanPhamChiTietIdAsync(Guid sanPhamChiTietId);
+        Task<List<PromotionSanPhamChiTiet>> GetPromotionSanPhamChiTietsByPromotionIdAsync(Guid promotionId);
     }
 }

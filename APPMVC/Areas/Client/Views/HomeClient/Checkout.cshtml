@@ -377,16 +377,16 @@
         $("#WardName").val(wardName);
     });
 
-    $('.voucher-radio').on('change', function() {
+        $('.voucher-radio').on('change', function() {
         var voucherId = $(this).val();
-        var shippingFee = parseFloat($('#phi_van_chuyen').val().replace(/[^0-9.-]+/g, "")) || 0; // Get shipping fee
+        var shippingFee = parseFloat($('#phi_van_chuyen').val().replace(/[^0-9.-]+/g, "")) || 0; // Lấy phí vận chuyển
 
         $.ajax({
             url: '@Url.Action("ApplyVoucher", "HomeClient", new { area = "Client" })',
             type: 'POST',
             data: { voucherId: voucherId, shippingFee: shippingFee },
             success: function(response) {
-                // Format discount amounts
+                // Định dạng lại các giá trị giảm giá
                 response.totalAfterDiscount = formatCurrency(response.totalAfterDiscount);
                 response.discountAmount = formatCurrency(response.discountAmount);
 
@@ -394,12 +394,12 @@
                 $('#phi_van_chuyen').val(formatCurrency(shippingFee)); // Hiển thị phí vận chuyển
 
                 if (response.success) {
-                    // Remove previous vouchers
+                    // Xóa các voucher trước đó
                     $('#discount-row').remove();
                     $('input[name="SelectedVoucherId"]').remove();
                     $('input[name="DiscountAmount"]').remove();
 
-                    // Show discount
+                    // Hiển thị thông tin giảm giá
                     $('#tong_so_tien').closest('.form-group').after(`
                         <div id="discount-row" class="form-group">
                             <label>Giảm giá Voucher</label>
@@ -410,15 +410,18 @@
                     // Cập nhật tổng tiền
                     $('#tong_tien').val(response.totalAfterDiscount);
 
-                    // Add hidden fields for voucher info
+                    // Thêm các trường ẩn cho thông tin voucher
                     $('form').append(`
                         <input type="hidden" name="SelectedVoucherId" value="${response.voucherId}" />
                         <input type="hidden" name="DiscountAmount" value="${response.discountAmount.replace(/[^0-9.-]+/g, "")}" />
                     `);
                 } else {
-                    // Handle failure case
+                    // Reset radio button đã chọn nếu không thành công do giá trị đơn hàng không đủ
+                    $('input[name="SelectedVoucher"]:checked').prop('checked', false); // Bỏ chọn radio button đã chọn
                     $('#discount-row').remove();
-                    alert(response.message);
+                    $('input[name="SelectedVoucherId"]').remove();
+                    $('input[name="DiscountAmount"]').remove();
+                    alert(response.message); // Hiển thị thông báo lỗi
                 }
             },
             error: function() {

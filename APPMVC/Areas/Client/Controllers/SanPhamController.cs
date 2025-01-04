@@ -131,14 +131,15 @@ namespace APPMVC.Areas.Client.Controllers
                     if (promotionId.HasValue && promotionId.Value != Guid.Empty)
                     {
                         var promotionDetails = await _promotionService.GetPromotionByIdAsync(promotionId.Value);
-                        if (promotionDetails?.TrangThai == 1 && sanPhamChiTiet.GiaGiam.HasValue && sanPhamChiTiet.GiaGiam < sanPhamChiTiet.Gia)
+                        if (promotionDetails?.TrangThai == 1 && sanPhamChiTiet.GiaGiam.HasValue && sanPhamChiTiet.GiaGiam > 0 && sanPhamChiTiet.GiaGiam < sanPhamChiTiet.Gia)
                         {
                             var discountPercentage = Math.Round(((sanPhamChiTiet.Gia - sanPhamChiTiet.GiaGiam.Value) / sanPhamChiTiet.Gia) * 100);
                             highestDiscountPercentage = Math.Max(highestDiscountPercentage, discountPercentage);
                         }
                     }
 
-                    double effectivePrice = sanPhamChiTiet.GiaGiam ?? sanPhamChiTiet.Gia;
+                    // Determine the effective price
+                    double effectivePrice = (sanPhamChiTiet.GiaGiam.HasValue && sanPhamChiTiet.GiaGiam > 0) ? sanPhamChiTiet.GiaGiam.Value : sanPhamChiTiet.Gia;
                     minPrice = minPrice == null ? effectivePrice : Math.Min(minPrice.Value, effectivePrice);
                     maxPrice = maxPrice == null ? effectivePrice : Math.Max(maxPrice.Value, effectivePrice);
                 }
@@ -209,6 +210,7 @@ namespace APPMVC.Areas.Client.Controllers
 
             return View(sanPhamClientViewModels);
         }
+
         [HttpGet]
         public async Task<IActionResult> Detail(Guid sanphamId, Guid? selectedColorId = null, Guid? selectedSizeId = null)
         {
@@ -408,7 +410,16 @@ namespace APPMVC.Areas.Client.Controllers
                     return Ok(new { message = "Số lượng mặt hàng đã được cập nhật trong giỏ hàng thành công", existingItem });
                 }
 
-                var donGia = sanPhamChiTiet.GiaGiam ?? sanPhamChiTiet.Gia;
+                // Check for discount and decide the price
+                double donGia;
+                if (sanPhamChiTiet.GiaGiam.HasValue && sanPhamChiTiet.GiaGiam > 0)
+                {
+                    donGia = sanPhamChiTiet.GiaGiam.Value;
+                }
+                else
+                {
+                    donGia = sanPhamChiTiet.Gia;
+                }
 
                 var gioHangChiTiet = new GioHangChiTiet
                 {
