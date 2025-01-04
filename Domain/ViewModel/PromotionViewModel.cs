@@ -21,6 +21,7 @@ namespace AppData.ViewModel
         public class SanPhamChiTietViewModel
         {
             public Guid IdSanPhamChiTiet { get; set; }
+            public string? MaSP {  get; set; }
             public string? ProductName { get; set; }
             public double Quantity { get; set; }
             public double Price { get; set; }

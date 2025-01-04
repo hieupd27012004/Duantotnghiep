@@ -304,6 +304,7 @@ namespace APPMVC.Areas.Admin.Controllers
                             sanPhamChiTietViewModels.Add(new PromotionViewModel.SanPhamChiTietViewModel
                             {
                                 IdSanPhamChiTiet = chiTiet.IdSanPhamChiTiet,
+                                MaSP = chiTiet.MaSp,
                                 ProductName = sanPham.TenSanPham,
                                 Quantity = chiTiet.SoLuong,
                                 Price = chiTiet.Gia,
@@ -372,13 +373,60 @@ namespace APPMVC.Areas.Admin.Controllers
                     _logger.LogWarning($"Promotion not found for Id: {id}");
                     return NotFound("Promotion not found.");
                 }
+
+                // Tạo một thể hiện của PromotionViewModel
+                var promotionViewModel = new PromotionViewModel
+                {
+                    Promotion = promotion,
+                    NgayBatDau = promotion.NgayBatDau, // Giả sử đây là thuộc tính trong Promotion
+                    NgayKetThuc = promotion.NgayKetThuc // Giả sử đây là thuộc tính trong Promotion
+                };
+
+                // Lấy danh sách sản phẩm chi tiết liên quan đến khuyến mãi
+                promotionViewModel.SanPhamChiTiets = new List<PromotionViewModel.SanPhamChiTietViewModel>();
+                var promotionSanPhamChiTiets = await _promotionSanPhamChiTietService.GetPromotionSanPhamChiTietsByPromotionIdAsync(id);
+
+                // Lấy thông tin chi tiết sản phẩm cho từng sản phẩm trong khuyến mãi
+                foreach (var item in promotionSanPhamChiTiets)
+                {
+                    // Lấy chi tiết sản phẩm
+                    var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
+                    if (sanPhamChiTiet == null) continue;
+
+                    // Lấy sản phẩm tương ứng
+                    var sanPham = await _sanPhamService.GetSanPhamById(sanPhamChiTiet.IdSanPham);
+                    if (sanPham == null) continue;
+
+                    // Lấy màu sắc, kích cỡ và hình ảnh
+                    var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
+                    var mauSacTenList = mauSacList?.Select(ms => ms?.TenMauSac).ToList() ?? new List<string>();
+
+                    var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
+                    var kichCoTenList = kichCoList?.Select(kc => kc?.TenKichCo).ToList() ?? new List<string>();
+
+                    var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
+
+                    promotionViewModel.SanPhamChiTiets.Add(new PromotionViewModel.SanPhamChiTietViewModel
+                    {
+                        IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
+                        MaSP = sanPhamChiTiet.MaSp,
+                        ProductName = sanPham?.TenSanPham,
+                        Quantity = sanPhamChiTiet.SoLuong,
+                        Price = sanPhamChiTiet.Gia,
+                        HinhAnhs = hinhAnhs,
+                        MauSac = mauSacTenList,
+                        KichCo = kichCoTenList,
+                    });
+                }
+
                 ViewBag.TrangThaiList = new SelectList(new[]
                 {
-                    new { Value = 0, Text = "Disabled" },
-                    new { Value = 1, Text = "Active" },
-                    new { Value = 2, Text = "Paused" }
-                }, "Value", "Text", promotion.TrangThai);
-                return View(promotion);
+            new { Value = 0, Text = "Disabled" },
+            new { Value = 1, Text = "Active" },
+            new { Value = 2, Text = "Paused" }
+        }, "Value", "Text", promotion.TrangThai);
+
+                return View(promotionViewModel); // Trả về PromotionViewModel
             }
             catch (Exception ex)
             {
@@ -386,43 +434,75 @@ namespace APPMVC.Areas.Admin.Controllers
                 return StatusCode(500, "An error occurred while retrieving the promotion.");
             }
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, Promotion promotion)
+        public async Task<IActionResult> Edit(Guid id, PromotionViewModel model)
         {
-            if (id != promotion.IdPromotion)
+            if (id != model.Promotion.IdPromotion)
             {
                 return BadRequest("Id mismatch");
             }
 
             if (!ModelState.IsValid)
             {
-                return View(promotion);
+                model.SanPhams = await GetProducts();
+                return View(model);
             }
 
             try
             {
+                var promotion = model.Promotion;
+
+                // Kiểm tra tính hợp lệ của ngày
+                if (promotion.NgayBatDau >= promotion.NgayKetThuc)
+                {
+                    TempData["ErrorMessage"] = "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.";
+                    model.SanPhams = await GetProducts();
+                    return View(model);
+                }
+
+                // Cập nhật khuyến mãi
                 var result = await _promotionService.UpdateAsync(promotion);
-                if (result)
+                if (!result)
                 {
-                    _logger.LogInformation($"Successfully updated promotion with Id: {promotion.IdPromotion}");
-                    TempData["SuccessMessage"] = "Promotion updated successfully.";
-                    return RedirectToAction(nameof(Index));
+                    TempData["ErrorMessage"] = "Không thể cập nhật khuyến mãi. Vui lòng thử lại.";
+                    model.SanPhams = await GetProducts();
+                    return View(model);
                 }
-                else
+
+                // Lấy tất cả các sản phẩm chi tiết liên quan đến khuyến mãi
+                var promotionSanPhamChiTiets = await _promotionSanPhamChiTietService.GetPromotionSanPhamChiTietsByPromotionIdAsync(promotion.IdPromotion);
+                foreach (var promotionSanPhamChiTiet in promotionSanPhamChiTiets)
                 {
-                    _logger.LogWarning($"Failed to update promotion with Id: {promotion.IdPromotion}");
-                    ModelState.AddModelError("", "Failed to update the promotion. Please check server logs for details.");
+                    var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(promotionSanPhamChiTiet.IdSanPhamChiTiet);
+                    if (sanPhamChiTiet != null)
+                    {
+                        if (promotion.TrangThai == 0)
+                        {
+                            // Nếu trạng thái là 0, đặt giá giảm về 0
+                            sanPhamChiTiet.GiaGiam = 0;
+                        }
+                        else if (promotion.TrangThai == 1)
+                        {
+                            // Nếu trạng thái là 1, tính giá giảm
+                            double originalPrice = sanPhamChiTiet.Gia;
+                            double discountPercentage = promotion.PhanTramGiam;
+                            sanPhamChiTiet.GiaGiam = originalPrice * (1 - (discountPercentage / 100.0));
+                        }
+
+                        await _sanPhamChiTietService.Update(sanPhamChiTiet);
+                    }
                 }
+
+                TempData["SuccessMessage"] = "Khuyến mãi đã được cập nhật thành công.";
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Exception occurred during promotion update. Promotion Id: {promotion.IdPromotion}");
-                ModelState.AddModelError("", $"An error occurred: {ex.Message}");
+                TempData["ErrorMessage"] = $"Đã xảy ra lỗi: {ex.Message}";
+                model.SanPhams = await GetProducts();
+                return View(model);
             }
-
-            return View(promotion);
         }
     }
 }

@@ -115,5 +115,22 @@ namespace AppAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("promotionsById")]
+        public async Task<IActionResult> GetPromotionSanPhamChiTietsByPromotionId(Guid promotionId)
+        {
+            try
+            {
+                var promotions = await _service.GetPromotionSanPhamChiTietsByPromotionIdAsync(promotionId);
+                if (promotions == null || !promotions.Any())
+                {
+                    return NotFound($"No SanPhamChiTiet found for Promotion with ID {promotionId}.");
+                }
+                return Ok(promotions);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

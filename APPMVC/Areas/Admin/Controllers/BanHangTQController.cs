@@ -340,11 +340,14 @@ namespace APPMVC.Areas.Admin.Controllers
                         if (promotionDetails != null && promotionDetails.TrangThai == 1)
                         {
                             // Calculate the discounted price based on the discount amount
-                            giaDaGiam = gia - (gia - sanPhamCT.GiaGiam);
-
-                            if (giaDaGiam.HasValue && giaDaGiam < gia)
+                            if (sanPhamCT.GiaGiam > 0) // Only calculate if GiaGiam is greater than 0
                             {
-                                phanTramGiam = Math.Round(((gia - giaDaGiam.Value) / gia) * 100, 2);
+                                giaDaGiam = gia - (gia - sanPhamCT.GiaGiam);
+
+                                if (giaDaGiam.HasValue && giaDaGiam < gia)
+                                {
+                                    phanTramGiam = Math.Round(((gia - giaDaGiam.Value) / gia) * 100, 2);
+                                }
                             }
                         }
                     }
@@ -361,7 +364,7 @@ namespace APPMVC.Areas.Admin.Controllers
                         KichCo = kichCoTenList,
                         HinhAnhs = hinhAnhs,
                         IdHoaDonChiTiet = hoaDonChiTiet.IdHoaDonChiTiet,
-                        GiaDaGiam = giaDaGiam, // Will be null if promotion is not active
+                        GiaDaGiam = giaDaGiam, // Will be null if promotion is not active or GiaGiam is 0
                         PhanTramGiam = phanTramGiam, // Will be null if promotion is not active
                         KichHoat = sanPhamCT.KichHoat,
                         HoatKich = sanPham.KichHoat
@@ -380,8 +383,8 @@ namespace APPMVC.Areas.Admin.Controllers
                 var sanPhamChiTiet = sanPhamChiTiets.FirstOrDefault(x => x.IdSanPhamChiTiet == chiTiet.IdSanPhamChiTiet);
                 if (sanPhamChiTiet != null)
                 {
-                    // Use discounted price if available, otherwise use original price
-                    double priceToUse = sanPhamChiTiet.GiaDaGiam ?? sanPhamChiTiet.Price;
+                    // Use discounted price if available and greater than 0, otherwise use original price
+                    double priceToUse = (sanPhamChiTiet.GiaDaGiam > 0) ? sanPhamChiTiet.GiaDaGiam.Value : sanPhamChiTiet.Price;
                     tongTienHang += chiTiet.SoLuong * priceToUse;
                 }
             }
@@ -432,7 +435,7 @@ namespace APPMVC.Areas.Admin.Controllers
                             var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
 
                             var gia = sanPhamCT.Gia;
-                            var giaDaGiam = sanPhamCT.GiaGiam;
+                            double? giaDaGiam = sanPhamCT.GiaGiam; // Keep the original GiaGiam
                             double? phanTramGiam = null;
 
                             // Check for promotions
@@ -442,11 +445,21 @@ namespace APPMVC.Areas.Admin.Controllers
                                 var promotionDetails = await _promotionService.GetPromotionByIdAsync(promotionId.Value);
                                 if (promotionDetails != null && promotionDetails.TrangThai == 1 && promotionDetails.PhanTramGiam > 0)
                                 {
-                                    // Calculate the discounted price
-                                    giaDaGiam = gia - (gia - giaDaGiam);
+                                    // Calculate the discounted price only if GiaGiam > 0
+                                    if (giaDaGiam.HasValue && giaDaGiam > 0)
+                                    {
+                                        giaDaGiam = gia - (gia - giaDaGiam.Value);
+                                    }
                                 }
                             }
 
+                            // If giaDaGiam is 0, use the original price
+                            if (!giaDaGiam.HasValue || giaDaGiam == 0)
+                            {
+                                giaDaGiam = gia; // Use the original price if GiaGiam is 0
+                            }
+
+                            // Calculate discount percentage only if giaDaGiam is valid and less than gia
                             if (giaDaGiam.HasValue && giaDaGiam < gia)
                             {
                                 phanTramGiam = Math.Round(((gia - giaDaGiam.Value) / gia) * 100, 2);
