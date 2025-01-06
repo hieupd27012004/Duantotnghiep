@@ -471,6 +471,12 @@ namespace APPMVC.Areas.Admin.Controllers
                     var kh = await _service.LoginKH(nv.Email, nv.MatKhau);
                     if (kh != null)
                     {
+                        if (kh.TrangThai == 0)  // Kiểm tra nếu trạng thái là 0
+                        {
+                            ModelState.AddModelError("", "Tài khoản của bạn chưa được kích hoạt.");
+                            return View(nv);
+                        }
+
                         var chucVu = await chucVuService.GetChucVuId(kh.IdchucVu);
                         // Lưu thông tin khách hàng vào session
                         HttpContext.Session.SetString("NhanVien", JsonConvert.SerializeObject(kh));
@@ -482,7 +488,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     }
                     else
                     {
-                        ModelState.AddModelError("", "Đăng nhập thất bại. Kiểm tra lại email hoặc mật khẩu.");
+                        ModelState.AddModelError("", "Sai tài khoản hoặc mật khẩu. Vui lòng kiểm tra lại.");
                     }
                 }
                 catch (Exception ex)

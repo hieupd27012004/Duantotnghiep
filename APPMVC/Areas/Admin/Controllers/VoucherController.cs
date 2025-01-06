@@ -42,27 +42,25 @@ namespace APPMVC.Areas.Admin.Controllers
                 }
 
                 List<Voucher> vouchers = await _voucherService.GetVouchersAsync();
+
                 foreach (var voucher in vouchers)
                 {
+                    // Chỉ cập nhật khi cần (đến ngày kích hoạt hoặc dừng)
                     if (voucher.TrangThai != 4) // Bỏ qua nếu voucher đã bị "Dừng"
                     {
-                        if (voucher.NgayBatDau <= DateTime.Now && voucher.NgayKetThuc >= DateTime.Now)
+                        if (voucher.TrangThai == 1 && voucher.NgayBatDau <= DateTime.Now)
                         {
-                            if (voucher.TrangThai != 2) // Chỉ cập nhật nếu trạng thái chưa phải là 2
-                            {
-                                _logger.LogInformation($"Updating voucher {voucher.VoucherId} status to 2 (Active).");
-                                voucher.TrangThai = 2;
-                                await _voucherService.UpdateVoucherStatusAsync(voucher, 2);
-                            }
+                            // Chờ kích hoạt -> Kích hoạt
+                            _logger.LogInformation($"Updating voucher {voucher.VoucherId} status to 2 (Active).");
+                            voucher.TrangThai = 2;
+                            await _voucherService.UpdateVoucherStatusAsync(voucher, 2);
                         }
-                        else if (voucher.NgayKetThuc < DateTime.Now)
+                        else if (voucher.TrangThai == 2 && voucher.NgayKetThuc < DateTime.Now)
                         {
-                            if (voucher.TrangThai != 4) // Chỉ cập nhật nếu trạng thái chưa phải là 4
-                            {
-                                _logger.LogInformation($"Updating voucher {voucher.VoucherId} status to 4 (Expired).");
-                                voucher.TrangThai = 4;
-                                await _voucherService.UpdateVoucherStatusAsync(voucher, 4);
-                            }
+                            // Kích hoạt -> Dừng
+                            _logger.LogInformation($"Updating voucher {voucher.VoucherId} status to 4 (Expired).");
+                            voucher.TrangThai = 4;
+                            await _voucherService.UpdateVoucherStatusAsync(voucher, 4);
                         }
                     }
                 }
@@ -310,6 +308,11 @@ namespace APPMVC.Areas.Admin.Controllers
                     TempData["ErrorVouCher"] = "Ngày kết thúc phải muộn hơn ngày bắt đầu.";
                     return View(voucher);
                 }
+                //if (voucher.NgayBatDau > DateTime.Now)
+                //{
+                //    TempData["ErrorVouCher"] = "Không thể để trạng thái 'Kích Hoạt' khi ngày bắt đầu lớn hơn ngày hiện tại. Vui lòng kiểm tra và thử lại.";
+                //    return View(voucher);
+                //}
                 //Kiểm tra tên
                 var isDuplicate = await _voucherService.CheckMaVoucher(voucher.MaVoucher);
                 if (isDuplicate)

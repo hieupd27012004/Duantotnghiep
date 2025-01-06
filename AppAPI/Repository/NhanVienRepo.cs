@@ -36,7 +36,7 @@ namespace AppAPI.Repository
         }
         public async Task<NhanVien?> Login(string email, string password)
         {
-            var kh = await _context.nhanViens.FirstOrDefaultAsync(kh => kh.Email == email);
+            var kh = await _context.nhanViens.FirstOrDefaultAsync(kh => kh.Email == email);           
             if (kh == null)
             {
                 throw new Exception("Email Không tồn tại");
@@ -88,7 +88,7 @@ namespace AppAPI.Repository
             _context.Entry(nv).Property(x => x.DiaChi).IsModified = true;
             _context.Entry(nv).Property(x => x.IdchucVu).IsModified = true;
             _context.Entry(nv).Property(x => x.TrangThai).IsModified = true;
-           
+            
             await _context.SaveChangesAsync();
             return nv;
 
