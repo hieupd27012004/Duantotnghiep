@@ -702,7 +702,7 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateSPCT(SanPhamChiTietItemViewModel viewModel)
         {
-            // Xử lý POST request
+            // Kiểm tra tính hợp lệ của Model
             if (!ModelState.IsValid)
             {
                 foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
@@ -714,7 +714,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
             try
             {
-                // Lấy chi tiết sản phẩm hiện tại từ cơ sở dữ liệu
+                // Lấy thông tin chi tiết sản phẩm từ cơ sở dữ liệu
                 var sanPhamChiTiet = await _sanPhamCTService.GetSanPhamChiTietById(viewModel.IdSanPhamChiTiet);
                 if (sanPhamChiTiet == null)
                 {
@@ -728,15 +728,19 @@ namespace APPMVC.Areas.Admin.Controllers
                 sanPhamChiTiet.XuatXu = viewModel.XuatXu;
                 sanPhamChiTiet.KichHoat = viewModel.KichHoat;
 
+                // Lấy danh sách ảnh hiện tại
                 var existingImages = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
-                foreach (var existingImage in existingImages)
-                {
-                    await _hinhAnhService.DeleteAsync(existingImage.IdHinhAnh);
-                }
 
-                // Xử lý hình ảnh mới
+                // Kiểm tra và xử lý ảnh mới
                 if (viewModel.Files != null && viewModel.Files.Count > 0)
                 {
+                    // Xóa các ảnh cũ
+                    foreach (var existingImage in existingImages)
+                    {
+                        await _hinhAnhService.DeleteAsync(existingImage.IdHinhAnh);
+                    }
+
+                    // Thêm ảnh mới
                     foreach (var file in viewModel.Files)
                     {
                         if (file.Length > 0)
@@ -754,6 +758,11 @@ namespace APPMVC.Areas.Admin.Controllers
                             await _hinhAnhService.UploadAsync(hinhAnh);
                         }
                     }
+                }
+                else
+                {
+                    // Không làm gì nếu không có ảnh mới
+                    // Giữ nguyên ảnh cũ
                 }
 
                 // Lưu thay đổi vào cơ sở dữ liệu

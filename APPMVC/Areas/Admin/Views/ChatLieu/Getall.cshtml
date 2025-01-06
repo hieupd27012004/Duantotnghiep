@@ -53,6 +53,7 @@
                         <table class="table">
                             <thead>
                                 <tr>
+                                    <th>Mã Chất Liệu</th>
                                     <th>Tên chất liệu</th>
                                     <th hidden>Ngày cập nhật</th>
                                     <th>Ngày tạo</th>
@@ -66,6 +67,7 @@
                                 @foreach (var item in Model)
                                 {
                                     <tr style="border-bottom: 1px solid #dee2e6;">
+                                        <td>@item.IdChatLieu.ToString().Substring(0, 5)</td>
                                         <td>@Html.DisplayFor(modelItem => item.TenChatLieu)</td>
                                         <td hidden>@Html.DisplayFor(modelItem => item.NgayCapNhat)</td>
                                         <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>

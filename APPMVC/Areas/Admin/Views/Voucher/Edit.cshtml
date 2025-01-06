@@ -79,13 +79,13 @@
 
                         <div class="form-group">
                             <label asp-for="NgayBatDau">Ngày Bắt Đầu</label>
-                            <input asp-for="NgayBatDau" class="form-control" type="date" />
+                            <input asp-for="NgayBatDau" id="NgayBatDau" name="NgayBatDau" class="form-control" type="datetime-local" />
                             <span asp-validation-for="NgayBatDau" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
                             <label asp-for="NgayKetThuc">Ngày Kết Thúc</label>
-                            <input asp-for="NgayKetThuc" class="form-control" type="date" />
+                            <input asp-for="NgayKetThuc" class="form-control" type="datetime-local"  />
                             <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
                         </div>
 
@@ -126,5 +126,48 @@
 
         // Update visibility on change
         $('#LoaiGiamGia').on('change', toggleSoTienToiDa);
+    });
+    $(document).ready(function () {
+        // Hàm cập nhật danh sách trạng thái dựa trên giá trị ngày bắt đầu
+        function updateTrangThaiOptions() {
+            // Lấy giá trị của trường Ngày Bắt Đầu
+            const ngayBatDauValue = $('#NgayBatDau').val();
+            if (!ngayBatDauValue) {
+                return; // Nếu chưa nhập ngày bắt đầu thì không thực hiện
+            }
+
+            const ngayBatDau = new Date(ngayBatDauValue); // Chuyển giá trị thành Date
+            const now = new Date(); // Thời gian hiện tại
+
+            // Lấy danh sách tùy chọn trạng thái
+            const trangThaiOptions = $('#TrangThai option');
+
+            // Xử lý các trạng thái
+            if (ngayBatDau <= now) {
+                // Nếu Ngày Bắt Đầu <= hiện tại
+                trangThaiOptions.filter('[value="1"]').hide(); // Ẩn trạng thái "Chờ kích hoạt"
+                trangThaiOptions.filter('[value="2"]').show(); // Hiển thị trạng thái "Kích hoạt"
+
+                // Nếu trạng thái hiện tại là "Chờ kích hoạt", đổi thành "Kích hoạt"
+                if ($('#TrangThai').val() === "1") {
+                    $('#TrangThai').val("2");
+                }
+            } else {
+                // Nếu Ngày Bắt Đầu > hiện tại
+                trangThaiOptions.filter('[value="1"]').show(); // Hiển thị trạng thái "Chờ kích hoạt"
+                trangThaiOptions.filter('[value="2"]').hide(); // Ẩn trạng thái "Kích hoạt"
+
+                // Nếu trạng thái hiện tại là "Kích hoạt", đổi thành "Chờ kích hoạt"
+                if ($('#TrangThai').val() === "2") {
+                    $('#TrangThai').val("1");
+                }
+            }
+        }
+
+        // Gọi hàm cập nhật khi trang được tải
+        updateTrangThaiOptions();
+
+        // Gọi hàm cập nhật khi giá trị ngày bắt đầu thay đổi
+        $('#NgayBatDau').on('change', updateTrangThaiOptions);
     });
 </script>
