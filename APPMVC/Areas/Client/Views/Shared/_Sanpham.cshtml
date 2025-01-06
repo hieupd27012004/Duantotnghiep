@@ -248,7 +248,7 @@
 						<div class="sidebar-block">
 							<h3 class="sidebar-title">Categories</h3>
 							<ul class="list-unstyled category-list" id="categoryList">
-								@if (ViewData["Categories"] is List<DanhMuc> categories)
+								@if (ViewData["Categories"] is List<DanhMuc> categories && categories.Count > 0)
 								{
 									foreach (var category in categories)
 									{
@@ -263,10 +263,11 @@
 								}
 							</ul>
 						</div>
+
 						<div class="sidebar-block">
 							<h3 class="sidebar-title">Colors</h3>
 							<ul class="list-unstyled color-filters" id="colorButtons">
-								@if (ViewData["Colors"] is List<MauSac> colors)
+								@if (ViewData["Colors"] is List<MauSac> colors && colors.Count > 0)
 								{
 									foreach (var color in colors)
 									{
@@ -286,10 +287,11 @@
 								}
 							</ul>
 						</div>
+
 						<div class="sidebar-block">
 							<h3 class="sidebar-title">Sizes</h3>
 							<div class="size-filters" id="sizeButtons" style="display: flex; flex-wrap: wrap;">
-								@if (ViewData["Sizes"] is List<KichCo> sizes)
+								@if (ViewData["Sizes"] is List<KichCo> sizes && sizes.Count > 0)
 								{
 									foreach (var size in sizes)
 									{

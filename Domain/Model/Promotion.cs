@@ -36,8 +36,8 @@ namespace AppData.Model
         {
             return TrangThai switch
             {
-                0 => "Disabled",
-                1 => "Active",
+                0 => "Dừng Hoạt Động",
+                1 => "Hoạt Động",
                 2 => "Paused",
                 3 => "Expired",
                 _ => "Unknown"

@@ -255,7 +255,7 @@
                                     var mauSacDisplay = item.mauSac && Array.isArray(item.mauSac) ? item.mauSac.join(", ") : 'N/A';
                                     var kichCoDisplay = item.kichCo && Array.isArray(item.kichCo) ? item.kichCo.join(", ") : 'N/A';
                                     var formattedPrice = item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
-                                    var ma = item.MaSP.toString();
+                                    var ma = item.MaSP ? item.MaSP.toString() : 'N/A';
 
                                     var row = `<tr>
                                                 <td><input type="checkbox" name="SelectedSanPhamChiTietIds" value="${item.idSanPhamChiTiet}" /></td>
