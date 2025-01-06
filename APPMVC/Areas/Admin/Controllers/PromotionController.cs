@@ -331,6 +331,20 @@ namespace APPMVC.Areas.Admin.Controllers
                 var promotion = await _promotionService.GetPromotionByIdAsync(id);
                 if (promotion != null)
                 {
+                    // Lấy danh sách sản phẩm chi tiết liên quan đến khuyến mãi
+                    var promotionSanPhamChiTiets = await _promotionSanPhamChiTietService.GetPromotionSanPhamChiTietsByPromotionIdAsync(id);
+                    foreach (var promotionSanPhamChiTiet in promotionSanPhamChiTiets)
+                    {
+                        var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(promotionSanPhamChiTiet.IdSanPhamChiTiet);
+                        if (sanPhamChiTiet != null)
+                        {
+                            // Đặt giá giảm về 0
+                            sanPhamChiTiet.GiaGiam = 0;
+                            await _sanPhamChiTietService.Update(sanPhamChiTiet);
+                        }
+                    }
+
+                    // Xóa khuyến mãi
                     var result = await _promotionService.DeleteAsync(id);
                     if (result)
                     {
@@ -379,7 +393,9 @@ namespace APPMVC.Areas.Admin.Controllers
                 {
                     Promotion = promotion,
                     NgayBatDau = promotion.NgayBatDau, // Giả sử đây là thuộc tính trong Promotion
-                    NgayKetThuc = promotion.NgayKetThuc // Giả sử đây là thuộc tính trong Promotion
+                    NgayKetThuc = promotion.NgayKetThuc, // Giả sử đây là thuộc tính trong Promotion
+                    NgayTao = promotion.NgayTao
+
                 };
 
                 // Lấy danh sách sản phẩm chi tiết liên quan đến khuyến mãi
@@ -421,9 +437,9 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 ViewBag.TrangThaiList = new SelectList(new[]
                 {
-            new { Value = 0, Text = "Disabled" },
-            new { Value = 1, Text = "Active" },
-            new { Value = 2, Text = "Paused" }
+            new { Value = 0, Text = "Dừng Hoạt Động" },
+            new { Value = 1, Text = "Hoạt Động" },
+            //new { Value = 2, Text = "Paused" }
         }, "Value", "Text", promotion.TrangThai);
 
                 return View(promotionViewModel); // Trả về PromotionViewModel
