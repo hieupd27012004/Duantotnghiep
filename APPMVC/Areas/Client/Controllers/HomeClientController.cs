@@ -570,7 +570,8 @@ namespace APPMVC.Areas.Client.Controllers
                 if (result)
                 {
                     TempData["SuccessMessage"] = "Đặt hàng thành công! Cảm ơn bạn đã mua sắm với chúng tôi.";
-                    return RedirectToAction("Index");
+
+                    return RedirectToAction("Index", "SanPham");
 
                 }
             }
@@ -663,7 +664,8 @@ namespace APPMVC.Areas.Client.Controllers
                     HttpContext.Session.Remove("DiscountAmount"); // Remove discount amount if not needed anymore
 
                     TempData["SuccessMessage"] = "Đặt hàng thành công! Cảm ơn bạn đã mua sắm với chúng tôi.";
-                    return RedirectToAction("Index");
+
+                    return RedirectToAction("Index", "SanPham");
                 }
             }
 

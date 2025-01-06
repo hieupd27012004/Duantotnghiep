@@ -87,13 +87,19 @@ namespace APPMVC.Areas.Client.Controllers
 
                     var hinhAnhs = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamCT.IdSanPhamChiTiet);
 
-                    var giaBan = sanPhamCT.Gia;
-                    var giaDaGiam = sanPhamCT.GiaGiam;
+                    var giaBan = hoaDonChiTiet.DonGia;
+                    var giaDaGiam = hoaDonChiTiet.TienGiam;
                     double? phanTramGiam = null;
 
-                    if (giaDaGiam.HasValue && giaDaGiam < giaBan)
+                    // Calculate discount percentage if there is a discount
+                    if (giaDaGiam > 0 && giaDaGiam < giaBan)
                     {
-                        phanTramGiam = Math.Round(((giaBan - giaDaGiam.Value) / giaBan) * 100, 2);
+                        phanTramGiam = Math.Round(((giaBan - giaDaGiam) / giaBan) * 100, 2);
+                    }
+                    else if (giaDaGiam == 0)
+                    {
+                        // If no discount, use the full selling price
+                        giaDaGiam = giaBan; // Set giaDaGiam to giaBan if there's no discount
                     }
 
                     sanPhamChiTiets.Add(new HoaDonChiTietViewModel.SanPhamChiTietViewModel

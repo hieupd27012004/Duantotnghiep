@@ -18,6 +18,8 @@ namespace AppData.ViewModel
 
         public DateTime NgayKetThuc { get; set; }
 
+        public DateTime NgayTao { get; set; }
+
         public class SanPhamChiTietViewModel
         {
             public Guid IdSanPhamChiTiet { get; set; }

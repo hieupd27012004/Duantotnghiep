@@ -12,7 +12,7 @@
     .search-form {
         display: flex;
         justify-content: left;
-        margin: 20px 0 20px 20px; /* Thêm margin-left để tạo khoảng cách */
+        margin: 20px 0 20px 20px;
     }
 
         .search-form input {
@@ -115,7 +115,88 @@
         color: #007bff;
         margin-bottom: 20px;
     }
+
+    .modal {
+        display: none; /* Ẩn modal mặc định */
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.7); /* Nền mờ tối hơn */
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        max-width: 500px;
+        margin: auto;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .close {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+        }
+
+    .modal-icon {
+        font-size: 50px;
+        color: #28a745; /* Màu xanh thành công */
+    }
+
+    .modal-message {
+        margin: 20px 0;
+        font-size: 18px;
+    }
+
+    .modal button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        .modal button:hover {
+            background-color: #0056b3;
+        }
 </style>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-icon">&#10003;</span>
+                <span class="close" id="closeModal">&times;</span>
+            </div>
+            <h2>Thanh toán thành công!</h2>
+            <p class="modal-message">@TempData["SuccessMessage"]</p>
+            <button onclick="document.getElementById('successModal').style.display='none';">Đóng</button>
+        </div>
+    </div>
+}
 
 <div class="search-form">
     <form method="get" action="@Url.Action("Index")">
@@ -126,39 +207,50 @@
 
 <div class="container">
     <div class="row">
-        @foreach (var sanPham in Model)
+        @if (Model != null && Model.Count > 0)
         {
-            <div class="col-12 col-md-4 col-lg-3 mb-4">
-                <div class="product-card">
-                    <div class="product-image">
-                        <img id="mainImage_@sanPham.IdSanPham"
-                             src="@(sanPham.RepresentativeImage != null ? $"data:image;base64,{Convert.ToBase64String(sanPham.RepresentativeImage)}" : "/images/default-product.jpg")"
-                             alt="@sanPham.TenSanPham"
-                             data-original-image="@(sanPham.RepresentativeImage != null ? $"data:image;base64,{Convert.ToBase64String(sanPham.RepresentativeImage)}" : "/images/default-product.jpg")" />
+            foreach (var sanPham in Model)
+            {
+                <div class="col-12 col-md-4 col-lg-3 mb-4">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img id="mainImage_@sanPham.IdSanPham"
+                                 src="@(sanPham.RepresentativeImage != null ? $"data:image;base64,{Convert.ToBase64String(sanPham.RepresentativeImage)}" : "/images/default-product.jpg")"
+                                 alt="@sanPham.TenSanPham"
+                                 data-original-image="@(sanPham.RepresentativeImage != null ? $"data:image;base64,{Convert.ToBase64String(sanPham.RepresentativeImage)}" : "/images/default-product.jpg")" />
 
-                        @if (sanPham.HighestDiscountPercentage > 0)
-                        {
-                            <div class="discount-badge">Giảm @sanPham.HighestDiscountPercentage%!</div>
-                        }
-                    </div>
-                    <div class="product-info">
-                        <div class="product-colors mb-2">
-                            @foreach (var colorImage in sanPham.ColorImages)
+                            @if (sanPham.HighestDiscountPercentage > 0)
                             {
-                                <div class="color-item"
-                                     style="background-image: url('data:image;base64,@Convert.ToBase64String(colorImage.AnhDaiDien)');"
-                                     data-main-image="@Convert.ToBase64String(colorImage.AnhDaiDien)">
-                                </div>
+                                <div class="discount-badge">Giảm @sanPham.HighestDiscountPercentage%!</div>
                             }
                         </div>
-                        <h3 class="product-title">@sanPham.TenSanPham</h3>
-                        <p class="product-price">
-                            @(sanPham.GiaThapNhat?.ToString("N0") ?? "N/A") -
-                            @(sanPham.GiaCaoNhat?.ToString("N0") ?? "N/A") VND
-                        </p>
-                        <a href="@Url.Action("Detail", "SanPham", new { sanphamId = sanPham.IdSanPham })"
-                           class="btn btn-primary">Xem chi tiết</a>
+                        <div class="product-info">
+                            <div class="product-colors mb-2">
+                                @foreach (var colorImage in sanPham.ColorImages)
+                                {
+                                    <div class="color-item"
+                                         style="background-image: url('data:image;base64,@Convert.ToBase64String(colorImage.AnhDaiDien)');"
+                                         data-main-image="@Convert.ToBase64String(colorImage.AnhDaiDien)">
+                                    </div>
+                                }
+                            </div>
+                            <h3 class="product-title">@sanPham.TenSanPham</h3>
+                            <p class="product-price">
+                                @(sanPham.GiaThapNhat?.ToString("N0") ?? "N/A") -
+                                @(sanPham.GiaCaoNhat?.ToString("N0") ?? "N/A") VND
+                            </p>
+                            <a href="@Url.Action("Detail", "SanPham", new { sanphamId = sanPham.IdSanPham })"
+                               class="btn btn-primary">Xem chi tiết</a>
+                        </div>
                     </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info" role="alert">
+                    Không có sản phẩm nào được tìm thấy.
                 </div>
             </div>
         }
@@ -184,5 +276,23 @@
                 mainImage.src = originalImage;
             });
         });
+
+        // Hiển thị thông báo thành công nếu có
+        const successModal = document.getElementById('successModal');
+        if (successModal) {
+            successModal.style.display = 'flex'; // Hiển thị modal
+
+            // Đóng modal khi nhấn vào nút đóng
+            document.getElementById('closeModal').onclick = function () {
+                successModal.style.display = 'none';
+            };
+
+            // Đóng modal khi nhấn ra ngoài vùng modal
+            window.onclick = function (event) {
+                if (event.target === successModal) {
+                    successModal.style.display = 'none';
+                }
+            };
+        }
     });
 </script>
