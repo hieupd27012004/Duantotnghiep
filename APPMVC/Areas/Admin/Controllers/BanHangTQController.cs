@@ -713,7 +713,7 @@ namespace APPMVC.Areas.Admin.Controllers
             hoaDon.TienGiam = 0;
             hoaDon.TongTienDonHang = tongTienHang;
             hoaDon.TongTienHoaDon = tongTienHang;
-            hoaDon.TrangThai = "Đã Thanh Toán";
+            hoaDon.TrangThai = "Hoàn Thành";
 
             try
             {
@@ -991,7 +991,7 @@ namespace APPMVC.Areas.Admin.Controllers
             hoaDon.TienGiam = 0;
             hoaDon.TongTienDonHang = tongTienHang;
             hoaDon.TongTienHoaDon = tongTienHang;
-            hoaDon.TrangThai = "Đã Thanh Toán";
+            hoaDon.TrangThai = "Hoàn Thành";
 
             try
             {
