@@ -413,7 +413,7 @@
                     // Thêm các trường ẩn cho thông tin voucher
                     $('form').append(`
                         <input type="hidden" name="SelectedVoucherId" value="${response.voucherId}" />
-                        <input type="hidden" name="DiscountAmount" value="${response.discountAmount.replace(/[^0-9.-]+/g, "")}" />
+                            <input type="hidden" name="DiscountAmount" value="${response.discountAmount}.replace(/[^0-9.-]+/g, "")" />
                     `);
                 } else {
                     // Reset radio button đã chọn nếu không thành công do giá trị đơn hàng không đủ
