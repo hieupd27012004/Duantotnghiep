@@ -54,7 +54,7 @@ namespace AppAPI.Repository
         public async Task<Guid?> GetPromotionsBySanPhamChiTietIdAsync(Guid sanPhamChiTietId)
         {
             return await _context.promotionSanPhamChiTiets
-                .Where(p => p.IdSanPhamChiTiet == sanPhamChiTietId)
+                .Where(p => p.IdSanPhamChiTiet == sanPhamChiTietId && p.Promotion.TrangThai == 1)
                 .Select(p => p.Promotion.IdPromotion)
                 .FirstOrDefaultAsync();
         }
