@@ -414,7 +414,7 @@ namespace APPMVC.Areas.Client.Controllers
 
                 if (!string.IsNullOrEmpty(discountAmountString) && double.TryParse(discountAmountString, out discountAmount))
                 {
-                    // Nếu có giá trị giảm giá, tính tổng hóa đơn
+                    
                 }
 
                 double totalHoaDon = totalDonHang + thanhToanViewModel.PhiVanChuyen - discountAmount; 
@@ -534,11 +534,24 @@ namespace APPMVC.Areas.Client.Controllers
                 return Unauthorized(new { message = "Không tìm thấy khách hàng trong phiên." });
             }
 
+            // Check if voucher is being used
+            //var voucherIdString = HttpContext.Session.GetString("VoucherId");
+            //if (!string.IsNullOrEmpty(voucherIdString) && Guid.TryParse(voucherIdString, out Guid voucherId))
+            //{
+            //    var Voucher = await _voucherService.GetVoucherByIdAsync(voucherId);
+
+            //    if (Voucher != null && Voucher.TrangThai != 2) 
+            //    {
+            //        TempData["ErrorMessage"] = "Voucher này đã hết hạn";
+            //        return View("Checkout", thanhToanViewModel);
+            //    }
+            //}
+
             foreach (var item in cartItems)
             {
                 var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
                 var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
-                if (sanPhamChiTiet.KichHoat == 0 || sanPham.KichHoat == 0) 
+                if (sanPhamChiTiet.KichHoat == 0 || sanPham.KichHoat == 0)
                 {
                     TempData["ErrorMessage"] = $"Sản phẩm {sanPham?.TenSanPham} không còn hoạt động.";
                     return RedirectToAction("Index", "HomeClient");
@@ -570,9 +583,7 @@ namespace APPMVC.Areas.Client.Controllers
                 if (result)
                 {
                     TempData["SuccessMessage"] = "Đặt hàng thành công! Cảm ơn bạn đã mua sắm với chúng tôi.";
-
                     return RedirectToAction("Index", "SanPham");
-
                 }
             }
             else if (model.PaymentMethod == "online_payment")

@@ -95,18 +95,36 @@ namespace APPMVC.Areas.Admin.Controllers
                 return View(new List<HoaDonChiTietViewModel>());
             }
 
-            var filteredOrders = hoaDons
+            var filteredOrders = await Task.WhenAll(hoaDons
                 .Where(hd => hd.TrangThai == "Tạo đơn hàng")
-                .Select(hd => new HoaDonChiTietViewModel
-                {
-                    IdHoaDon = hd.IdHoaDon,
-                    HoaDon = new HoaDonChiTietViewModel.HoaDonViewModel
+                .Select(async hd => {
+                    var sanPhamChiTiets = new List<HoaDonChiTietViewModel.SanPhamChiTietViewModel>();
+                    try
                     {
-                        MaDon = hd.MaDon
+                        var sanPhamDetails = await _hoaDonChiTietService.GetByIdHoaDonAsync(hd.IdHoaDon);
+                        sanPhamChiTiets = sanPhamDetails.Select(sp => new HoaDonChiTietViewModel.SanPhamChiTietViewModel
+                        {
+                            IdSanPhamChiTiet = sp.IdSanPhamChiTiet,
+                        }).ToList();
                     }
+                    catch (HttpRequestException ex)
+                    {
+                        // Ghi lại lỗi hoặc xử lý theo cách bạn muốn
+                        Console.WriteLine($"Lỗi khi gọi API: {ex.Message}");
+                        // Bạn có thể thực hiện một hành động nào đó nếu không thể lấy sản phẩm chi tiết
+                    }
+                    return new HoaDonChiTietViewModel
+                    {
+                        IdHoaDon = hd.IdHoaDon,
+                        HoaDon = new HoaDonChiTietViewModel.HoaDonViewModel
+                        {
+                            MaDon = hd.MaDon
+                        },
+                        SanPhamChiTiets = sanPhamChiTiets
+                    };
                 })
                 .Take(5)
-                .ToList();
+                .ToList());
 
             return View(filteredOrders);
         }

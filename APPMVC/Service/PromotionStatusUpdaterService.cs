@@ -23,7 +23,7 @@ public class PromotionStatusUpdaterService : IHostedService, IDisposable
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _timer = new Timer(UpdatePromotionStatus, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
+        _timer = new Timer(UpdatePromotionStatus, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         return Task.CompletedTask;
     }
 
