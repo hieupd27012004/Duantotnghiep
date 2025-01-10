@@ -64,17 +64,22 @@
             <ul class="menu-sub">
                 <li class="menu-item">
                     <a href="@Url.Action("ThongKeTongQuan", "ThongKe", new { area = "Admin" })" class="menu-link" onclick="return checkLoginAndRole();">
-                        <div data-i18n="Analytics">Thống kê tổng quan</div>
+                        <div data-i18n="Analytics">Tổng Quan</div>
                     </a>
                 </li>      
                 <li class="menu-item">
                     <a href="@Url.Action("TopSellingProductsChart", "ThongKe", new { area = "Admin" })" class="menu-link" onclick="return checkLoginAndRole();">
-                        <div data-i18n="Analytics">Top sản phẩm bán nhiều</div>
+                        <div data-i18n="Analytics">Sản Phẩm Bán Nhiều</div>
                     </a>
                 </li>
                 <li class="menu-item">
                     <a href="@Url.Action("ThongKeTheoKhoangThoiGian", "ThongKe", new { area = "Admin" })" class="menu-link" onclick="return checkLoginAndRole();">
-                        <div data-i18n="Analytics">Biểu đồ thống kê</div>
+                        <div data-i18n="Analytics">Biểu Đồ Đơn Hàng</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="@Url.Action("ThongKeDoanhThu", "ThongKe", new { area = "Admin" })" class="menu-link" onclick="return checkLoginAndRole();">
+                        <div data-i18n="Analytics">Biểu Đồ Doanh Thu</div>
                     </a>
                 </li>
             </ul>

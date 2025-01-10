@@ -13,6 +13,7 @@ namespace AppAPI.IRepository
         Task<List<ThongKeKhoangThoiGian>> GetStatisticsByTimeRange(DateTime startDate, DateTime endDate);
         //Sản Phẩm bán chạy HoangLong
         Task<List<TopSellingProductViewModel>> GetTopSellingProductsAsync(DateTime? startDate, DateTime? endDate);
+        Task<List<ThongKeDoanhThu>> GetRevenueStatisticsAsync(DateTime startDate, DateTime endDate);
 
     }
 }

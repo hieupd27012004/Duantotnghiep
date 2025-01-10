@@ -5,8 +5,10 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container py-4">
-    <h1 class="mb-4 text-center">@ViewData["Title"]</h1>
+<div class="container mt-4">
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">Voucher/</span> Thêm voucher
+    </h4>
     <div class="">
         <div class="">
             <form asp-action="Create" method="post" id="createVoucherForm" class="d-flex">

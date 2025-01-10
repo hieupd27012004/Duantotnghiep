@@ -10,6 +10,7 @@ using AppData.Model;
 using APPMVC.IService;
 using System.Net.WebSockets;
 using Newtonsoft.Json;
+using X.PagedList;
 
 namespace APPMVC.Areas.Admin.Controllers
 {
@@ -31,7 +32,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
         // GET: Admin/Voucher
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 6)
         {
             try
             {
@@ -66,8 +67,17 @@ namespace APPMVC.Areas.Admin.Controllers
                 }
 
                 var sortedVoucher = vouchers.OrderByDescending(x => x.NgayTao).ToList();
-                _logger.LogInformation($"Retrieved {vouchers.Count} vouchers");
-                return View(sortedVoucher);
+                int totalVouchers = sortedVoucher.Count;
+                var pagedVouchers = sortedVoucher
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                ViewBag.CurrentPage = page;
+                ViewBag.PageSize = pageSize;
+                ViewBag.TotalPages = (int)Math.Ceiling(totalVouchers / (double)pageSize);
+
+                return View(pagedVouchers);
             }
             catch (Exception ex)
             {
@@ -269,7 +279,17 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 voucher.NgayTao = DateTime.Now;
             }
-
+            ViewBag.TrangThaiOptions = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "1", Text = "Chờ kích hoạt" },
+                new SelectListItem { Value = "2", Text = "Kích hoạt" },
+                new SelectListItem { Value = "4", Text = "Dừng" }
+            };
+            ViewBag.LoaiGiamGiaOptions = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "1", Text = "Theo % sản phẩm" },
+                new SelectListItem { Value = "2", Text = "Theo số tiền" }
+            };
             return View(voucher);
         }
 
@@ -306,6 +326,17 @@ namespace APPMVC.Areas.Admin.Controllers
                 if (voucher.NgayKetThuc <= voucher.NgayBatDau)
                 {
                     TempData["ErrorVouCher"] = "Ngày kết thúc phải muộn hơn ngày bắt đầu.";
+                    ViewBag.TrangThaiOptions = new List<SelectListItem>
+                    {
+                        new SelectListItem { Value = "1", Text = "Chờ kích hoạt" },
+                        new SelectListItem { Value = "2", Text = "Kích hoạt" },
+                        new SelectListItem { Value = "4", Text = "Dừng" }
+                    };
+                    ViewBag.LoaiGiamGiaOptions = new List<SelectListItem>
+                    {
+                        new SelectListItem { Value = "1", Text = "Theo % sản phẩm" },
+                        new SelectListItem { Value = "2", Text = "Theo số tiền" }
+                    };
                     return View(voucher);
                 }
                 //if (voucher.NgayBatDau > DateTime.Now)
@@ -322,6 +353,17 @@ namespace APPMVC.Areas.Admin.Controllers
                     if (currentVoucher == null || currentVoucher.MaVoucher != voucher.MaVoucher)
                     {
                         TempData["ErrorVouCher"] = "Mã voucher đã tồn tại. Vui lòng chọn mã khác.";
+                        ViewBag.TrangThaiOptions = new List<SelectListItem>
+                        {
+                            new SelectListItem { Value = "1", Text = "Chờ kích hoạt" },
+                            new SelectListItem { Value = "2", Text = "Kích hoạt" },
+                            new SelectListItem { Value = "4", Text = "Dừng" }
+                        };
+                        ViewBag.LoaiGiamGiaOptions = new List<SelectListItem>
+                        {
+                            new SelectListItem { Value = "1", Text = "Theo % sản phẩm" },
+                            new SelectListItem { Value = "2", Text = "Theo số tiền" }
+                        };
                         return View(voucher);
                     }
                 }
@@ -360,12 +402,33 @@ namespace APPMVC.Areas.Admin.Controllers
                     TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật voucher. Vui lòng kiểm tra lại dữ liệu.";
                     TempData["ValidationErrors"] = errors;
                 }
-
+                ViewBag.TrangThaiOptions = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "1", Text = "Chờ kích hoạt" },
+                    new SelectListItem { Value = "2", Text = "Kích hoạt" },
+                    new SelectListItem { Value = "4", Text = "Dừng" }
+                };
+                ViewBag.LoaiGiamGiaOptions = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "1", Text = "Theo % sản phẩm" },
+                    new SelectListItem { Value = "2", Text = "Theo số tiền" }
+                };
                 return View(voucher);
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
+                ViewBag.TrangThaiOptions = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "1", Text = "Chờ kích hoạt" },
+                    new SelectListItem { Value = "2", Text = "Kích hoạt" },
+                    new SelectListItem { Value = "4", Text = "Dừng" }
+                };
+                ViewBag.LoaiGiamGiaOptions = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "1", Text = "Theo % sản phẩm" },
+                    new SelectListItem { Value = "2", Text = "Theo số tiền" }
+                };
                 return View(voucher);
             }
         }
