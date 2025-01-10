@@ -38,7 +38,7 @@ namespace AppData.Model
             {
                 0 => "Dừng Hoạt Động",
                 1 => "Hoạt Động",
-                2 => "Paused",
+                2 => "Chờ Hoạt Động",
                 3 => "Expired",
                 _ => "Unknown"
             };

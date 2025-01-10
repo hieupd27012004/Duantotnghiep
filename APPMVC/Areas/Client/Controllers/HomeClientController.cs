@@ -535,17 +535,18 @@ namespace APPMVC.Areas.Client.Controllers
             }
 
             // Check if voucher is being used
-            //var voucherIdString = HttpContext.Session.GetString("VoucherId");
-            //if (!string.IsNullOrEmpty(voucherIdString) && Guid.TryParse(voucherIdString, out Guid voucherId))
-            //{
-            //    var Voucher = await _voucherService.GetVoucherByIdAsync(voucherId);
+            var voucherIdString = HttpContext.Session.GetString("VoucherId");
+            if (!string.IsNullOrEmpty(voucherIdString) && Guid.TryParse(voucherIdString, out Guid voucherId))
+            {
+                var Voucher = await _voucherService.GetVoucherByIdAsync(voucherId);
 
-            //    if (Voucher != null && Voucher.TrangThai != 2) 
-            //    {
-            //        TempData["ErrorMessage"] = "Voucher này đã hết hạn";
-            //        return View("Checkout", thanhToanViewModel);
-            //    }
-            //}
+                if (Voucher != null && Voucher.TrangThai != 2)
+                {
+                    TempData["ErrorMessage"] = "Voucher này đã hết hạn";
+                    HttpContext.Session.Remove("VoucherId"); 
+                    return View("Checkout", thanhToanViewModel);
+                }
+            }
 
             foreach (var item in cartItems)
             {
