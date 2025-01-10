@@ -10,22 +10,21 @@
 <style>
 
 	.carousel-item img {
-		height: 200px; /* Chiều cao cố định */
-		object-fit: contain; /* Hiển thị toàn bộ ảnh mà không cắt */
-		background-color: rgba(0, 0, 0, 0.1); /* Nền nhạt cho ảnh để nhìn tinh tế */
-		border-radius: 10px; /* Bo góc nhẹ cho ảnh */
+		height: 470px;
+		object-fit: cover;
+		margin-bottom: 5px;
+		border-radius: 10px;
 	}
 
-	.carousel-control-prev-icon, .carousel-control-next-icon {
-		background-color: rgba(255, 255, 255, 0.7); /* Nền sáng hơn cho nút điều khiển */
-		border-radius: 50%; /* Bo tròn nút điều khiển */
-		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Hiệu ứng đổ bóng */
+	.carousel-caption {
+		background: rgba(0, 0, 0, 0.2); /* Nền tối cho caption */
+		border-radius: 5px; /* Bo góc caption */
+		padding: 10px;
 	}
 
-	.hero {
-		background: linear-gradient(135deg, #1a1a1a, #333333); /* Màu nền gradient sang trọng */
-		color: #fff; /* Văn bản màu trắng */
-		padding: 50px 0; /* Khoảng cách trên dưới */
+	.carousel-control-prev-icon,
+	.carousel-control-next-icon {
+		css Copier background-color: rgba(0, 0, 0, 0.4); /* Nền cho các nút điều khiển */
 	}
 
 	.intro-excerpt h1 {
@@ -53,47 +52,45 @@
 <body>
 	@Html.Partial("_Nav")
 
-	<div class="hero bg-dark">
-		<div class="container">
-			<div class="row justify-content-between">
-				<div class="col-lg-5">
-					<div class="intro-excerpt">
-						<h1 class="text-white">Shop</h1>
+	<div class="">
+		<!-- Slide Show -->
+		<div id="carouselExampleCaptions" class="carousel slide">
+			<div class="carousel-indicators">
+				<button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+				<button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+				<button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+			</div>
+			<div class="carousel-inner">
+				<div class="carousel-item active">
+					<img src="/Client/images/Shoes-Web-Ads-Banne1r-thietkehaithanh.jpg" class="d-block w-100" alt="...">
+					<div class="carousel-caption d-none d-md-block">
+						<h5>Ưu Đãi Đặc Biệt</h5>
+						<p>Giảm giá lên đến 50% cho các sản phẩm chọn lọc!</p>
 					</div>
 				</div>
-				<div class="col-lg-7">
-					<div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
-						<div class="carousel-inner">
-							<div class="carousel-item active">
-								<img src="~/Client/images/Shoes.png" class="d-block w-100" alt="Slide 1">
-							</div>
-							<div class="carousel-item">
-								<img src="~/Client/img/giaymau1.png" class="d-block w-100" alt="Slide 2">
-							</div>
-							<div class="carousel-item">
-								<img src="~/Client/img/giay1.png" class="d-block w-100" alt="Slide 3">
-							</div>
-							<div class="carousel-item">
-								<img src="~/Client/img/mau2.png" class="d-block w-100" alt="Slide 4">
-							</div>
-							<div class="carousel-item">
-								<img src="~/Client/img/mau3.png" class="d-block w-100" alt="Slide 5">
-							</div>
-							<div class="carousel-item">
-								<img src="~/Client/img/mau4.png" class="d-block w-100" alt="Slide 6">
-							</div>
-						</div>
-						<button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-							<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-							<span class="visually-hidden">Previous</span>
-						</button>
-						<button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-							<span class="carousel-control-next-icon" aria-hidden="true"></span>
-							<span class="visually-hidden">Next</span>
-						</button>
+				<div class="carousel-item">
+					<img src="/Client/images/20240926111113-0.webp" class="d-block w-100" alt="...">
+					<div class="carousel-caption d-none d-md-block">
+						<h5>Giày Thể Thao Mới Nhất</h5>
+						<p>Khám phá bộ sưu tập giày thể thao mới nhất của chúng tôi!</p>
+					</div>
+				</div>
+				<div class="carousel-item">
+					<img src="/Client/images/banner.webp" class="d-block w-100" alt="...">
+					<div class="carousel-caption d-none d-md-block">
+						<h5>Khám Phá Ngay</h5>
+						<p>Chúng tôi có nhiều kiểu dáng phù hợp với mọi phong cách!</p>
 					</div>
 				</div>
 			</div>
+			<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+				<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+				<span class="visually-hidden">Previous</span>
+			</button>
+			<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+				<span class="carousel-control-next-icon" aria-hidden="true"></span>
+				<span class="visually-hidden">Next</span>
+			</button>
 		</div>
 	</div>
 	<!-- End Hero Section -->
@@ -103,8 +100,8 @@
 	<div class="untree_co-section product-section before-footer-section">
 		<div class="container">
 			<div class="backbutton">
-				<a href="@Url.Action("Index", "SanPham",new { area = "Client" })" class="btn btn-dark btn-xs">
-					<img src="~/Client/images/chevron-left.jpg" alt="Back" style="filter: invert(1); width: 20px">Back to shop
+				<a href="@Url.Action("Index", "SanPham", new { area = "Client" })" class="btn btn-dark btn-xs">
+					<i class="fa-solid fa-backward" style="color: #ffffff; margin-right: 5px;"></i>Back to shop
 				</a>
 			</div>
 			<div class="row">

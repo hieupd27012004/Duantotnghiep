@@ -44,7 +44,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 EndDate = end
             };
 
-            ViewData["Date"] = time.ToString("yyyy-MM-dd");
+            ViewData["Date"] = time.ToString("dd-MM-yyyy");
             ViewData["StartDate"] = start.ToString("yyyy-MM-dd");
             ViewData["EndDate"] = end.ToString("yyyy-MM-dd");
             return View(model);
@@ -78,6 +78,25 @@ namespace APPMVC.Areas.Admin.Controllers
                 endDate = startDate.Value.AddMonths(1).AddDays(-1);
             }
             var result = await _service.GetStatisticsByTimeRange(startDate.Value, endDate.Value);
+
+            // Truyền dữ liệu và khoảng thời gian vào View
+            ViewBag.StartDate = startDate.Value.ToString("yyyy-MM-dd");
+            ViewBag.EndDate = endDate.Value.ToString("yyyy-MM-dd");
+            return View(result);
+        }
+
+        public async Task<IActionResult> ThongKeDoanhThu(DateTime? startDate, DateTime? endDate)
+        {
+            if (!startDate.HasValue)
+            {
+                startDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+
+            }
+            if (!endDate.HasValue)
+            {
+                endDate = startDate.Value.AddMonths(1).AddDays(-1);
+            }
+            var result = await _service.GetRevenueStatisticsAsync(startDate.Value, endDate.Value);
 
             // Truyền dữ liệu và khoảng thời gian vào View
             ViewBag.StartDate = startDate.Value.ToString("yyyy-MM-dd");

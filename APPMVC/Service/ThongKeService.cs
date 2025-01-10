@@ -128,5 +128,20 @@ namespace APPMVC.Service
                 return new List<TopSellingProductViewModel>(); // Trả về danh sách rỗng trong trường hợp lỗi
             }
         }
+        public async Task<List<ThongKeDoanhThu>> GetRevenueStatisticsAsync(DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/ThongKe/ThongKeDoanThu?startDate={startDate:yyyy-MM-dd}&endDate={endDate:yyyy-MM-dd}");
+                response.EnsureSuccessStatusCode();
+                var products = await response.Content.ReadFromJsonAsync<List<ThongKeDoanhThu>>();
+                return products ?? new List<ThongKeDoanhThu>(); // Trả về danh sách rỗng nếu không có dữ liệu
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Bùm: {ex.Message}");
+                return new List<ThongKeDoanhThu>(); // Trả về danh sách rỗng trong trường hợp lỗi
+            }
+        }
     }
 }
