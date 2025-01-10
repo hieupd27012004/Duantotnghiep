@@ -8,15 +8,18 @@ using System.Threading.Tasks;
 public class PromotionStatusUpdaterService : IHostedService, IDisposable
 {
     private readonly IPromotionService _promotionService;
-    private readonly ISanPhamChiTietService _sanPhamChiTietService; // Dịch vụ để cập nhật sản phẩm chi tiết
+    private readonly ISanPhamChiTietService _sanPhamChiTietService;
     private readonly IPromotionSanPhamChiTietService _promotionSanPhamChiTietService;
     private readonly ILogger<PromotionStatusUpdaterService> _logger;
     private Timer _timer;
 
-    public PromotionStatusUpdaterService(IPromotionService promotionService, ISanPhamChiTietService sanPhamChiTietService, ILogger<PromotionStatusUpdaterService> logger, IPromotionSanPhamChiTietService promotionSanPhamChiTietService)
+    public PromotionStatusUpdaterService(IPromotionService promotionService,
+                                         ISanPhamChiTietService sanPhamChiTietService,
+                                         ILogger<PromotionStatusUpdaterService> logger,
+                                         IPromotionSanPhamChiTietService promotionSanPhamChiTietService)
     {
         _promotionService = promotionService;
-        _sanPhamChiTietService = sanPhamChiTietService; // Khởi tạo dịch vụ sản phẩm chi tiết
+        _sanPhamChiTietService = sanPhamChiTietService;
         _logger = logger;
         _promotionSanPhamChiTietService = promotionSanPhamChiTietService;
     }
@@ -38,7 +41,7 @@ public class PromotionStatusUpdaterService : IHostedService, IDisposable
             {
                 if (promotion.NgayKetThuc < currentDateTime && promotion.TrangThai == 1)
                 {
-                    // Cập nhật trạng thái khuyến mãi
+                    // Cập nhật trạng thái khuyến mãi thành không hoạt động
                     promotion.TrangThai = 0;
                     await _promotionService.UpdateAsync(promotion);
                     _logger.LogInformation($"Updated promotion status to inactive for Id: {promotion.IdPromotion}");
@@ -51,9 +54,32 @@ public class PromotionStatusUpdaterService : IHostedService, IDisposable
                         var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(promotionSanPhamChiTiet.IdSanPhamChiTiet);
                         if (sanPhamChiTiet != null)
                         {
-                            sanPhamChiTiet.GiaGiam = 0; // Đặt giá giảm về 0
+                            sanPhamChiTiet.GiaGiam = 0;
                             await _sanPhamChiTietService.Update(sanPhamChiTiet);
                             _logger.LogInformation($"Updated discount price to 0 for product detail Id: {sanPhamChiTiet.IdSanPhamChiTiet}");
+                        }
+                    }
+                }
+                else if (promotion.TrangThai == 2 && promotion.NgayBatDau <= currentDateTime)
+                {
+                    // Cập nhật trạng thái khuyến mãi thành hoạt động
+                    promotion.TrangThai = 1;
+                    await _promotionService.UpdateAsync(promotion);
+                    _logger.LogInformation($"Updated promotion status to active for Id: {promotion.IdPromotion}");
+
+                    // Cập nhật giá giảm cho các sản phẩm chi tiết liên quan
+                    var promotionSanPhamChiTiets = await _promotionSanPhamChiTietService.GetPromotionSanPhamChiTietsByPromotionIdAsync(promotion.IdPromotion);
+                    foreach (var promotionSanPhamChiTiet in promotionSanPhamChiTiets)
+                    {
+                        var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(promotionSanPhamChiTiet.IdSanPhamChiTiet);
+                        if (sanPhamChiTiet != null)
+                        {
+                            // Cập nhật giá giảm dựa trên phần trăm giảm giá của khuyến mãi
+                            double originalPrice = sanPhamChiTiet.Gia;
+                            double discountPercentage = promotion.PhanTramGiam;
+                            sanPhamChiTiet.GiaGiam = originalPrice * (1 - (discountPercentage / 100.0));
+                            await _sanPhamChiTietService.Update(sanPhamChiTiet);
+                            _logger.LogInformation($"Updated discount price for product detail Id: {sanPhamChiTiet.IdSanPhamChiTiet} to {sanPhamChiTiet.GiaGiam}");
                         }
                     }
                 }

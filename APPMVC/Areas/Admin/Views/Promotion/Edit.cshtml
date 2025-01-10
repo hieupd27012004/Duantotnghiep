@@ -4,7 +4,12 @@
     ViewData["Title"] = "Chỉnh Sửa Promotion";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @Html.Raw(TempData["ErrorMessage"])
+    </div>
+}
 <h1>@ViewData["Title"]</h1>
 <hr />
 <div class="row">
@@ -40,7 +45,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="Promotion.TrangThai" class="control-label">Trạng Thái</label>
-                <select asp-for="Promotion.TrangThai" class="form-control" asp-items="ViewBag.TrangThaiList"></select>
+                <select asp-for="Promotion.TrangThai" class="form-control" asp-items="ViewBag.TrangThaiList" id="trangThaiSelect"></select>
                 <span asp-validation-for="Promotion.TrangThai" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -60,7 +65,6 @@
                     Số Lượng: @item.Quantity <br />
                     <strong>Màu Sắc:</strong> @string.Join(", ", item.MauSac) <br />
                     <strong>Kích Cỡ:</strong> @string.Join(", ", item.KichCo) <br />
-                   
                 </li>
             }
         </ul>
@@ -73,19 +77,43 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var dateInputs = document.querySelectorAll('.date-input');
+        var trangThaiSelect = document.getElementById('trangThaiSelect');
+
+        function updateStatusOptions() {
+            var startDate = new Date(document.querySelector('input[name="Promotion.NgayBatDau"]').value);
+            var endDate = new Date(document.querySelector('input[name="Promotion.NgayKetThuc"]').value);
+            var currentDate = new Date();
+
+            if (endDate > currentDate  && startDate > currentDate) {
+                // Only allow "Inactive" and "Pending Activation"
+                trangThaiSelect.innerHTML = '';
+                trangThaiSelect.innerHTML = `
+                    <option value="0">Dừng Hoạt Động</option>
+                    <option value="2">Chờ Hoạt Động</option>
+                `;
+            } else if (currentDate >= startDate && currentDate <= endDate) {
+                // Only allow "Active" and "Inactive"
+                trangThaiSelect.innerHTML = '';
+                trangThaiSelect.innerHTML = `
+                    <option value="0">Dừng Hoạt Động</option>
+                    <option value="1">Hoạt Động</option>
+                `;
+            } else {
+                // Restore all options if the current date is before the promotion dates
+                trangThaiSelect.innerHTML = '';
+                trangThaiSelect.innerHTML = `
+                    <option value="0">Dừng Hoạt Động</option>
+                    <option value="1">Hoạt Động</option>
+                    <option value="2">Chờ Hoạt Động</option>
+                `;
+            }
+        }
+
+        // Initial call to set options based on current dates
+        updateStatusOptions();
+
         dateInputs.forEach(function (input) {
-            input.addEventListener('change', function () {
-                var date = new Date(this.value);
-                var formattedDate = date.toLocaleString('en-GB', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }).replace(',', '');
-                var displaySpan = this.nextElementSibling;
-                displaySpan.textContent = formattedDate;
-            });
+            input.addEventListener('change', updateStatusOptions);
         });
     });
 </script>

@@ -695,6 +695,13 @@ namespace APPMVC.Areas.Admin.Controllers
                     }
 
                     double priceToUse = hoaDonChiTiet.TienGiam > 0 ? hoaDonChiTiet.TienGiam : hoaDonChiTiet.DonGia;
+                    double productPriceToCompare = Convert.ToDouble(sanPhamCT.GiaGiam) > 0 ? Convert.ToDouble(sanPhamCT.GiaGiam) : sanPhamCT.Gia;
+
+                    // Check if the prices match
+                    if (priceToUse != productPriceToCompare)
+                    {
+                        TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã kết thúc.";
+                    }
                     double thanhTien = hoaDonChiTiet.SoLuong * priceToUse;
                     tongTienHang += thanhTien;
 
@@ -967,7 +974,7 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 if (sanPhamCT != null)
                 {
-                    // Kiểm tra KichHoat và HoatKich
+                    // Check activation status
                     var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(hoaDonChiTiet.IdSanPhamChiTiet);
                     if (sanPham == null || sanPhamCT.KichHoat == 0 || sanPham.KichHoat == 0)
                     {
@@ -979,7 +986,18 @@ namespace APPMVC.Areas.Admin.Controllers
                         return Json(new { success = false, message = $"Không đủ số lượng cho sản phẩm {sanPham.TenSanPham}." });
                     }
 
+                    // Check if the discounted price matches
                     double priceToUse = hoaDonChiTiet.TienGiam > 0 ? hoaDonChiTiet.TienGiam : hoaDonChiTiet.DonGia;
+
+                    // Determine the correct price to compare based on whether a discount exists
+                    double productPriceToCompare = Convert.ToDouble(sanPhamCT.GiaGiam) > 0 ? Convert.ToDouble(sanPhamCT.GiaGiam) : sanPhamCT.Gia;
+
+                    // Check if the prices match
+                    if (priceToUse != productPriceToCompare)
+                    {
+                        TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã kết thúc.";
+                    }
+
                     double thanhTien = hoaDonChiTiet.SoLuong * priceToUse;
                     tongTienHang += thanhTien;
 
@@ -994,7 +1012,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Hóa đơn không tồn tại." });
             }
 
-            // Cập nhật thông tin khách hàng
+            // Update customer information
             if (idKhachHang.HasValue)
             {
                 var khachHang = await _khachHangService.GetIdKhachHang(idKhachHang.Value);
@@ -1056,7 +1074,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 await System.IO.File.WriteAllBytesAsync(fullPath, pdfBytes);
                 var fileUrl = $"/TempFiles/{fileName}";
 
-                // Sử dụng TempData để lưu thông báo và URL của hóa đơn
+                // Store success message and invoice URL in TempData
                 TempData["SuccessMessage"] = "Thanh toán thành công! Bạn có muốn in hóa đơn không?";
                 TempData["FileUrl"] = fileUrl;
 
