@@ -96,11 +96,11 @@
             <span class="text-muted fw-light">Tìm Mã Đơn</span>
         </h4>
 
-        <form id="searchForm" method="post">
-            <div class="mb-3">
+        <form id="searchForm" method="post" class="mb-4">
+            <div class="input-group mb-3">
                 <input type="text" name="maHoaDon" class="form-control" placeholder="Nhập mã hóa đơn" required />
+                <button type="submit" class="btn btn-primary">Tìm</button>
             </div>
-            <button type="submit" class="btn btn-primary">Tìm</button>
         </form>
 
         @if (Model.HoaDon != null)

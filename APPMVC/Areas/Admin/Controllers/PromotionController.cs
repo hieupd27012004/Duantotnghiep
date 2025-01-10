@@ -477,22 +477,37 @@ namespace APPMVC.Areas.Admin.Controllers
                     return View(model);
                 }
 
-                // Cập nhật khuyến mãi
-                var result = await _promotionService.UpdateAsync(promotion);
-                if (!result)
-                {
-                    TempData["ErrorMessage"] = "Không thể cập nhật khuyến mãi. Vui lòng thử lại.";
-                    model.SanPhams = await GetProducts();
-                    return View(model);
-                }
-
                 // Lấy tất cả các sản phẩm chi tiết liên quan đến khuyến mãi
                 var promotionSanPhamChiTiets = await _promotionSanPhamChiTietService.GetPromotionSanPhamChiTietsByPromotionIdAsync(promotion.IdPromotion);
+
                 foreach (var promotionSanPhamChiTiet in promotionSanPhamChiTiets)
                 {
                     var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(promotionSanPhamChiTiet.IdSanPhamChiTiet);
+                    var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(promotionSanPhamChiTiet.IdSanPhamChiTiet);
                     if (sanPhamChiTiet != null)
                     {
+                        // Kiểm tra xem sản phẩm có đang trong khuyến mãi khác không
+                        //var existingPromotionIds = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(sanPhamChiTiet.IdSanPhamChiTiet);
+
+                        //if (existingPromotionIds.HasValue && existingPromotionIds.Value != Guid.Empty)
+                        //{
+                        //    var existingPromotion = await _promotionService.GetPromotionByIdAsync(existingPromotionIds.Value);
+
+                        //    // Kiểm tra trạng thái khuyến mãi
+                        //    if (existingPromotion != null && existingPromotion.TrangThai == 1)
+                        //    {
+                        //        // Kiểm tra thời gian khuyến mãi
+                        //        if (existingPromotion.NgayBatDau < promotion.NgayKetThuc &&
+                        //            existingPromotion.NgayKetThuc > promotion.NgayBatDau)
+                        //        {
+                        //            TempData["ErrorMessage"] = $"Sản phẩm '{sanPham.TenSanPham}' đang trong khuyến mãi '{existingPromotion.TenPromotion}' từ {existingPromotion.NgayBatDau:yyyy-MM-dd} đến {existingPromotion.NgayKetThuc:yyyy-MM-dd}.";
+                        //            model.SanPhams = await GetProducts();
+                        //            return View(model);
+                        //        }
+                        //    }
+                        //}
+
+                        // Cập nhật giá giảm
                         if (promotion.TrangThai == 0)
                         {
                             // Nếu trạng thái là 0, đặt giá giảm về 0
@@ -508,6 +523,15 @@ namespace APPMVC.Areas.Admin.Controllers
 
                         await _sanPhamChiTietService.Update(sanPhamChiTiet);
                     }
+                }
+
+                // Cập nhật khuyến mãi
+                var result = await _promotionService.UpdateAsync(promotion);
+                if (!result)
+                {
+                    TempData["ErrorMessage"] = "Không thể cập nhật khuyến mãi. Vui lòng thử lại.";
+                    model.SanPhams = await GetProducts();
+                    return View(model);
                 }
 
                 TempData["SuccessMessage"] = "Khuyến mãi đã được cập nhật thành công.";
