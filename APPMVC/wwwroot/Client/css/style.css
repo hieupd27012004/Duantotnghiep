@@ -233,7 +233,7 @@ a {
       position: absolute;
       width: 255px;
       height: 217px;
-      background-image: url("../images/dots-light.svg");
+      background-image: url("/Client/images/dots-light.svg");
       background-size: contain;
       background-repeat: no-repeat;
       right: -100px;
@@ -358,17 +358,18 @@ a {
   .why-choose-section .img-wrap {
     position: relative; }
     .why-choose-section .img-wrap:before {
-      position: absolute;
-      content: "";
-      width: 255px;
-      height: 217px;
-      background-image: url("../images/dots-yellow.svg");
-      background-repeat: no-repeat;
-      background-size: contain;
-      -webkit-transform: translate(-40%, -40%);
-      -ms-transform: translate(-40%, -40%);
-      transform: translate(-40%, -40%);
-      z-index: -1; }
+        position: absolute;
+        content: "";
+        width: 255px;
+        height: 217px;
+        background-image: url("/Client/images/dots-yellow.svg");
+        background-repeat: no-repeat;
+        background-size: contain;
+        -webkit-transform: translate(-40%, -40%);
+        -ms-transform: translate(-40%, -40%);
+        transform: translate(-40%, -40%);
+        z-index: -1;
+    }
     .why-choose-section .img-wrap img {
       border-radius: 20px; }
 
@@ -404,17 +405,18 @@ a {
     grid-template-columns: repeat(27, 1fr);
     position: relative; }
     .we-help-section .imgs-grid:before {
-      position: absolute;
-      content: "";
-      width: 255px;
-      height: 217px;
-      background-image: url("../images/dots-green.svg");
-      background-size: contain;
-      background-repeat: no-repeat;
-      -webkit-transform: translate(-40%, -40%);
-      -ms-transform: translate(-40%, -40%);
-      transform: translate(-40%, -40%);
-      z-index: -1; }
+        position: absolute;
+        content: "";
+        width: 255px;
+        height: 217px;
+        background-image: url("/Client/images/dots-green.svg");
+        background-size: contain;
+        background-repeat: no-repeat;
+        -webkit-transform: translate(-40%, -40%);
+        -ms-transform: translate(-40%, -40%);
+        transform: translate(-40%, -40%);
+        z-index: -1;
+    }
     .we-help-section .imgs-grid .grid {
       position: relative; }
       .we-help-section .imgs-grid .grid img {
@@ -589,7 +591,7 @@ a {
         background-color: #3b5d50; }
 
 .before-footer-section {
-  padding: 7rem 0 12rem 0 !important; }
+  padding: 1rem 0 12rem 0 !important; }
 
 .blog-section {
   padding: 7rem 0 12rem 0; }
@@ -705,7 +707,7 @@ a {
       font-size: 14px !important; }
 
 .untree_co-section {
-  padding: 7rem 0; }
+  padding: 1rem 0; }
 
 .form-control {
   height: 50px;

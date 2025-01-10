@@ -39,5 +39,9 @@ namespace AppAPI.Service
         {
             return await _repository.GetTopSellingProductsAsync(startDate, endDate);
         }
+        public async Task<List<ThongKeDoanhThu>> GetRevenueStatisticsAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _repository.GetRevenueStatisticsAsync(startDate,endDate);
+        }
     }
 }

@@ -11,5 +11,6 @@ namespace APPMVC.IService
         Task<ThongKeTongQuan> GetTotalOrdersAndRevenue();
         Task<List<ThongKeKhoangThoiGian>> GetStatisticsByTimeRange(DateTime startDate, DateTime endDate);
         Task<List<TopSellingProductViewModel>> GetTopSellingProductsAsync(DateTime? startDate, DateTime? endDate);
+        Task<List<ThongKeDoanhThu>> GetRevenueStatisticsAsync(DateTime startDate, DateTime endDate);
     }
 }

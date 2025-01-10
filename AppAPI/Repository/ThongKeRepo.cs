@@ -2,6 +2,7 @@
 using AppData;
 using AppData.ViewModel;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace AppAPI.Repository
 {
@@ -21,9 +22,9 @@ namespace AppAPI.Repository
             var hoaDonsTrongNgay = await _context.hoaDons
                 .Where(hd => hd.NgayTao >= startDate && hd.NgayTao < endDate)
                 .ToListAsync();
-			var tongtien = await _context.lichSuThanhToans
-				.Where(ls => ls.NgayTao >= startDate && ls.NgayTao < endDate && ls.TrangThai == "Đã thanh toán" || ls.TrangThai == "Hoàn Thành")
-				.SumAsync(ls => ls.SoTien);
+			var tongtien = await _context.hoaDons
+				.Where(ls => ls.NgayTao >= startDate && ls.NgayTao < endDate && ls.TrangThai != "Chờ Xác Nhận" && ls.TrangThai != "Đã Hủy")
+				.SumAsync(ls => ls.TongTienHoaDon);
             
 			var result = hoaDonsTrongNgay
 		        .GroupBy(hd => hd.NgayTao.Date)
@@ -51,9 +52,9 @@ namespace AppAPI.Repository
 	            .Where(hd => hd.NgayTao >= startOfWeek && hd.NgayTao < endOfWeek)
 	            .ToListAsync();
 
-			var tongtien = await _context.lichSuThanhToans
-				.Where(ls => ls.NgayTao >= startOfWeek && ls.NgayTao < endOfWeek && ls.TrangThai == "Đã thanh toán" || ls.TrangThai == "Hoàn Thành")
-				.SumAsync(ls => ls.SoTien);
+			var tongtien = await _context.hoaDons
+				.Where(ls => ls.NgayTao >= startOfWeek && ls.NgayTao < endOfWeek && ls.TrangThai != "Chờ Xác Nhận" && ls.TrangThai != "Đã Hủy")
+				.SumAsync(ls => ls.TongTienHoaDon);
 
 			var result = hoaDonsTrongTuan
 		        .GroupBy(_ => true) 
@@ -78,9 +79,9 @@ namespace AppAPI.Repository
 	            .Where(hd => hd.NgayTao >= startOfMonth && hd.NgayTao < endOfMonth)
 	            .ToListAsync();
 
-			var tongtien = await _context.lichSuThanhToans
-				.Where(ls => ls.NgayTao >= startOfMonth && ls.NgayTao < endOfMonth && ls.TrangThai == "Đã thanh toán" || ls.TrangThai == "Hoàn Thành")
-				.SumAsync(ls => ls.SoTien);
+			var tongtien = await _context.hoaDons
+				.Where(ls => ls.NgayTao >= startOfMonth && ls.NgayTao < endOfMonth && ls.TrangThai != "Chờ Xác Nhận" && ls.TrangThai != "Đã Hủy")
+				.SumAsync(ls => ls.TongTienHoaDon);
 
 			var result = hoaDonsTrongThang
 		        .GroupBy(_ => true) 
@@ -104,9 +105,9 @@ namespace AppAPI.Repository
                 .Where(hd => hd.NgayTao.Year == year)
                 .ToListAsync();
 
-			var tongTienTheoThang = await _context.lichSuThanhToans
-				.Where(ls => ls.NgayTao.Year == year && ls.TrangThai == "Đã thanh toán" || ls.TrangThai == "Hoàn Thành")
-				.SumAsync(ls => ls.SoTien);
+			var tongTienTheoThang = await _context.hoaDons
+				.Where(ls => ls.NgayTao.Year == year && ls.TrangThai != "Chờ Xác Nhận" && ls.TrangThai != "Đã Hủy")
+				.SumAsync(ls => ls.TongTienHoaDon);
 
 			var result = hoaDonsTrongNam
 	            .GroupBy(_ => true) 
@@ -127,9 +128,9 @@ namespace AppAPI.Repository
 		{
 			int totalOrders = await _context.hoaDons.CountAsync(hd => hd.TrangThai != "Tạo đơn hàng"); 
 
-			double totalRevenue = await _context.lichSuThanhToans
-				.Where(hd => (hd.TrangThai == "Hoàn Thành" || hd.TrangThai == "Đã Thanh Toán"))
-				.SumAsync(hd => hd.SoTien); 
+			double totalRevenue = await _context.hoaDons
+				.Where(hd => (hd.TrangThai != "Chờ Xác Nhận" && hd.TrangThai != "Đã Hủy"))
+				.SumAsync(hd => hd.TongTienHoaDon); 
 			
 			return new ThongKeTongQuan
 			{
@@ -145,10 +146,10 @@ namespace AppAPI.Repository
 				.Where(hd => hd.NgayTao.Date >= startDate.Date && hd.NgayTao.Date <= endDate.Date)
 				.ToListAsync();
 
-            var tongTienTrongKhoang = await _context.lichSuThanhToans
-                .Where(ls => ls.NgayTao.Date >= startDate.Date && ls.NgayTao.Date <= endDate.Date && ls.TrangThai == "Đã thanh toán" || ls.TrangThai == "Hoàn Thành")
+            var tongTienTrongKhoang = await _context.hoaDons
+                .Where(ls => ls.NgayTao.Date >= startDate.Date && ls.NgayTao.Date <= endDate.Date && ls.TrangThai != "Chờ Xác Nhận" && ls.TrangThai != "Đã Hủy")
                 .GroupBy(ls => ls.NgayTao.Date)
-                .Select(g => new { Ngay = g.Key, TongTien = g.Sum(ls => ls.SoTien) })
+                .Select(g => new { Ngay = g.Key, TongTien = g.Sum(ls => ls.TongTienHoaDon) })
                 .ToListAsync();
 
             // Thống kê theo ngày
@@ -176,7 +177,9 @@ namespace AppAPI.Repository
                 .Include(hdct => hdct.SanPhamChiTiet)
                 .ThenInclude(spct => spct.SanPham)
                 .Where(hdct => hdct.HoaDon.NgayTao >= (startDate ?? DateTime.MinValue)
-                            && hdct.HoaDon.NgayTao <= (endDate ?? DateTime.MaxValue))
+                            && hdct.HoaDon.NgayTao <= (endDate ?? DateTime.MaxValue)
+                            && hdct.HoaDon.TrangThai != "Chờ xác nhận"  // Trạng thái khác "Chờ xác nhận"
+                            && hdct.HoaDon.TrangThai != "Đã hủy")     // Trạng thái khác "Đã hủy"
                 .GroupBy(hdct => hdct.IdSanPhamChiTiet)
                 .Select(group => new TopSellingProductViewModel
                 {
@@ -188,6 +191,28 @@ namespace AppAPI.Repository
                 .OrderByDescending(x => x.SoLuongBan)
                 .Take(10);
             return await query.ToListAsync();
+        }
+
+        // Thống kê doanh thu
+        public async Task<List<ThongKeDoanhThu>> GetRevenueStatisticsAsync(DateTime startDate, DateTime endDate)
+        {
+            var hoaDons = await _context.hoaDons
+                .Where(hd => hd.NgayTao.Date >= startDate.Date &&
+                     hd.NgayTao.Date <= endDate.Date &&
+                     (hd.TrangThai != "Chờ Xác Nhận" && hd.TrangThai != "Đã Hủy"))
+                .ToListAsync();
+
+                    var result = hoaDons
+                        .GroupBy(hd => hd.NgayTao.Date)
+                        .Select(g => new ThongKeDoanhThu
+                        {
+                            Ngay = g.Key,
+                            TongDoanhThu = g.Sum(hd => hd.TongTienHoaDon)
+                        })
+                        .OrderBy(tk => tk.Ngay)
+                        .ToList();
+
+            return result;
         }
     }
 }

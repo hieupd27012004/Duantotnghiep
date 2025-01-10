@@ -22,7 +22,90 @@
 		max-height: 200px; 
 		object-fit: cover; 
 	}
+    /* Style cho slideshow */
+    .carousel-item img {
+        height: 470px;
+        object-fit: cover; 
+        margin-bottom: 5px;
+        border-radius: 10px;
+    }
+
+    .carousel-caption {
+        background: rgba(0, 0, 0, 0.2); /* Nền tối cho caption */
+        border-radius: 5px; /* Bo góc caption */
+        padding: 10px;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        css Copier background-color: rgba(0, 0, 0, 0.4); /* Nền cho các nút điều khiển */
+    }
+
+    .hero {          
+        border-radius: 10px; /* Bo góc */
+    }
+
+    /* Nút CTA */
+    .btn {
+       
+        color: white; /* Chữ trắng */
+        border-radius: 50px; /* Bo góc */
+        padding: 10px 20px; /* Thêm padding */
+    }
+
+    /* Hiệu ứng hover cho sản phẩm */
+    .product-item:hover {
+        transform: scale(1.05); /* Phóng to khi hover */
+        transition: transform 0.3s; /* Thêm hiệu ứng chuyển tiếp */
+    }
+
+    /* Khoảng cách giữa các phần tử */
+    .section-title {
+        margin-bottom: 1.5rem; /* Tăng khoảng cách dưới tiêu đề */
+    }
 </style>
+
+<!-- Slide Show -->
+<!-- Slide Show -->
+<div id="carouselExampleCaptions" class="carousel slide">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="/Client/images/Shoes-Web-Ads-Banne1r-thietkehaithanh.jpg" class="d-block w-100" alt="...">
+            <div class="carousel-caption d-none d-md-block">
+                <h5>Ưu Đãi Đặc Biệt</h5>
+                <p>Giảm giá lên đến 50% cho các sản phẩm chọn lọc!</p>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="/Client/images/20240926111113-0.webp" class="d-block w-100" alt="...">
+            <div class="carousel-caption d-none d-md-block">
+                <h5>Giày Thể Thao Mới Nhất</h5>
+                <p>Khám phá bộ sưu tập giày thể thao mới nhất của chúng tôi!</p>                
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="/Client/images/banner.webp" class="d-block w-100" alt="...">
+            <div class="carousel-caption d-none d-md-block">
+                <h5>Khám Phá Ngay</h5>
+                <p>Chúng tôi có nhiều kiểu dáng phù hợp với mọi phong cách!</p>
+            </div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
 <div class="hero">
 	<div class="container">
 		<div class="row justify-content-between">
@@ -56,21 +139,21 @@
 			<!-- End Column 1 -->
 			<!-- Start Column 2 -->
 			<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-				<a class="product-item" href="cart.html">
+                <a class="product-item" href="@Url.Action("Index", "SanPham", new { area = "Client" })">
 					<img src="/Client/img/pngegg.png" class="img-fluid product-thumbnail">
 					<h3 class="product-title">Giày Nike Air Zoom Pegasus 32</h3>
 				</a>
 			</div>
 			<!-- End Column 2 -->
 			<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-				<a class="product-item" href="cart.html">
+                <a class="product-item" href="@Url.Action("Index", "SanPham", new { area = "Client" })">
 					<img src="/Client/img/sanpham2.png" class="img-fluid product-thumbnail">
 					<h3 class="product-title">Nike AIR JORDAN XXXI Banned</h3>
 				</a>
 			</div>
 			<!-- End Column 3 -->
 			<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0">
-				<a class="product-item" href="cart.html">
+                <a class="product-item" href="@Url.Action("Index", "SanPham", new { area = "Client" })">
 					<img src="/Client/img/sanpham3.png" class="img-fluid product-thumbnail">
 					<h3 class="product-title">Giày adidas NMD_R1 ‘Focus Olive’ IG5534</h3>
 				</a>
@@ -144,6 +227,7 @@
 </div>
 <!-- End Why Choose Us Section -->
 <!-- Start We Help Section -->
+
 <div class="we-help-section">
 	<div class="container">
 		<div class="row justify-content-between">
@@ -155,7 +239,7 @@
 				</div>
 			</div>
 			<div class="col-lg-5 ps-lg-5">
-				<h2 class="section-title mb-4">We help you find the perfect pair of shoes</h2>
+                <h2 class="section-title mb-4">Chúng tôi giúp bạn tìm được đôi giày hoàn hảo</h2>
 
                 <ul class="list-unstyled custom-list my-4">
                     <li>Sản Phẩm Chất Lượng: Mỗi đôi giày được chọn lựa cẩn thận để đảm bảo tính xác thực và chất lượng tốt nhất.</li>

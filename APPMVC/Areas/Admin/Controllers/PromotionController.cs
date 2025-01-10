@@ -55,13 +55,30 @@ namespace APPMVC.Areas.Admin.Controllers
             _promotionSanPhamChiTietService = promotionSanPhamChiTietService;
         }
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 6)
         {
             try
             {
+                var sessionData = HttpContext.Session.GetString("NhanVien");
+                if (string.IsNullOrEmpty(sessionData))
+                {
+                    return RedirectToAction("Login", "NhanVien");
+                }
                 List<Promotion> promotions = await _promotionService.GetPromotionsAsync();
                 _logger.LogInformation($"Retrieved {promotions.Count} promotions");
-                return View(promotions);
+                var sapXep = promotions.OrderByDescending(x => x.NgayTao).ToList();
+
+                var pagedPromotions = sapXep.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+                // Tính tổng số trang
+                var totalPromotions = sapXep.Count();
+                var totalPages = (int)Math.Ceiling(totalPromotions / (double)pageSize);
+
+                // Truyền dữ liệu phân trang vào View
+                ViewBag.CurrentPage = page;
+                ViewBag.TotalPages = totalPages;
+
+                return View(pagedPromotions);
             }
             catch (Exception ex)
             {
