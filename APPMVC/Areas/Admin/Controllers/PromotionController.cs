@@ -505,7 +505,7 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 var promotion = model.Promotion;
 
-                // Validate dates
+                // Validate date range
                 if (promotion.NgayBatDau >= promotion.NgayKetThuc)
                 {
                     TempData["ErrorMessage"] = "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.";
@@ -515,7 +515,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 var currentDateTime = DateTime.Now;
 
-                // Check state transition
+                // Check state transition requirements
                 if (promotion.TrangThai == 2 && promotion.NgayBatDau <= currentDateTime)
                 {
                     TempData["ErrorMessage"] = "Không thể chuyển sang trạng thái 'Chờ Hoạt Động' khi thời gian bắt đầu không lớn hơn thời gian hiện tại.";
@@ -523,56 +523,44 @@ namespace APPMVC.Areas.Admin.Controllers
                     return View(model);
                 }
 
-                // Get all promotion details linked to the current promotion
+                // Get promotion details linked to this promotion
                 var promotionSanPhamChiTiets = await _promotionSanPhamChiTietService.GetPromotionSanPhamChiTietsByPromotionIdAsync(promotion.IdPromotion);
 
-                // Check if any product is active within the new promotion's time range
-                foreach (var promotionSanPhamChiTiet in promotionSanPhamChiTiets)
+                // Check for active promotions linked to the same products
+                foreach (var detail in promotionSanPhamChiTiets)
                 {
-                    var activePromotions = await _promotionService.GetPromotionByIdAsync(promotionSanPhamChiTiet.IdPromotion);
-
-                    // Check if activePromotions is not null
-                    if (activePromotions != null) // Updated check
+                    var existingPromotionIdNullable = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(detail.IdSanPhamChiTiet);
+                    if (existingPromotionIdNullable.HasValue && existingPromotionIdNullable.Value != Guid.Empty)
                     {
-                        var existingPromotion = await _promotionService.GetPromotionByIdAsync(activePromotions.IdPromotion);
+                        var activePromotion = await _promotionService.GetPromotionByIdAsync(existingPromotionIdNullable.Value);
 
-                        // Ensure existingPromotion is not null
-                        if (existingPromotion != null && existingPromotion.IdPromotion != promotion.IdPromotion)
+                        if (activePromotion != null && activePromotion.IdPromotion != promotion.IdPromotion)
                         {
                             // Check for time overlap
-                            if (existingPromotion.NgayBatDau < promotion.NgayKetThuc &&
-                                existingPromotion.NgayKetThuc > promotion.NgayBatDau)
+                            if (activePromotion.NgayBatDau < promotion.NgayKetThuc &&
+                                activePromotion.NgayKetThuc > promotion.NgayBatDau)
                             {
                                 TempData["ErrorMessage"] = "Không thể kích hoạt hoặc chuyển sang trạng thái 'Chờ Hoạt Động' vì có sản phẩm đang hoạt động trong khoảng thời gian này.";
                                 model.SanPhams = await GetProducts();
                                 return View(model);
                             }
                         }
-                        else if (existingPromotion == null)
-                        {
-                            // Handle the case where the promotion was not found
-                            TempData["ErrorMessage"] = "Khuyến mãi không tồn tại.";
-                            model.SanPhams = await GetProducts();
-                            return View(model);
-                        }
                     }
                 }
 
-                // Update discount prices for related products
+                // Update discount prices for related products based on promotion status
                 foreach (var promotionSanPhamChiTiet in promotionSanPhamChiTiets)
                 {
                     var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(promotionSanPhamChiTiet.IdSanPhamChiTiet);
                     if (sanPhamChiTiet != null)
                     {
-                        // Update discount
                         if (promotion.TrangThai == 0)
                         {
-                            // If status is 0, reset discount
                             sanPhamChiTiet.GiaGiam = 0;
                         }
                         else if (promotion.TrangThai == 1)
                         {
-                            // If status is 1, calculate discount
+                            // Calculate discount if status is 1
                             double originalPrice = sanPhamChiTiet.Gia;
                             double discountPercentage = promotion.PhanTramGiam;
                             sanPhamChiTiet.GiaGiam = originalPrice * (1 - (discountPercentage / 100.0));
@@ -582,7 +570,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     }
                 }
 
-                // Update promotion
+                // Update the promotion in the database
                 var result = await _promotionService.UpdateAsync(promotion);
                 if (!result)
                 {

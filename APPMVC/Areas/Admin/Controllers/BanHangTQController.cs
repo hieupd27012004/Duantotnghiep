@@ -576,10 +576,9 @@ namespace APPMVC.Areas.Admin.Controllers
                     IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
                     DonGia = gia,
                     SoLuong = requestedQuantity,
-                    // Calculate total amount considering discount
                     TongTien = (giaDaGiam.HasValue && giaDaGiam > 0)
-                        ? giaDaGiam.Value * requestedQuantity
-                        : gia * requestedQuantity,
+                        ? Math.Round(giaDaGiam.Value * requestedQuantity, 2)
+                        : Math.Round(gia * requestedQuantity, 2),
                     KichHoat = 1,
                     TienGiam = Convert.ToDouble(giaDaGiam)
                 };
@@ -697,11 +696,16 @@ namespace APPMVC.Areas.Admin.Controllers
                     double priceToUse = hoaDonChiTiet.TienGiam > 0 ? hoaDonChiTiet.TienGiam : hoaDonChiTiet.DonGia;
                     double productPriceToCompare = Convert.ToDouble(sanPhamCT.GiaGiam) > 0 ? Convert.ToDouble(sanPhamCT.GiaGiam) : sanPhamCT.Gia;
 
-                    // Check if the prices match
                     if (priceToUse != productPriceToCompare)
                     {
-                        TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã kết thúc.";
+                        hoaDonChiTiet.TienGiam = Convert.ToDouble(sanPhamCT.GiaGiam);
+                        hoaDonChiTiet.TongTien = Math.Round(hoaDonChiTiet.SoLuong * sanPhamCT.Gia, 2);
+
+                        await _hoaDonChiTietService.UpdateAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
+                        TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã được cập nhật.";
+                        return RedirectToAction("Index");
                     }
+
                     double thanhTien = hoaDonChiTiet.SoLuong * priceToUse;
                     tongTienHang += thanhTien;
 
@@ -930,17 +934,25 @@ namespace APPMVC.Areas.Admin.Controllers
                 var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(chiTiet.IdSanPhamChiTiet);
                 if (sanPhamCT != null)
                 {
+                    // Lấy giá giảm nếu có
+                    double priceToUse = chiTiet.TienGiam > 0 ? chiTiet.TienGiam : sanPhamCT.Gia;
+
                     sanPhamChiTiets.Add(new SanPhamChiTietViewModel
                     {
                         IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
                         MaSanPham = sanPhamCT.MaSp,
                         Quantity = chiTiet.SoLuong,
-                        Price = sanPhamCT.Gia,
+                        Price = priceToUse,  // Sử dụng giá đã được điều chỉnh
                     });
                 }
             }
 
-            var model = (sanPhamChiTiets, idHoaDon);
+            var model = new ThanhToanCKViewModel
+            {
+                SanPhamChiTiets = sanPhamChiTiets,
+                IdHoaDon = idHoaDon,
+                MaDon = hoaDon.MaDon
+            };
             return PartialView("~/Areas/Admin/Views/BanHangTQ/ThanhToanCK.cshtml", model);
         }
         [HttpPost]
@@ -987,7 +999,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     }
 
                     // Check if the discounted price matches
-                    double priceToUse = hoaDonChiTiet.TienGiam > 0 ? hoaDonChiTiet.TienGiam : hoaDonChiTiet.DonGia;
+                    double priceToUse = Math.Round(hoaDonChiTiet.TienGiam > 0 ? hoaDonChiTiet.TienGiam : hoaDonChiTiet.DonGia, 2);
 
                     // Determine the correct price to compare based on whether a discount exists
                     double productPriceToCompare = Convert.ToDouble(sanPhamCT.GiaGiam) > 0 ? Convert.ToDouble(sanPhamCT.GiaGiam) : sanPhamCT.Gia;
@@ -995,7 +1007,16 @@ namespace APPMVC.Areas.Admin.Controllers
                     // Check if the prices match
                     if (priceToUse != productPriceToCompare)
                     {
-                        TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã kết thúc.";
+                        hoaDonChiTiet.TienGiam = Convert.ToDouble(sanPhamCT.GiaGiam);
+                        hoaDonChiTiet.TongTien = Math.Round(hoaDonChiTiet.SoLuong * sanPhamCT.Gia, 2);
+
+                        await _hoaDonChiTietService.UpdateAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
+
+                        // Lưu thông báo lỗi vào TempData
+                        TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã được cập nhật.";
+
+                        // Điều hướng đến trang Index
+                        return Json(new { success = true, redirectUrl = Url.Action("Index") });
                     }
 
                     double thanhTien = hoaDonChiTiet.SoLuong * priceToUse;
@@ -1082,7 +1103,16 @@ namespace APPMVC.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Đã xảy ra lỗi khi xác nhận thanh toán." });
+                // Ghi lại lỗi chi tiết vào log file hoặc hệ thống log (nếu có)
+                // Ví dụ: _logger.LogError(ex, "Đã xảy ra lỗi khi xác nhận thanh toán.");
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Khuyến mãi đã hết hạn.",
+                    error = ex.Message, // Ghi rõ thông điệp lỗi
+                    stackTrace = ex.StackTrace // Ghi rõ stack trace (có thể loại bỏ nếu không cần thiết cho bảo mật)
+                });
             }
         }
         //[HttpPost]

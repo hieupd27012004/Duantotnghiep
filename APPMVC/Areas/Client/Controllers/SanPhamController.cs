@@ -404,7 +404,7 @@ namespace APPMVC.Areas.Client.Controllers
                     }
 
                     existingItem.SoLuong = newQuantity;
-                    existingItem.TongTien = existingItem.DonGia * newQuantity;
+                    existingItem.TongTien = Math.Round(existingItem.DonGia * existingItem.SoLuong, 2);
 
                     await _gioHangChiTietService.UpdateAsync(existingItem);
                     return Ok(new { message = "Số lượng mặt hàng đã được cập nhật trong giỏ hàng thành công", existingItem });
@@ -414,7 +414,7 @@ namespace APPMVC.Areas.Client.Controllers
                 double donGia;
                 if (sanPhamChiTiet.GiaGiam.HasValue && sanPhamChiTiet.GiaGiam > 0)
                 {
-                    donGia = sanPhamChiTiet.GiaGiam.Value;
+                    donGia = Math.Round(sanPhamChiTiet.GiaGiam.Value, 2);
                 }
                 else
                 {
@@ -426,9 +426,9 @@ namespace APPMVC.Areas.Client.Controllers
                     IdGioHangChiTiet = Guid.NewGuid(),
                     IdGioHang = idGioHang,
                     IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
-                    DonGia = donGia,
+                    DonGia = Math.Round(donGia, 2),
                     SoLuong = requestedQuantity,
-                    TongTien = donGia * requestedQuantity,
+                    TongTien = Math.Round(donGia * requestedQuantity, 2),
                     KichHoat = 1
                 };
 
@@ -451,13 +451,16 @@ namespace APPMVC.Areas.Client.Controllers
                 {
                     return BadRequest(ModelState);
                 }
+
                 var customerIdString = HttpContext.Session.GetString("IdKhachHang");
                 if (string.IsNullOrEmpty(customerIdString) || !Guid.TryParse(customerIdString, out Guid customerId))
                 {
                     return Json(new { message = "Vui Lòng Đăng Nhập Để Mua Sắm" });
                 }
+
                 var sanPham = await _sanPhamservice.GetSanPhamById(productId);
                 var sanPhamChiTiet = await _sanPhamCTservice.GetIdSanPhamChiTietByFilter(productId, sizeId, colorId);
+
                 if (sanPhamChiTiet == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy sản phẩm." });
@@ -473,28 +476,34 @@ namespace APPMVC.Areas.Client.Controllers
                     return Json(new { success = false, message = "Số lượng không đủ." });
                 }
 
+                // Lấy giá sản phẩm
                 double price = sanPhamChiTiet.Gia;
 
+                // Kiểm tra khuyến mãi
                 var promotionId = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(sanPhamChiTiet.IdSanPhamChiTiet);
-
                 if (promotionId.HasValue && promotionId.Value != Guid.Empty)
                 {
                     var promotionDetails = await _promotionService.GetPromotionByIdAsync(promotionId.Value);
                     if (promotionDetails != null && promotionDetails.TrangThai == 1 && promotionDetails.PhanTramGiam > 0)
                     {
                         // Tính giá đã giảm
-                        price = Convert.ToDouble(sanPhamChiTiet.GiaGiam);
+                        price = sanPhamChiTiet.GiaGiam.HasValue ? sanPhamChiTiet.GiaGiam.Value : sanPhamChiTiet.Gia;
                     }
                 }
 
+                // Làm tròn giá sau khi áp dụng khuyến mãi
+                price = Math.Round(price, 2);
+
+                // Tạo đối tượng BuyItemViewModel
                 var buyItem = new BuyItemViewModel
                 {
                     IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
                     ProductName = sanPham.TenSanPham,
                     Quantity = quantity,
-                    Price = price 
+                    Price = price
                 };
 
+                // Lưu vào session
                 HttpContext.Session.SetObject("SelectedItem", buyItem);
 
                 // Trả về URL để redirect client
@@ -506,6 +515,6 @@ namespace APPMVC.Areas.Client.Controllers
                 Console.WriteLine($"Lỗi trong BuyNow: {ex.Message}");
                 return StatusCode(500, new { message = "Đã xảy ra lỗi trong quá trình xử lý yêu cầu." });
             }
-        }       
+        }
     }
 }
