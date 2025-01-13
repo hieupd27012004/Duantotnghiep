@@ -178,6 +178,7 @@ namespace APPMVC.Areas.Client.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Edit(KhachHang khachHang)
 		{
+            
 			if (ModelState.IsValid)
 			{
 				try

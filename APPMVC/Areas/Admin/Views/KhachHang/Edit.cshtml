@@ -47,7 +47,7 @@
 
                             <div class="form-group mb-3" hidden>
                                 <label asp-for="MatKhau" class="control-label">Mật Khẩu</label>
-                                <input asp-for="MatKhau" class="form-control"/>
+                                <input asp-for="MatKhau" class="form-control" />
                                 <span asp-validation-for="MatKhau" class="text-danger"></span>
                             </div>
 
@@ -73,3 +73,36 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function (event) {
+            let isValid = true;
+
+            const hoTen = document.querySelector('input[name="HoTen"]');
+            const soDienThoai = document.querySelector('input[name="SoDienThoai"]');
+            const email = document.querySelector('input[name="Email"]');
+
+            // Kiểm tra các trường thông tin
+            if (!hoTen.value.trim()) {
+                isValid = false;
+                alert("Họ Tên không được để trống.");
+                hoTen.focus();
+            } else if (!soDienThoai.value.trim()) {
+                isValid = false;
+                alert("Số Điện Thoại không được để trống.");
+                soDienThoai.focus();
+            } else if (!email.value.trim()) {
+                isValid = false;
+                alert("Email không được để trống.");
+                email.focus();
+            }
+
+            // Nếu không hợp lệ, ngăn gửi biểu mẫu
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>

@@ -133,11 +133,11 @@
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="MatKhau"></label>
+                <label>Mật Khẩu</label>
                 <input asp-for="MatKhau" type="password" class="form-control" />
                 <span asp-validation-for="MatKhau" class="text-danger"></span>
             </div>
-            <button type="submit" class="btn_login">LOGIN</button>
+            <button type="submit" class="btn_login" >LOGIN</button>
             <button type="button" class="btn" onclick="location.href='@Url.Action("ForgotPassword", "KhachHang")'">Quên Mật Khẩu</button>
         </form>
     </div>
@@ -147,22 +147,22 @@
         <h2>SIGN UP</h2>
         <form asp-action="Register" method="post">
             <div class="form-group">
-                <label asp-for="HoTen"></label>
+                <label>Họ Tên</label>
                 <input asp-for="HoTen" class="form-control" />
                 <span asp-validation-for="HoTen" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="SoDienThoai"></label>
+                <label>Số Điện Thoại</label>
                 <input asp-for="SoDienThoai" class="form-control" />
                 <span asp-validation-for="SoDienThoai" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Email"></label>
+                <label>Email</label>
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="MatKhau"></label>
+                <label>Mật Khẩu</label>
                 <input asp-for="MatKhau" type="password" class="form-control" />
                 <span asp-validation-for="MatKhau" class="text-danger"></span>
             </div>

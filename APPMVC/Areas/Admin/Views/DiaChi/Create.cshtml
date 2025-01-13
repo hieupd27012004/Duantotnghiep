@@ -101,6 +101,43 @@
 </div>
 @section Scripts {
     <script>
+        // Hàm kiểm tra thông tin trước khi gửi biểu mẫu
+        function validateForm() {
+            let isValid = true;
+            let errorMessage = "";
+
+            // Kiểm tra Tỉnh/Thành phố
+            if ($("#ProvinceId").val() === "") {
+                isValid = false;
+                errorMessage += "Vui lòng chọn Tỉnh/Thành phố.\n";
+            }
+
+            // Kiểm tra Quận/Huyện
+            if ($("#DistrictId").val() === "") {
+                isValid = false;
+                errorMessage += "Vui lòng chọn Quận/Huyện.\n";
+            }
+
+            // Kiểm tra Phường/Xã
+            if ($("#WardId").val() === "") {
+                isValid = false;
+                errorMessage += "Vui lòng chọn Phường/Xã.\n";
+            }
+
+            // Nếu không hợp lệ, hiển thị thông báo lỗi
+            if (!isValid) {
+                alert(errorMessage);
+            }
+
+            return isValid; // Trả về true nếu hợp lệ, false nếu không
+        }
+
+        // Thêm sự kiện 'submit' cho biểu mẫu
+        $("form").on("submit", function (event) {
+            if (!validateForm()) {
+                event.preventDefault(); // Ngăn gửi biểu mẫu nếu không hợp lệ
+            }
+        });
         $("#ProvinceId").change(function () {
             var provinceId = $(this).val();
             console.log("ProvinceId:", provinceId);
@@ -156,14 +193,6 @@
                     alert("Khách hàng này đã có 3 địa chỉ. Không thể thêm mới.");
                 }
             });
-        });
-        // //Check địa chỉ mặc định
-        // $(document).ready(function () {
-        //     var isDefaultAddress = @Html.Raw(JsonConvert.SerializeObject(ViewBag.HasDefaultAddress));
-        //     if (isDefaultAddress) {
-        //         $('#DiaChiMacDinh').prop('disabled', true);
-        //         $('label[for="DiaChiMacDinh"]').text("Địa chỉ mặc định đã tồn tại");
-        //     }
-        // });
+        });      
     </script>
 }

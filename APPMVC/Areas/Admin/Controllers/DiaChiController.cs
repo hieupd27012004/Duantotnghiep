@@ -65,7 +65,7 @@ namespace APPMVC.Areas.Admin.Controllers
 				}
                 ViewBag.Provinces = await _services.GetProvincesAsync();
                 await LoadDropDownsCreate(dc);
-                ViewBag.khachHang = (await _serviceKH.GetAllKhachHang()).Where(kh => kh.KichHoat != 0).ToList();
+                ViewBag.khachHang = (await _serviceKH.GetAllKhachHang()).Where(kh => kh.KichHoat == 1).ToList();
                 return View(dc);
 			}
 

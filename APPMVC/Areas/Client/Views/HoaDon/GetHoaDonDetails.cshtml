@@ -92,16 +92,25 @@
 
 <div class="content-wrapper">
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4">
-            <span class="text-muted fw-light">Tìm Mã Đơn</span>
-        </h4>
+        <div class="card mb-3">
+            <div class="card-body rounded-3">
+                <div class="d-flex mt-5 mb-5">
+                    <img src="/Client/images/—Pngtree—search box with unique design_6595345.png" width="100px" height="100px" />
+                    <h3 class="fw-bold py-3 mb-4">
+                        <span class="text-muted fw-light"><strong>Tra Cứu Đơn Hàng</strong></span>
+                    </h3>
+                </div>
 
-        <form id="searchForm" method="post" class="mb-4">
-            <div class="input-group mb-3">
-                <input type="text" name="maHoaDon" class="form-control" placeholder="Nhập mã hóa đơn" required />
-                <button type="submit" class="btn btn-primary">Tìm</button>
+
+                <form id="searchForm" method="post" class="mb-4">
+                    <div class="input-group mb-3">
+                        <input type="text" name="maHoaDon" class="form-control" placeholder="Nhập mã hóa đơn" required />
+                        <button type="submit" class="btn btn-primary">Tìm</button>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
+       <hr />
 
         @if (Model.HoaDon != null)
         {
@@ -272,6 +281,6 @@
             </div>
         }
 
-        <a asp-action="Index" class="btn btn-primary">Quay lại danh sách</a>
+        <a href="@Url.Action("Index", "SanPham", new { area = "Client" })" class="btn btn-primary">Tiếp tục mua sắm</a>
     </div>
 </div>

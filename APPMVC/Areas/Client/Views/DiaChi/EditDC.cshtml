@@ -139,8 +139,19 @@
             });
 
             // Đảm bảo giá trị WardName được cập nhật khi trang được tải lại
-            $("#WardId").val("@Model.WardId");
-            $("#WardName").val($("#WardId option:selected").text());
+           
+            $("form").submit(function (e) {
+                var provinceId = $("#ProvinceId").val();
+                var districtId = $("#DistrictId").val();
+                var wardId = $("#WardId").val();
+
+                // Nếu bất kỳ trường nào trống, hiển thị cảnh báo và ngừng gửi form
+                if (!provinceId || !districtId || !wardId) {
+                    e.preventDefault();
+                    alert("Vui lòng chọn đầy đủ Tỉnh/Thành phố, Quận/Huyện và Phường/Xã.");
+                    return false;
+                }
+            });
         });
     </script>
 }

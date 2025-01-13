@@ -38,44 +38,80 @@ namespace APPMVC.Areas.Client.Controllers
 			ViewBag.Provinces = await _services.GetProvincesAsync();
 			return View();
 		}
-		[HttpPost]
-		public async Task<IActionResult> Create(DiaChi dc)
-		{
-			//Check số lượng địa chỉ
-			var IdKhachHang = HttpContext.Session.GetString("IdKhachHang");
-			var id = Guid.Parse(IdKhachHang);
-			int addressCount = await _services.GetAddressCountByCustomerId(id);
-			if (addressCount >= 3)
-			{
-				ModelState.AddModelError("", "Khách hàng này đã có tối đa 3 địa chỉ.");
+        [HttpPost]
+        public async Task<IActionResult> Create(DiaChi dc)
+        {
+            // Kiểm tra số lượng địa chỉ
+            var IdKhachHang = HttpContext.Session.GetString("IdKhachHang");
+            var id = Guid.Parse(IdKhachHang);
+            int addressCount = await _services.GetAddressCountByCustomerId(id);
+            if (addressCount >= 3)
+            {
+                ModelState.AddModelError("", "Khách hàng này đã có tối đa 3 địa chỉ.");
                 ViewBag.Provinces = await _services.GetProvincesAsync();
                 await LoadDropDownsCreate(dc);
-				return View(dc);
-			}
-			if (!ModelState.IsValid)
-			{
-				foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-				{
-					Console.WriteLine($"Error: {error.ErrorMessage}"); 
-				}
+                return View(dc);
+            }
+
+            // Kiểm tra tính hợp lệ của model và các trường dữ liệu
+            if (!ModelState.IsValid)
+            {
+                // Nếu có lỗi, hiển thị thông báo lỗi của các trường thiếu
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($"Error: {error.ErrorMessage}");
+                }
+                if (dc.ProvinceId == null || string.IsNullOrEmpty(dc.ProvinceId.ToString()))
+                {
+                    TempData["ErrorHoTen"] = "Họ tên không được để trống.";
+                }
+                if (dc.DistrictId == null || string.IsNullOrEmpty(dc.DistrictId.ToString()))
+                {
+                    TempData["ErrorHoTen"] = "Họ tên không được để trống.";
+                }
+                if(dc.WardId == null || string.IsNullOrEmpty(dc.WardId.ToString()))
+                {
+                    TempData["ErrorHoTen"] = "Họ tên không được để trống.";
+                }
+
+                // Nếu thiếu các trường quan trọng, thông báo lỗi cho người dùng
+                if (string.IsNullOrEmpty(dc.HoTen))
+                {
+                    ModelState.AddModelError("HoTen", "Họ tên không được để trống.");
+                }
+                if (string.IsNullOrEmpty(dc.SoDienThoai))
+                {
+                    ModelState.AddModelError("SoDienThoai", "Số điện thoại không được để trống.");
+                }
+                if (string.IsNullOrEmpty(dc.MoTa))
+                {
+                    ModelState.AddModelError("DiaChiCuThe", "Địa chỉ cụ thể không được để trống.");
+                }
+                
                 ViewBag.Provinces = await _services.GetProvincesAsync();
                 await LoadDropDownsCreate(dc);
-				return View(dc);
-			}
-			if (string.IsNullOrEmpty(IdKhachHang))
-			{
-				return RedirectToAction("Login", "KhachHang");  
-			}
-			dc.IdKhachHang = id;
-			//Nếu tất cả ok thì thêm =))
-			bool success = await _services.AddAsync(dc);
-			if (success)
-			{
-				return RedirectToAction("GetAll");
-			}
-			await LoadDropDowns(dc);
-			return View(dc);
-		}
+                return View(dc);
+            }
+
+            // Kiểm tra nếu khách hàng chưa đăng nhập
+            if (string.IsNullOrEmpty(IdKhachHang))
+            {
+                return RedirectToAction("Login", "KhachHang");
+            }
+
+            dc.IdKhachHang = id;
+
+            // Nếu tất cả ok thì thêm địa chỉ mới
+            bool success = await _services.AddAsync(dc);
+            if (success)
+            {
+                return RedirectToAction("GetAll");
+            }
+
+            await LoadDropDowns(dc);
+            return View(dc);
+        }
+
         //Sua
         public async Task<IActionResult> EditDC(Guid IdDiaChi)
         {

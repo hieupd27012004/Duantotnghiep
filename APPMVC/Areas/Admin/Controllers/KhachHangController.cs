@@ -108,24 +108,47 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(KhachHang kh)
         {
+            // Kiểm tra các trường thông tin bắt buộc
+            if (string.IsNullOrWhiteSpace(kh.HoTen))
+            {
+                TempData["ErrorKH"] = "Đăng ký thất bại! Họ tên không được để trống.";
+                return RedirectToAction("Index");
+            }
+
+            if (string.IsNullOrWhiteSpace(kh.SoDienThoai))
+            {
+                TempData["ErrorKH"] = "Đăng ký thất bại! Số điện thoại không được để trống.";
+                return RedirectToAction("Index");
+            }
+
+            if (string.IsNullOrWhiteSpace(kh.Email))
+            {
+                TempData["ErrorKH"] = "Đăng ký thất bại! Email không được để trống.";
+                return RedirectToAction("Index");
+            }
+
             var checkSdt = await _service.CheckSDT(kh.SoDienThoai);
             if (checkSdt)
             {
-                TempData["Error"] = "Đăng ký thất bại! Số điện thoại đã tồn tại";
+                TempData["ErrorKH"] = "Đăng ký thất bại! Số điện thoại đã tồn tại.";
                 return RedirectToAction("Index");
             }
+
             var checkEmail = await _service.CheckMail(kh.Email);
             if (checkEmail)
             {
-                TempData["Error"] = "Đăng ký thất bại! Email này đã tồn tại";
+                TempData["ErrorKH"] = "Đăng ký thất bại! Email này đã tồn tại.";
                 return RedirectToAction("Index");
             }
+
             kh.MatKhau = "123456";
+
             if (ModelState.IsValid)
             {
                 await _service.AddKhachHang(kh);
                 return RedirectToAction("Index");
             }
+
             return View(kh);
         }
         public async Task<IActionResult> Edit(Guid id)
@@ -141,6 +164,29 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(KhachHang kh)
         {
+            var currentKhachHang = await _service.GetIdKhachHang(kh.IdKhachHang);
+
+            // Kiểm tra số điện thoại
+            if (currentKhachHang.SoDienThoai != kh.SoDienThoai)
+            {
+                var checkSdt = await _service.CheckSDT(kh.SoDienThoai);
+                if (checkSdt)
+                {
+                    TempData["ErrorKH"] = "Sửa thất bại! Số điện thoại đã tồn tại.";
+                    return RedirectToAction("Index");
+                }
+            }
+
+            // Kiểm tra email
+            if (currentKhachHang.Email != kh.Email)
+            {
+                var checkEmail = await _service.CheckMail(kh.Email);
+                if (checkEmail)
+                {
+                    TempData["ErrorKH"] = "Sửa thất bại! Email này đã tồn tại.";
+                    return RedirectToAction("Index");
+                }
+            }
             if (ModelState.IsValid)
             {
                 await _service.UpdateKhachHang(kh);
