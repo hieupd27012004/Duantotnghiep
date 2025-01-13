@@ -58,7 +58,7 @@ namespace APPMVC.Areas.Admin.Controllers
         public async Task<ActionResult> Index(int page = 1, string status = null, string search = null)
         {
             page = page < 1 ? 1 : page; 
-            const int pageSize = 5;
+            const int pageSize = 8;
 
             var hoaDons = await _hoaDonService.GetAllAsync() ?? new List<HoaDon>();
 

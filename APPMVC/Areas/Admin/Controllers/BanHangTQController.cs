@@ -88,6 +88,11 @@ namespace APPMVC.Areas.Admin.Controllers
         private static SynchronizedConverter _converter = new SynchronizedConverter(new PdfTools());
         public async Task<ActionResult> Index()
         {
+            var sessionData = HttpContext.Session.GetString("NhanVien");
+            if (string.IsNullOrEmpty(sessionData))
+            {
+                return RedirectToAction("Login", "NhanVien");
+            }
             var hoaDons = await _hoaDonService.GetAllAsync();
 
             if (hoaDons == null || !hoaDons.Any())
@@ -137,8 +142,9 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             var NVIdString = HttpContext.Session.GetString("IdNhanVien");
+			var nguoiTao = HttpContext.Session.GetString("NhanVienName");
 
-            if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
+			if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
             {
                 return RedirectToAction("Login", "NhanVien");
             }
@@ -164,7 +170,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 TongTienDonHang = 0,
                 TongTienHoaDon = 0,
                 NgayTao = DateTime.Now,
-                NguoiTao = "Nhân Viên",
+                NguoiTao = nguoiTao,
                 KichHoat = 1,
                 TrangThai = "Tạo đơn hàng",
                 IdKhachHang = null,
@@ -180,7 +186,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     IdLichSuHoaDon = Guid.NewGuid(),
                     ThaoTac = order.TrangThai,
                     NgayTao = DateTime.Now,
-                    NguoiThaoTac = "Nhân Viên",
+                    NguoiThaoTac = nguoiTao,
                     TrangThai = "1",
                     IdHoaDon = order.IdHoaDon,
                 };

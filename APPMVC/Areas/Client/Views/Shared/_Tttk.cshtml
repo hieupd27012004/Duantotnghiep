@@ -46,7 +46,7 @@
         }
 
             .menu-link:hover {
-                background-color: #5bc0de; /* Màu xanh lam sáng */
+                background-color: rgba(0, 0, 0, 0.7);
                 color: #fff;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
             }
@@ -79,19 +79,20 @@
 
         .menu-left {
             width: 280px;
-            background-color: #f0f0f5; /* Màu nền xám nhạt */
+            background-color: #D0D0D0;
             padding: 20px;
-            border-right: 1px solid #e0e0e0; /* Đường viền ngăn */
+            border-right: 3px solid #e0e0e0; /* Đường viền ngăn */
         }
 
             .menu-left .menu-header-text {
-                color: #5bc0de;
+                color: rgba(0, 0, 0, 0.7); /* Màu đen mềm mại hơn */
+                font-size: 18px; /* Tăng kích thước font chữ */
             }
 
         .content {
             flex-grow: 1;
             padding: 40px;
-            background-color: #fff; /* Nền nội dung trắng */
+            background-color: #E0E0E0; /* Nền nội dung trắng */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
         }
 
@@ -106,6 +107,22 @@
                 color: #555;
                 line-height: 1.6;
             }
+
+        .fas.fa-user {
+            color: rgba(0, 0, 0, 1); /* Màu đen với độ mờ 100% */
+        }
+
+        .fas.fa-map-marker-alt {
+            color: rgba(0, 0, 0, 1); /* Màu đen với độ mờ 100% */
+        }
+
+        .fas.fa-lock {
+            color: rgba(0, 0, 0, 1); /* Màu đen với độ mờ 100% */
+        }
+
+        .fas.fa-receipt {
+            color: rgba(0, 0, 0, 1); /* Màu đen với độ mờ 100% */
+        }
     </style>
 </head>
 
@@ -113,7 +130,7 @@
     @Html.Partial("_Nav")
     <div class="layout-container">
         <!-- Menu bên trái -->
-        <aside class="menu-left">
+        <aside class="menu-left rounded-start">
             <ul class="menu-inner py-1">
                 <li class="menu-header small text-uppercase">
                     <span class="menu-header-text">Tài khoản</span>
@@ -146,7 +163,7 @@
         </aside>
 
         <!-- Nội dung bên phải -->
-        <div class="content">        
+        <div class="content" style="background-color: #F5F5F5">
             @RenderBody()
             @RenderSection("Scripts", required: false)
         </div>

@@ -64,6 +64,9 @@
 			background-color: #343a40;
 		}
 
+			.color-swatch:hover {
+			background-color: #a9a9a9; /* Màu nền khi hover */
+		}
 		.color-label {
 			color: white; /* Màu chữ trắng cho nổi bật */
 			font-size: 0.8rem; /* Kích thước chữ nhỏ */
@@ -87,7 +90,7 @@
 		}
 
 			.size-button:hover {
-				background-color: #495057; /* Màu nền khi hover */
+				background-color: #a9a9a9; /* Màu nền khi hover */
 			}
 		/*Slide*/
 		.carousel-item img {
@@ -135,7 +138,19 @@
 		.category-button:hover {
 			background-color: #a9a9a9; /* Màu xám đậm hơn khi hover */
 		}
+
+		.sidebar-t {
+			font-weight: bold; /* Đậm tiêu đề */
+			color: #343a40; /* Màu chữ tiêu đề */
+			margin-bottom: 10px; /* Khoảng cách dưới tiêu đề */
+			font-size: 1rem; /* Kích thước chữ lớn hơn */
+			text-transform: uppercase; /* Chuyển đổi chữ thành chữ hoa */
+			letter-spacing: 1px; /* Khoảng cách giữa các chữ cái */
+			border-bottom: 2px solid #007bff; /* Đường viền dưới tiêu đề */
+			padding-bottom: 5px; /* Khoảng cách dưới đường viền */
+		}
 	</style>
+	<link rel="stylesheet" href="/Client/css/loading.css" />
 </head>
 
 <body>
@@ -183,6 +198,11 @@
 		</div>
 	</div>
 	<!-- End Slide Section -->
+	
+	<div class="loading-container" id="loading" style="display: none;">
+		<div class="loader"></div>
+		<p>Chờ xíu SoleMates đang tìm sản phẩm cho bạn!</p>
+	</div>
 	<div class="container mt-2" id="container">
 		<div class="">
 			<h3 class="text-dark">Danh Mục</h3>
@@ -191,7 +211,7 @@
 				{
 					foreach (var category in categories1)
 					{
-						<button class="category-button" onclick="location.href='@Url.Action("Index", new { name = "", categoryId = category.IdDanhMuc })'">
+						<button class="category-button" onclick="showLoadingAndRedirect('@Url.Action("Index", new { name = "", categoryId = category.IdDanhMuc })')">
 							@category.TenDanhMuc
 						</button>
 					}
@@ -210,11 +230,13 @@
 			<div class="row">
 				<!-- Bắt đầu lọc -->
 				<div class="col-lg-3 col-md-4 col-sm-12">
-
+					<h5 class="sidebar-t">
+						<i class="fa-solid fa-filter"></i> Bộ Lọc Tìm Kiếm
+					</h5>
 					<!-- Lọc-->
 					<div class="sidebar">
 						<div class="sidebar-block">
-							<h3 class="sidebar-title">Colors</h3>
+							<h3 class="sidebar-title">Màu Sắc</h3>
 							<ul class="list-unstyled color-filters" id="colorButtons">
 								@if (ViewData["Colors"] is List<MauSac> colors && colors.Count > 0)
 								{
@@ -222,8 +244,7 @@
 									{
 										<li style="margin-right: 10px; margin-bottom: 10px;">
 											<div class="color-swatch"
-												
-												 onclick="location.href='@Url.Action("Index", new { colorId = color.IdMauSac })'"
+												 onclick="showLoadingAndRedirect('@Url.Action("Index", new { colorId = color.IdMauSac })')"
 												 title="@color.TenMauSac">
 												<span class="color-label">@color.TenMauSac</span>
 											</div>
@@ -238,14 +259,14 @@
 						</div>
 
 						<div class="sidebar-block">
-							<h3 class="sidebar-title">Sizes</h3>
+							<h3 class="sidebar-title">Kích Thước</h3>
 							<div class="size-filters" id="sizeButtons" style="display: flex; flex-wrap: wrap;">
 								@if (ViewData["Sizes"] is List<KichCo> sizes && sizes.Count > 0)
 								{
 									foreach (var size in sizes)
 									{
 										<button class="size-button"
-												onclick="location.href='@Url.Action("Index", new { sizeId = size.IdKichCo })'"
+												onclick="showLoadingAndRedirect('@Url.Action("Index", new { sizeId = size.IdKichCo })')"
 												title="@size.TenKichCo">
 											@size.TenKichCo
 										</button>
@@ -283,7 +304,17 @@
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<script>
+		function showLoadingAndRedirect(url) {
+			// Hiện hiệu ứng loading
+			document.getElementById('loading').style.display = 'flex';
 
+			// Chuyển hướng sau một khoảng thời gian nhất định (ví dụ: 1 giây)
+			setTimeout(function () {
+				window.location.href = url;
+			}, 1000); // Thay đổi thời gian nếu cần
+		}
+	</script>
 </body>
 
 </html>
