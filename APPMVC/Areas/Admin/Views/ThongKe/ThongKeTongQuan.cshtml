@@ -1,14 +1,16 @@
 ﻿@model AppData.ViewModel.ThongKeViewModel
 
-<div class="container mt-4">
-    <div class="card bg-light shadow-sm mb-4">
+<div class="container mt-4 " >
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">Thống kê/</span> Tổng quan
+    </h4>
+    <div class="card shadow-sm border mb-4" >
         <div class="card-body text-center">
-            <h3 class="card-title text-primary">Thống Kê Tổng Quan</h3>
+            <h3 class="card-title">Thống Kê Tổng Quan</h3>
             <p class="card-text">Tổng Số Đơn Hàng: <strong>@Model.TongDonHang</strong></p>
             <p class="card-text">Tổng Doanh Thu: <strong>@Model.TongDoanhThu.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</strong></p>
         </div>
     </div>
-
     <div class="d-flex flex-wrap">
         <div class="card flex-fill me-2 mb-3 shadow" id="bg-ngay">
             @if (Model.ThongKeNgay == null || !Model.ThongKeNgay.Any())
@@ -19,7 +21,7 @@
             }
             else
             {
-                <i class="fa-solid fa-wallet fa-lg d-flex justify-content-center mt-1"></i>
+                <i class="fa-solid fa-wallet fa-2xl d-flex justify-content-center mt-1"></i>
                 <h4 class="text-center mt-2">Hôm Nay: @ViewData["Date"]</h4>
                 @foreach (var item in Model.ThongKeNgay)
                 {
@@ -39,7 +41,7 @@
                             <strong>@item.DonHangThanhCong</strong>
                         </div>
                         <div class="text-center">
-                            <p class="text-danger">Đã Hủy</p>
+                            <p>Đã Hủy</p>
                             <strong class="text-danger">@item.DonHangHuy</strong>
                         </div>
                     </div>
@@ -56,7 +58,7 @@
             }
             else
             {
-                <i class="fa-solid fa-rectangle-list fa-lg d-flex justify-content-center mt-1"></i>
+                <i class="fa-solid fa-rectangle-list fa-2xl d-flex justify-content-center mt-1"></i>
                 <h4 class="text-center mt-2">Tuần Này</h4>
                 @foreach (var item in Model.ThongKeTuan)
                 {
@@ -75,7 +77,7 @@
                             <strong>@item.DonHangThanhCong</strong>
                         </div>
                         <div class="text-center">
-                            <p class="text-danger">Đã Hủy</p>
+                            <p>Đã Hủy</p>
                             <strong class="text-danger">@item.DonHangHuy</strong>
                         </div>
                     </div>
@@ -94,7 +96,7 @@
             }
             else
             {
-                <i class="fa-solid fa-wallet fa-lg d-flex justify-content-center mt-1"></i>
+                <i class="fa-solid fa-wallet fa-2xl d-flex justify-content-center mt-1"></i>
                 <h4 class="text-center mt-2">Tháng Này</h4>
                 @foreach (var item in Model.ThongKeThang)
                 {
@@ -113,7 +115,7 @@
                             <strong>@item.DonHangThanhCong</strong>
                         </div>
                         <div class="text-center">
-                            <p class="text-danger">Đã Hủy</p>
+                            <p>Đã Hủy</p>
                             <strong class="text-danger">@item.DonHangHuy</strong>
                         </div>
                     </div>
@@ -130,7 +132,7 @@
             }
             else
             {
-                <i class="fa-solid fa-wallet fa-lg d-flex justify-content-center mt-1"></i>
+                <i class="fa-solid fa-wallet fa-2xl d-flex justify-content-center mt-1"></i>
                 <h4 class="text-center mt-2">Năm Nay</h4>
                 @foreach (var item in Model.ThongKeNam)
                 {
@@ -149,7 +151,7 @@
                             <strong>@item.DonHangThanhCong</strong>
                         </div>
                         <div class="text-center">
-                            <p class="text-danger">Đã Hủy</p>
+                            <p>Đã Hủy</p>
                             <strong class="text-danger">@item.DonHangHuy</strong>
                         </div>
                     </div>
@@ -158,9 +160,9 @@
         </div>
     </div>
 
-    <div class="card mb-5 shadow">
-        <h4 class="card-header text-center bg-primary text-white">Thống Kê Theo Khoảng Thời Gian</h4>
-        <form method="get" action="@Url.Action("ThongKeTongQuan", "ThongKe")" class="filter-form d-flex align-items-center">
+    <div class="card mb-5 shadow border">
+        <h4 class="card-header text-center bg-primary-rgb text-white">Thống Kê Theo Khoảng Thời Gian</h4>
+        <form method="get" action="@Url.Action("ThongKeTongQuan", "ThongKe")" class="filter-form d-flex align-items-center justify-content-center">
             <div class="mb-1 me-3">
                 <label for="startDate" class="form-label">Ngày bắt đầu:</label>
                 <input type="date" id="startDate" name="startDate" class="form-control" style="width: 200px;" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
@@ -185,8 +187,8 @@
                 @foreach (var item in Model.ThongKeKhoangThoiGian)
                 {
                     <div class="d-flex justify-content-center">
-                        <h5 class="text-center me-3 text-danger">Ngày: <strong>@item.Ngay.ToString("yyyy-MM-dd")</strong></h5>
-                        <h5 class="text-center text-danger">Tổng Tiền: <strong>@item.TongDoanhThu.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</strong></h5>
+                        <h5 class="text-center me-3 text-primary">Ngày: <strong>@item.Ngay.ToString("yyyy-MM-dd")</strong></h5>
+                        <h5 class="text-center text-primary">Tổng Tiền: <strong>@item.TongDoanhThu.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</strong></h5>
                     </div>
                    
                     <div class="d-flex justify-content-around">
@@ -203,7 +205,7 @@
                             <strong>@item.DonHangThanhCong</strong>
                         </div>
                         <div class="text-center">
-                            <p class="text-danger">Đã Hủy</p>
+                            <p>Đã Hủy</p>
                             <strong class="text-danger">@item.DonHangHuy</strong>
                         </div>
                     </div>

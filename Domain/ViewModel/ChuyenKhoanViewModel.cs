@@ -12,4 +12,10 @@ namespace AppData.ViewModel
         public string TenNguoiNhan { get; set; }
         public double TongTienHang { get; set; }
     }
+    public class ThanhToanCKViewModel
+    {
+        public List<AppData.ViewModel.HoaDonChiTietViewModel.SanPhamChiTietViewModel> SanPhamChiTiets { get; set; }
+        public Guid IdHoaDon { get; set; }
+        public string MaDon { get; set; }
+    }
 }

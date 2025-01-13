@@ -1,4 +1,5 @@
 ﻿using AppAPI.IService;
+using AppData.ViewModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -60,6 +61,12 @@ namespace AppAPI.Controllers
         public async Task<IActionResult> GetTopSellingProducts([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
         {
             var result = await _service.GetTopSellingProductsAsync(startDate, endDate);
+            return Ok(result);
+        }
+        [HttpGet("ThongKeDoanThu")]
+        public async Task<IActionResult> GetRevenueStatisticsAsync(DateTime startDate, DateTime endDate)
+        {
+            var result = await _service.GetRevenueStatisticsAsync(startDate,endDate);
             return Ok(result);
         }
     }

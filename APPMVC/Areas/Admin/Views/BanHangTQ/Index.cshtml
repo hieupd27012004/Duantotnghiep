@@ -5,6 +5,9 @@
 }
 
 <style>
+    .text-danger {
+        color: red;
+    }
     .container-xxl {
         max-width: 1320px;
     }
@@ -97,8 +100,12 @@
                         int count = 1;
                         foreach (var invoice in sortedInvoices)
                         {
+                            var productCount = invoice.SanPhamChiTiets.Count();
+                            var textColorClass = productCount > 0 ? "text-danger" : "";
                             <div class="product-item" data-idhoadon="@invoice.IdHoaDon" onclick="viewInvoiceDetail(this)">
-                                <h6>Đơn hàng @count - @invoice.HoaDon.MaDon</h6>
+                                <h6>
+                                    Đơn hàng @count - <span class="@textColorClass">@invoice.HoaDon.MaDon</span> [@productCount]
+                                </h6>
                                 <i class="fas fa-trash delete-icon" title="Xóa" onclick="event.stopPropagation(); deleteInvoice('@invoice.IdHoaDon')"></i>
                             </div>
                             count++;
@@ -108,12 +115,14 @@
                             $(document).ready(function() {
                                 var firstInvoiceItem = $('.product-item').first();
                                 if (firstInvoiceItem.length) {
-                                    viewInvoiceDetail(firstInvoiceItem[0]); 
+                                    viewInvoiceDetail(firstInvoiceItem[0]);
                                 }
                             });
                         </script>
                     }
                 </div>
+
+               
 
                 <div id="invoiceDetailsContainer" data-idhoadon="">
                     <!-- Details will be populated here -->

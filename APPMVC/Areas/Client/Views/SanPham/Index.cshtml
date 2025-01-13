@@ -15,27 +15,27 @@
         margin: 20px 0 20px 20px;
     }
 
-        .search-form input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 300px;
-            margin-right: 10px;
-        }
+    .search-form input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 300px;
+        margin-right: 10px;
+    }
 
-        .search-form button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+    .search-form button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
 
-            .search-form button:hover {
-                background-color: #0056b3;
-            }
+    .search-form button:hover {
+        background-color: #0056b3;
+    }
 
     .product-card {
         background-color: #fff;
@@ -47,9 +47,9 @@
         min-height: 350px;
     }
 
-        .product-card:hover {
-            transform: translateY(-5px);
-        }
+    .product-card:hover {
+       transform: translateY(-5px);
+    }
 
     .product-image {
         position: relative;
@@ -181,6 +181,20 @@
         .modal button:hover {
             background-color: #0056b3;
         }
+
+    .alert {
+        padding: 1rem; /* Kích thước padding cho alert */
+    }
+
+    .alert-image {
+        max-width: 500px; /* Giảm kích thước hình ảnh */
+        height: auto; /* Giữ tỷ lệ hình ảnh */
+        margin-bottom: 0.5rem; /* Khoảng cách giữa hình ảnh và văn bản */
+    }
+
+    .alert-message {
+        font-size: 16px; /* Kích thước font chữ */
+    }
 </style>
 
 @if (TempData["SuccessMessage"] != null)
@@ -204,7 +218,10 @@
         <button type="submit">Tìm kiếm</button>
     </form>
 </div>
-
+<div class="loading-containe" id="loading" style="display: none;">
+    <div class="loader"></div>
+    <p>Chờ xíu Shop đang tìm sản phẩm cho bạn :3</p>
+</div>
 <div class="container">
     <div class="row">
         @if (Model != null && Model.Count > 0)
@@ -248,9 +265,10 @@
         }
         else
         {
-            <div class="col-12">
-                <div class="alert alert-info" role="alert">
-                    Không có sản phẩm nào được tìm thấy.
+            <div class="col-12 text-center">
+                <div class="alert  text-center" role="alert">
+                    <img src="/Client/images/pngwing.com.png" class="alert-image" />
+                    <div class="alert-message">Không có sản phẩm nào được tìm thấy.</div>
                 </div>
             </div>
         }
@@ -294,5 +312,5 @@
                 }
             };
         }
-    });
+    }); 
 </script>

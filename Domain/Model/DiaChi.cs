@@ -10,13 +10,14 @@ namespace AppData.Model
 	public class DiaChi
 	{
 		public Guid IdDiaChi { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
+		[Required(ErrorMessage = "Họ Tên Không Được Để Trống")]
 		public string HoTen { get; set; }
-		[Required(ErrorMessage = "Không Được Để Trống")]
+		[Required(ErrorMessage = "Số Điện Thoại Không Được Để Trống")]
 		[RegularExpression(@"^(\+84|0)[3|5|7|8|9][0-9]{8}$", ErrorMessage = "Không Đúng Định Dạng")]
 		[StringLength(10, MinimumLength = 10, ErrorMessage = "Phải Đủ 10 Số")]
 		public string SoDienThoai { get; set; }
-		public string MoTa { get; set; }
+        [Required(ErrorMessage = "Địa Chỉ Cụ Thể Không Được Để Trống")]
+        public string MoTa { get; set; }
 
 		[Required(ErrorMessage = "Tỉnh/Thành phố không được để trống")]
 		public string ProvinceName { get; set; }

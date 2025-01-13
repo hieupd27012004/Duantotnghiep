@@ -35,8 +35,8 @@ namespace APPMVC.Areas.Admin.Controllers
 		public async Task<IActionResult> Create()
 		{
             var dc = new DiaChi();
-			var khachHang = await _serviceKH.GetAllKhachHang();
-			ViewBag.khachHang = khachHang;
+			var khachHang = (await _serviceKH.GetAllKhachHang()).Where(kh => kh.KichHoat != 0).ToList();
+            ViewBag.khachHang = khachHang;
 			ViewBag.Provinces = await _services.GetProvincesAsync();
 
 			//await LoadDropDownsCreate(dc);
@@ -53,21 +53,10 @@ namespace APPMVC.Areas.Admin.Controllers
 				ModelState.AddModelError("", "Khách hàng này đã có tối đa 3 địa chỉ.");
                 ViewBag.Provinces = await _services.GetProvincesAsync();
                 await LoadDropDownsCreate(dc);
-                ViewBag.khachHang = await _serviceKH.GetAllKhachHang();
+				ViewBag.khachHang = (await _serviceKH.GetAllKhachHang()).Where(kh => kh.KichHoat != 0).ToList();
+					
                 return View(dc);
 			}
-			//if (dc.DiaChiMacDinh)
-			//{
-			//	bool hasDefaultAddress = await _services.HasDefaultAddressAsync(dc.IdKhachHang);
-			//	if (hasDefaultAddress)
-			//	{
-			//		ModelState.AddModelError("", "Khách hàng này đã có một địa chỉ mặc định.");
-   //                 ViewBag.Provinces = await _services.GetProvincesAsync();
-   //                 LoadDropDownsCreate(dc);
-   //                 ViewBag.khachHang = await _serviceKH.GetAllKhachHang();
-   //                 return View(dc);
-			//	}
-			//}
 			if (!ModelState.IsValid)
 			{
 				foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
@@ -76,7 +65,7 @@ namespace APPMVC.Areas.Admin.Controllers
 				}
                 ViewBag.Provinces = await _services.GetProvincesAsync();
                 await LoadDropDownsCreate(dc);
-                ViewBag.khachHang = await _serviceKH.GetAllKhachHang();
+                ViewBag.khachHang = (await _serviceKH.GetAllKhachHang()).Where(kh => kh.KichHoat == 1).ToList();
                 return View(dc);
 			}
 

@@ -1,4 +1,4 @@
-﻿@model (List<AppData.ViewModel.HoaDonChiTietViewModel.SanPhamChiTietViewModel>, Guid)
+﻿@model AppData.ViewModel.ThanhToanCKViewModel
 
 @{
     ViewData["Title"] = "ThanhToanCK";
@@ -11,7 +11,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.7);
+        background: rgba(0, 0, 0, 0.5); /* Nền tối mờ */
         display: flex;
         justify-content: center;
         align-items: center;
@@ -22,11 +22,11 @@
     }
 
     .modal-content {
-        background: white;
+        background: #ffffff; /* Nền trắng sáng */
         border-radius: 8px;
         padding: 20px;
-        width: 90%;
-        max-width: 600px;
+        width: 90%; /* Chiều rộng 90% */
+        max-width: 800px; /* Tăng max-width để modal rộng hơn */
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         position: relative;
     }
@@ -48,10 +48,11 @@
 
     .order-info {
         flex: 1;
-        background: #f9f9f9;
+        background: #f9f9f9; /* Giữ màu nền sáng */
         padding: 15px;
         border-radius: 5px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-right: 20px; /* Tạo khoảng cách bên phải */
     }
 
     .total-amount {
@@ -90,9 +91,9 @@
         transition: background 0.3s;
     }
 
-        button:hover {
-            background: #45a049;
-        }
+    button:hover {
+        background: #45a049;
+    }
 </style>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -102,21 +103,21 @@
             <div class="order-info">
                 <h2>Thông tin đơn hàng</h2>
                 <div class="total-amount">
-                    <span class="label">Số Tiền Thanh Toán</span>
-                    <span class="value">@Model.Item1.Sum(x => x.Price * x.Quantity).ToString("#,0") VNĐ</span>
+                    <span class="label">Mã Đơn Hàng</span>
+                    <span class="value">@Model.MaDon.ToString()</span>
                 </div>
                 <div class="total-amount">
-                    <span class="label">Giá Trị Đơn Hàng</span>
-                    <span class="value">@Model.Item1.Sum(x => x.Price * x.Quantity).ToString("#,0") VNĐ</span>
+                    <span class="label">Số Tiền Thanh Toán</span>
+                    <span class="value">@Model.SanPhamChiTiets.Sum(x => x.Price * x.Quantity).ToString("#,0") VNĐ</span>
                 </div>
                 <div class="total-amount">
                     <span class="label">Phí Giao Dịch</span>
                     <span class="value">0 VNĐ</span>
                 </div>
                 <div class="total-amount">
-                    <span class="label">Mã Đơn Hàng</span>
-                    <span class="value">@Model.Item2.ToString()</span>
-                </div>
+                    <span class="label">Giá Trị Đơn Hàng</span>
+                    <span class="value">@Model.SanPhamChiTiets.Sum(x => x.Price * x.Quantity).ToString("#,0") VNĐ</span>
+                </div>               
             </div>
             <div class="qr-code">
                 <h3>Quét mã ứng dụng Ngân hàng/ Ví điện tử</h3>
@@ -124,9 +125,8 @@
             </div>
         </div>
         <div class="modal-buttons">
-            <button onclick="confirmPayment('@Model.Item2')">Xác nhận thanh toán</button>
+            <button onclick="confirmPayment('@Model.IdHoaDon')">Xác nhận thanh toán</button>
             <button onclick="closeModal()">Hủy</button>
         </div>
     </div>
 </div>
-

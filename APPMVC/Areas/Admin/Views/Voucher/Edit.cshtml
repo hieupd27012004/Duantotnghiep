@@ -4,34 +4,33 @@
     ViewData["Title"] = "Chỉnh Sửa Voucher";
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
-
-@if (TempData["ValidationErrors"] != null)
-{
-    var validationErrors = TempData["ValidationErrors"] as List<string>;
-    if (validationErrors != null && validationErrors.Any())
+<div class="container mt-4">
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">Voucher/</span> Cập nhật voucher
+    </h4>
+    @if (TempData["ValidationErrors"] != null)
     {
-        <div class="alert alert-danger">
-            <strong>Lỗi:</strong>
-            <ul>
-                @foreach (var error in validationErrors)
-                {
-                    <li>@error</li>
-                }
-            </ul>
+        var validationErrors = TempData["ValidationErrors"] as List<string>;
+        if (validationErrors != null && validationErrors.Any())
+        {
+            <div class="alert alert-danger">
+                <strong>Lỗi:</strong>
+                <ul>
+                    @foreach (var error in validationErrors)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+            </div>
+        }
+    }
+    @if (TempData["ErrorVouCher"] != null)
+    {
+        <div class="alert alert-danger" style="margin-top: 20px;">
+            @TempData["ErrorVouCher"]
         </div>
     }
-}
-@if (TempData["ErrorVouCher"] != null)
-{
-    <div class="alert alert-danger" style="margin-top: 20px;">
-        @TempData["ErrorVouCher"]
-    </div>
-}
-<div class="container-fluid">
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
-        </div>
+    <div class="card shadow mb-4">       
         <form asp-action="Edit" method="post">
             <div class="card-body">
                 <div class="row">
@@ -52,10 +51,7 @@
 
                         <div class="form-group">
                             <label asp-for="LoaiGiamGia">Loại Giảm Giá</label>
-                            <select asp-for="LoaiGiamGia" class="form-control" id="LoaiGiamGia">
-                                <option value="1" selected="@(Model.LoaiGiamGia == 1 ? "selected" : "")">Theo % sản phẩm</option>
-                                <option value="2" selected="@(Model.LoaiGiamGia == 2 ? "selected" : "")">Theo số tiền</option>
-                            </select>
+                            <select asp-for="LoaiGiamGia" class="form-control" asp-items="ViewBag.LoaiGiamGiaOptions"></select>
                             <span asp-validation-for="LoaiGiamGia" class="text-danger"></span>
                         </div>
 
@@ -85,18 +81,13 @@
 
                         <div class="form-group">
                             <label asp-for="NgayKetThuc">Ngày Kết Thúc</label>
-                            <input asp-for="NgayKetThuc" class="form-control" type="datetime-local"  />
+                            <input asp-for="NgayKetThuc" class="form-control" type="datetime-local" />
                             <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
                         </div>
 
                         <div class="form-group">
                             <label asp-for="TrangThai">Trạng thái</label>
-                            <select asp-for="TrangThai" class="form-control">
-                                <option value="1" selected="@(Model.TrangThai == 1 ? "selected" : "")">Chờ kích hoạt</option>
-                                <option value="2" selected="@(Model.TrangThai == 2 ? "selected" : "")">kích hoạt</option>
-                                <option value="3" selected="@(Model.TrangThai == 3 ? "selected" : "")">Tạm dừng</option>
-                                <option value="4" selected="@(Model.TrangThai == 4 ? "selected" : "")">Dừng</option>
-                            </select>
+                            <select asp-for="TrangThai" class="form-control" asp-items="ViewBag.TrangThaiOptions"></select>
                             <span asp-validation-for="TrangThai" class="text-danger"></span>
                         </div>
                     </div>
@@ -110,6 +101,7 @@
     </div>
 </div>
 
+   
 <script>
     $(document).ready(function () {
         function toggleSoTienToiDa() {
@@ -121,10 +113,10 @@
             }
         }
 
-        // Initialize visibility based on the current selection
+        // Khởi tạo khi tải trang
         toggleSoTienToiDa();
 
-        // Update visibility on change
+        // Lắng nghe sự thay đổi
         $('#LoaiGiamGia').on('change', toggleSoTienToiDa);
     });
     $(document).ready(function () {

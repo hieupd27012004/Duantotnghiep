@@ -114,8 +114,13 @@ namespace APPMVC.Areas.Client.Controllers
 					var kh = await _service.LoginKH(khach.Email, khach.MatKhau);
 					if (kh != null)
 					{
-						// Lưu thông tin khách hàng vào session
-						HttpContext.Session.SetString("KhachHang", JsonConvert.SerializeObject(kh));
+                        if (kh.KichHoat == 0)  // Kiểm tra nếu trạng thái là 0
+                        {
+                            TempData["Error"] = ("Tài khoản của bạn đã bị khóa.");
+                            return View(khach);
+                        }
+                        // Lưu thông tin khách hàng vào session
+                        HttpContext.Session.SetString("KhachHang", JsonConvert.SerializeObject(kh));
 						HttpContext.Session.SetString("TenKhachHang", kh.HoTen);
 						HttpContext.Session.SetString("IdKhachHang", kh.IdKhachHang.ToString()); // Chuyển đổi sang chuỗi
 						return RedirectToAction("Index", "HomeClient", new { area = "Client" }); // Chuyển hướng đến trang Index
@@ -173,6 +178,7 @@ namespace APPMVC.Areas.Client.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Edit(KhachHang khachHang)
 		{
+            
 			if (ModelState.IsValid)
 			{
 				try

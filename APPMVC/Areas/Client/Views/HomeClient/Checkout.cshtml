@@ -39,6 +39,12 @@
         font-weight: 700; 
     }
 </style>
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert" style="padding: 15px; margin-right: 20px; margin-top: 20px; position: fixed; top: 20px; right: 20px; z-index: 1050; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); background-color: #d4edda; border-color: #c3e6cb;">
+        <strong style="font-size:15px; color:red;">@TempData["ErrorMessage"]</strong>
+    </div>
+}
 <div class="container">
     <div class="row">
         <div class="col-md-8">
@@ -216,7 +222,7 @@
                             <label for="tong_tien">Tổng tiền hóa đơn</label>
                             <input type="text" class="form-control" id="tong_tien"
                                    value="@((Model.CartItems.Sum(i => i.Price * i.Quantity) + Model.PhiVanChuyen)
-                           .ToString(new CultureInfo("vi-VN")) + " VND")" readonly />
+           .ToString(new CultureInfo("vi-VN")) + " VND")" readonly />
                         </div>
 
                         <div class="card mt-3">
@@ -300,24 +306,7 @@
            }
        }
     // Define the formatCurrency function in the global scope
-    function formatCurrency(value) {
-        if (value !== undefined && value !== null) {
-            return value.toLocaleString('vi-VN') + ' VND';
-        }
-        return '0 VND'; // Default return for undefined or null
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        // Get total amounts
-        const totalAmount = parseFloat(document.getElementById('tong_so_tien').value.replace(/[^0-9.-]+/g, "")) || 0;
-        const shippingFee = parseFloat(document.getElementById('phi_van_chuyen').value.replace(/[^0-9.-]+/g, "")) || 0;
-        const totalBill = totalAmount + shippingFee;
-
-        // Update values with formatted currency
-        document.getElementById('tong_so_tien').value = formatCurrency(totalAmount);
-        document.getElementById('phi_van_chuyen').value = formatCurrency(shippingFee);
-        document.getElementById('tong_tien').value = formatCurrency(totalBill);
-    });
+    
 
     // Load user addresses function
     function loadUserAddresses() {
@@ -377,56 +366,110 @@
         $("#WardName").val(wardName);
     });
 
-        $('.voucher-radio').on('change', function() {
+    let lastSelectedVoucher = null; // Variable to store the last selected voucher
+
+    $('.voucher-radio').on('click', function() {
         var voucherId = $(this).val();
-        var shippingFee = parseFloat($('#phi_van_chuyen').val().replace(/[^0-9.-]+/g, "")) || 0; // Lấy phí vận chuyển
+        var shippingFee = parseFloat($('#phi_van_chuyen').val().replace(/[^0-9.-]+/g, "")) || 0; // Get shipping fee
+        var originalTotal = parseFloat($('#tong_so_tien').val().replace(/[^0-9.-]+/g, "")) || 0; // Get original total amount
 
-        $.ajax({
-            url: '@Url.Action("ApplyVoucher", "HomeClient", new { area = "Client" })',
-            type: 'POST',
-            data: { voucherId: voucherId, shippingFee: shippingFee },
-            success: function(response) {
-                // Định dạng lại các giá trị giảm giá
-                response.totalAfterDiscount = formatCurrency(response.totalAfterDiscount);
-                response.discountAmount = formatCurrency(response.discountAmount);
+        // If the same voucher is clicked again
+        if (lastSelectedVoucher === voucherId) {
+            // Uncheck radio button
+            $(this).prop('checked', false);
+            lastSelectedVoucher = null; // Reset state variable
+            $('#discount-row').remove(); // Remove discount info
+            $('input[name="SelectedVoucherId"]').remove();
+            $('input[name="DiscountAmount"]').remove();
 
-                // Cập nhật hiển thị phí vận chuyển
-                $('#phi_van_chuyen').val(formatCurrency(shippingFee)); // Hiển thị phí vận chuyển
-
-                if (response.success) {
-                    // Xóa các voucher trước đó
-                    $('#discount-row').remove();
-                    $('input[name="SelectedVoucherId"]').remove();
-                    $('input[name="DiscountAmount"]').remove();
-
-                    // Hiển thị thông tin giảm giá
-                    $('#tong_so_tien').closest('.form-group').after(`
-                        <div id="discount-row" class="form-group">
-                            <label>Giảm giá Voucher</label>
-                            <input type="text" class="form-control" value="${response.discountAmount}" readonly />
-                        </div>
-                    `);
-
-                    // Cập nhật tổng tiền
-                    $('#tong_tien').val(response.totalAfterDiscount);
-
-                    // Thêm các trường ẩn cho thông tin voucher
-                    $('form').append(`
-                        <input type="hidden" name="SelectedVoucherId" value="${response.voucherId}" />
-                        <input type="hidden" name="DiscountAmount" value="${response.discountAmount.replace(/[^0-9.-]+/g, "")}" />
-                    `);
-                } else {
-                    // Reset radio button đã chọn nếu không thành công do giá trị đơn hàng không đủ
-                    $('input[name="SelectedVoucher"]:checked').prop('checked', false); // Bỏ chọn radio button đã chọn
-                    $('#discount-row').remove();
-                    $('input[name="SelectedVoucherId"]').remove();
-                    $('input[name="DiscountAmount"]').remove();
-                    alert(response.message); // Hiển thị thông báo lỗi
+            // Send request to clear voucher from session
+            $.ajax({
+                url: '@Url.Action("ClearVoucherSession", "HomeClient", new { area = "Client" })',
+                type: 'POST',
+                success: function(response) {
+                    if (!response.success) {
+                        alert(response.message); // Show error message if any
+                    } else {
+                        // Reset total amount
+                        resetTotalAmount(shippingFee); // Reset total amount
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while clearing the voucher from session.');
                 }
-            },
-            error: function() {
-                alert('Có lỗi xảy ra. Vui lòng thử lại.');
-            }
-        });
+            });
+        } else {
+            // If a new voucher is selected
+            lastSelectedVoucher = voucherId; // Update last selected voucher
+
+            $.ajax({
+                url: '@Url.Action("ApplyVoucher", "HomeClient", new { area = "Client" })',
+                type: 'POST',
+                data: { voucherId: voucherId, shippingFee: shippingFee },
+                success: function(response) {
+                    // Format the discount values
+                    response.totalAfterDiscount = formatCurrency(response.totalAfterDiscount);
+                    response.discountAmount = formatCurrency(response.discountAmount);
+
+                    // If response is successful
+                    if (response.success) {
+                        // Remove previous vouchers
+                        $('#discount-row').remove();
+                        $('input[name="SelectedVoucherId"]').remove();
+                        $('input[name="DiscountAmount"]').remove();
+
+                        // Show discount info
+                        $('#tong_so_tien').closest('.form-group').after(`
+                            <div id="discount-row" class="form-group">
+                                <label>Giảm giá Voucher</label>
+                                <input type="text" class="form-control" value="${response.discountAmount}" readonly />
+                            </div>
+                        `);
+
+                        // Update total amount with the voucher
+                        $('#tong_tien').val(response.totalAfterDiscount);
+
+                        // Add hidden fields for voucher info
+                        $('form').append(`
+                            <input type="hidden" name="SelectedVoucherId" value="${response.voucherId}" />
+                            <input type="hidden" name="DiscountAmount" value="${response.discountAmount.replace(/[^0-9.-]+/g, "")}" />
+                        `);
+                    } else {
+                        // If not successful
+                        alert(response.message); // Show error message
+                    }
+                },
+                error: function() {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        }
+    });
+
+    // Function to reset total amount
+    function resetTotalAmount(shippingFee) {
+        var originalTotal = parseFloat($('#tong_so_tien').val().replace(/[^0-9.-]+/g, "")) || 0; // Get original total amount
+        var newTotal = originalTotal + shippingFee; // Add shipping fee
+        $('#tong_tien').val(formatCurrency(newTotal)); // Update total amount
+    }
+
+    // Function to format currency
+    function formatCurrency(value) {
+        if (value !== undefined && value !== null) {
+            return value.toLocaleString('vi-VN') + ' VND';
+        }
+        return '0 VND'; // Default return for undefined or null
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Get total amounts
+        const totalAmount = parseFloat(document.getElementById('tong_so_tien').value.replace(/[^0-9.-]+/g, "")) || 0;
+        const shippingFee = parseFloat(document.getElementById('phi_van_chuyen').value.replace(/[^0-9.-]+/g, "")) || 0;
+        const totalBill = totalAmount + shippingFee;
+
+        // Format and update values
+        document.getElementById('tong_so_tien').value = formatCurrency(totalAmount);
+        document.getElementById('phi_van_chuyen').value = formatCurrency(shippingFee); // Ensure shipping fee is formatted
+        document.getElementById('tong_tien').value = formatCurrency(totalBill);
     });
 </script>

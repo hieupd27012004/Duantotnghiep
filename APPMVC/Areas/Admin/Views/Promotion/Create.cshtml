@@ -5,12 +5,7 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @Html.Raw(TempData["ErrorMessage"])
-    </div>
-}
+
 
 <style>
     .input-group {
@@ -84,132 +79,130 @@
         #productDetailsTable tr:nth-child(even) {
             background-color: #f2f2f2;
         }
-
-    /* New styles for spacing */
-    .container {
-        margin: 20px; /* Adjust this value to control the spacing */
-        padding: 20px; /* Optional: add padding to the container */
-        border: 1px solid #dee2e6; /* Optional: add a border for visual distinction */
-        border-radius: 0.5rem; /* Optional: round the corners */
-        background-color: #f8f9fa; /* Optional: background color */
-    }
 </style>
 
-<div class="container">
-    <h1>@ViewData["Title"]</h1>
-    <hr />
-
+<div class="container mt-4">
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">Promotion/</span> Thêm promotion
+    </h4>
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @Html.Raw(TempData["ErrorMessage"])
+        </div>
+    }
     <div class="row">
         <div class="col-md-6">
-            <h3>Thông Tin Khuyến Mãi</h3>
             <form asp-action="Create" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="card shadow-lg me-1">
+                    <div class="card-body">
+                        <h4>Thông Tin Promotion</h4>
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                <div class="form-group">
-                    <label asp-for="Promotion.TenPromotion" class="control-label">Tên Khuyến Mãi</label>
-                    <input asp-for="Promotion.TenPromotion" class="form-control" />
-                    <span asp-validation-for="Promotion.TenPromotion" class="text-danger"></span>
-                </div>
+                        <div class="form-group">
+                            <label asp-for="Promotion.TenPromotion" class="control-label">Tên Khuyến Mãi</label>
+                            <input asp-for="Promotion.TenPromotion" class="form-control" />
+                            <span asp-validation-for="Promotion.TenPromotion" class="text-danger"></span>
+                        </div>
 
-                <div class="form-group">
-                    <label asp-for="Promotion.PhanTramGiam" class="control-label">Phần Trăm Giảm</label>
-                    <div class="input-group">
-                        <input asp-for="Promotion.PhanTramGiam" class="form-control" id="phanTramGiam" oninput="validatePercentage()" />
-                        <span class="input-group-addon">%</span>
+                        <div class="form-group">
+                            <label asp-for="Promotion.PhanTramGiam" class="control-label">Phần Trăm Giảm</label>
+                            <div class="input-group">
+                                <input asp-for="Promotion.PhanTramGiam" class="form-control" id="phanTramGiam" oninput="validatePercentage()" />
+                                <span class="input-group-addon">%</span>
+                            </div>
+                            <span asp-validation-for="Promotion.PhanTramGiam" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="NgayBatDau" class="control-label">Ngày Bắt Đầu</label>
+                            <input asp-for="NgayBatDau" class="form-control" type="datetime-local" value="@Model.NgayBatDau.ToString("yyyy-MM-ddTHH:mm")" />
+                            <span asp-validation-for="NgayBatDau" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="NgayKetThuc" class="control-label">Ngày Kết Thúc</label>
+                            <input asp-for="NgayKetThuc" class="form-control" type="datetime-local" value="@Model.NgayKetThuc.ToString("yyyy-MM-ddTHH:mm")" onchange="validateEndDate()" />
+                            <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="hidden" asp-for="Promotion.TrangThai" value="1" />
+                        </div>
+                        <div class="form-group mt-2">
+                            <input type="submit" value="Tạo" class="btn btn-primary me-3" />
+                            <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+
+                        </div>
+                        <div class="col-md-12 mt-4">
+                            <h4>Chi Tiết Sản Phẩm</h4>
+                            <table id="productDetailsTable" class="table" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th>Chọn</th>
+                                        <th hidden>ID Sản Phẩm</th>
+                                        <th>Mã Sản Phẩm</th>
+                                        <th>Tên Sản Phẩm</th>
+                                        <th>Giá</th>
+                                        <th>Số Lượng</th>
+                                        <th>Màu Sắc</th>
+                                        <th>Kích Cỡ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productDetailsBody">
+                                    <!-- Dòng sẽ được thêm vào đây bằng JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>                     
                     </div>
-                    <span asp-validation-for="Promotion.PhanTramGiam" class="text-danger"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="NgayBatDau" class="control-label">Ngày Bắt Đầu</label>
-                    <input asp-for="NgayBatDau" class="form-control" type="datetime-local" value="@Model.NgayBatDau.ToString("yyyy-MM-ddTHH:mm")" />
-                    <span asp-validation-for="NgayBatDau" class="text-danger"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="NgayKetThuc" class="control-label">Ngày Kết Thúc</label>
-                    <input asp-for="NgayKetThuc" class="form-control" type="datetime-local" value="@Model.NgayKetThuc.ToString("yyyy-MM-ddTHH:mm")" onchange="validateEndDate()" />
-                    <span asp-validation-for="NgayKetThuc" class="text-danger"></span>
-                </div>
-
-                <div class="form-group">
-                    <input type="hidden" asp-for="Promotion.TrangThai" value="1" />
-                </div>
-
-                <div class="col-md-12">
-                    <h3>Chi Tiết Sản Phẩm</h3>
-                    <table id="productDetailsTable" class="table table-striped table-bordered" style="display: none;">
+                </div>            
+            </form>         
+        </div>
+        <!-- Cột Danh Sách Sản Phẩm -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h4>Danh Sách Sản Phẩm</h4>
+                    <div class="form-group">
+                        <label for="searchProduct" class="control-label">Tìm Kiếm Sản Phẩm</label>
+                        <input type="text" id="searchProduct" class="form-control" placeholder="Nhập tên sản phẩm để tìm..." />
+                    </div>
+                    <table class="table">
                         <thead>
                             <tr>
+                                <th hidden>ID</th>
                                 <th>Chọn</th>
-                                <th hidden>ID Sản Phẩm</th>
-                                <th>Mã Sản Phẩm</th>
                                 <th>Tên Sản Phẩm</th>
-                                <th>Giá</th>
-                                <th>Số Lượng</th>
-                                <th>Màu Sắc</th>
-                                <th>Kích Cỡ</th>
                             </tr>
                         </thead>
-                        <tbody id="productDetailsBody">
-                            <!-- Dòng sẽ được thêm vào đây bằng JavaScript -->
+                        <tbody id="productList">
+                            @if (Model.SanPhams != null && Model.SanPhams.Any())
+                            {
+                                foreach (var product in Model.SanPhams)
+                                {
+                                    <tr>
+                                        <td hidden>@product.IdSanPham</td>
+                                        <td>
+                                            <input type="checkbox" name="SelectedSanPhamIds" class="select-product" value="@product.IdSanPham" />
+                                        </td>
+                                        <td>@product.TenSanPham</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center">Không có sản phẩm nào để hiển thị.</td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
-
-                <div class="form-group">
-                    <input type="submit" value="Tạo" class="btn btn-primary" />
-                </div>
-            </form>
-        </div>
-
-        <div class="col-md-6">
-            <h3>Danh Sách Sản Phẩm</h3>
-            <div class="form-group">
-                <label for="searchProduct" class="control-label">Tìm Kiếm Sản Phẩm</label>
-                <input type="text" id="searchProduct" class="form-control" placeholder="Nhập tên sản phẩm để tìm..." />
             </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th hidden>ID</th>
-                        <th>Chọn</th>
-                        <th>Tên Sản Phẩm</th>
-                      
-                    </tr>
-                </thead>
-                <tbody id="productList">
-                    @if (Model.SanPhams != null && Model.SanPhams.Any())
-                    {
-                        foreach (var product in Model.SanPhams)
-                        {
-                            <tr>
-                                <td hidden>@product.IdSanPham</td>
-                                <td>
-                                    <input type="checkbox" name="SelectedSanPhamIds" class="select-product" value="@product.IdSanPham" />
-                                </td>
-                                <td>@product.TenSanPham</td>
-                             
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="8" class="text-center">Không có sản phẩm nào để hiển thị.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
         </div>
-    </div>
-    </div>
 
-    <div>
-        <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
     </div>
 </div>
-
 @section scripts {
     <script>
         $(document).ready(function () {
@@ -255,12 +248,11 @@
                                     var mauSacDisplay = item.mauSac && Array.isArray(item.mauSac) ? item.mauSac.join(", ") : 'N/A';
                                     var kichCoDisplay = item.kichCo && Array.isArray(item.kichCo) ? item.kichCo.join(", ") : 'N/A';
                                     var formattedPrice = item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
-                                    var ma = item.MaSP ? item.MaSP.toString() : 'N/A';
 
                                     var row = `<tr>
                                                 <td><input type="checkbox" name="SelectedSanPhamChiTietIds" value="${item.idSanPhamChiTiet}" /></td>
                                                 <td hidden>${item.idSanPhamChiTiet}</td>
-                                                <td>${ma}</td>
+                                                <td>${item.MaSP}</td>
                                                 <td>${item.productName}</td>
                                                 <td>${formattedPrice}</td>
                                                 <td>${item.quantity}</td>

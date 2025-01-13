@@ -88,6 +88,11 @@ namespace APPMVC.Areas.Admin.Controllers
         private static SynchronizedConverter _converter = new SynchronizedConverter(new PdfTools());
         public async Task<ActionResult> Index()
         {
+            var sessionData = HttpContext.Session.GetString("NhanVien");
+            if (string.IsNullOrEmpty(sessionData))
+            {
+                return RedirectToAction("Login", "NhanVien");
+            }
             var hoaDons = await _hoaDonService.GetAllAsync();
 
             if (hoaDons == null || !hoaDons.Any())
@@ -95,18 +100,36 @@ namespace APPMVC.Areas.Admin.Controllers
                 return View(new List<HoaDonChiTietViewModel>());
             }
 
-            var filteredOrders = hoaDons
+            var filteredOrders = await Task.WhenAll(hoaDons
                 .Where(hd => hd.TrangThai == "Tạo đơn hàng")
-                .Select(hd => new HoaDonChiTietViewModel
-                {
-                    IdHoaDon = hd.IdHoaDon,
-                    HoaDon = new HoaDonChiTietViewModel.HoaDonViewModel
+                .Select(async hd => {
+                    var sanPhamChiTiets = new List<HoaDonChiTietViewModel.SanPhamChiTietViewModel>();
+                    try
                     {
-                        MaDon = hd.MaDon
+                        var sanPhamDetails = await _hoaDonChiTietService.GetByIdHoaDonAsync(hd.IdHoaDon);
+                        sanPhamChiTiets = sanPhamDetails.Select(sp => new HoaDonChiTietViewModel.SanPhamChiTietViewModel
+                        {
+                            IdSanPhamChiTiet = sp.IdSanPhamChiTiet,
+                        }).ToList();
                     }
+                    catch (HttpRequestException ex)
+                    {
+                        // Ghi lại lỗi hoặc xử lý theo cách bạn muốn
+                        Console.WriteLine($"Lỗi khi gọi API: {ex.Message}");
+                        // Bạn có thể thực hiện một hành động nào đó nếu không thể lấy sản phẩm chi tiết
+                    }
+                    return new HoaDonChiTietViewModel
+                    {
+                        IdHoaDon = hd.IdHoaDon,
+                        HoaDon = new HoaDonChiTietViewModel.HoaDonViewModel
+                        {
+                            MaDon = hd.MaDon
+                        },
+                        SanPhamChiTiets = sanPhamChiTiets
+                    };
                 })
                 .Take(5)
-                .ToList();
+                .ToList());
 
             return View(filteredOrders);
         }
@@ -119,8 +142,9 @@ namespace APPMVC.Areas.Admin.Controllers
             }
 
             var NVIdString = HttpContext.Session.GetString("IdNhanVien");
+			var nguoiTao = HttpContext.Session.GetString("NhanVienName");
 
-            if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
+			if (string.IsNullOrEmpty(NVIdString) || !Guid.TryParse(NVIdString, out Guid NVID))
             {
                 return RedirectToAction("Login", "NhanVien");
             }
@@ -146,7 +170,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 TongTienDonHang = 0,
                 TongTienHoaDon = 0,
                 NgayTao = DateTime.Now,
-                NguoiTao = "Nhân Viên",
+                NguoiTao = nguoiTao,
                 KichHoat = 1,
                 TrangThai = "Tạo đơn hàng",
                 IdKhachHang = null,
@@ -162,7 +186,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     IdLichSuHoaDon = Guid.NewGuid(),
                     ThaoTac = order.TrangThai,
                     NgayTao = DateTime.Now,
-                    NguoiThaoTac = "Nhân Viên",
+                    NguoiThaoTac = nguoiTao,
                     TrangThai = "1",
                     IdHoaDon = order.IdHoaDon,
                 };
@@ -558,10 +582,9 @@ namespace APPMVC.Areas.Admin.Controllers
                     IdSanPhamChiTiet = sanPhamChiTiet.IdSanPhamChiTiet,
                     DonGia = gia,
                     SoLuong = requestedQuantity,
-                    // Calculate total amount considering discount
                     TongTien = (giaDaGiam.HasValue && giaDaGiam > 0)
-                        ? giaDaGiam.Value * requestedQuantity
-                        : gia * requestedQuantity,
+                        ? Math.Round(giaDaGiam.Value * requestedQuantity, 2)
+                        : Math.Round(gia * requestedQuantity, 2),
                     KichHoat = 1,
                     TienGiam = Convert.ToDouble(giaDaGiam)
                 };
@@ -677,6 +700,18 @@ namespace APPMVC.Areas.Admin.Controllers
                     }
 
                     double priceToUse = hoaDonChiTiet.TienGiam > 0 ? hoaDonChiTiet.TienGiam : hoaDonChiTiet.DonGia;
+                    double productPriceToCompare = Convert.ToDouble(sanPhamCT.GiaGiam) > 0 ? Convert.ToDouble(sanPhamCT.GiaGiam) : sanPhamCT.Gia;
+
+                    if (priceToUse != productPriceToCompare)
+                    {
+                        hoaDonChiTiet.TienGiam = Convert.ToDouble(sanPhamCT.GiaGiam);
+                        hoaDonChiTiet.TongTien = Math.Round(hoaDonChiTiet.SoLuong * sanPhamCT.Gia, 2);
+
+                        await _hoaDonChiTietService.UpdateAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
+                        TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã được cập nhật.";
+                        return RedirectToAction("Index");
+                    }
+
                     double thanhTien = hoaDonChiTiet.SoLuong * priceToUse;
                     tongTienHang += thanhTien;
 
@@ -713,7 +748,7 @@ namespace APPMVC.Areas.Admin.Controllers
             hoaDon.TienGiam = 0;
             hoaDon.TongTienDonHang = tongTienHang;
             hoaDon.TongTienHoaDon = tongTienHang;
-            hoaDon.TrangThai = "Đã Thanh Toán";
+            hoaDon.TrangThai = "Hoàn Thành";
 
             try
             {
@@ -905,17 +940,25 @@ namespace APPMVC.Areas.Admin.Controllers
                 var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(chiTiet.IdSanPhamChiTiet);
                 if (sanPhamCT != null)
                 {
+                    // Lấy giá giảm nếu có
+                    double priceToUse = chiTiet.TienGiam > 0 ? chiTiet.TienGiam : sanPhamCT.Gia;
+
                     sanPhamChiTiets.Add(new SanPhamChiTietViewModel
                     {
                         IdSanPhamChiTiet = sanPhamCT.IdSanPhamChiTiet,
                         MaSanPham = sanPhamCT.MaSp,
                         Quantity = chiTiet.SoLuong,
-                        Price = sanPhamCT.Gia,
+                        Price = priceToUse,  // Sử dụng giá đã được điều chỉnh
                     });
                 }
             }
 
-            var model = (sanPhamChiTiets, idHoaDon);
+            var model = new ThanhToanCKViewModel
+            {
+                SanPhamChiTiets = sanPhamChiTiets,
+                IdHoaDon = idHoaDon,
+                MaDon = hoaDon.MaDon
+            };
             return PartialView("~/Areas/Admin/Views/BanHangTQ/ThanhToanCK.cshtml", model);
         }
         [HttpPost]
@@ -949,7 +992,7 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 if (sanPhamCT != null)
                 {
-                    // Kiểm tra KichHoat và HoatKich
+                    // Check activation status
                     var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(hoaDonChiTiet.IdSanPhamChiTiet);
                     if (sanPham == null || sanPhamCT.KichHoat == 0 || sanPham.KichHoat == 0)
                     {
@@ -961,7 +1004,27 @@ namespace APPMVC.Areas.Admin.Controllers
                         return Json(new { success = false, message = $"Không đủ số lượng cho sản phẩm {sanPham.TenSanPham}." });
                     }
 
-                    double priceToUse = hoaDonChiTiet.TienGiam > 0 ? hoaDonChiTiet.TienGiam : hoaDonChiTiet.DonGia;
+                    // Check if the discounted price matches
+                    double priceToUse = Math.Round(hoaDonChiTiet.TienGiam > 0 ? hoaDonChiTiet.TienGiam : hoaDonChiTiet.DonGia, 2);
+
+                    // Determine the correct price to compare based on whether a discount exists
+                    double productPriceToCompare = Convert.ToDouble(sanPhamCT.GiaGiam) > 0 ? Convert.ToDouble(sanPhamCT.GiaGiam) : sanPhamCT.Gia;
+
+                    // Check if the prices match
+                    if (priceToUse != productPriceToCompare)
+                    {
+                        hoaDonChiTiet.TienGiam = Convert.ToDouble(sanPhamCT.GiaGiam);
+                        hoaDonChiTiet.TongTien = Math.Round(hoaDonChiTiet.SoLuong * sanPhamCT.Gia, 2);
+
+                        await _hoaDonChiTietService.UpdateAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
+
+                        // Lưu thông báo lỗi vào TempData
+                        TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã được cập nhật.";
+
+                        // Điều hướng đến trang Index
+                        return Json(new { success = true, redirectUrl = Url.Action("Index") });
+                    }
+
                     double thanhTien = hoaDonChiTiet.SoLuong * priceToUse;
                     tongTienHang += thanhTien;
 
@@ -976,7 +1039,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Hóa đơn không tồn tại." });
             }
 
-            // Cập nhật thông tin khách hàng
+            // Update customer information
             if (idKhachHang.HasValue)
             {
                 var khachHang = await _khachHangService.GetIdKhachHang(idKhachHang.Value);
@@ -991,7 +1054,7 @@ namespace APPMVC.Areas.Admin.Controllers
             hoaDon.TienGiam = 0;
             hoaDon.TongTienDonHang = tongTienHang;
             hoaDon.TongTienHoaDon = tongTienHang;
-            hoaDon.TrangThai = "Đã Thanh Toán";
+            hoaDon.TrangThai = "Hoàn Thành";
 
             try
             {
@@ -1038,7 +1101,7 @@ namespace APPMVC.Areas.Admin.Controllers
                 await System.IO.File.WriteAllBytesAsync(fullPath, pdfBytes);
                 var fileUrl = $"/TempFiles/{fileName}";
 
-                // Sử dụng TempData để lưu thông báo và URL của hóa đơn
+                // Store success message and invoice URL in TempData
                 TempData["SuccessMessage"] = "Thanh toán thành công! Bạn có muốn in hóa đơn không?";
                 TempData["FileUrl"] = fileUrl;
 
@@ -1046,7 +1109,16 @@ namespace APPMVC.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Đã xảy ra lỗi khi xác nhận thanh toán." });
+                // Ghi lại lỗi chi tiết vào log file hoặc hệ thống log (nếu có)
+                // Ví dụ: _logger.LogError(ex, "Đã xảy ra lỗi khi xác nhận thanh toán.");
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Khuyến mãi đã hết hạn.",
+                    error = ex.Message, // Ghi rõ thông điệp lỗi
+                    stackTrace = ex.StackTrace // Ghi rõ stack trace (có thể loại bỏ nếu không cần thiết cho bảo mật)
+                });
             }
         }
         //[HttpPost]
