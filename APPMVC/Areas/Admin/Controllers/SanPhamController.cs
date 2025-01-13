@@ -110,6 +110,7 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             var kichCos = await _kichCoService.GetKichCo(null) ?? new List<KichCo>();
             return kichCos
+                .Where(k => k.KichHoat == 1)
                 .Select(k => new SelectListItem
                 {
                     Value = k.IdKichCo.ToString(),
@@ -120,7 +121,9 @@ namespace APPMVC.Areas.Admin.Controllers
         private async Task<List<SelectListItem>> GetMauSacOptions()
         {
             var mauSacs = await _mauSacService.GetMauSac(null) ?? new List<MauSac>();
-            return mauSacs.Select(m => new SelectListItem
+            return mauSacs
+                .Where(k => k.KichHoat == 1)
+                .Select(m => new SelectListItem
             {
                 Value = m.IdMauSac.ToString(),
                 Text = m.TenMauSac
@@ -143,22 +146,32 @@ namespace APPMVC.Areas.Admin.Controllers
                 await LoadViewBags();
                 return View(viewModel);
             }
+            // Kiểm tra trạng thái KichHoat của MauSac đã chọn
+            var mauSacIds = viewModel.SelectedMauSacIds.Select(id => Guid.Parse(id)).ToList();
+            var mauSacs = await _mauSacService.GetMauSacByIdsAsync(mauSacIds);
+            var inactiveMauSacs = mauSacs.Where(m => m.KichHoat != 1).ToList();
+            if (inactiveMauSacs.Any())
+            {
+                var inactiveNames = string.Join(", ", inactiveMauSacs.Select(m => m.TenMauSac));
+                TempData["Error"] = $"Màu sắc '{inactiveNames}' không còn hoạt động. Vui lòng thử lại.";
+                await LoadViewBags();
+                return View(viewModel);
+            }
 
+            // Kiểm tra trạng thái KichHoat của KichCo đã chọn
+            var kichCoIds = viewModel.SelectedKichCoIds.Select(id => Guid.Parse(id)).ToList();
+            var kichCos = await _kichCoService.GetKichCoByIdsAsync(kichCoIds);
+            var inactiveKichCos = kichCos.Where(k => k.KichHoat != 1).ToList();
+            if (inactiveKichCos.Any())
+            {
+                var inactiveNames = string.Join(", ", inactiveKichCos.Select(k => k.TenKichCo));
+                TempData["Error"] = $"Kích cỡ '{inactiveNames}' không còn hoạt động. Vui lòng thử lại.";
+                await LoadViewBags();
+                return View(viewModel);
+            }
             try
             {
-                if (viewModel.Combinations == null || !viewModel.Combinations.Any())
-                {
-                    TempData["Error"] = "Không có tổ hợp nào được chọn.";
-                    return RedirectToAction("Create");
-                }
-
-                if (viewModel.Combinations.Any(c => c.SoLuong <= 0))
-                {
-                    TempData["Error"] = "Tất cả các tổ hợp phải có số lượng lớn hơn 0.";
-                    await LoadViewBags();
-                    return RedirectToAction("Create");
-                }
-
+                
                 // Load related entities
                 var chatLieuTask = _chatLieuService.GetChatLieuById(viewModel.IdChatLieu);
                 var thuongHieuTask = _thuongHieuService.GetThuongHieuById(viewModel.IdThuongHieu);

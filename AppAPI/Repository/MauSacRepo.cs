@@ -76,13 +76,12 @@ namespace AppAPI.Repository
             if (mauSacUpdate != null)
             {
                 mauSacUpdate.TenMauSac = mauSac.TenMauSac;
-                mauSacUpdate.NgayCapNhat = mauSac.NgayCapNhat;
-                mauSacUpdate.NgayTao = mauSac.NgayTao;
+                mauSacUpdate.KichHoat = mauSac.KichHoat;
+                mauSacUpdate.NgayCapNhat = DateTime.Now;
                 mauSacUpdate.NguoiCapNhat = mauSac.NguoiCapNhat;
-                mauSacUpdate.NguoiTao = mauSac.NguoiTao;
-                mauSacUpdate.KichHoat = mauSac.KichHoat == 1 ? 1 : 0;
+
                 _context.mauSacs.Update(mauSacUpdate);
-                _context.SaveChanges();
+                _context.SaveChanges(); // Đảm bảo gọi SaveChanges để lưu thay đổi
                 return true;
             }
             return false;
