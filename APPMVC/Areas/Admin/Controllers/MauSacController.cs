@@ -2,6 +2,7 @@
 using APPMVC.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using System.Threading.Tasks;
 using X.PagedList;
 
@@ -10,7 +11,7 @@ namespace APPMVC.Areas.Admin.Controllers
     [Area("Admin")]
     public class MauSacController : Controller
     {
-        public IMauSacService _services;
+        private readonly IMauSacService _services;
 
         public MauSacController(IMauSacService services)
         {
@@ -22,23 +23,18 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             page = page < 1 ? 1 : page;
             int pageSize = 5;
-            List<MauSac> timten = await _services.GetMauSac(name);
-            if (timten != null)
-            {
-                var pagedMauSacs = timten.ToPagedList(page, pageSize);
-                return View(pagedMauSacs);
-            }
-            else
+
+            try
             {
                 List<MauSac> mauSacs = await _services.GetMauSac(name);
                 var pagedMauSacs = mauSacs.ToPagedList(page, pageSize);
                 return View(pagedMauSacs);
             }
-        }
-
-        public IActionResult Create()
-        {
-            return PartialView("Create");
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Không thể tải danh sách màu sắc: " + ex.Message;
+                return View(new List<MauSac>().ToPagedList(1, 5));
+            }
         }
 
         [HttpPost]
@@ -49,7 +45,23 @@ namespace APPMVC.Areas.Admin.Controllers
                 // Kiểm tra dữ liệu đầu vào
                 if (string.IsNullOrWhiteSpace(TenMauSac))
                 {
-                    return Json(new { success = false, message = "Tên màu không được để trống" });
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Tên màu không được để trống"
+                    });
+                }
+
+                // Kiểm tra trùng tên (nếu cần)
+                var existingMauSacs = await _services.GetMauSac(TenMauSac);
+                if (existingMauSacs != null && existingMauSacs.Any(m =>
+                    m.TenMauSac.Trim().ToLower() == TenMauSac.Trim().ToLower()))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Tên màu sắc đã tồn tại"
+                    });
                 }
 
                 var mauSac = new MauSac
@@ -58,7 +70,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     TenMauSac = TenMauSac,
                     NgayTao = DateTime.Now,
                     NgayCapNhat = DateTime.Now,
-                    NguoiTao = "Admin", // Lấy từ session
+                    NguoiTao = "Admin",
                     NguoiCapNhat = "Admin",
                     KichHoat = 1
                 };
@@ -68,13 +80,22 @@ namespace APPMVC.Areas.Admin.Controllers
                 return Json(new
                 {
                     success = true,
-                    id = mauSac.IdMauSac,
-                    tenMauSac = mauSac.TenMauSac
+                    id = mauSac.IdMauSac.ToString(),
+                    tenMauSac = mauSac.TenMauSac,
+                    kichHoat = mauSac.KichHoat,
+                    ngayTao = mauSac.NgayTao.ToString("dd/MM/yyyy")
+                });
+            }
+            catch (HttpRequestException ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Lỗi kết nối: " + ex.Message
                 });
             }
             catch (Exception ex)
             {
-                // Log lỗi nếu có
                 return Json(new
                 {
                     success = false,
@@ -91,57 +112,116 @@ namespace APPMVC.Areas.Admin.Controllers
             }
             return View(mauSac);
         }
-
         [HttpPost]
-        public async Task<ActionResult> Edit(MauSac mauSac)
+        public async Task<IActionResult> Edit(MauSac mauSac)
         {
-            if (!ModelState.IsValid)
-            {
-                // Kiểm tra tính hợp lệ của dữ liệu
-                if (ModelState.ContainsKey("TenMauSac"))
-                {
-                    var error = ModelState["TenMauSac"].Errors.FirstOrDefault();
-                    if (error != null)
-                    {
-                        TempData["Error"] = error.ErrorMessage;
-                    }
-                }
-                return View(mauSac);
-            }
             try
             {
-                await _services.Update(mauSac);
-                TempData["Success"] = "Cập nhật thành công";
+                // Kiểm tra input
+                if (mauSac == null || string.IsNullOrWhiteSpace(mauSac.TenMauSac))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Dữ liệu không hợp lệ"
+                    });
+                }
+
+                // Kiểm tra trùng tên
+                var existingMauSacs = await _services.GetMauSac(null);
+                if (existingMauSacs.Any(m =>
+                    m.TenMauSac.Trim().ToLower() == mauSac.TenMauSac.Trim().ToLower() &&
+                    m.IdMauSac != mauSac.IdMauSac))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Tên màu sắc đã tồn tại"
+                    });
+                }
+
+                // Cập nhật thông tin
+                var existingMauSac = await _services.GetMauSacById(mauSac.IdMauSac);
+                if (existingMauSac == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy màu sắc"
+                    });
+                }
+
+                // Chỉ cập nhật những trường cần thiết
+                existingMauSac.TenMauSac = mauSac.TenMauSac;
+                existingMauSac.KichHoat = mauSac.KichHoat;
+                existingMauSac.NgayCapNhat = DateTime.Now;
+                existingMauSac.NguoiCapNhat = "Admin";
+
+                await _services.Update(existingMauSac);
+
+                return Json(new
+                {
+                    success = true,
+                    id = existingMauSac.IdMauSac.ToString(),
+                    tenMauSac = existingMauSac.TenMauSac,
+                    kichHoat = existingMauSac.KichHoat
+                });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                TempData["Error"] = "Cập nhật thất bại";
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
-            return RedirectToAction("Getall");
         }
 
-        public async Task<ActionResult> Delete(Guid id)
+        [HttpPost]
+        public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
                 await _services.Delete(id);
-                TempData["Success"] = "Xóa thành công";
+                return Json(new
+                {
+                    success = true
+                });
             }
-            catch (Exception)
+            catch (HttpRequestException ex)
             {
-                TempData["Error"] = "Xóa thất bại";
+                return Json(new
+                {
+                    success = false,
+                    message = "Lỗi kết nối: " + ex.Message
+                });
             }
-            return RedirectToAction("Getall");
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Có lỗi xảy ra: " + ex.Message
+                });
+            }
         }
 
         public async Task<IActionResult> Details(Guid id)
         {
-            var mauSac = await _services.GetMauSacById(id);
-            if (mauSac == null)
+            try
             {
-                return NotFound();
+                var mauSac = await _services.GetMauSacById(id);
+                if (mauSac == null)
+                {
+                    return NotFound();
+                }
+                return View(mauSac);
             }
-            return View(mauSac);
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Không thể tải chi tiết: " + ex.Message;
+                return RedirectToAction(nameof(Getall));
+            }
         }
     }
 }

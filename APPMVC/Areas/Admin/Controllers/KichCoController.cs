@@ -10,7 +10,7 @@ namespace APPMVC.Areas.Admin.Controllers
     [Area("Admin")]
     public class KichCoController : Controller
     {
-        public IKichCoService _services;
+        private readonly IKichCoService _services;
 
         public KichCoController(IKichCoService services)
         {
@@ -22,23 +22,19 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             page = page < 1 ? 1 : page;
             int pageSize = 5;
-            List<KichCo> timten = await _services.GetKichCo(name);
-            if (timten != null)
-            {
-                var pagedKichCos = timten.ToPagedList(page, pageSize);
-                return View(pagedKichCos);
-            }
-            else
+
+            try
             {
                 List<KichCo> kichCos = await _services.GetKichCo(name);
                 var pagedKichCos = kichCos.ToPagedList(page, pageSize);
                 return View(pagedKichCos);
             }
-        }
-
-        public IActionResult Create()
-        {
-            return PartialView("Create");
+            catch (Exception ex)
+            {
+                // Log lỗi nếu cần
+                TempData["Error"] = "Không thể tải danh sách kích cỡ: " + ex.Message;
+                return View(new List<KichCo>().ToPagedList(1, 5));
+            }
         }
 
         [HttpPost]
@@ -49,7 +45,23 @@ namespace APPMVC.Areas.Admin.Controllers
                 // Kiểm tra dữ liệu đầu vào
                 if (string.IsNullOrWhiteSpace(TenKichCo))
                 {
-                    return Json(new { success = false, message = "Tên kích cỡ không được để trống" });
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Tên kích cỡ không được để trống"
+                    });
+                }
+
+                // Kiểm tra trùng tên (nếu cần)
+                var existingKichCos = await _services.GetKichCo(TenKichCo);
+                if (existingKichCos != null && existingKichCos.Any(k =>
+                    k.TenKichCo.Trim().ToLower() == TenKichCo.Trim().ToLower()))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Tên kích cỡ đã tồn tại"
+                    });
                 }
 
                 var kichCo = new KichCo
@@ -68,13 +80,24 @@ namespace APPMVC.Areas.Admin.Controllers
                 return Json(new
                 {
                     success = true,
-                    id = kichCo.IdKichCo,
-                    tenKichCo = kichCo.TenKichCo
+                    id = kichCo.IdKichCo.ToString(),
+                    tenKichCo = kichCo.TenKichCo,
+                    kichHoat = kichCo.KichHoat,
+                    ngayTao = kichCo.NgayTao.ToString("dd/MM/yyyy")
+                });
+            }
+            catch (HttpRequestException ex)
+            {
+                // Xử lý lỗi kết nối API
+                return Json(new
+                {
+                    success = false,
+                    message = "Lỗi kết nối: " + ex.Message
                 });
             }
             catch (Exception ex)
             {
-                // Log lỗi nếu có
+                // Xử lý các lỗi khác
                 return Json(new
                 {
                     success = false,
@@ -83,66 +106,128 @@ namespace APPMVC.Areas.Admin.Controllers
             }
         }
 
-        public async Task<IActionResult> Edit(Guid id)
+        [HttpPost]
+        public async Task<IActionResult> Edit(KichCo kichCo)
         {
-            var kichCo = await _services.GetKichCoById(id);
-            if (kichCo == null)
+            try
             {
-                return NotFound();
+                // Validation chi tiết hơn
+                if (kichCo == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Dữ liệu không hợp lệ"
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(kichCo.TenKichCo))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Tên kích cỡ không được để trống"
+                    });
+                }
+
+                // Kiểm tra trùng tên
+                var existingKichCos = await _services.GetKichCo(null);
+                if (existingKichCos.Any(k =>
+                    k.TenKichCo.Trim().ToLower() == kichCo.TenKichCo.Trim().ToLower() &&
+                    k.IdKichCo != kichCo.IdKichCo))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Tên kích cỡ đã tồn tại"
+                    });
+                }
+
+                // Lấy đối tượng hiện tại để cập nhật
+                var existingKichCo = await _services.GetKichCoById(kichCo.IdKichCo);
+                if (existingKichCo == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy kích cỡ"
+                    });
+                }
+
+                // Cập nhật từng trường
+                existingKichCo.TenKichCo = kichCo.TenKichCo;
+                existingKichCo.KichHoat = kichCo.KichHoat;
+                existingKichCo.NgayCapNhat = DateTime.Now;
+                existingKichCo.NguoiCapNhat = "Admin"; // Nên lấy từ session thực tế
+
+                await _services.Update(existingKichCo);
+
+                return Json(new
+                {
+                    success = true,
+                    id = existingKichCo.IdKichCo.ToString(),
+                    tenKichCo = existingKichCo.TenKichCo,
+                    kichHoat = existingKichCo.KichHoat
+                });
             }
-            return View(kichCo);
+            catch (Exception ex)
+            {
+                // Log lỗi ở đây nếu cần
+                return Json(new
+                {
+                    success = false,
+                    message = "Có lỗi xảy ra: " + ex.Message
+                });
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult> Edit(KichCo kichCo)
-        {
-            if (!ModelState.IsValid)
-            {
-                // Kiểm tra tính hợp lệ của dữ liệu
-                if (ModelState.ContainsKey("TenKichCo"))
-                {
-                    var error = ModelState["TenKichCo"].Errors.FirstOrDefault();
-                    if (error != null)
-                    {
-                        TempData["Error"] = error.ErrorMessage;
-                    }
-                }
-                return View(kichCo);
-            }
-            try
-            {
-                await _services.Update(kichCo);
-                TempData["Success"] = "Cập nhật thành công";
-            }
-            catch (Exception)
-            {
-                TempData["Error"] = "Cập nhật thất bại";
-            }
-            return RedirectToAction("Getall");
-        }
-
-        public async Task<ActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
                 await _services.Delete(id);
-                TempData["Success"] = "Xóa thành công";
+                return Json(new
+                {
+                    success = true
+                });
             }
-            catch (Exception)
+            catch (HttpRequestException ex)
             {
-                TempData["Error"] = "Xóa thất bại";
+                // Xử lý lỗi kết nối API
+                return Json(new
+                {
+                    success = false,
+                    message = "Lỗi kết nối: " + ex.Message
+                });
             }
-            return RedirectToAction("Getall");
+            catch (Exception ex)
+            {
+                // Xử lý các lỗi khác
+                return Json(new
+                {
+                    success = false,
+                    message = "Có lỗi xảy ra: " + ex.Message
+                });
+            }
         }
 
         public async Task<IActionResult> Details(Guid id)
         {
-            var kichCo = await _services.GetKichCoById(id);
-            if (kichCo == null)
+            try
             {
-                return NotFound();
+                var kichCo = await _services.GetKichCoById(id);
+                if (kichCo == null)
+                {
+                    return NotFound();
+                }
+                return View(kichCo);
             }
-            return View(kichCo);
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Không thể tải chi tiết: " + ex.Message;
+                return RedirectToAction(nameof(Getall));
+            }
         }
     }
 }

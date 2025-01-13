@@ -37,7 +37,8 @@ namespace APPMVC.Service
 
         public async Task Update(MauSac mauSac)
         {
-            await _httpClient.PutAsJsonAsync("api/MauSac/Sua", mauSac);
+            var response = await _httpClient.PutAsJsonAsync($"api/MauSac/Sua", mauSac);
+            response.EnsureSuccessStatusCode();
         }
         public Task<List<MauSac>> GetMauSacBySanPhamId(Guid sanPhamId)
         {
