@@ -118,7 +118,7 @@ namespace APPMVC.Areas.Client.Controllers
 
             var gioHangChiTiets = await _gioHangChiTietService.GetByGioHangIdAsync(idGioHang);
 
-            var viewModelTasks = gioHangChiTiets.Select(async item =>
+            var viewModelTasks = gioHangChiTiets.Select(async (item, index) => // Specify type arguments
             {
                 var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
                 var hinhanh = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(item.IdSanPhamChiTiet);
@@ -126,12 +126,21 @@ namespace APPMVC.Areas.Client.Controllers
 
                 var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
                 var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
-                
+
                 var originalPrice = sanPhamChiTiet?.Gia;
                 double? discountedPrice = null;
                 double? discountPercentage = null;
                 var quantity = sanPhamChiTiet.SoLuong;
+                double productPriceToCompare = Math.Round(Convert.ToDouble(sanPhamChiTiet.GiaGiam) > 0 ? Convert.ToDouble(sanPhamChiTiet.GiaGiam) : sanPhamChiTiet.Gia, 2);
+
+                if (item.DonGia != productPriceToCompare)
+                {
+                    item.DonGia = productPriceToCompare;
+                    item.TongTien = Math.Round(productPriceToCompare * item.SoLuong, 2);
+                    await _gioHangChiTietService.UpdateAsync(item);
+                }
                 var promotionId = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(sanPhamChiTiet.IdSanPhamChiTiet);
+
                 if (promotionId.HasValue && promotionId.Value != Guid.Empty)
                 {
                     var promotionDetails = await _promotionService.GetPromotionByIdAsync(promotionId.Value);
@@ -145,6 +154,8 @@ namespace APPMVC.Areas.Client.Controllers
                 {
                     discountPercentage = Math.Round(((originalPrice.Value - discountedPrice.Value) / originalPrice.Value) * 100, 2);
                 }
+
+                
 
                 var tenSanPham = sanPham?.TenSanPham ?? "Unknown Product";
                 var kichCoTen = string.Join(", ", kichCoList.Select(kc => kc.TenKichCo));
@@ -165,7 +176,7 @@ namespace APPMVC.Areas.Client.Controllers
                     KichHoat = sanPhamChiTiet.KichHoat,
                     HoatKich = sanPham.KichHoat
                 };
-            });
+            }).ToList(); // Call ToList to evaluate the IEnumerable
 
             var viewModelArray = await Task.WhenAll(viewModelTasks);
             var viewModel = viewModelArray.ToList();
@@ -251,6 +262,15 @@ namespace APPMVC.Areas.Client.Controllers
                 {
                     TempData["ErrorMessage"] = $"Số lượng cho sản phẩm {sanPham.TenSanPham} vượt quá số lượng có sẵn.";
                     return RedirectToAction("Card");
+                }
+                double productPriceToCompare = Math.Round(Convert.ToDouble(sanphamchitiet.GiaGiam) > 0 ? Convert.ToDouble(sanphamchitiet.GiaGiam) : sanphamchitiet.Gia , 2);
+                if (item.DonGia != productPriceToCompare)
+                {
+                    item.DonGia = Math.Round(productPriceToCompare, 2); // Update the price here
+                    item.TongTien = item.DonGia * item.SoLuong;
+                    await _gioHangChiTietService.UpdateAsync(item);
+                    TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã kết thúc.";
+                    return RedirectToAction("Card", "HomeClient");
                 }
             }
 
@@ -398,7 +418,7 @@ namespace APPMVC.Areas.Client.Controllers
             try
             {
                 var idGioHang = await _cardService.GetCartIdByCustomerIdAsync(customerId);
-                double totalDonHang = cartItems.Sum(item => item.Price * item.Quantity);
+                double totalDonHang = Math.Round(cartItems.Sum(item => item.Price * item.Quantity),2);
                 double discountAmount = 0;
 
                 // Lấy giá trị discountAmount từ session
@@ -414,10 +434,10 @@ namespace APPMVC.Areas.Client.Controllers
 
                 if (!string.IsNullOrEmpty(discountAmountString) && double.TryParse(discountAmountString, out discountAmount))
                 {
-                    
+                    discountAmount = Math.Round(discountAmount, 2);
                 }
 
-                double totalHoaDon = totalDonHang + thanhToanViewModel.PhiVanChuyen - discountAmount; 
+                double totalHoaDon = Math.Round(totalDonHang + thanhToanViewModel.PhiVanChuyen - discountAmount,2); 
 
                 // Tạo hóa đơn
                 var order = new HoaDon
@@ -535,17 +555,18 @@ namespace APPMVC.Areas.Client.Controllers
             }
 
             // Check if voucher is being used
-            //var voucherIdString = HttpContext.Session.GetString("VoucherId");
-            //if (!string.IsNullOrEmpty(voucherIdString) && Guid.TryParse(voucherIdString, out Guid voucherId))
-            //{
-            //    var Voucher = await _voucherService.GetVoucherByIdAsync(voucherId);
+            var voucherIdString = HttpContext.Session.GetString("VoucherId");
+            if (!string.IsNullOrEmpty(voucherIdString) && Guid.TryParse(voucherIdString, out Guid voucherId))
+            {
+                var Voucher = await _voucherService.GetVoucherByIdAsync(voucherId);
 
-            //    if (Voucher != null && Voucher.TrangThai != 2) 
-            //    {
-            //        TempData["ErrorMessage"] = "Voucher này đã hết hạn";
-            //        return View("Checkout", thanhToanViewModel);
-            //    }
-            //}
+                if (Voucher != null && Voucher.TrangThai != 2)
+                {
+                    TempData["ErrorMessage"] = "Voucher này đã hết hạn";
+                    HttpContext.Session.Remove("VoucherId"); 
+                    return View("Checkout", thanhToanViewModel);
+                }
+            }
 
             foreach (var item in cartItems)
             {
@@ -562,6 +583,12 @@ namespace APPMVC.Areas.Client.Controllers
                 {
                     TempData["ErrorMessage"] = $"Số lượng cho sản phẩm {sanPham?.TenSanPham} vượt quá số lượng có sẵn.";
                     return RedirectToAction("Index", "HomeClient");
+                }
+                double productPriceToCompare = Math.Round(Convert.ToDouble(sanPhamChiTiet.GiaGiam) > 0 ? Convert.ToDouble(sanPhamChiTiet.GiaGiam) : sanPhamChiTiet.Gia , 2);
+                if (item.Price != productPriceToCompare)
+                {
+                    TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã kết thúc.";
+                    return RedirectToAction("Card", "HomeClient");
                 }
             }
 
@@ -609,7 +636,6 @@ namespace APPMVC.Areas.Client.Controllers
 
             return View("Checkout", thanhToanViewModel);
         }
-
 
         // VnPay    
         [HttpGet]
