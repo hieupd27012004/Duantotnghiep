@@ -332,7 +332,7 @@ namespace APPMVC.Areas.Client.Controllers
                 }
 
                 // Tính giảm giá
-                double discountAmount = CalculateDiscountAmount(voucher, totalOrderValue);
+                double discountAmount = Math.Floor(CalculateDiscountAmount(voucher, totalOrderValue));
 
                 // Cập nhật voucher
                 await _voucherService.UpdateAsync(voucher);
@@ -357,7 +357,23 @@ namespace APPMVC.Areas.Client.Controllers
                 return Json(new { success = false, message = "Có lỗi xảy ra khi áp dụng voucher" });
             }
         }
+        [HttpPost]
+        public IActionResult ClearVoucherSession()
+        {
+            try
+            {
+                HttpContext.Session.Remove("DiscountAmount");
+                HttpContext.Session.Remove("VoucherId");
 
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                // Log the error if necessary
+                Console.WriteLine($"Error clearing session: {ex.Message}");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa voucher" });
+            }
+        }
         private double CalculateDiscountAmount(Voucher voucher, double totalOrderValue)
         {
             double discountAmount = 0;

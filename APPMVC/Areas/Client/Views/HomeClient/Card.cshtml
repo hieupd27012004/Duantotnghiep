@@ -301,7 +301,7 @@
         const maxQuantity = parseInt(input.max);
         let currentVal = parseInt(input.value);
 
-        if (currentVal < maxQuantity) {
+        if (currentVal <= maxQuantity) {
         } else {
             alert("Số lượng không thể lớn hơn " + maxQuantity + ".");
             input.value = maxQuantity; // Reset to max if exceeded
@@ -339,7 +339,7 @@
 
                 if (isNaN(quantity) || quantity < 1) {
                     quantityInput.value = 1;
-                    quantity = 1; // Reset quantity for calculation
+                    quantity = 1; 
                 }
 
                 const total = price * quantity;
@@ -389,7 +389,7 @@
         .then(response => response.json())
         .then(data => {
             if (!data.success) {
-                input.value = 1; // Reset to 1 if there's an error
+                input.value = 1; 
                 updateTotal();
                 alert(data.message || 'Failed to update quantities.');
             } else {
