@@ -231,7 +231,7 @@
                                     var hinhAnh = sanPham.HinhAnhs.First();
                                     var base64String = Convert.ToBase64String(hinhAnh.DataHinhAnh);
                                     var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
-                                    <img src="@imageUrl" alt="Hình ảnh sản phẩm" class="product-image" />
+                                    <img src="@imageUrl" alt="Hình ảnh sản phẩm" class="product-image" loading="lazy" />
                                 }
                                 else
                                 {

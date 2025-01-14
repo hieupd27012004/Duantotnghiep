@@ -105,7 +105,7 @@
                                 var imageUrl = $"data:{hinhAnh.LoaiFileHinhAnh};base64,{base64String}";
 
                                 <div style="position: relative;">
-                                    <img src="@imageUrl" alt="Hình ảnh sản phẩm" style="width: 50px; height: auto;" />
+                                    <img src="@imageUrl" alt="Hình ảnh sản phẩm" style="width: 50px; height: auto;" loading="lazy" />
                                     @if (item.PhanTramGiam.HasValue)
                                     {
                                         <div class="discount-badge" style="position: absolute; top: 5px; right: 5px; background-color: red; color: white; padding: 3px 5px; border-radius: 5px; font-weight: bold;">
