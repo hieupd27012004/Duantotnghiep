@@ -1,7 +1,13 @@
 ﻿@model AppData.Model.NhanVien
 
 <div class="container mt-5">
-   
+    @if (TempData["DoiMK"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" id="successMessage" role="alert">
+            <strong>Thành công!</strong> @TempData["DoiMK"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow">

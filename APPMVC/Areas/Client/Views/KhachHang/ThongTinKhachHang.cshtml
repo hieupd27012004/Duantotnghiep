@@ -75,6 +75,13 @@
             @TempData["SuccessMessage"]
         </div>
     }
+    @if (TempData["DoiMK"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" id="successMessage" role="alert">
+            <strong>Thành công!</strong> @TempData["DoiMK"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     <h4>Khách Hàng</h4>
     <hr />
     <dl class="row">
