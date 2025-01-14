@@ -53,10 +53,18 @@ namespace APPMVC.Service
                 throw new ArgumentException("List of MauSac IDs cannot be null or empty.", nameof(mauSacIds));
             }
 
-            // Join the IDs into a query string
-            var idsQuery = string.Join(",", mauSacIds);
-            return await _httpClient.GetFromJsonAsync<List<MauSac>>($"api/MauSac/getbyids?mauSacIds={idsQuery}");
+            // Use a different query string format
+            var idsQuery = string.Join("&mauSacIds=", mauSacIds);
 
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<MauSac>>($"api/MauSac/getbyids?mauSacIds={idsQuery}");
+            }
+            catch (HttpRequestException ex)
+            {
+                // Log the exception or handle it as necessary
+                throw new Exception("Error fetching MauSac data.", ex);
+            }
         }
     }
 }

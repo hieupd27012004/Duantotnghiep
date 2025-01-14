@@ -104,7 +104,7 @@
                             var textColorClass = productCount > 0 ? "text-danger" : "";
                             <div class="product-item" data-idhoadon="@invoice.IdHoaDon" onclick="viewInvoiceDetail(this)">
                                 <h6>
-                                    Đơn hàng @count - <span class="@textColorClass">@invoice.HoaDon.MaDon</span> [@productCount]
+                                    Đơn hàng @count - <span class="@textColorClass">@invoice.HoaDon.MaDon</span>@*  [@productCount] *@
                                 </h6>
                                 <i class="fas fa-trash delete-icon" title="Xóa" onclick="event.stopPropagation(); deleteInvoice('@invoice.IdHoaDon')"></i>
                             </div>

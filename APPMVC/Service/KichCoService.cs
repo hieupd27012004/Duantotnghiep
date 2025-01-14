@@ -52,9 +52,18 @@ namespace APPMVC.Service
                 throw new ArgumentException("List of KichCo IDs cannot be null or empty.", nameof(kichCoIds));
             }
 
-            // Join the IDs into a query string
-            var idsQuery = string.Join(",", kichCoIds);
-            return await _httpClient.GetFromJsonAsync<List<KichCo>>($"api/KichCo/getbyids?kichCoIds={idsQuery}");
+            // Use a different query string format
+            var idsQuery = string.Join("&kichCoIds=", kichCoIds);
+
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<List<KichCo>>($"api/KichCo/getbyids?kichCoIds={idsQuery}");
+            }
+            catch (HttpRequestException ex)
+            {
+                // Log the exception or handle it as necessary
+                throw new Exception("Error fetching KichCo data.", ex);
+            }
         }
     }
 }
