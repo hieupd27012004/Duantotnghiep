@@ -429,7 +429,7 @@ namespace APPMVC.Areas.Client.Controllers
         }
         // Thanh Toán
         #region ThanhToan
-        private async Task<bool> SaveOrder(List<CartItemViewModel> cartItems, ThanhToanViewModel thanhToanViewModel, Guid customerId, string giaoDich, string pttt, string trangThaiThanhToan)
+        private async Task<SaveOrderResult> SaveOrder(List<CartItemViewModel> cartItems, ThanhToanViewModel thanhToanViewModel, Guid customerId, string giaoDich, string pttt, string trangThaiThanhToan)
         {
             try
             {
@@ -536,13 +536,17 @@ namespace APPMVC.Areas.Client.Controllers
                 // Xóa giỏ hàng
                 await _gioHangChiTietService.RemoveItemsFromCartAsync(idGioHang, cartItems.Select(item => item.IdSanPhamChiTiet).ToList());
 
-                return true;
+                return new SaveOrderResult
+                {
+                    OrderNumber = order.MaDon,
+                    TotalAmount = totalHoaDon
+                };
             }
             catch (Exception ex)
             {
                 // Xử lý lỗi hoặc ghi log nếu cần
                 Console.WriteLine($"Error saving order: {ex.Message}");
-                return false;
+                return null;
             }
         }
         [HttpPost]
@@ -622,10 +626,14 @@ namespace APPMVC.Areas.Client.Controllers
 
             if (model.PaymentMethod == "cash_on_delivery")
             {
-                var result = await SaveOrder(cartItems, thanhToanViewModel, customerId, "Thanh Toán COD", "Tiền Mặt", "Chờ Thanh Toán");
-                if (result)
+                var saveOrderResult = await SaveOrder(cartItems, thanhToanViewModel, customerId, "Thanh Toán COD", "Tiền Mặt", "Chờ Thanh Toán");
+                if (saveOrderResult != null)
                 {
-                    TempData["SuccessMessage"] = "Đặt hàng thành công! Cảm ơn bạn đã mua sắm với chúng tôi.";
+                    TempData["SuccessMessage"] = $@"
+    <strong>Đặt hàng thành công!</strong><br />
+    Mã đơn hàng của bạn là: <strong>{saveOrderResult.OrderNumber}</strong><br />
+    Tổng hóa đơn: <strong>{saveOrderResult.TotalAmount:N0} đ</strong><br />
+    Cảm ơn bạn đã mua sắm với chúng tôi.";
                     return RedirectToAction("Index", "SanPham");
                 }
             }
@@ -687,7 +695,7 @@ namespace APPMVC.Areas.Client.Controllers
                     if (sanPhamChiTiet != null)
                     {
                         // Check if product is active
-                        if (sanPhamChiTiet.KichHoat != 1 && sanPham.KichHoat != 1)
+                        if (sanPhamChiTiet.KichHoat != 1 || sanPham.KichHoat != 1)
                         {
                             return BadRequest($"Sản phẩm {sanPham.TenSanPham} không còn hoạt động.");
                         }
@@ -707,16 +715,20 @@ namespace APPMVC.Areas.Client.Controllers
                 }
 
                 // Save the order with the discount amount
-                var result = await SaveOrder(cartItems, thanhToanViewModel, customerId, "Thanh Toán VnPay", "VNPay", "Đã thanh toán");
-                if (result)
+                var saveOrderResult = await SaveOrder(cartItems, thanhToanViewModel, customerId, "Thanh Toán VnPay", "VNPay", "Đã thanh toán");
+                if (saveOrderResult != null) // Check if order was saved successfully
                 {
                     // Clear session data
                     HttpContext.Session.Remove("TemporaryOrderId");
                     HttpContext.Session.Remove("CartItems");
                     HttpContext.Session.Remove("ThanhToanViewModel");
-                    HttpContext.Session.Remove("DiscountAmount"); // Remove discount amount if not needed anymore
+                    HttpContext.Session.Remove("DiscountAmount");
 
-                    TempData["SuccessMessage"] = "Đặt hàng thành công! Cảm ơn bạn đã mua sắm với chúng tôi.";
+                    TempData["SuccessMessage"] = $@"
+    <strong>Đặt hàng thành công!</strong><br />
+    Mã đơn hàng của bạn là: <strong>{saveOrderResult.OrderNumber}</strong><br />
+    Tổng hóa đơn: <strong>{saveOrderResult.TotalAmount:N0} đ</strong><br />
+    Cảm ơn bạn đã mua sắm với chúng tôi.";
 
                     return RedirectToAction("Index", "SanPham");
                 }

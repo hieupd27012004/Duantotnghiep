@@ -26,6 +26,8 @@ namespace APPMVC.Areas.Admin.Controllers
         private readonly ISanPhamChiTietMauSacService _sanPhamChiTietMauSacService;
         private readonly ISanPhamChiTietKichCoService _sanPhamChiTietKichCoService;
         private readonly IHinhAnhService _hinhAnhService;
+        private readonly IPromotionSanPhamChiTietService _promotionSanPhamChiTietService;
+        private readonly IPromotionService _promotionService;
 
         public SanPhamController(
             ISanPhamService sanPhamService,
@@ -39,7 +41,9 @@ namespace APPMVC.Areas.Admin.Controllers
             IKichCoService kichCoService,
             ISanPhamChiTietMauSacService sanPhamChiTietMauSacService,
             ISanPhamChiTietKichCoService sanPhamChiTietKichCoService,
-            IHinhAnhService hinhAnhService)
+            IHinhAnhService hinhAnhService,
+            IPromotionSanPhamChiTietService promotionSanPhamChiTietService,
+            IPromotionService promotionService)
         {
             _sanPhamCTService = sanPhamChiTietService;
             _sanPhamService = sanPhamService;
@@ -53,6 +57,8 @@ namespace APPMVC.Areas.Admin.Controllers
             _sanPhamChiTietMauSacService = sanPhamChiTietMauSacService;
             _sanPhamChiTietKichCoService = sanPhamChiTietKichCoService;
             _hinhAnhService = hinhAnhService;
+            _promotionSanPhamChiTietService = promotionSanPhamChiTietService;
+            _promotionService = promotionService;
         }
 
         [HttpGet]
@@ -568,23 +574,45 @@ namespace APPMVC.Areas.Admin.Controllers
                     if (sanPhamChiTiet != null)
                     {
                         // Cập nhật các thuộc tính chỉ khi có sự thay đổi
+                        bool hasChanges = false;
+
                         if (sanPhamChiTiet.Gia != chiTiet.Gia)
                         {
                             sanPhamChiTiet.Gia = chiTiet.Gia;
+                            hasChanges = true;
                         }
 
                         if (sanPhamChiTiet.SoLuong != chiTiet.SoLuong)
                         {
                             sanPhamChiTiet.SoLuong = chiTiet.SoLuong;
+                            hasChanges = true;
                         }
 
                         if (sanPhamChiTiet.XuatXu != chiTiet.XuatXu)
                         {
                             sanPhamChiTiet.XuatXu = chiTiet.XuatXu;
+                            hasChanges = true;
                         }
 
-                        // Lưu thay đổi
-                        await _sanPhamCTService.Update(sanPhamChiTiet);
+                        // Kiểm tra khuyến mãi hiện tại
+                        var activePromotionId = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(chiTiet.IdSanPhamChiTiet);
+                        if (activePromotionId.HasValue && activePromotionId.Value != Guid.Empty)
+                        {
+                            var activePromotion = await _promotionService.GetPromotionByIdAsync(activePromotionId.Value);
+                            if (activePromotion != null)
+                            {
+                                // Tính toán giá giảm
+                                double discountPercentage = activePromotion.PhanTramGiam;
+                                sanPhamChiTiet.GiaGiam = sanPhamChiTiet.Gia * (1 - (discountPercentage / 100.0));
+                                hasChanges = true;
+                            }
+                        }
+
+                        // Lưu thay đổi nếu có sự thay đổi
+                        if (hasChanges)
+                        {
+                            await _sanPhamCTService.Update(sanPhamChiTiet);
+                        }
                     }
                     else
                     {
@@ -602,7 +630,6 @@ namespace APPMVC.Areas.Admin.Controllers
 
             return View(viewModel);
         }
-
         [HttpGet]
         public async Task<IActionResult> UpdateSP(Guid id)
         {
@@ -740,7 +767,17 @@ namespace APPMVC.Areas.Admin.Controllers
                 sanPhamChiTiet.SoLuong = viewModel.SoLuong;
                 sanPhamChiTiet.XuatXu = viewModel.XuatXu;
                 sanPhamChiTiet.KichHoat = viewModel.KichHoat;
-
+                var activePromotionId = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(viewModel.IdSanPhamChiTiet);
+                if (activePromotionId.HasValue && activePromotionId.Value != Guid.Empty)
+                {
+                    var activePromotion = await _promotionService.GetPromotionByIdAsync(activePromotionId.Value);
+                    if (activePromotion != null)
+                    {
+                        // Tính toán giá giảm
+                        double discountPercentage = activePromotion.PhanTramGiam;
+                        sanPhamChiTiet.GiaGiam = sanPhamChiTiet.Gia * (1 - (discountPercentage / 100.0));
+                    }
+                }
                 // Lấy danh sách ảnh hiện tại
                 var existingImages = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
 

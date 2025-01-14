@@ -55,4 +55,9 @@ namespace AppData.ViewModel
         public double OriginalPrice { get; set; }
 
     }
+    public class SaveOrderResult
+    {
+        public string OrderNumber { get; set; }
+        public double TotalAmount { get; set; }
+    }
 }
