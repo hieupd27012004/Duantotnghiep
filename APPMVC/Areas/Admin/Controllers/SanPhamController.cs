@@ -287,12 +287,14 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             var lastProductCode = await GetLastProductCodeAsync();
             int newProductCodeNumber = lastProductCode + 1;
-            string newProductCode = $"SP{newProductCodeNumber}";
+
+            // Format the product code to ensure numbers from 1 to 9 have a leading zero
+            string newProductCode = $"SP{newProductCodeNumber:D2}"; // D2 ensures two digits
 
             while (await IsProductCodeExists(newProductCode))
             {
                 newProductCodeNumber++;
-                newProductCode = $"SP{newProductCodeNumber}";
+                newProductCode = $"SP{newProductCodeNumber:D2}"; // Keep the formatting
             }
 
             return newProductCode;

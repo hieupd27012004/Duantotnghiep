@@ -69,9 +69,8 @@ namespace APPMVC.Areas.Client.Controllers
 
         public async Task<IActionResult> Index(string? name, Guid? categoryId, Guid? colorId, Guid? sizeId)
         {
-           
             var sanPhams = await _sanPhamservice.GetSanPhamClient(name);
-          
+
             if (categoryId.HasValue)
             {
                 sanPhams = sanPhams.Where(sp => sp.IdDanhMuc == categoryId.Value).ToList();
@@ -109,6 +108,9 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 sanPhams = sanPhams.Where(sp => sp.TenSanPham.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
             }
+
+            // Sort products by creation date in descending order
+            sanPhams = sanPhams.OrderByDescending(sp => sp.NgayTao).ToList();
 
             var activeSanPhams = sanPhams.Where(sp => sp.KichHoat == 1).ToList();
             var sanPhamClientViewModels = new List<SanPhamClientViewModel>();
