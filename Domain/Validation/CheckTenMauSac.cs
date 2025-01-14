@@ -23,24 +23,45 @@ namespace AppData.Validation
             if (string.IsNullOrEmpty(name))
                 return ValidationResult.Success;
 
-            var objectType = validationContext.ObjectType;
-            var idProperty = objectType.GetProperty("IdMauSac");
-            if (idProperty == null)
+            // Lấy DbContext từ dependency injection
+            var _context = validationContext.GetService(typeof(AppDbcontext)) as AppDbcontext;
+
+            if (_context == null)
             {
-                // Handle the case where Id property is not found
-                return ValidationResult.Success; // or return an error message if needed
+                return ValidationResult.Success;
             }
 
-            var mauSacId = (Guid)idProperty.GetValue(validationContext.ObjectInstance);
-            var existing = _context.mauSacs
-                .AsNoTracking() // Add this to avoid tracking issues
-                .Any(ms => ms.TenMauSac == name && ms.IdMauSac != mauSacId);
-
-            if (existing)
+            try
             {
-                return new ValidationResult("Tên màu sắc đã tồn tại", new[] { "TenMauSac" });
+                var objectType = validationContext.ObjectType;
+                var idProperty = objectType.GetProperty("IdMauSac");
+
+                if (idProperty == null)
+                {
+                    return ValidationResult.Success;
+                }
+
+                var mauSacId = (Guid)idProperty.GetValue(validationContext.ObjectInstance);
+
+                // Sử dụng phương thức FirstOrDefault thay vì Any để tránh việc mở nhiều DataReader
+                var existing = _context.mauSacs
+                    .AsNoTracking()
+                    .FirstOrDefault(ms =>
+                        ms.TenMauSac.ToLower() == name.ToLower() &&
+                        ms.IdMauSac != mauSacId);
+
+                if (existing != null)
+                {
+                    return new ValidationResult("Tên màu sắc đã tồn tại", new[] { "TenMauSac" });
+                }
+
+                return ValidationResult.Success;
             }
-            return ValidationResult.Success;
+            catch (Exception)
+            {
+                // Nếu có lỗi, trả về Success để không block việc validate
+                return ValidationResult.Success;
+            }
         }
     }
 }

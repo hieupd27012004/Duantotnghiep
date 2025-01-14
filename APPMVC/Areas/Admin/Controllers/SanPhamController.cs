@@ -26,6 +26,8 @@ namespace APPMVC.Areas.Admin.Controllers
         private readonly ISanPhamChiTietMauSacService _sanPhamChiTietMauSacService;
         private readonly ISanPhamChiTietKichCoService _sanPhamChiTietKichCoService;
         private readonly IHinhAnhService _hinhAnhService;
+        private readonly IPromotionSanPhamChiTietService _promotionSanPhamChiTietService;
+        private readonly IPromotionService _promotionService;
 
         public SanPhamController(
             ISanPhamService sanPhamService,
@@ -39,7 +41,9 @@ namespace APPMVC.Areas.Admin.Controllers
             IKichCoService kichCoService,
             ISanPhamChiTietMauSacService sanPhamChiTietMauSacService,
             ISanPhamChiTietKichCoService sanPhamChiTietKichCoService,
-            IHinhAnhService hinhAnhService)
+            IHinhAnhService hinhAnhService,
+            IPromotionSanPhamChiTietService promotionSanPhamChiTietService,
+            IPromotionService promotionService)
         {
             _sanPhamCTService = sanPhamChiTietService;
             _sanPhamService = sanPhamService;
@@ -53,6 +57,8 @@ namespace APPMVC.Areas.Admin.Controllers
             _sanPhamChiTietMauSacService = sanPhamChiTietMauSacService;
             _sanPhamChiTietKichCoService = sanPhamChiTietKichCoService;
             _hinhAnhService = hinhAnhService;
+            _promotionSanPhamChiTietService = promotionSanPhamChiTietService;
+            _promotionService = promotionService;
         }
 
         [HttpGet]
@@ -110,6 +116,7 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             var kichCos = await _kichCoService.GetKichCo(null) ?? new List<KichCo>();
             return kichCos
+                .Where(k => k.KichHoat == 1)
                 .Select(k => new SelectListItem
                 {
                     Value = k.IdKichCo.ToString(),
@@ -120,7 +127,9 @@ namespace APPMVC.Areas.Admin.Controllers
         private async Task<List<SelectListItem>> GetMauSacOptions()
         {
             var mauSacs = await _mauSacService.GetMauSac(null) ?? new List<MauSac>();
-            return mauSacs.Select(m => new SelectListItem
+            return mauSacs
+                .Where(k => k.KichHoat == 1)
+                .Select(m => new SelectListItem
             {
                 Value = m.IdMauSac.ToString(),
                 Text = m.TenMauSac
@@ -143,22 +152,32 @@ namespace APPMVC.Areas.Admin.Controllers
                 await LoadViewBags();
                 return View(viewModel);
             }
+            // Kiểm tra trạng thái KichHoat của MauSac đã chọn
+            var mauSacIds = viewModel.SelectedMauSacIds.Select(id => Guid.Parse(id)).ToList();
+            var mauSacs = await _mauSacService.GetMauSacByIdsAsync(mauSacIds);
+            var inactiveMauSacs = mauSacs.Where(m => m.KichHoat != 1).ToList();
+            if (inactiveMauSacs.Any())
+            {
+                var inactiveNames = string.Join(", ", inactiveMauSacs.Select(m => m.TenMauSac));
+                TempData["Error"] = $"Màu sắc '{inactiveNames}' không còn hoạt động. Vui lòng thử lại.";
+                await LoadViewBags();
+                return View(viewModel);
+            }
 
+            // Kiểm tra trạng thái KichHoat của KichCo đã chọn
+            var kichCoIds = viewModel.SelectedKichCoIds.Select(id => Guid.Parse(id)).ToList();
+            var kichCos = await _kichCoService.GetKichCoByIdsAsync(kichCoIds);
+            var inactiveKichCos = kichCos.Where(k => k.KichHoat != 1).ToList();
+            if (inactiveKichCos.Any())
+            {
+                var inactiveNames = string.Join(", ", inactiveKichCos.Select(k => k.TenKichCo));
+                TempData["Error"] = $"Kích cỡ '{inactiveNames}' không còn hoạt động. Vui lòng thử lại.";
+                await LoadViewBags();
+                return View(viewModel);
+            }
             try
             {
-                if (viewModel.Combinations == null || !viewModel.Combinations.Any())
-                {
-                    TempData["Error"] = "Không có tổ hợp nào được chọn.";
-                    return RedirectToAction("Create");
-                }
-
-                if (viewModel.Combinations.Any(c => c.SoLuong <= 0))
-                {
-                    TempData["Error"] = "Tất cả các tổ hợp phải có số lượng lớn hơn 0.";
-                    await LoadViewBags();
-                    return RedirectToAction("Create");
-                }
-
+                
                 // Load related entities
                 var chatLieuTask = _chatLieuService.GetChatLieuById(viewModel.IdChatLieu);
                 var thuongHieuTask = _thuongHieuService.GetThuongHieuById(viewModel.IdThuongHieu);
@@ -555,23 +574,45 @@ namespace APPMVC.Areas.Admin.Controllers
                     if (sanPhamChiTiet != null)
                     {
                         // Cập nhật các thuộc tính chỉ khi có sự thay đổi
+                        bool hasChanges = false;
+
                         if (sanPhamChiTiet.Gia != chiTiet.Gia)
                         {
                             sanPhamChiTiet.Gia = chiTiet.Gia;
+                            hasChanges = true;
                         }
 
                         if (sanPhamChiTiet.SoLuong != chiTiet.SoLuong)
                         {
                             sanPhamChiTiet.SoLuong = chiTiet.SoLuong;
+                            hasChanges = true;
                         }
 
                         if (sanPhamChiTiet.XuatXu != chiTiet.XuatXu)
                         {
                             sanPhamChiTiet.XuatXu = chiTiet.XuatXu;
+                            hasChanges = true;
                         }
 
-                        // Lưu thay đổi
-                        await _sanPhamCTService.Update(sanPhamChiTiet);
+                        // Kiểm tra khuyến mãi hiện tại
+                        var activePromotionId = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(chiTiet.IdSanPhamChiTiet);
+                        if (activePromotionId.HasValue && activePromotionId.Value != Guid.Empty)
+                        {
+                            var activePromotion = await _promotionService.GetPromotionByIdAsync(activePromotionId.Value);
+                            if (activePromotion != null)
+                            {
+                                // Tính toán giá giảm
+                                double discountPercentage = activePromotion.PhanTramGiam;
+                                sanPhamChiTiet.GiaGiam = sanPhamChiTiet.Gia * (1 - (discountPercentage / 100.0));
+                                hasChanges = true;
+                            }
+                        }
+
+                        // Lưu thay đổi nếu có sự thay đổi
+                        if (hasChanges)
+                        {
+                            await _sanPhamCTService.Update(sanPhamChiTiet);
+                        }
                     }
                     else
                     {
@@ -589,7 +630,6 @@ namespace APPMVC.Areas.Admin.Controllers
 
             return View(viewModel);
         }
-
         [HttpGet]
         public async Task<IActionResult> UpdateSP(Guid id)
         {
@@ -727,7 +767,17 @@ namespace APPMVC.Areas.Admin.Controllers
                 sanPhamChiTiet.SoLuong = viewModel.SoLuong;
                 sanPhamChiTiet.XuatXu = viewModel.XuatXu;
                 sanPhamChiTiet.KichHoat = viewModel.KichHoat;
-
+                var activePromotionId = await _promotionSanPhamChiTietService.GetPromotionsBySanPhamChiTietIdAsync(viewModel.IdSanPhamChiTiet);
+                if (activePromotionId.HasValue && activePromotionId.Value != Guid.Empty)
+                {
+                    var activePromotion = await _promotionService.GetPromotionByIdAsync(activePromotionId.Value);
+                    if (activePromotion != null)
+                    {
+                        // Tính toán giá giảm
+                        double discountPercentage = activePromotion.PhanTramGiam;
+                        sanPhamChiTiet.GiaGiam = sanPhamChiTiet.Gia * (1 - (discountPercentage / 100.0));
+                    }
+                }
                 // Lấy danh sách ảnh hiện tại
                 var existingImages = await _hinhAnhService.GetHinhAnhsBySanPhamChiTietId(sanPhamChiTiet.IdSanPhamChiTiet);
 

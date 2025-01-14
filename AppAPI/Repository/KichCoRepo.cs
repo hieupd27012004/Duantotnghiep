@@ -81,6 +81,7 @@ namespace AppAPI.Repository
                 kichCoUpdate.NguoiCapNhat = kichCo.NguoiCapNhat;
                 kichCoUpdate.NguoiTao = kichCo.NguoiTao;
                 kichCoUpdate.KichHoat = kichCo.KichHoat == 1 ? 1 : 0;
+
                 _context.kichCos.Update(kichCoUpdate);
                 _context.SaveChanges();
                 return true;
