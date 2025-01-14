@@ -69,20 +69,17 @@ namespace APPMVC.Areas.Client.Controllers
 
         public async Task<IActionResult> Index(string? name, Guid? categoryId, Guid? colorId, Guid? sizeId)
         {
-            // Fetch all products from the service
+           
             var sanPhams = await _sanPhamservice.GetSanPhamClient(name);
-
-            // Filter products by category if categoryId is provided
+          
             if (categoryId.HasValue)
             {
                 sanPhams = sanPhams.Where(sp => sp.IdDanhMuc == categoryId.Value).ToList();
             }
 
-            // Fetch all product details in one go for filtering by color and size
             var allChiTietSanPhams = await Task.WhenAll(sanPhams.Select(sp => _sanPhamCTservice.GetSanPhamChiTietBySanPhamId(sp.IdSanPham)));
             var flatChiTietSanPhams = allChiTietSanPhams.SelectMany(x => x).ToList();
 
-            // Filter product details by color if colorId is provided
             if (colorId.HasValue)
             {
                 var sanPhamChiTietIdsByColor = await _sanPhamChiTietMauSacService.GetSanPhamChiTietIdsByMauSacId(colorId.Value);
@@ -95,7 +92,6 @@ namespace APPMVC.Areas.Client.Controllers
                     flatChiTietSanPhams.Any(ct => sanPhamChiTietIdsByColor.Contains(ct.IdSanPhamChiTiet) && ct.IdSanPham == sp.IdSanPham)).ToList();
             }
 
-            // Filter product details by size if sizeId is provided
             if (sizeId.HasValue)
             {
                 var sanPhamChiTietIdsBySize = await _sanPhamChiTietKichCoService.GetSanPhamChiTietIdsByKichCoId(sizeId.Value);

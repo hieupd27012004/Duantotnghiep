@@ -1,6 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Xác Minh Mã";
-    var email = TempData["Email"] as string;
+    var email = Context.Request.Cookies["Email"];
 }
 
 <div class="container mt-5">

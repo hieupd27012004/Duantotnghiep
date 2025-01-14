@@ -93,19 +93,12 @@ namespace AppAPI.Repository
         }
         public async Task<KhachHang> UpdateKHThongTin(KhachHang kh)
         {
+            _context.khachHangs.Attach(kh);
+            _context.Entry(kh).Property(x => x.HoTen).IsModified = true;
+            _context.Entry(kh).Property(x => x.SoDienThoai).IsModified = true;
+            _context.Entry(kh).Property(x => x.Email).IsModified = true;
 
-            var khachHang = _context.khachHangs.Find(kh.IdKhachHang);
-            if(khachHang !=  null)
-            {
-                khachHang.HoTen = kh.HoTen;
-                khachHang.SoDienThoai = kh.SoDienThoai;
-                khachHang.Email = kh.Email;
-                khachHang.NgayCapNhat = DateTime.Now;
-                _context.Update(kh);
-                _context.SaveChangesAsync();
-                return kh;
-
-            }
+            await _context.SaveChangesAsync();            
             return kh;
         }
         public async Task<bool> ChangePassword(Guid id,string newPassword)

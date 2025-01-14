@@ -93,7 +93,7 @@
     }
     <div class="row">
         <div class="col-md-6">
-            <form asp-action="Create" method="post">
+            <form asp-action="Create" method="post" onsubmit="return validateForm()">
                 <div class="card shadow-lg me-1">
                     <div class="card-body">
                         <h4>Thông Tin Promotion</h4>
@@ -130,7 +130,7 @@
                             <input type="hidden" asp-for="Promotion.TrangThai" value="1" />
                         </div>
                         <div class="form-group mt-2">
-                            <input type="submit" value="Tạo" class="btn btn-primary me-3" />
+                            <input type="submit" value="Tạo" class="btn btn-primary me-3"  />
                             <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
 
                         </div>
@@ -232,6 +232,7 @@
                         type: 'GET',
                         data: { sanPhamIds: selectedProductIds.join(',') },
                         success: function (data) {
+                            
                             var availableProductDetails = [];
 
                             if (data.chiTietSanPhams && data.chiTietSanPhams.length > 0) {
@@ -252,7 +253,7 @@
                                     var row = `<tr>
                                                 <td><input type="checkbox" name="SelectedSanPhamChiTietIds" value="${item.idSanPhamChiTiet}" /></td>
                                                 <td hidden>${item.idSanPhamChiTiet}</td>
-                                                <td>${item.MaSP}</td>
+                                                <td>${item.maSP}</td>
                                                 <td>${item.productName}</td>
                                                 <td>${formattedPrice}</td>
                                                 <td>${item.quantity}</td>
@@ -305,8 +306,8 @@
             var phanTramGiamInput = document.getElementById("phanTramGiam");
             var numericValue = parseFloat(phanTramGiamInput.value);
 
-            if (isNaN(numericValue) || numericValue < 0 || numericValue > 100) {
-                alert("Phần trăm giảm phải là một số từ 0 đến 100.");
+            if (isNaN(numericValue) || numericValue <= 0 || numericValue > 100) {
+                alert("Phần trăm giảm phải là một số từ 1 đến 100.");
                 phanTramGiamInput.value = null;
             }
         }
@@ -322,6 +323,17 @@
                 alert("Ngày Kết Thúc phải sau Ngày Bắt Đầu.");
                 endDateInput.value = "";
             }
+        }
+        function validateForm() {
+            var phanTramGiamInput = document.getElementById("phanTramGiam");
+            var numericValue = parseFloat(phanTramGiamInput.value);
+
+            // Kiểm tra nếu phần trăm giảm là 0 hoặc vượt quá 100
+            if (isNaN(numericValue) || numericValue <= 0 || numericValue > 100) {
+                alert("Phần trăm giảm phải là một số từ 1 đến 100.");
+                return false; // Ngăn không cho gửi form
+            }
+            return true; // Cho phép gửi form
         }
     </script>
 }

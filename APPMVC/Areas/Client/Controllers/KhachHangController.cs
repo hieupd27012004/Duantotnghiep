@@ -171,6 +171,7 @@ namespace APPMVC.Areas.Client.Controllers
 
 			// Deserialize sessionData để chuyển thành đối tượng KhachHang
 			var khachHang = JsonConvert.DeserializeObject<KhachHang>(sessionData);
+           
 
 			// Trả về view với thông tin khách hàng
 			return View(khachHang);
@@ -186,7 +187,7 @@ namespace APPMVC.Areas.Client.Controllers
 					await _service.UpdateKHThongTin(khachHang);
 					HttpContext.Session.SetString("KhachHang", JsonConvert.SerializeObject(khachHang));
 					HttpContext.Session.SetString("TenKhachHang", khachHang.HoTen);
-					HttpContext.Session.SetString("IdKhachHang", JsonConvert.SerializeObject(khachHang.IdKhachHang));
+					//HttpContext.Session.SetString("IdKhachHang", JsonConvert.SerializeObject(khachHang.IdKhachHang));
 					return RedirectToAction("ThongTinKhachHang");
 				}
 				catch (Exception ex)
@@ -237,7 +238,7 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 khachHang.MatKhau = newPassword; // Ensure this is hashed before storing
                 HttpContext.Session.SetString("KhachHang", JsonConvert.SerializeObject(khachHang));
-                ViewBag.Message = "Đổi Mật Khẩu Thành Công";
+                TempData["DoiMK"] = "Đổi Mật Khẩu Thành Công";
                 return RedirectToAction("ThongTinKhachHang");
             }
 
@@ -264,11 +265,23 @@ namespace APPMVC.Areas.Client.Controllers
 
             if (result)
             {
-                TempData["Email"] = email; // Sử dụng TempData để lưu email
+                var cookieOptions = new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddDays(1) // Đặt thời gian hết hạn cho cookie
+                };
+                Response.Cookies.Append("Email", email, cookieOptions);
                 return RedirectToAction("VerifyCode");
             }
 
+            // Nếu gửi mã xác thực không thành công, lưu email vào cookie
+            var errorCookieOptions = new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddDays(1) // Đặt thời gian hết hạn cho cookie
+            };
+            Response.Cookies.Append("Email", email, errorCookieOptions);
+
             ModelState.AddModelError("", "Không thể gửi mã xác thực. Vui lòng thử lại.");
+            ViewBag.Email = Request.Cookies["Email"]; // Lấy email từ Cookie nếu có
             return View();
         }
         public IActionResult VerifyCode()
@@ -279,9 +292,10 @@ namespace APPMVC.Areas.Client.Controllers
         public async Task<IActionResult> VerifyCode(string code, string email)
         {
             var verifycationCode = await _service.GetVerificationCodeFromRedisAsync(email);
+            var mmail = Request.Cookies["Email"];
             if (code == verifycationCode)
             {
-                TempData["Email"] = email;
+                mmail = email;
                 return RedirectToAction("ResetPassword");
             }
             ModelState.AddModelError("", "Mã xác thực không chích xác hoặc đã hết hạn");
@@ -297,15 +311,15 @@ namespace APPMVC.Areas.Client.Controllers
             // Check if new passwords match
             if (newPassword != confirmPassword)
             {
-                TempData["Error"] = "Mật khẩu không khớp! Vui lòng thử lại";
-                return RedirectToAction("Login", "KhachHang");
+                ModelState.AddModelError("", "Mật khẩu không khớp! Vui lòng thử lại");
+                return View();
             }
 
             // Validate password complexity
             if (!IsValidPassword(newPassword))
             {
-                TempData["Error"] = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt. Vui lòng thử lại";
-                return RedirectToAction("Login", "KhachHang");
+                ModelState.AddModelError("", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt. Vui lòng thử lại");
+                return View();
             }
 
             var result = await _service.ResetPassword(email, newPassword, confirmPassword);

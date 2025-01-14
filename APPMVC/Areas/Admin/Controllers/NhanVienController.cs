@@ -333,6 +333,12 @@ namespace APPMVC.Areas.Admin.Controllers
                 return RedirectToAction("Login");
             }
             var nhanVien = JsonConvert.DeserializeObject<NhanVien>(sessionData);
+            id = nhanVien.IdNhanVien;
+            var idNhanVien = await _service.GetIdNhanVien(id);
+            if(nhanVien == null)
+            {
+                return RedirectToAction("Error");
+            }
 
             // Trả về view với thông tin khách hàng
             return View(nhanVien);
@@ -619,11 +625,23 @@ namespace APPMVC.Areas.Admin.Controllers
 
             if (result)
             {
-                TempData["Email"] = email; // Sử dụng TempData để lưu email
+                var cookieOptions = new CookieOptions
+                {
+                    Expires = DateTimeOffset.UtcNow.AddDays(1) // Đặt thời gian hết hạn cho cookie
+                };
+                Response.Cookies.Append("Email", email, cookieOptions);
                 return RedirectToAction("VerifyCode");
             }
 
+            // Nếu gửi mã xác thực không thành công, lưu email vào cookie
+            var errorCookieOptions = new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddDays(1) // Đặt thời gian hết hạn cho cookie
+            };
+            Response.Cookies.Append("Email", email, errorCookieOptions);
+
             ModelState.AddModelError("", "Không thể gửi mã xác thực. Vui lòng thử lại.");
+            ViewBag.Email = Request.Cookies["Email"]; // Lấy email từ Cookie nếu có
             return View();
         }
         public IActionResult VerifyCode()
@@ -634,9 +652,10 @@ namespace APPMVC.Areas.Admin.Controllers
         public async Task<IActionResult> VerifyCode(string code, string email)
         {
            var verifycationCode = await _service.GetVerificationCodeFromRedisAsync(email);
-            if(code == verifycationCode)
+            var mmail = Request.Cookies["Email"];
+            if (code == verifycationCode)
             {
-                TempData["Email"] = email;
+                mmail = email;
                 return RedirectToAction("ResetPassword");
             }
             ModelState.AddModelError("", "Mã xác thực không chích xác hoặc đã hết hạn");
@@ -652,21 +671,21 @@ namespace APPMVC.Areas.Admin.Controllers
             // Check if new passwords match
             if (newPassword != confirmPassword)
             {
-                TempData["Error"] = "Đổi mật khẩu thất bại do nhập sai mật khẩu! Vui lòng thử lại";
-                return RedirectToAction("Login", "NhanVien");
+                TempData["Error33"] = "Mật khẩu không khớp! Vui lòng thử lại";
+                return RedirectToAction("ResetPassword", "NhanVien");
             }
 
             // Validate password complexity
             if (!IsValidPassword(newPassword))
             {
-                TempData["Error"] = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
-                return View();
+                TempData["Error33"] = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt. Vui lòng thử lại";
+                return RedirectToAction("ResetPassword", "NhanVien");
             }
 
             var result = await _service.RestPassword(email, newPassword, confirmPassword);
             if (result)
             {
-                ViewBag.Message = "Đổi mật khẩu thành công.";
+                TempData["DoiMK"] = "Đổi mật khẩu thành công.";
                 return RedirectToAction("Login");
             }
 

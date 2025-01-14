@@ -18,7 +18,7 @@
         <div class="col-md-6">
             <div class="card shadow mb-4">
                 <div class="card-body">
-                    <form asp-action="Edit" method="post">
+                    <form asp-action="Edit" method="post" onsubmit="return validateEditForm()">
                         @Html.AntiForgeryToken()
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="Promotion.IdPromotion" />
@@ -52,8 +52,9 @@
                             <select asp-for="Promotion.TrangThai" class="form-control" asp-items="ViewBag.TrangThaiList" id="trangThaiSelect"></select>
                             <span asp-validation-for="Promotion.TrangThai" class="text-danger"></span>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group mt-2">
                             <input type="submit" value="Lưu" class="btn btn-primary" />
+                            <a asp-action="Index" class="btn btn-secondary">Quay Lại</a>
                         </div>
                     </form>
                 </div>
@@ -80,10 +81,6 @@
             </div>
         </div>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index" class="btn btn-primary">Quay Lại</a>
 </div>
 
 <script>
@@ -136,4 +133,27 @@
             input.addEventListener('change', updateStatusOptions);
         });
     });
+    function validateEditForm() {
+        var isValid = true;
+
+        // Kiểm tra phần trăm giảm
+        var phanTramGiamInput = document.querySelector('input[name="Promotion.PhanTramGiam"]');
+        var numericValue = parseFloat(phanTramGiamInput.value);
+        if (isNaN(numericValue) || numericValue <= 0 || numericValue > 100) {
+            alert("Phần trăm giảm phải là một số từ 1 đến 100.");
+            isValid = false;
+        }
+
+        // Kiểm tra ngày bắt đầu và kết thúc nếu cần
+        var startDateInput = document.querySelector('input[name="Promotion.NgayBatDau"]');
+        var endDateInput = document.querySelector('input[name="Promotion.NgayKetThuc"]');
+        var startDate = new Date(startDateInput.value);
+        var endDate = new Date(endDateInput.value);
+        if (endDate <= startDate) {
+            alert("Ngày Kết Thúc phải sau Ngày Bắt Đầu.");
+            isValid = false;
+        }
+
+        return isValid; // Trả về trạng thái tổng hợp
+    }
 </script>
