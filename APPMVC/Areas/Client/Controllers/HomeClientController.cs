@@ -594,7 +594,7 @@ namespace APPMVC.Areas.Client.Controllers
                 var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
                 if (sanPhamChiTiet.KichHoat == 0 || sanPham.KichHoat == 0)
                 {
-                    TempData["ErrorMessage"] = $"Sản phẩm {sanPham?.TenSanPham} không còn hoạt động.";
+                    TempData["ErrorMessage"] = $"Khuyến mãi của sản phẩm '{sanPham.TenSanPham}' (Mã: {sanPhamChiTiet.MaSp}) đã được cập nhật.";
                     return RedirectToAction("Index", "HomeClient");
                 }
 
@@ -607,7 +607,7 @@ namespace APPMVC.Areas.Client.Controllers
                 double productPriceToCompare = Math.Round(Convert.ToDouble(sanPhamChiTiet.GiaGiam) > 0 ? Convert.ToDouble(sanPhamChiTiet.GiaGiam) : sanPhamChiTiet.Gia , 2);
                 if (item.Price != productPriceToCompare)
                 {
-                    TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã kết thúc.";
+                    TempData["ErrorMessage"] = $"Khuyến mãi của sản phẩm '{sanPham.TenSanPham}' (Mã: {sanPhamChiTiet.MaSp}) đã được cập nhật.";
                     return RedirectToAction("Card", "HomeClient");
                 }
             }

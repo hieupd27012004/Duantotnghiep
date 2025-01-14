@@ -514,7 +514,9 @@ namespace APPMVC.Areas.Admin.Controllers
                 }
 
                 var sanPhamChiTietViewModels = (await Task.WhenAll(sanPhamChiTietViewModelsTasks)).Where(x => x != null).ToList();
-
+                sanPhamChiTietViewModels = sanPhamChiTietViewModels
+            .OrderByDescending(x => x.MaSanPham)
+            .ToList();
                 return PartialView("~/Areas/Admin/Views/BanHangTQ/ListSanPhamChiTiet.cshtml", (sanPhamChiTietViewModels, idHoaDon));
             }
             catch (Exception ex)
@@ -708,7 +710,7 @@ namespace APPMVC.Areas.Admin.Controllers
                         hoaDonChiTiet.TongTien = Math.Round(hoaDonChiTiet.SoLuong * sanPhamCT.Gia, 2);
 
                         await _hoaDonChiTietService.UpdateAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
-                        TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã được cập nhật.";
+                        TempData["ErrorMessage"] = $"Khuyến mãi của sản phẩm '{sanPham.TenSanPham}' (Mã: {sanPhamCT.MaSp}) đã được cập nhật.";
                         return RedirectToAction("Index");
                     }
 
@@ -1019,7 +1021,7 @@ namespace APPMVC.Areas.Admin.Controllers
                         await _hoaDonChiTietService.UpdateAsync(new List<HoaDonChiTiet> { hoaDonChiTiet });
 
                         // Lưu thông báo lỗi vào TempData
-                        TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã được cập nhật.";
+                        TempData["ErrorMessage"] = $"Khuyến mãi của sản phẩm '{sanPham.TenSanPham}' (Mã: {sanPhamCT.MaSp}) đã được cập nhật.";
 
                         // Điều hướng đến trang Index
                         return Json(new { success = true, redirectUrl = Url.Action("Index") });
