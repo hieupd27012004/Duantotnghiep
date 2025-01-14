@@ -203,11 +203,15 @@
         <div class="modal-content">
             <div class="modal-header">
                 <span class="modal-icon">&#10003;</span>
+                <span class="modal-title">Thanh toán thành công!</span>
                 <span class="close" id="closeModal">&times;</span>
             </div>
-            <h2>Thanh toán thành công!</h2>
-            <p class="modal-message">@TempData["SuccessMessage"]</p>
-            <button onclick="document.getElementById('successModal').style.display='none';">Đóng</button>
+            <div class="modal-body">
+                <p class="modal-message">@Html.Raw(TempData["SuccessMessage"])</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" onclick="document.getElementById('successModal').style.display='none';">Đóng</button>
+            </div>
         </div>
     </div>
 }
