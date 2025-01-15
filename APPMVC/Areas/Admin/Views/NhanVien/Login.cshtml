@@ -1,5 +1,11 @@
 ﻿@model AppData.Model.NhanVien
 
+@{
+    ViewData["Title"] = "LoginAdmin";
+    Layout = null;
+}
+@Html.Partial("_Head")
+@Html.Partial("_Nav")
 <div class="container mt-5">
     @if (TempData["DoiMK"] != null)
     {
