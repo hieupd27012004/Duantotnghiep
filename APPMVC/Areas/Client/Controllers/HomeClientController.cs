@@ -257,10 +257,18 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 var sanphamchitiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
                 var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
-
+                var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
+                var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
+                var kichCoTen = string.Join(", ", kichCoList.Select(kc => kc.TenKichCo));
+                var mauSacTen = string.Join(", ", mauSacList.Select(ms => ms.TenMauSac));
+                if (sanphamchitiet.KichHoat == 0 || sanPham.KichHoat == 0)
+                {
+                    TempData["ErrorMessage"] = $"Sản phẩm '{sanPham.TenSanPham}'({mauSacTen} + {kichCoTen}) đã dừng bán";
+                    return RedirectToAction("Card", "HomeClient");
+                }
                 if (item.SoLuong > sanphamchitiet.SoLuong)
                 {
-                    TempData["ErrorMessage"] = $"Số lượng cho sản phẩm {sanPham.TenSanPham} vượt quá số lượng có sẵn.";
+                    TempData["ErrorMessage"] = $"Số lượng cho sản phẩm '{sanPham.TenSanPham}'({mauSacTen} + {kichCoTen}) vượt quá số lượng có sẵn.";
                     return RedirectToAction("Card");
                 }
                 double productPriceToCompare = Math.Round(Convert.ToDouble(sanphamchitiet.GiaGiam) > 0 ? Convert.ToDouble(sanphamchitiet.GiaGiam) : sanphamchitiet.Gia , 2);
@@ -269,7 +277,7 @@ namespace APPMVC.Areas.Client.Controllers
                     item.DonGia = Math.Round(productPriceToCompare, 2); // Update the price here
                     item.TongTien = item.DonGia * item.SoLuong;
                     await _gioHangChiTietService.UpdateAsync(item);
-                    TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm {sanPham.TenSanPham} đã kết thúc.";
+                    TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm '{sanPham.TenSanPham}'({mauSacTen} + {kichCoTen}) đã kết thúc.";
                     return RedirectToAction("Card", "HomeClient");
                 }
             }
@@ -592,22 +600,26 @@ namespace APPMVC.Areas.Client.Controllers
             {
                 var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
                 var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
+                var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
+                var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
+                var kichCoTen = string.Join(", ", kichCoList.Select(kc => kc.TenKichCo));
+                var mauSacTen = string.Join(", ", mauSacList.Select(ms => ms.TenMauSac));
                 if (sanPhamChiTiet.KichHoat == 0 || sanPham.KichHoat == 0)
                 {
-                    TempData["ErrorMessage"] = $"Khuyến mãi của sản phẩm '{sanPham.TenSanPham}' (Mã: {sanPhamChiTiet.MaSp}) đã được cập nhật.";
+                    TempData["ErrorMessage"] = $"Sản phẩm '{sanPham.TenSanPham}'({mauSacTen} + {kichCoTen}) đã dừng bán";
                     return RedirectToAction("Index", "HomeClient");
                 }
 
                 // Kiểm tra số lượng sản phẩm
                 if (item.Quantity > sanPhamChiTiet.SoLuong)
                 {
-                    TempData["ErrorMessage"] = $"Số lượng cho sản phẩm {sanPham?.TenSanPham} vượt quá số lượng có sẵn.";
+                    TempData["ErrorMessage"] = $"Số lượng cho sản phẩm '{sanPham.TenSanPham}'({mauSacTen} + {kichCoTen}) vượt quá số lượng có sẵn.";
                     return RedirectToAction("Index", "HomeClient");
                 }
                 double productPriceToCompare = Math.Round(Convert.ToDouble(sanPhamChiTiet.GiaGiam) > 0 ? Convert.ToDouble(sanPhamChiTiet.GiaGiam) : sanPhamChiTiet.Gia , 2);
                 if (item.Price != productPriceToCompare)
                 {
-                    TempData["ErrorMessage"] = $"Khuyến mãi của sản phẩm '{sanPham.TenSanPham}' (Mã: {sanPhamChiTiet.MaSp}) đã được cập nhật.";
+                    TempData["ErrorMessage"] = $"Khuyến mãi của sản phẩm '{sanPham.TenSanPham}'({mauSacTen} + {kichCoTen}) đã được cập nhật.";
                     return RedirectToAction("Card", "HomeClient");
                 }
             }
@@ -692,18 +704,22 @@ namespace APPMVC.Areas.Client.Controllers
                 {
                     var sanPhamChiTiet = await _sanPhamChiTietService.GetSanPhamChiTietById(item.IdSanPhamChiTiet);
                     var sanPham = await _sanPhamChiTietService.GetSanPhamByIdSanPhamChiTietAsync(item.IdSanPhamChiTiet);
+                    var mauSacList = await _sanPhamChiTietMauSacService.GetMauSacIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
+                    var kichCoList = await _sanPhamChiTietKichCoService.GetKichCoIdsBySanPhamChiTietId(item.IdSanPhamChiTiet);
+                    var kichCoTen = string.Join(", ", kichCoList.Select(kc => kc.TenKichCo));
+                    var mauSacTen = string.Join(", ", mauSacList.Select(ms => ms.TenMauSac));
                     if (sanPhamChiTiet != null)
                     {
                         // Check if product is active
                         if (sanPhamChiTiet.KichHoat != 1 || sanPham.KichHoat != 1)
                         {
-                            return BadRequest($"Sản phẩm {sanPham.TenSanPham} không còn hoạt động.");
+                            return BadRequest($"Sản phẩm '{sanPham.TenSanPham}'({mauSacTen} + {kichCoTen}) không còn hoạt động.");
                         }
 
                         // Check if there is enough stock
                         if (item.Quantity > sanPhamChiTiet.SoLuong)
                         {
-                            return BadRequest($"Số lượng cho sản phẩm {sanPham.TenSanPham} vượt quá số lượng có sẵn.");
+                            return BadRequest($"Số lượng cho sản phẩm '{sanPham.TenSanPham}'({mauSacTen} + {kichCoTen}) vượt quá số lượng có sẵn.");
                         }
 
                         // Decrease stock quantity
