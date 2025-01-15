@@ -207,7 +207,7 @@ namespace AppData
                 new DanhMuc
                 {
                     IdDanhMuc = danhMucLowTop, // ID cố định ngẫu nhiên cho "Low-top"
-                    TenDanhMuc = "Low-top",
+                    TenDanhMuc = "Giày Cổ Thấp",
                     NgayTao = new DateTime(2024, 9, 4),
                     NgayCapNhat = DateTime.Now,
                     NguoiTao = "Admin",
@@ -217,7 +217,7 @@ namespace AppData
                 new DanhMuc
                 {
                     IdDanhMuc = danhMucMidTop, // ID cố định ngẫu nhiên cho "Mid-top"
-                    TenDanhMuc = "Mid – top",
+                    TenDanhMuc = "Giày Cổ Trung",
                     NgayTao = new DateTime(2024, 9, 4),
                     NgayCapNhat = DateTime.Now,
                     NguoiTao = "Admin",
@@ -227,7 +227,7 @@ namespace AppData
                 new DanhMuc
                 {
                     IdDanhMuc = danhMucHighTop, // ID cố định ngẫu nhiên cho "High-top"
-                    TenDanhMuc = "High – top",
+                    TenDanhMuc = "Giày Cổ Cao",
                     NgayTao = new DateTime(2024, 9, 4),
                     NgayCapNhat = DateTime.Now,
                     NguoiTao = "Admin",
@@ -796,7 +796,7 @@ namespace AppData
             new KichCo
             {
                 IdKichCo = kichco35,
-                TenKichCo = "Size 35",
+                TenKichCo = "35",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -806,7 +806,7 @@ namespace AppData
             new KichCo
             {
                 IdKichCo = kichco36,
-                TenKichCo = "Size 36",
+                TenKichCo = "36",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -816,7 +816,7 @@ namespace AppData
             new KichCo
             {
                 IdKichCo = kichco37,
-                TenKichCo = "Size 37",
+                TenKichCo = "37",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -826,7 +826,7 @@ namespace AppData
             new KichCo
             {
                 IdKichCo = kichco38,
-                TenKichCo = "Size 38",
+                TenKichCo = "38",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -836,7 +836,7 @@ namespace AppData
             new KichCo
             {
                 IdKichCo = kichco39,
-                TenKichCo = "Size 39",
+                TenKichCo = "39",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -846,7 +846,7 @@ namespace AppData
             new KichCo
             {
                 IdKichCo = kichco40,
-                TenKichCo = "Size 40",
+                TenKichCo = "40",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -856,7 +856,7 @@ namespace AppData
             new KichCo
             {
                 IdKichCo = kichco41,
-                TenKichCo = "Size 41",
+                TenKichCo = "41",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -866,7 +866,7 @@ namespace AppData
             new KichCo
             {
                 IdKichCo = kichco42,
-                TenKichCo = "Size 42",
+                TenKichCo = "42",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -876,7 +876,7 @@ namespace AppData
             new KichCo
             {
                 IdKichCo = kichco43,
-                TenKichCo = "Size 43",
+                TenKichCo = "43",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -886,7 +886,7 @@ namespace AppData
             new KichCo
             {
                 IdKichCo = kichco44,
-                TenKichCo = "Size 44",
+                TenKichCo = "44",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -896,7 +896,7 @@ namespace AppData
             new KichCo
             {
                 IdKichCo = kichco45,
-                TenKichCo = "Size 45",
+                TenKichCo = "45",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -953,11 +953,10 @@ namespace AppData
             var metallicsId = Guid.NewGuid();
             var fluorescentsId = Guid.NewGuid();
             modelBuilder.Entity<MauSac>().HasData(
-            // thêm màu sắc
             new MauSac
             {
                 IdMauSac = redId,
-                TenMauSac = "Red",
+                TenMauSac = "Đỏ",
                 NgayCapNhat = new DateTime(2024, 9, 4),
                 NgayTao = new DateTime(2024, 9, 4),
                 NguoiCapNhat = "Admin",
@@ -967,7 +966,7 @@ namespace AppData
             new MauSac
             {
                 IdMauSac = greenId,
-                TenMauSac = "Green",
+                TenMauSac = "Xanh lá",
                 NgayCapNhat = new DateTime(2024, 9, 4),
                 NgayTao = new DateTime(2024, 9, 4),
                 NguoiCapNhat = "Admin",
@@ -977,7 +976,7 @@ namespace AppData
             new MauSac
             {
                 IdMauSac = blueId,
-                TenMauSac = "Blue",
+                TenMauSac = "Xanh dương",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -987,7 +986,7 @@ namespace AppData
             new MauSac
             {
                 IdMauSac = blackId,
-                TenMauSac = "Black",
+                TenMauSac = "Đen",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -997,7 +996,7 @@ namespace AppData
             new MauSac
             {
                 IdMauSac = whiteId,
-                TenMauSac = "white",
+                TenMauSac = "Trắng",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -1007,7 +1006,7 @@ namespace AppData
             new MauSac
             {
                 IdMauSac = greyId,
-                TenMauSac = "grey",
+                TenMauSac = "Xám",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -1017,7 +1016,7 @@ namespace AppData
             new MauSac
             {
                 IdMauSac = navyBlueId,
-                TenMauSac = "navy blue",
+                TenMauSac = "Xanh Navy",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -1027,7 +1026,7 @@ namespace AppData
             new MauSac
             {
                 IdMauSac = brownId,
-                TenMauSac = "Brown",
+                TenMauSac = "Nâu",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -1037,7 +1036,7 @@ namespace AppData
             new MauSac
             {
                 IdMauSac = pinkId,
-                TenMauSac = "pink",
+                TenMauSac = "Hồng",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -1047,7 +1046,7 @@ namespace AppData
             new MauSac
             {
                 IdMauSac = orangeId,
-                TenMauSac = "orange",
+                TenMauSac = "Cam",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -1057,7 +1056,7 @@ namespace AppData
             new MauSac
             {
                 IdMauSac = metallicsId,
-                TenMauSac = "metallics",
+                TenMauSac = "Kim loại",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
@@ -1067,7 +1066,7 @@ namespace AppData
             new MauSac
             {
                 IdMauSac = fluorescentsId,
-                TenMauSac = "fluorescents",
+                TenMauSac = "Phát quang",
                 NgayCapNhat = DateTime.Now,
                 NgayTao = DateTime.Now,
                 NguoiCapNhat = "Admin",
