@@ -130,3 +130,28 @@
         </div>
     </div>
 </div>
+<script>
+    function closeModal() {
+        $('#modalOverlay').css('visibility', 'hidden').css('opacity', '0');
+    }
+
+    function confirmPayment(idHoaDon) {
+        if (confirm("Bạn có chắc chắn muốn xác nhận thanh toán cho hóa đơn này không?")) {
+            $.ajax({
+                url: '@Url.Action("XacNhanThanhToanCK", "BanHangTQ")', // Adjust the controller name
+                type: 'POST',
+                data: { idHoaDon: idHoaDon },
+                success: function(response) {
+                    if (response.success) {
+                        window.location.href = response.redirectUrl; // Redirect to the invoice page
+                    } else {
+                        alert(response.message); // Show error message
+                    }
+                },
+                error: function() {
+                    alert("Có lỗi xảy ra. Vui lòng thử lại."); // General error message
+                }
+            });
+        }
+    }
+</script>

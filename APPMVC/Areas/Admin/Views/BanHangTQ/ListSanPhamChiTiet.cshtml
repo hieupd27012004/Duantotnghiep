@@ -2,8 +2,6 @@
 
 @{
     ViewData["Title"] = "ListSanPhamChiTiet";
-
-    var sortedSanPhamChiTiets = Model.SanPhamChiTiets.OrderByDescending(item => item.MaSanPham).ToList();
 }
 
 <style>
@@ -47,9 +45,9 @@
             </tr>
         </thead>
         <tbody>
-            @if (sortedSanPhamChiTiets != null && sortedSanPhamChiTiets.Any())
+            @if (Model.SanPhamChiTiets != null && Model.SanPhamChiTiets.Any())
             {
-                foreach (var item in sortedSanPhamChiTiets)
+                foreach (var item in Model.SanPhamChiTiets)
                 {
                     string rowStyle = string.Empty;
                     string statusMessage = string.Empty;

@@ -822,7 +822,7 @@ namespace APPMVC.Areas.Admin.Controllers
 
                 // Thông báo thành công
                 TempData["Success"] = "Cập nhật thành công";
-                return RedirectToAction("GetAll");
+                return RedirectToAction("Edit", "SanPham", new { area = "Admin", id = sanPhamChiTiet.IdSanPham });
             }
             catch (Exception ex)
             {
