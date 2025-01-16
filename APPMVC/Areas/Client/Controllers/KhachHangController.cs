@@ -298,7 +298,7 @@ namespace APPMVC.Areas.Client.Controllers
                 mmail = email;
                 return RedirectToAction("ResetPassword");
             }
-            ModelState.AddModelError("", "Mã xác thực không chích xác hoặc đã hết hạn");
+            ModelState.AddModelError("", "Mã xác thực không chính xác hoặc đã hết hạn");
             return View();
         }
         public IActionResult ResetPassword()
