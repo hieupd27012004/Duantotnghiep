@@ -21,7 +21,7 @@ builder.Services.AddDbContext<AppDbcontext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 10485760; // 10 MB
+    options.MultipartBodyLengthLimit = 1099511627776;
 });
 
 

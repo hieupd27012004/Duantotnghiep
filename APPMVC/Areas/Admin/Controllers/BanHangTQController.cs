@@ -407,9 +407,18 @@ namespace APPMVC.Areas.Admin.Controllers
                 var sanPhamChiTiet = sanPhamChiTiets.FirstOrDefault(x => x.IdSanPhamChiTiet == chiTiet.IdSanPhamChiTiet);
                 if (sanPhamChiTiet != null)
                 {
-                    // Use discounted price if available and greater than 0, otherwise use original price
                     double priceToUse = (sanPhamChiTiet.GiaDaGiam > 0) ? sanPhamChiTiet.GiaDaGiam.Value : sanPhamChiTiet.Price;
                     tongTienHang += chiTiet.SoLuong * priceToUse;
+
+                    double productPriceToCompare = Convert.ToDouble(chiTiet.TienGiam) > 0 ? Convert.ToDouble(chiTiet.TienGiam) : chiTiet.DonGia;
+
+                    if (priceToUse != productPriceToCompare)
+                    {
+                        chiTiet.TienGiam = Convert.ToDouble(sanPhamChiTiet.GiaDaGiam);
+                        chiTiet.TongTien = Math.Round(chiTiet.SoLuong * priceToUse, 2); 
+
+                        await _hoaDonChiTietService.UpdateAsync(new List<HoaDonChiTiet> { chiTiet });
+                    }
                 }
             }
 
@@ -481,9 +490,9 @@ namespace APPMVC.Areas.Admin.Controllers
                     if (promotionId.HasValue && promotionId.Value != Guid.Empty)
                     {
                         var promotionDetails = await _promotionService.GetPromotionByIdAsync(promotionId.Value);
-                        if (promotionDetails != null && promotionDetails.TrangThai == 1 && promotionDetails.PhanTramGiam > 0)
+                        if (promotionDetails != null && promotionDetails.TrangThai == 1 && promotionDetails.PhanTramGiam > 0 && giaDaGiam > 0)
                         {
-                            giaDaGiam = sanPhamCT.Gia - (sanPhamCT.Gia * (promotionDetails.PhanTramGiam / 100));
+                            giaDaGiam = giaDaGiam;
                         }
                     }
 
@@ -957,7 +966,7 @@ namespace APPMVC.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> ThanhToanCK(Guid idHoaDon)
+        public async Task<ActionResult> ThanhToanCK(Guid idHoaDon, Guid? idKhachHang)
         {
             var hoaDon = await _hoaDonService.GetByIdAsync(idHoaDon);
             if (hoaDon == null)
@@ -994,7 +1003,8 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 SanPhamChiTiets = sanPhamChiTiets,
                 IdHoaDon = idHoaDon,
-                MaDon = hoaDon.MaDon
+                MaDon = hoaDon.MaDon,
+                IdKhachHang = idKhachHang ?? Guid.Empty
             };
             return PartialView("~/Areas/Admin/Views/BanHangTQ/ThanhToanCK.cshtml", model);
         }

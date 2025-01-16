@@ -490,7 +490,7 @@ namespace APPMVC.Areas.Admin.Controllers
                         HttpContext.Session.SetString("NhanVienName", kh.TenNhanVien);
                         HttpContext.Session.SetString("IdNhanVien", kh.IdNhanVien.ToString());
                         HttpContext.Session.SetString("NhanVienRole", chucVu != null ? chucVu.Code : "Không xác định"); // Vai trò nhân viên
-                        return RedirectToAction("ThongKeTongQuan", "ThongKe");
+                        return RedirectToAction("Index", "BanHangTQ");
                     }
                     else
                     {

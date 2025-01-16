@@ -92,12 +92,13 @@ namespace APPMVC.Areas.Admin.Controllers
         public async Task<IActionResult> Create()
         {
             await LoadViewBags();
+            var nguoiTao = HttpContext.Session.GetString("NhanVienName");
             var sanPham = new SanPham
             {
                 IdSanPham = Guid.NewGuid(),
                 NgayTao = DateTime.Now,
                 NgayCapNhat = DateTime.Now,
-                NguoiTao = "Admin",
+                NguoiTao = nguoiTao,
                 NguoiCapNhat = "Admin",
                 KichHoat = 1
             };
@@ -139,6 +140,7 @@ namespace APPMVC.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(SanPhamViewModel viewModel)
         {
+            var nguoiTao = HttpContext.Session.GetString("NhanVienName");
             // Check if the product name is empty
             if (string.IsNullOrWhiteSpace(viewModel.SanPham.TenSanPham))
             {
@@ -192,6 +194,8 @@ namespace APPMVC.Areas.Admin.Controllers
                 viewModel.SanPham.DanhMuc = await danhMucTask;
                 viewModel.SanPham.DeGiay = await deGiayTask;
                 viewModel.SanPham.KieuDang = await kieuDangTask;
+                viewModel.SanPham.NgayTao = DateTime.Now;
+                viewModel.SanPham.NgayCapNhat = DateTime.Now;
 
                 await _sanPhamService.Create(viewModel.SanPham);
                 var idSanPham = viewModel.SanPham.IdSanPham;
@@ -225,7 +229,7 @@ namespace APPMVC.Areas.Admin.Controllers
                                     GioiTinh = "Nam",
                                     NgayTao = DateTime.Now,
                                     NgayCapNhat = DateTime.Now,
-                                    NguoiTao = "Admin",
+                                    NguoiTao = nguoiTao,
                                     NguoiCapNhat = "Admin",
                                     KichHoat = 1
                                 };

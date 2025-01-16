@@ -274,10 +274,10 @@ namespace APPMVC.Areas.Client.Controllers
                 double productPriceToCompare = Math.Round(Convert.ToDouble(sanphamchitiet.GiaGiam) > 0 ? Convert.ToDouble(sanphamchitiet.GiaGiam) : sanphamchitiet.Gia , 2);
                 if (item.DonGia != productPriceToCompare)
                 {
-                    item.DonGia = Math.Round(productPriceToCompare, 2); // Update the price here
+                    item.DonGia = Math.Round(productPriceToCompare, 2); 
                     item.TongTien = item.DonGia * item.SoLuong;
                     await _gioHangChiTietService.UpdateAsync(item);
-                    TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm '{sanPham.TenSanPham}'({mauSacTen} + {kichCoTen}) đã kết thúc.";
+                    TempData["ErrorMessage"] = $"Khuyến mãi cho sản phẩm '{sanPham.TenSanPham}'({mauSacTen} + {kichCoTen}) đã cập nhật.";
                     return RedirectToAction("Card", "HomeClient");
                 }
             }

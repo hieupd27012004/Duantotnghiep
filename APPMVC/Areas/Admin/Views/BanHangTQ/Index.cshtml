@@ -367,23 +367,29 @@
         }
 
         // Load order details
-        function loadOrderDetails(idHoaDon) {
-            $.get('@Url.Action("ThanhToanCK", "BanHangTQ", new { area = "Admin" })', { idHoaDon: idHoaDon })
-                .done(function(data) {
-                    $('#modalOverlay').html(data).css({
-                        display: 'flex',
-                        opacity: '1',
-                        visibility: 'visible'
-                    });
-                })
-                .fail(function(jqXHR, textStatus, errorThrown) {
-                    console.error("Error loading order details:", textStatus, errorThrown);
-                    alert("Đã xảy ra lỗi khi tải thông tin đơn hàng.");
+         function loadOrderDetails(idHoaDon) {
+            const customerId = document.getElementById('customerId').value; 
+
+            $.get('@Url.Action("ThanhToanCK", "BanHangTQ", new { area = "Admin" })', {
+                idHoaDon: idHoaDon,
+                idKhachHang: customerId // Include customer ID in the request
+            })
+            .done(function(data) {
+                // Set the modal overlay content
+                $('#modalOverlay').html(data).css({
+                    display: 'flex',
+                    opacity: '1',
+                    visibility: 'visible'
                 });
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("Error loading order details:", textStatus, errorThrown);
+                alert("Đã xảy ra lỗi khi tải thông tin đơn hàng.");
+            });
         }
 
         // Handle payment process
-        function handlePayment() {
+                function handlePayment() {
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
             if (!paymentMethod) {
                 alert("Vui lòng chọn phương thức thanh toán.");
@@ -394,7 +400,7 @@
 
             const confirmMessage = `Bạn có chắc chắn muốn xác nhận thanh toán bằng phương thức: ${selectedPaymentMethod === 'cash' ? 'Tiền Mặt' : 'Chuyển Khoản'}?`;
             if (!confirm(confirmMessage)) {
-                return; 
+                return;
             }
 
             const form = document.getElementById('paymentForm');
@@ -422,8 +428,6 @@
                 }
 
                 const amountGiven = parseFloat(amountGivenInput.value); // Parse to float
-
-                // Extract the numeric value from the totalAmount element
                 const totalAmountText = totalAmountElement.getAttribute('data-value'); // Use data attribute
                 const totalAmount = parseFloat(totalAmountText); // Parse to float
 
@@ -449,11 +453,25 @@
                 } else {
                     alert("Số tiền khách đưa phải lớn hơn hoặc bằng tổng tiền.");
                 }
-            } else if (selectedPaymentMethod === 'bankTransfer') {
+            }
+            // Handle bank transfer payment
+            else if (selectedPaymentMethod === 'bankTransfer') {
                 const idHoaDonInput = form.querySelector('input[name="idHoaDon"]');
                 if (idHoaDonInput) {
                     const idHoaDon = idHoaDonInput.value;
-                    loadOrderDetails(idHoaDon);
+
+                    // Ensure customer ID is included
+                    if (customerId) {
+                        const idKhachHangInput = document.createElement('input');
+                        idKhachHangInput.type = 'hidden';
+                        idKhachHangInput.name = 'idKhachHang';
+                        idKhachHangInput.value = customerId;
+                        form.appendChild(idKhachHangInput);
+                    }
+
+                    loadOrderDetails(idHoaDon); // Load order details
+                    // Optionally submit the form if needed
+                    // form.submit(); // Uncomment if you want to submit the form after loading order details
                 } else {
                     console.error("Invoice ID input not found.");
                     alert("Không thể tìm thấy ID hóa đơn.");
