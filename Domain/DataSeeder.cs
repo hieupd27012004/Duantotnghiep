@@ -21,10 +21,10 @@ namespace AppData
             );
 
             // Định nghĩa ID cố định cho các nhân viên
-            var nhanVien1 = Guid.Parse("55555555-5555-5555-5555-555555555555");
-            var nhanVien2 = Guid.Parse("66666666-6666-6666-6666-666666666666");
-            var nhanVien3 = Guid.Parse("77777777-7777-7777-7777-777777777777");
-            var nhanVien4 = Guid.Parse("88888888-8888-8888-8888-888888888888");
+            var nhanVien1 = Guid.NewGuid();
+            var nhanVien2 = Guid.NewGuid();
+            var nhanVien3 = Guid.NewGuid();
+            var nhanVien4 = Guid.NewGuid();
 
             // Seed dữ liệu nhân viên
             modelBuilder.Entity<NhanVien>().HasData(
