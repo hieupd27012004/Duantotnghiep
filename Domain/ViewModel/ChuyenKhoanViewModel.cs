@@ -17,5 +17,7 @@ namespace AppData.ViewModel
         public List<AppData.ViewModel.HoaDonChiTietViewModel.SanPhamChiTietViewModel> SanPhamChiTiets { get; set; }
         public Guid IdHoaDon { get; set; }
         public string MaDon { get; set; }
+
+        public Guid IdKhachHang { get; set; }
     }
 }

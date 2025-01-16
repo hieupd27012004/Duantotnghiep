@@ -431,7 +431,10 @@ namespace APPMVC.Areas.Admin.Controllers
             {
                 var sanPhamCT = await _sanPhamCTService.GetSanPhamChiTietById(chiTiet.IdSanPhamChiTiet);
                 var sanPham = await _sanPhamCTService.GetSanPhamByIdSanPhamChiTietAsync(chiTiet.IdSanPhamChiTiet);
-
+                if (sanPham == null || sanPhamCT.KichHoat == 0 || sanPham.KichHoat == 0)
+                {
+                    errorMessages.Add($"Sản phẩm {sanPham?.TenSanPham}({sanPhamCT.MaSp}) không còn hoạt động.");
+                }
                 if (sanPhamCT != null)
                 {
                     if (sanPhamCT.SoLuong >= chiTiet.SoLuong)
@@ -442,7 +445,7 @@ namespace APPMVC.Areas.Admin.Controllers
                     else
                     {
                         // Collect error message for insufficient stock
-                        errorMessages.Add($"Không đủ số lượng cho sản phẩm {sanPham.TenSanPham}. Số lượng hiện có: {sanPhamCT.SoLuong}, yêu cầu: {chiTiet.SoLuong}.");
+                        errorMessages.Add($"Không đủ số lượng cho sản phẩm {sanPham.TenSanPham}({sanPhamCT.MaSp}). Số lượng hiện có: {sanPhamCT.SoLuong}, yêu cầu: {chiTiet.SoLuong}.");
                     }
                 }
             }

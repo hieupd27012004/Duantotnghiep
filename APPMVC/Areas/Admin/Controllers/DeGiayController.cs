@@ -22,20 +22,26 @@ namespace APPMVC.Areas.Admin.Controllers
         {
             page = page < 1 ? 1 : page;
             int pageSize = 5;
+
             List<DeGiay> timten = await _services.GetDeGiay(name);
-            if (timten != null)
+
+            if (timten != null && timten.Any())
             {
+                // Sắp xếp timten theo ngày tạo từ trên xuống dưới
+                timten = timten.OrderByDescending(dg => dg.NgayTao).ToList();
                 var pagedDeGiays = timten.ToPagedList(page, pageSize);
                 return View(pagedDeGiays);
             }
             else
             {
                 List<DeGiay> deGiays = await _services.GetDeGiay(name);
+
+                // Sắp xếp deGiays theo ngày tạo từ trên xuống dưới
+                deGiays = deGiays.OrderByDescending(dg => dg.NgayTao).ToList();
                 var pagedDeGiays = deGiays.ToPagedList(page, pageSize);
                 return View(pagedDeGiays);
             }
         }
-
         public IActionResult Create()
         {
             return PartialView("Create");

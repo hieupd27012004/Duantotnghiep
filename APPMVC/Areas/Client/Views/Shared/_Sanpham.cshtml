@@ -263,7 +263,8 @@
 							<div class="size-filters" id="sizeButtons" style="display: flex; flex-wrap: wrap;">
 								@if (ViewData["Sizes"] is List<KichCo> sizes && sizes.Count > 0)
 								{
-									foreach (var size in sizes)
+									var sortedSizes = sizes.OrderBy(size => size.TenKichCo).ToList();
+									foreach (var size in sortedSizes)
 									{
 										<button class="size-button"
 												onclick="showLoadingAndRedirect('@Url.Action("Index", new { sizeId = size.IdKichCo })')"

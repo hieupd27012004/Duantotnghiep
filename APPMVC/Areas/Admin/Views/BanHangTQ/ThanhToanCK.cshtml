@@ -125,22 +125,29 @@
             </div>
         </div>
         <div class="modal-buttons">
-            <button onclick="confirmPayment('@Model.IdHoaDon')">Xác nhận thanh toán</button>
+            <button onclick="confirmPayment('@Model.IdHoaDon', '@Model.IdKhachHang')">Xác nhận thanh toán</button>
             <button onclick="closeModal()">Hủy</button>
         </div>
     </div>
 </div>
 <script>
     function closeModal() {
-        $('#modalOverlay').css('visibility', 'hidden').css('opacity', '0');
+        $('#modalOverlay').css({
+            display: 'none',
+            opacity: '0',
+            visibility: 'hidden'
+        });
     }
 
-    function confirmPayment(idHoaDon) {
+        function confirmPayment(idHoaDon, idKhachHang) { // Added idKhachHang parameter
         if (confirm("Bạn có chắc chắn muốn xác nhận thanh toán cho hóa đơn này không?")) {
             $.ajax({
-                url: '@Url.Action("XacNhanThanhToanCK", "BanHangTQ")', // Adjust the controller name
+                url: '@Url.Action("XacNhanThanhToanCK", "BanHangTQ")',
                 type: 'POST',
-                data: { idHoaDon: idHoaDon },
+                data: {
+                    idHoaDon: idHoaDon,
+                    idKhachHang: idKhachHang // Pass idKhachHang here
+                },
                 success: function(response) {
                     if (response.success) {
                         window.location.href = response.redirectUrl; // Redirect to the invoice page
